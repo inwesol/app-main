@@ -76,7 +76,7 @@ export async function sendPasswordResetEmail(email: string, token: string): Prom
   try {
     console.log('Sending password reset email to:', email);
     
-    const resetUrl = `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/reset-password?token=${token}`;
+    const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://app.inwesol.com'}/reset-password?token=${token}`;
     
     const mailOptions = {
       from: process.env.EMAIL_FROM || '"CoCo App" <noreply@coco.com>',

@@ -30,7 +30,7 @@ export async function sendVerificationEmail(email: string, otp: string) {
 }
 
 export async function sendPasswordResetEmail(email: string, token: string) {
-  const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/reset-password?token=${token}`;
+  const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://app.inwesol.com' }/reset-password?token=${token}`;
   
   await transporter.sendMail({
     from: process.env.SMTP_FROM,
