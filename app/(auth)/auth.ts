@@ -5,7 +5,6 @@ import GoogleProvider from 'next-auth/providers/google';
 
 import { getUser, createUser, updateUser } from '@/lib/db/queries';
 import { authConfig } from './auth.config';
-// import GoogleProvider from "next-auth/providers/google";
 
 interface ExtendedSession extends Session {
   user: User;
@@ -21,10 +20,11 @@ export const {
   debug: true,
   secret: process.env.AUTH_SECRET,
   providers: [
-    // GoogleProvider({
-    //   clientId: process.env.GOOGLE_CLIENT_ID!,
-    //   clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-    // }),
+    // UNCOMMENTED GOOGLE PROVIDER - THIS WAS THE ISSUE
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    }),
     Credentials({
       credentials: {
         email: { label: 'Email', type: 'email' },
