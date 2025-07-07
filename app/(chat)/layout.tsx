@@ -17,8 +17,9 @@ export default async function Layout({
 
   return (
     <>
-      <style dangerouslySetInnerHTML={{
-        __html: `
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
           html, body {
             background: rgba(16, 185, 129, 0.03) !important;
             background-attachment: fixed !important;
@@ -37,19 +38,20 @@ export default async function Layout({
           .bg-slate-50 {
             background: transparent !important;
           }
-        `
-      }} />
-      <div 
-        className="min-h-screen"
+        `,
+        }}
+      />
+      <div
+        className="min-h-screen bg-[#00b24b]/2"
         style={{
-          background: 'rgba(16, 185, 129, 0.1)',
+          // background: 'rgba(16, 185, 129, 0.05)',
           backgroundAttachment: 'fixed',
           position: 'fixed',
           top: 0,
           left: 0,
           right: 0,
           bottom: 0,
-          zIndex: -1
+          zIndex: -1,
         }}
       />
       <Script
