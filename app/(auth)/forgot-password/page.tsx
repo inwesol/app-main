@@ -12,8 +12,8 @@ export default function ForgotPasswordPage() {
 
   if (state.status === 'success') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
-        <div className="max-w-md w-full space-y-8 p-8">
+      <div className="flex items-center justify-center bg-white py-8 px-4 sm:px-6 min-h-screen">
+        <div className="max-w-md w-full space-y-8 p-4 sm:p-8 bg-white rounded-xl shadow-[4px_4px_10px_rgba(0,0,0,0.1),-4px_4px_10px_rgba(0,0,0,0.1),0_-4px_10px_rgba(0,0,0,0.1)]">
           <div className="text-center">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">Check Your Email</h2>
             <p className="text-gray-600 mb-6">
@@ -32,8 +32,8 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white">
-      <div className="max-w-md w-full space-y-8 p-8">
+    <div className="flex items-center justify-center bg-white py-8 px-6 sm:px-6 min-h-screen">
+      <div className="max-w-md w-full space-y-8 p-4 sm:p-8 bg-white rounded-xl shadow-[4px_4px_10px_rgba(0,0,0,0.1),-4px_4px_10px_rgba(0,0,0,0.1),0_-4px_10px_rgba(0,0,0,0.1)]">
         <div className="text-center">
           <h2 className="text-3xl font-bold text-gray-900 mb-2">Forgot Password</h2>
           <p className="text-gray-600 mb-8">

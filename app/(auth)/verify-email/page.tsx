@@ -50,8 +50,8 @@ function VerifyEmailForm() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="w-full max-w-md bg-white rounded-lg shadow-lg p-8">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+      <div className="w-full max-w-md bg-white rounded-xl shadow-[4px_4px_10px_rgba(0,0,0,0.1),-4px_4px_10px_rgba(0,0,0,0.1),0_-4px_10px_rgba(0,0,0,0.1)] p-6 sm:p-8">
         <div className="text-center mb-6">
           <h2 className="text-3xl font-bold text-gray-900 mb-2">
             Verify Email
