@@ -48,7 +48,6 @@ export default function Page() {
         description: 'Verification email sent! Check your inbox.',
       });
       setIsSuccessful(true);
-      // Redirect to verification page with email parameter
       router.push(`/verify-email?email=${encodeURIComponent(email)}`);
     }
   }, [state, email, router]);
@@ -63,15 +62,13 @@ export default function Page() {
       setIsGoogleLoading(true);
       console.log('Starting Google sign in...');
 
-      // Direct redirect to Google OAuth - this should work now
       const result = await signIn('google', {
         callbackUrl: '/',
-        redirect: true, // Explicitly enable redirect
+        redirect: true,
       });
 
       console.log('Sign in result:', result);
 
-      // This code won't execute if redirect is successful
       if (result?.error) {
         console.error('Sign in error:', result.error);
         toast({
@@ -91,9 +88,9 @@ export default function Page() {
   };
 
   return (
-    <div className="min-h-screen flex">
-      {/* Left side - Illustration */}
-      <div className="w-1/2 bg-white relative overflow-hidden flex flex-col justify-center items-center p-12">
+    <div className="min-h-screen flex flex-col md:flex-row">
+      {/* Left side - Illustration (hidden on mobile) */}
+      <div className="hidden md:flex w-full md:w-1/2 bg-white relative overflow-hidden flex-col justify-center items-center p-12">
         <div className="absolute inset-0 bg-white" />
 
         <div className="relative z-10 mb-8 w-full max-w-md">
@@ -109,7 +106,7 @@ export default function Page() {
       </div>
 
       {/* Right side - Signup Form */}
-      <div className="w-1/2 flex items-center justify-center p-12 bg-white">
+      <div className="w-full md:w-1/2 flex items-center justify-center p-12 bg-white">
         <div className="w-full max-w-sm">
           <div className="bg-white rounded-lg shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06),4px_0_6px_-1px_rgba(0,0,0,0.1)] p-4">
             <div className="text-center mb-6">
