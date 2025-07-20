@@ -17,15 +17,16 @@ function PureSuggestedActions({ chatId, append }: SuggestedActionsProps) {
       label: 'of finding purpose in my life?',
       action: 'What are the advantages of finding purpose in my life?',
     },
-    {
-      title: 'How to navigate if',
-      label: `I got rejected from multiple job interviews?`,
-      action: `How to navigate if I got rejected from multiple job interviews?`,
-    },
+    
     {
       title: 'Help me to find career',
       label: `that I'm passionate about`,
       action: `Help me to find a career that I'm passionate about`,
+    },
+    {
+      title: 'How to navigate if',
+      label: `I got rejected from multiple job interviews?`,
+      action: `How to navigate if I got rejected from multiple job interviews?`,
     },
     {
       title: 'What is the way',
@@ -58,7 +59,7 @@ function PureSuggestedActions({ chatId, append }: SuggestedActionsProps) {
                 content: suggestedAction.action,
               });
             }}
-            className="text-left border-2  rounded-xl px-4 py-3.5 text-sm flex-1 gap-1 sm:flex-col w-full h-auto justify-start items-start"
+            className="text-left border-2 rounded-xl px-4 py-3.5 text-sm gap-1 sm:flex-col w-full h-auto justify-start items-start"
           >
             <span className="font-medium">{suggestedAction.title}</span>
             <span className="text-muted-foreground">
