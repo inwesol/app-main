@@ -5,9 +5,9 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://coco.inwesol.com'),
-  title: 'CoCo - Career Coach',
-  description: 'AI Career Coach from Inwesol.',
+  metadataBase: new URL('https://app.inwesol.com'),
+  title: 'CoCo - AI Mindset Coach',
+  description: 'AI Mindset Coach from Inwesol.',
 };
 
 export const viewport = {
