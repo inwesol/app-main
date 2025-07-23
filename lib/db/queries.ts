@@ -23,6 +23,7 @@ import {
   user_session_form_progress,
   demographics_details_form,
   career_maturity_assessment,
+  pre_assessment,
 } from "./schema";
 import { ArtifactKind } from "@/components/artifact";
 import { SESSION_TEMPLATES } from "@/lib/constants";
@@ -1129,5 +1130,70 @@ export async function getCareerMaturityAssessment(
     return JSON.parse(row.answers);
   } catch {
     return null;
+  }
+}
+export async function getPreAssessment(
+  userId: string,
+  sessionId: number
+): Promise<Record<string, number> | null> {
+  const [row] = await db
+    .select()
+    .from(pre_assessment)
+    .where(
+      and(
+        eq(pre_assessment.user_id, userId)
+        // eq(pre_assessment.session_id, sessionId)
+      )
+    );
+
+  if (!row) return null;
+
+  try {
+    return JSON.parse(row.answers) as Record<string, number>;
+  } catch {
+    return null;
+  }
+}
+
+export async function insertPreAssessment(
+  userId: string,
+  sessionId: number,
+  answers: Record<string, number>
+): Promise<void> {
+  // First, optionally check if a record exists for this user/session
+  const existing = await db
+    .select()
+    .from(pre_assessment)
+    .where(
+      and(
+        eq(pre_assessment.user_id, userId)
+        // eq(pre_assessment.session_id, sessionId)
+      )
+    )
+    .limit(1);
+
+  if (existing.length > 0) {
+    // If record exists, update instead of insert:
+    await db
+      .update(pre_assessment)
+      .set({
+        answers: JSON.stringify(answers),
+        updated_at: new Date(), // if you have timestamp columns
+      })
+      .where(
+        and(
+          eq(pre_assessment.user_id, userId)
+          // eq(pre_assessment.session_id, sessionId)
+        )
+      );
+  } else {
+    // Insert new record
+    await db.insert(pre_assessment).values({
+      user_id: userId,
+      // session_id: sessionId,
+      answers: JSON.stringify(answers),
+      created_at: new Date(), // if you have timestamp columns
+      updated_at: new Date(),
+    });
   }
 }

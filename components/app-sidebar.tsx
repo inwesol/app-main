@@ -1,14 +1,23 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import type { User } from 'next-auth';
-import Image from 'next/image';
-import { useRouter } from 'next/navigation';
-import { ArchiveX, Command, File, Inbox, Send, Trash2, MessageSquare, PlusIcon } from "lucide-react"
-import { SidebarHistory } from '@/components/sidebar-history';
-import { SidebarUserNav } from '@/components/sidebar-user-nav';
-import { Button } from '@/components/ui/button';
-import { Label } from "@/components/ui/label"
+import * as React from "react";
+import type { User } from "next-auth";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import {
+  ArchiveX,
+  Command,
+  File,
+  Inbox,
+  Send,
+  Trash2,
+  MessageSquare,
+  PlusIcon,
+} from "lucide-react";
+import { SidebarHistory } from "@/components/sidebar-history";
+import { SidebarUserNav } from "@/components/sidebar-user-nav";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import {
   Sidebar,
   SidebarContent,
@@ -21,9 +30,9 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from "@/components/ui/sidebar"
-import { Switch } from "@/components/ui/switch"
-import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
+} from "@/components/ui/sidebar";
+import { Switch } from "@/components/ui/switch";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
 // This is sample data
 const data = {
@@ -39,37 +48,37 @@ const data = {
       icon: MessageSquare,
       isActive: true,
     },
-  //   {
-  //     title: "Inbox",
-  //     url: "#",
-  //     icon: Inbox,
-  //     isActive: false,
-  //   },
-  //   {
-  //     title: "Drafts",
-  //     url: "#",
-  //     icon: File,
-  //     isActive: false,
-  //   },
-  //   {
-  //     title: "Sent",
-  //     url: "#",
-  //     icon: Send,
-  //     isActive: false,
-  //   },
-  //   {
-  //     title: "Junk",
-  //     url: "#",
-  //     icon: ArchiveX,
-  //     isActive: false,
-  //   },
-  //   {
-  //     title: "Trash",
-  //     url: "#",
-  //     icon: Trash2,
-  //     isActive: false,
-  //   },
-   ],
+    {
+      title: "Inbox",
+      url: "#",
+      icon: Inbox,
+      isActive: false,
+    },
+    // {
+    //   title: "Drafts",
+    //   url: "#",
+    //   icon: File,
+    //   isActive: false,
+    // },
+    // {
+    //   title: "Sent",
+    //   url: "#",
+    //   icon: Send,
+    //   isActive: false,
+    // },
+    // {
+    //   title: "Junk",
+    //   url: "#",
+    //   icon: ArchiveX,
+    //   isActive: false,
+    // },
+    // {
+    //   title: "Trash",
+    //   url: "#",
+    //   icon: Trash2,
+    //   isActive: false,
+    // },
+  ],
   // Commented out mail data since we're not using it anymore
   // mails: [
   //   {
@@ -82,12 +91,15 @@ const data = {
   //   },
   //   // ... rest of mail data
   // ],
-}
+};
 
-export function AppSidebar({ user, ...props }: { user: User | undefined } & React.ComponentProps<typeof Sidebar>) {
+export function AppSidebar({
+  user,
+  ...props
+}: { user: User | undefined } & React.ComponentProps<typeof Sidebar>) {
   const router = useRouter();
-  const [activeItem, setActiveItem] = React.useState(data.navMain[0])
-  const { setOpen, setOpenMobile } = useSidebar()
+  const [activeItem, setActiveItem] = React.useState(data.navMain[0]);
+  const { setOpen, setOpenMobile } = useSidebar();
 
   // // Handler for logo click to open chat history
   // const handleLogoClick = (e: React.MouseEvent) => {
@@ -105,10 +117,10 @@ export function AppSidebar({ user, ...props }: { user: User | undefined } & Reac
       case "Chat History":
         return (
           <div className="p-2">
-            <SidebarHistory  user={user} />
+            <SidebarHistory user={user} />
           </div>
         );
-      
+
       case "Inbox":
         // TODO: Add Inbox component here
         return (
@@ -116,7 +128,7 @@ export function AppSidebar({ user, ...props }: { user: User | undefined } & Reac
             Inbox component will be added here
           </div>
         );
-      
+
       case "Drafts":
         // TODO: Add Drafts component here
         return (
@@ -124,7 +136,7 @@ export function AppSidebar({ user, ...props }: { user: User | undefined } & Reac
             Drafts component will be added here
           </div>
         );
-      
+
       case "Sent":
         // TODO: Add Sent component here
         return (
@@ -132,7 +144,7 @@ export function AppSidebar({ user, ...props }: { user: User | undefined } & Reac
             Sent component will be added here
           </div>
         );
-      
+
       case "Junk":
         // TODO: Add Junk component here
         return (
@@ -140,7 +152,7 @@ export function AppSidebar({ user, ...props }: { user: User | undefined } & Reac
             Junk component will be added here
           </div>
         );
-      
+
       case "Trash":
         // TODO: Add Trash component here
         return (
@@ -148,7 +160,7 @@ export function AppSidebar({ user, ...props }: { user: User | undefined } & Reac
             Trash component will be added here
           </div>
         );
-      
+
       default:
         return (
           <div className="p-4 text-sm text-muted-foreground">
@@ -174,13 +186,25 @@ export function AppSidebar({ user, ...props }: { user: User | undefined } & Reac
         <SidebarHeader>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton size="lg" asChild className="md:h-8 md:p-0 hover:bg-transparent">
+              <SidebarMenuButton
+                size="lg"
+                asChild
+                className="md:h-8 md:p-0 hover:bg-transparent"
+              >
                 <a>
                   <div className="flex aspect-square size-8 items-center justify-center rounded-lg ">
-                    <Image src="/images/logo.svg" alt="CoCo AI Coach" width={32} height={32} className="size-8" />
+                    <Image
+                      src="/images/logo.svg"
+                      alt="CoCo AI Coach"
+                      width={32}
+                      height={32}
+                      className="size-8"
+                    />
                   </div>
                   <div className="grid flex-1 text-left text-sm leading-tight ml-3">
-                    <span className="truncate font-semibold">CoCo - AI Coach</span>
+                    <span className="truncate font-semibold">
+                      CoCo - AI Coach
+                    </span>
                     <span className="truncate text-xs">Enterprise</span>
                   </div>
                 </a>
@@ -200,8 +224,8 @@ export function AppSidebar({ user, ...props }: { user: User | undefined } & Reac
                         hidden: false,
                       }}
                       onClick={() => {
-                        setActiveItem(item)
-                        setOpen(true)
+                        setActiveItem(item);
+                        setOpen(true);
                       }}
                       isActive={activeItem?.title === item.title}
                       className="px-2.5 md:px-2 data-[state=open]:hover:bg-transparent data-[active=true]:bg-transparent hover:bg-[rgba(16,185,129,0.2)]"
@@ -215,14 +239,15 @@ export function AppSidebar({ user, ...props }: { user: User | undefined } & Reac
             </SidebarGroupContent>
           </SidebarGroup>
         </SidebarContent>
-        <SidebarFooter>
-          {user && <SidebarUserNav user={user} />}
-        </SidebarFooter>
+        <SidebarFooter>{user && <SidebarUserNav user={user} />}</SidebarFooter>
       </Sidebar>
 
       {/* This is the second sidebar */}
       {/* We disable collapsible and let it fill remaining space */}
-      <Sidebar collapsible="none" className="hidden flex-1 md:flex !bg-[rgba(16,185,129,0.1)]">
+      <Sidebar
+        collapsible="none"
+        className="hidden flex-1 md:flex !bg-[rgba(16,185,129,0.1)]"
+      >
         <SidebarHeader className="gap-3.5 border-b p-4 mr-10">
           <div className="flex w-full items-center justify-between">
             <div className="text-base font-medium text-foreground">
@@ -237,7 +262,7 @@ export function AppSidebar({ user, ...props }: { user: User | undefined } & Reac
                     className="p-2 h-fit hover:bg-transparent"
                     onClick={() => {
                       setOpenMobile(false);
-                      router.push('/');
+                      router.push("/");
                       router.refresh();
                     }}
                   >
@@ -253,11 +278,17 @@ export function AppSidebar({ user, ...props }: { user: User | undefined } & Reac
               </Label>
             )}
           </div>
-          <SidebarInput placeholder={activeItem?.title === "Chat History" ? "Search chats..." : `Search ${activeItem?.title.toLowerCase()}...`} />
+          <SidebarInput
+            placeholder={
+              activeItem?.title === "Chat History"
+                ? "Search chats..."
+                : `Search ${activeItem?.title.toLowerCase()}...`
+            }
+          />
         </SidebarHeader>
         <SidebarContent>
           <SidebarGroup className="pr-10">
-            <SidebarGroupContent >
+            <SidebarGroupContent>
               <div></div>
               {renderContent()}
             </SidebarGroupContent>
@@ -265,5 +296,5 @@ export function AppSidebar({ user, ...props }: { user: User | undefined } & Reac
         </SidebarContent>
       </Sidebar>
     </Sidebar>
-  )
+  );
 }

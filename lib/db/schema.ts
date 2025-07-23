@@ -422,3 +422,17 @@ export const career_maturity_assessment = pgTable(
     userUnique: unique().on(table.user_id),
   })
 );
+export const pre_assessment = pgTable(
+  "pre_assessment",
+  {
+    id: uuid("id").primaryKey().notNull().defaultRandom(),
+    user_id: uuid("user_id").notNull(),
+    // session_id: integer("session_id").notNull(),
+    answers: varchar("answers", { length: 4000 }).notNull(),
+    created_at: timestamp("created_at").defaultNow().notNull(),
+    updated_at: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (table) => ({
+    userUnique: unique().on(table.user_id),
+  })
+);

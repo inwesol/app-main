@@ -44,7 +44,6 @@ import {
   Brain,
   TrendingUp,
   MessageSquare,
-  Star,
   Zap,
   Shield,
   Award,
@@ -54,8 +53,6 @@ import {
   demographicsDetailsSchema,
   type DemographicsDetailsFormData,
 } from "@/lib/schemas/questionnaire-schemas/demographics-details-form-schema";
-// import PreviousButton from "../form-components/previous-button";
-// import NextButton from "../form-components/next-button";
 import { useRouter } from "next/navigation";
 
 export function DemographicsDetailsForm() {
@@ -70,9 +67,9 @@ export function DemographicsDetailsForm() {
       fullName: "",
       email: "",
       age: "",
-      gender: undefined,
-      profession: undefined,
-      previousCoaching: undefined,
+      // gender: "",
+      // profession: undefined,
+      // previousCoaching: undefined,
       education: "",
       stressLevel: 5,
       motivation: "",
@@ -87,35 +84,54 @@ export function DemographicsDetailsForm() {
   useEffect(() => {
     async function fetchData() {
       setIsLoading(true);
-      const res = await fetch("/api/journey/sessions/0/q/demographics-details");
-      if (res.ok) {
-        const data = await res.json();
-        form.reset({
-          fullName: data.full_name || "",
-          email: data.email || "",
-          age: data.age ? String(data.age) : "",
-          education: data.education || "",
-          gender: data.gender || "",
-          profession: data.profession || "",
-          previousCoaching: data.previous_coaching || "",
-          stressLevel: data.stress_level || 5,
-          motivation: data.motivation || "",
-        });
+      try {
+        const res = await fetch(
+          "/api/journey/sessions/0/q/demographics-details"
+        );
+        if (res.ok) {
+          const data = await res.json();
+          if (!data) {
+            form.reset({
+              fullName: "",
+              email: "",
+              age: "",
+              education: "",
+              stressLevel: 5,
+              motivation: "",
+            });
+          } else {
+            form.reset({
+              fullName: data.full_name || "",
+              email: data.email || "",
+              age: data.age ? String(data.age) : "",
+              education: data.education || "",
+              gender: data.gender || "",
+              profession: data.profession || "",
+              previousCoaching: data.previous_coaching || "",
+              stressLevel: data.stress_level || 5,
+              motivation: data.motivation || "",
+            });
+          }
+          setIsLoading(false);
+        } else {
+          throw new Error("Network Error");
+        }
+      } catch (error) {
+        console.log("Error:", error);
+        setIsLoading(false);
       }
-      setIsLoading(false);
     }
     fetchData();
   }, []);
 
   const onSubmit = async (data: DemographicsDetailsFormData) => {
-    // Replace the values below as per your routing and formId!
     const sessionId = 0;
     const qId = "demographics-details";
 
     const res = await fetch(`/api/journey/sessions/${sessionId}/q/${qId}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data), // just send the flat data object
+      body: JSON.stringify(data),
     });
 
     if (res.ok) {
@@ -124,6 +140,7 @@ export function DemographicsDetailsForm() {
         router.push("/journey");
       }, 2000);
     } else {
+      setIsSubmitted(false);
       alert("Error! Please try again.");
     }
   };
@@ -175,16 +192,16 @@ export function DemographicsDetailsForm() {
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 p-4 sm:py-8 flex items-center justify-center">
         <Card className="max-w-lg mx-auto shadow-xl border-0 bg-white/95 backdrop-blur-sm">
           <CardContent className="p-8 sm:p-12 text-center">
-            <div className="relative inline-flex items-center justify-center size-20 sm:size-24 bg-gradient-to-r from-green-500 to-green-600 rounded-3xl mb-6 sm:mb-8 shadow-lg">
+            <div className="relative inline-flex items-center justify-center size-20 sm:size-24 bg-gradient-to-r from-primary-green-500 to-primary-green-600 rounded-3xl mb-6 sm:mb-8 shadow-lg">
               <CheckCircle className="size-10 sm:size-12 text-white" />
-              <div className="absolute -top-2 -right-2 size-6 sm:size-8 bg-blue-500 rounded-full flex items-center justify-center shadow-md">
+              <div className="absolute -top-2 -right-2 size-6 sm:size-8 bg-primary-blue-500 rounded-full flex items-center justify-center shadow-md">
                 <Sparkles className="size-3 sm:size-4 text-white" />
               </div>
             </div>
-            <h2 className="text-2xl sm:text-4xl font-bold bg-gradient-to-r from-blue-700 to-green-700 bg-clip-text text-transparent mb-4 sm:mb-6">
+            <h2 className="text-2xl sm:text-4xl font-bold bg-gradient-to-r from-primary-blue-700 to-primary-green-700 bg-clip-text text-transparent mb-4 sm:mb-6">
               Thank You!
             </h2>
-            <p className="text-slate-600 mb-8 sm:mb-10 leading-relaxed text-base sm:text-lg">
+            <p className="text-slate-600 leading-relaxed text-base sm:text-lg">
               Your demographics details intake form has been submitted
               successfully. We&apos;ll review your information and be in touch
               soon to begin your transformative coaching journey.
@@ -713,39 +730,27 @@ export function DemographicsDetailsForm() {
                       />
                     </div>
 
-                    {/* <div>
+                    <Button
+                      type="button"
+                      onClick={nextPage}
+                      className="w-full h-12 bg-gradient-to-r from-primary-blue-500 to-primary-blue-600 hover:from-primary-blue-600 hover:to-primary-blue-700 text-white font-bold text-sm sm:text-base rounded-xl sm:rounded-2xl transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-[1.02] relative overflow-hidden group"
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
+                      <span className="relative z-10 flex items-center justify-center">
+                        Continue to Wellness & Goals
+                        <ArrowRight className="size-5 sm:size-6 ml-2 sm:ml-3 group-hover:translate-x-1 transition-transform duration-200" />
+                      </span>
+                    </Button>
+
+                    {/* <div className="flex flex-col sm:flex-row gap-4">
                       <Button
-                        type="button"
-                        onClick={nextPage}
-                        className="w-full h-12 sm:h-16 bg-gradient-to-r from-primary-blue-500 to-primary-blue-600 hover:from-primary-blue-600 hover:to-primary-blue-700 text-white font-bold text-base sm:text-xl rounded-xl sm:rounded-2xl transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-[1.02] relative overflow-hidden group"
-                      >
-                        <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
-                        <span className="relative z-10 flex items-center justify-center">
-                          Continue to Wellness & Goals
-                          <ArrowRight className="size-5 sm:size-6 ml-2 sm:ml-3 group-hover:translate-x-1 transition-transform duration-200" />
-                        </span>
-                      </Button>
-                    </div> */}
-
-                    {/* buttons */}
-                    <div className="flex flex-col sm:flex-row gap-4">
-                      <button
-                        onClick={prevPage}
-                        disabled={currentPage === 1}
-                        className="w-full sm:flex-1 h-12 border-2 border-slate-300 hover:bg-slate-50 text-slate-700 font-semibold rounded-xl disabled:opacity-50 disabled:cursor-not-allowed group transition-all duration-200 flex items-center justify-center gap-2"
-                      >
-                        <ArrowLeft className="size-5 group-hover:-translate-x-1 transition-transform duration-200" />
-                        Previous Page
-                      </button>
-
-                      <button
                         onClick={nextPage}
                         className="w-full sm:flex-1 h-12 bg-gradient-to-r from-primary-blue-500 to-primary-blue-600 hover:from-primary-blue-600 hover:to-primary-blue-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300 group flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-lg"
                       >
-                        Next Page
+                        Continue to Wellness & Coaching goals
                         <ArrowRight className="size-5 group-hover:translate-x-1 transition-transform duration-200" />
-                      </button>
-                    </div>
+                      </Button>
+                    </div> */}
                   </div>
                 )}
 
@@ -790,7 +795,7 @@ export function DemographicsDetailsForm() {
                                   onValueChange={(value) =>
                                     field.onChange(value[0])
                                   }
-                                  className="w-full"
+                                  className="w-full "
                                 />
                                 <div className="flex justify-between items-center text-xs sm:text-sm">
                                   <div className="text-center">
@@ -912,22 +917,49 @@ export function DemographicsDetailsForm() {
 
                     <div>
                       <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 mb-3">
-                        <button
+                        <Button
                           onClick={prevPage}
-                          disabled={currentPage === 1}
-                          className="w-full sm:flex-1 h-12 border-2 border-slate-300 hover:bg-slate-50 text-slate-700 font-semibold rounded-xl disabled:opacity-50 disabled:cursor-not-allowed group transition-all duration-200 flex items-center justify-center gap-2"
+                          className="w-full sm:flex-1 h-12 border-2 border-slate-300 hover:bg-slate-50 text-slate-700 font-semibold rounded-xl disabled:opacity-50 group transition-all duration-200 flex items-center justify-center gap-2 bg-white "
                         >
                           <ArrowLeft className="size-5 group-hover:-translate-x-1 transition-transform duration-200" />
                           Previous Page
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                           type="submit"
                           disabled={form.formState.isSubmitting}
                           className="w-full sm:flex-1 h-12 bg-gradient-to-r from-primary-green-500 to-primary-green-600 hover:from-primary-green-600 hover:to-primary-green-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300 group flex items-center justify-center gap-2"
                         >
-                          Complete Assessment
-                          <Award className="size-5 group-hover:rotate-12 transition-transform duration-200" />
-                        </button>
+                          {form.formState.isSubmitting ? (
+                            <>
+                              <svg
+                                className="animate-spin size-5 mr-2 text-white"
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                              >
+                                <circle
+                                  className="opacity-25"
+                                  cx="12"
+                                  cy="12"
+                                  r="10"
+                                  stroke="currentColor"
+                                  strokeWidth="4"
+                                ></circle>
+                                <path
+                                  className="opacity-75"
+                                  fill="currentColor"
+                                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                                ></path>
+                              </svg>
+                              Submitting...
+                            </>
+                          ) : (
+                            <>
+                              Complete Assessment
+                              <Award className="size-5 group-hover:rotate-12 transition-transform duration-200" />
+                            </>
+                          )}
+                        </Button>
                       </div>
                       <p className="text-center text-slate-500 leading-relaxed text-xs sm:text-base bg-slate-50 p-5 sm:p-5 rounded-xl">
                         🔒 Your information is confidential and will only be

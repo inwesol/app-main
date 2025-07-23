@@ -1,0 +1,1 @@
+ALTER TABLE "demographics_details_form" ADD COLUMN "gender" varchar(24);

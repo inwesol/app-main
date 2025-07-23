@@ -1,5 +1,6 @@
 import { CareerMaturity } from "@/components/questionnaire-forms/career-maturity";
 import { DemographicsDetailsForm } from "@/components/questionnaire-forms/demographics-details-form";
+import { PreAssessment } from "@/components/questionnaire-forms/pre-assessment";
 import { notFound } from "next/navigation";
 
 interface Params {
@@ -15,10 +16,10 @@ export default async function Page({ params }: PageProps) {
       id: "demographics-details",
       Component: DemographicsDetailsForm,
     },
-    // {
-    //   id: "pre-assesment",
-    //   Component: PreAssesment,
-    // },
+    {
+      id: "pre-assessment",
+      Component: PreAssessment,
+    },
     {
       id: "career-maturity",
       Component: CareerMaturity,
