@@ -169,8 +169,7 @@
 // // Legacy type exports for backward compatibility
 // export type NewUser = typeof user.$inferInsert;
 
-
-import type { InferSelectModel } from 'drizzle-orm';
+import type { InferSelectModel } from "drizzle-orm";
 import {
   pgTable,
   varchar,
@@ -181,141 +180,146 @@ import {
   primaryKey,
   foreignKey,
   boolean,
-} from 'drizzle-orm/pg-core';
+  integer,
+  unique,
+} from "drizzle-orm/pg-core";
 
-export const user = pgTable('User', {
-  id: uuid('id').primaryKey().notNull().defaultRandom(),
-  email: varchar('email', { length: 64 }).notNull().unique(),
-  password: varchar('password', { length: 64 }), // Nullable for OAuth users
-  name: varchar('name', { length: 64 }),
-  image: varchar('image', { length: 255 }),
-  email_verified: boolean('email_verified').default(false).notNull(),
-  created_at: timestamp('created_at').defaultNow().notNull(),
-  updated_at: timestamp('updated_at').defaultNow().notNull(),
+export const user = pgTable("User", {
+  id: uuid("id").primaryKey().notNull().defaultRandom(),
+  email: varchar("email", { length: 64 }).notNull().unique(),
+  password: varchar("password", { length: 64 }), // Nullable for OAuth users
+  name: varchar("name", { length: 64 }),
+  image: varchar("image", { length: 255 }),
+  email_verified: boolean("email_verified").default(false).notNull(),
+  created_at: timestamp("created_at").defaultNow().notNull(),
+  updated_at: timestamp("updated_at").defaultNow().notNull(),
 });
 
 export type User = InferSelectModel<typeof user>;
 
-export const emailVerificationTokens = pgTable('email_verification_tokens', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  user_id: uuid('user_id').references(() => user.id, { onDelete: 'cascade' }).notNull(),
-  token: text('token').notNull(),
-  expires_at: timestamp('expires_at').notNull(),
-  created_at: timestamp('created_at').defaultNow().notNull(),
+export const emailVerificationTokens = pgTable("email_verification_tokens", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  user_id: uuid("user_id")
+    .references(() => user.id, { onDelete: "cascade" })
+    .notNull(),
+  token: text("token").notNull(),
+  expires_at: timestamp("expires_at").notNull(),
+  created_at: timestamp("created_at").defaultNow().notNull(),
 });
 
-export type EmailVerificationToken = InferSelectModel<typeof emailVerificationTokens>;
+export type EmailVerificationToken = InferSelectModel<
+  typeof emailVerificationTokens
+>;
 
 // Password Reset Token table
-export const passwordResetToken = pgTable('PasswordResetToken', {
-  id: uuid('id').primaryKey().notNull().defaultRandom(),
-  userId: uuid('userId')
+export const passwordResetToken = pgTable("PasswordResetToken", {
+  id: uuid("id").primaryKey().notNull().defaultRandom(),
+  userId: uuid("userId")
     .notNull()
     .references(() => user.id),
-  token: varchar('token', { length: 255 }).notNull().unique(),
-  expiresAt: timestamp('expiresAt').notNull(),
-  createdAt: timestamp('createdAt').notNull().defaultNow(),
+  token: varchar("token", { length: 255 }).notNull().unique(),
+  expiresAt: timestamp("expiresAt").notNull(),
+  createdAt: timestamp("createdAt").notNull().defaultNow(),
 });
 
 export type PasswordResetToken = InferSelectModel<typeof passwordResetToken>;
 
-
 // Chat table - using snake_case consistently
-export const chat = pgTable('Chat', {
-  id: uuid('id').primaryKey().notNull().defaultRandom(),
-  createdAt: timestamp('createdAt').notNull(),
-  title: text('title').notNull(),
-  userId: uuid('userId')
+export const chat = pgTable("Chat", {
+  id: uuid("id").primaryKey().notNull().defaultRandom(),
+  createdAt: timestamp("createdAt").notNull(),
+  title: text("title").notNull(),
+  userId: uuid("userId")
     .notNull()
     .references(() => user.id),
-  visibility: varchar('visibility', { enum: ['public', 'private'] })
+  visibility: varchar("visibility", { enum: ["public", "private"] })
     .notNull()
-    .default('private'),
+    .default("private"),
 });
 
 export type Chat = InferSelectModel<typeof chat>;
 
 // DEPRECATED: The following schema is deprecated and will be removed in the future.
-export const messageDeprecated = pgTable('Message', {
-  id: uuid('id').primaryKey().notNull().defaultRandom(),
-  chatId: uuid('chatId')
+export const messageDeprecated = pgTable("Message", {
+  id: uuid("id").primaryKey().notNull().defaultRandom(),
+  chatId: uuid("chatId")
     .notNull()
     .references(() => chat.id),
-  role: varchar('role').notNull(),
-  content: json('content').notNull(),
-  createdAt: timestamp('createdAt').notNull(),
+  role: varchar("role").notNull(),
+  content: json("content").notNull(),
+  createdAt: timestamp("createdAt").notNull(),
 });
 
 export type MessageDeprecated = InferSelectModel<typeof messageDeprecated>;
 
 // Current message table with snake_case
-export const message = pgTable('Message_v2', {
-  id: uuid('id').primaryKey().notNull().defaultRandom(),
-  chatId: uuid('chatId')
+export const message = pgTable("Message_v2", {
+  id: uuid("id").primaryKey().notNull().defaultRandom(),
+  chatId: uuid("chatId")
     .notNull()
     .references(() => chat.id),
-  role: varchar('role').notNull(),
-  parts: json('parts').notNull(),
-  attachments: json('attachments').notNull(),
-  createdAt: timestamp('createdAt').notNull(),
+  role: varchar("role").notNull(),
+  parts: json("parts").notNull(),
+  attachments: json("attachments").notNull(),
+  createdAt: timestamp("createdAt").notNull(),
 });
 
 export type DBMessage = InferSelectModel<typeof message>;
 
 // DEPRECATED: The following schema is deprecated and will be removed in the future.
 export const voteDeprecated = pgTable(
-  'Vote',
+  "Vote",
   {
-    chatId: uuid('chatId')
+    chatId: uuid("chatId")
       .notNull()
       .references(() => chat.id),
-    messageId: uuid('messageId')
+    messageId: uuid("messageId")
       .notNull()
       .references(() => messageDeprecated.id),
-    isUpvoted: boolean('isUpvoted').notNull(),
+    isUpvoted: boolean("isUpvoted").notNull(),
   },
   (table) => {
     return {
       pk: primaryKey({ columns: [table.chatId, table.messageId] }),
     };
-  },
+  }
 );
 
 export type VoteDeprecated = InferSelectModel<typeof voteDeprecated>;
 
 // Current vote table with snake_case
 export const vote = pgTable(
-  'Vote_v2',
+  "Vote_v2",
   {
-    chatId: uuid('chatId')
+    chatId: uuid("chatId")
       .notNull()
       .references(() => chat.id),
-    messageId: uuid('messageId')
+    messageId: uuid("messageId")
       .notNull()
       .references(() => message.id),
-    isUpvoted: boolean('isUpvoted').notNull(),
+    isUpvoted: boolean("isUpvoted").notNull(),
   },
   (table) => {
     return {
       pk: primaryKey({ columns: [table.chatId, table.messageId] }),
     };
-  },
+  }
 );
 
 export type Vote = InferSelectModel<typeof vote>;
 
 // Document table with snake_case
 export const document = pgTable(
-  'Document',
+  "Document",
   {
-    id: uuid('id').notNull().defaultRandom(),
-    createdAt: timestamp('createdAt').notNull(),
-    title: text('title').notNull(),
-    content: text('content'),
-    kind: varchar('text', { enum: ['text', 'code', 'image', 'sheet'] })
+    id: uuid("id").notNull().defaultRandom(),
+    createdAt: timestamp("createdAt").notNull(),
+    title: text("title").notNull(),
+    content: text("content"),
+    kind: varchar("text", { enum: ["text", "code", "image", "sheet"] })
       .notNull()
-      .default('text'),
-    userId: uuid('userId')
+      .default("text"),
+    userId: uuid("userId")
       .notNull()
       .references(() => user.id),
   },
@@ -323,26 +327,26 @@ export const document = pgTable(
     return {
       pk: primaryKey({ columns: [table.id, table.createdAt] }),
     };
-  },
+  }
 );
 
 export type Document = InferSelectModel<typeof document>;
 
 // Suggestion table with snake_case
 export const suggestion = pgTable(
-  'Suggestion',
+  "Suggestion",
   {
-    id: uuid('id').notNull().defaultRandom(),
-    documentId: uuid('documentId').notNull(),
-    documentCreatedAt: timestamp('documentCreatedAt').notNull(),
-    originalText: text('originalText').notNull(),
-    suggestedText: text('suggestedText').notNull(),
-    description: text('description'),
-    isResolved: boolean('isResolved').notNull().default(false),
-    userId: uuid('userId')
+    id: uuid("id").notNull().defaultRandom(),
+    documentId: uuid("documentId").notNull(),
+    documentCreatedAt: timestamp("documentCreatedAt").notNull(),
+    originalText: text("originalText").notNull(),
+    suggestedText: text("suggestedText").notNull(),
+    description: text("description"),
+    isResolved: boolean("isResolved").notNull().default(false),
+    userId: uuid("userId")
       .notNull()
       .references(() => user.id),
-    createdAt: timestamp('createdAt').notNull(),
+    createdAt: timestamp("createdAt").notNull(),
   },
   (table) => ({
     pk: primaryKey({ columns: [table.id] }),
@@ -350,9 +354,71 @@ export const suggestion = pgTable(
       columns: [table.documentId, table.documentCreatedAt],
       foreignColumns: [document.id, document.createdAt],
     }),
-  }),
+  })
 );
 
 export type Suggestion = InferSelectModel<typeof suggestion>;
 
+// journey table
+export const journey_progress = pgTable("journey_progress", {
+  id: uuid("id").primaryKey().notNull().defaultRandom(),
+  user_id: uuid("user_id").notNull(),
+  current_session: integer("current_session").notNull(),
+  completed_sessions: json("completed_sessions").notNull(), // array of numbers
+  total_score: integer("total_score").notNull(),
+  last_active_date: varchar("last_active_date", { length: 32 }).notNull(), // or timestamp
+  created_at: timestamp("created_at").defaultNow().notNull(),
+  updated_at: timestamp("updated_at").defaultNow().notNull(),
+});
 
+// per-user, per-session, per-form progress
+export const user_session_form_progress = pgTable(
+  "user_session_form_progress",
+  {
+    id: uuid("id").primaryKey().notNull().defaultRandom(),
+    user_id: uuid("user_id").notNull(),
+    session_id: integer("session_id").notNull(),
+    form_id: text("form_id").notNull(),
+    status: varchar("status", { length: 32 }).notNull(), // completed | in-progress | not-started
+    score: integer("score"),
+    completed_at: varchar("completed_at", { length: 32 }), // ISO string
+    updated_at: timestamp("updated_at").defaultNow().notNull(),
+  }
+);
+
+// demographic details form response table
+export const demographics_details_form = pgTable(
+  "demographics_details_form",
+  {
+    id: uuid("id").primaryKey().notNull().defaultRandom(),
+    user_id: uuid("user_id").notNull(),
+    full_name: varchar("full_name", { length: 100 }),
+    email: varchar("email", { length: 100 }),
+    age: integer("age"),
+    gender: varchar("gender", { length: 30 }),
+    profession: varchar("profession", { length: 50 }),
+    previous_coaching: varchar("previous_coaching", { length: 20 }),
+    education: varchar("education", { length: 100 }),
+    stress_level: integer("stress_level"),
+    motivation: varchar("motivation", { length: 500 }),
+    created_at: timestamp("created_at").defaultNow().notNull(),
+    updated_at: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (table) => ({
+    userUnique: unique().on(table.user_id), // <-- enforces unique user_id constraint
+  })
+);
+export const career_maturity_assessment = pgTable(
+  "career_maturity_assessment",
+  {
+    id: uuid("id").primaryKey().notNull().defaultRandom(),
+    user_id: uuid("user_id").notNull(),
+    // session_id: integer("session_id").notNull(),
+    answers: varchar("answers", { length: 4000 }).notNull(),
+    created_at: timestamp("created_at").defaultNow().notNull(),
+    updated_at: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (table) => ({
+    userUnique: unique().on(table.user_id),
+  })
+);
