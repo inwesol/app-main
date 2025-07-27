@@ -13,7 +13,7 @@ export const Greeting = () => {
         transition={{ delay: 0.5 }}
         className="text-2xl font-semibold"
       >
-        Hello there! I&apos;m CoCo.
+        Hello there! I&apos;m CoCo, your Mindset Coach.
       </motion.div>
       <motion.div
         initial={{ opacity: 0, y: 10 }}
@@ -22,7 +22,8 @@ export const Greeting = () => {
         transition={{ delay: 0.6 }}
         className="text-2xl text-zinc-500"
       >
-        How can I guide you today?
+        I ask questions so you can pause and think clearly. I don&apos;t give
+        advice, just help you reflect.
       </motion.div>
     </div>
   );

@@ -1,14 +1,14 @@
-"use client"
+'use client';
 
-import * as React from "react"
+import * as React from 'react';
 import type { User } from 'next-auth';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { ArchiveX, Command, File, Inbox, Send, Trash2, MessageSquare, PlusIcon, ChevronLeft } from "lucide-react"
+import { MessageSquare, PlusIcon, ChevronLeft } from 'lucide-react';
 import { SidebarHistory } from '@/components/sidebar-history';
 import { SidebarUserNav } from '@/components/sidebar-user-nav';
 import { Button } from '@/components/ui/button';
-import { Label } from "@/components/ui/label"
+import { Label } from '@/components/ui/label';
 import {
   Sidebar,
   SidebarContent,
@@ -21,55 +21,55 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from "@/components/ui/sidebar"
-import { Switch } from "@/components/ui/switch"
+} from '@/components/ui/sidebar';
+import { Switch } from '@/components/ui/switch';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 
 // This is sample data
 const data = {
   user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
+    name: 'shadcn',
+    email: 'm@example.com',
+    avatar: '/avatars/shadcn.jpg',
   },
   navMain: [
     {
-      title: "Chat History",
-      url: "#",
+      title: 'Chat History',
+      url: '#',
       icon: MessageSquare,
       isActive: true,
     },
-  //   {
-  //     title: "Inbox",
-  //     url: "#",
-  //     icon: Inbox,
-  //     isActive: false,
-  //   },
-  //   {
-  //     title: "Drafts",
-  //     url: "#",
-  //     icon: File,
-  //     isActive: false,
-  //   },
-  //   {
-  //     title: "Sent",
-  //     url: "#",
-  //     icon: Send,
-  //     isActive: false,
-  //   },
-  //   {
-  //     title: "Junk",
-  //     url: "#",
-  //     icon: ArchiveX,
-  //     isActive: false,
-  //   },
-  //   {
-  //     title: "Trash",
-  //     url: "#",
-  //     icon: Trash2,
-  //     isActive: false,
-  //   },
-   ],
+    //   {
+    //     title: "Inbox",
+    //     url: "#",
+    //     icon: Inbox,
+    //     isActive: false,
+    //   },
+    //   {
+    //     title: "Drafts",
+    //     url: "#",
+    //     icon: File,
+    //     isActive: false,
+    //   },
+    //   {
+    //     title: "Sent",
+    //     url: "#",
+    //     icon: Send,
+    //     isActive: false,
+    //   },
+    //   {
+    //     title: "Junk",
+    //     url: "#",
+    //     icon: ArchiveX,
+    //     isActive: false,
+    //   },
+    //   {
+    //     title: "Trash",
+    //     url: "#",
+    //     icon: Trash2,
+    //     isActive: false,
+    //   },
+  ],
   // Commented out mail data since we're not using it anymore
   // mails: [
   //   {
@@ -82,13 +82,16 @@ const data = {
   //   },
   //   // ... rest of mail data
   // ],
-}
+};
 
-export function AppSidebar({ user, ...props }: { user: User | undefined } & React.ComponentProps<typeof Sidebar>) {
+export function AppSidebar({
+  user,
+  ...props
+}: { user: User | undefined } & React.ComponentProps<typeof Sidebar>) {
   const router = useRouter();
-  const [activeItem, setActiveItem] = React.useState(data.navMain[0])
-  const { setOpen, setOpenMobile, isMobile } = useSidebar()
-  const [showSecondSidebar, setShowSecondSidebar] = React.useState(false)
+  const [activeItem, setActiveItem] = React.useState(data.navMain[0]);
+  const { setOpen, setOpenMobile, isMobile } = useSidebar();
+  const [showSecondSidebar, setShowSecondSidebar] = React.useState(false);
 
   // Handler for new chat creation
   const handleNewChat = () => {
@@ -99,7 +102,7 @@ export function AppSidebar({ user, ...props }: { user: User | undefined } & Reac
   };
 
   // Handle navigation item click
-  const handleNavItemClick = (item: typeof data.navMain[0]) => {
+  const handleNavItemClick = (item: (typeof data.navMain)[0]) => {
     setActiveItem(item);
     if (isMobile) {
       setShowSecondSidebar(true);
@@ -116,13 +119,13 @@ export function AppSidebar({ user, ...props }: { user: User | undefined } & Reac
   // Function to render content based on active item
   const renderContent = () => {
     switch (activeItem?.title) {
-      case "Chat History":
+      case 'Chat History':
         return (
           <div className="p-2">
             <SidebarHistory user={user} />
           </div>
         );
-      
+
       // case "Inbox":
       //   // TODO: Add Inbox component here
       //   return (
@@ -130,7 +133,7 @@ export function AppSidebar({ user, ...props }: { user: User | undefined } & Reac
       //       Inbox component will be added here
       //     </div>
       //   );
-      
+
       // case "Drafts":
       //   // TODO: Add Drafts component here
       //   return (
@@ -138,7 +141,7 @@ export function AppSidebar({ user, ...props }: { user: User | undefined } & Reac
       //       Drafts component will be added here
       //     </div>
       //   );
-      
+
       // case "Sent":
       //   // TODO: Add Sent component here
       //   return (
@@ -146,7 +149,7 @@ export function AppSidebar({ user, ...props }: { user: User | undefined } & Reac
       //       Sent component will be added here
       //     </div>
       //   );
-      
+
       // case "Junk":
       //   // TODO: Add Junk component here
       //   return (
@@ -154,7 +157,7 @@ export function AppSidebar({ user, ...props }: { user: User | undefined } & Reac
       //       Junk component will be added here
       //     </div>
       //   );
-      
+
       // case "Trash":
       //   // TODO: Add Trash component here
       //   return (
@@ -162,7 +165,7 @@ export function AppSidebar({ user, ...props }: { user: User | undefined } & Reac
       //       Trash component will be added here
       //     </div>
       //   );
-      
+
       default:
         return (
           <div className="p-4 text-sm text-muted-foreground">
@@ -190,19 +193,31 @@ export function AppSidebar({ user, ...props }: { user: User | undefined } & Reac
               <SidebarHeader>
                 <SidebarMenu>
                   <SidebarMenuItem>
-                    <SidebarMenuButton size="lg" asChild className="h-8 p-0 hover:bg-transparent">
+                    <SidebarMenuButton
+                      size="lg"
+                      asChild
+                      className="h-8 p-0 hover:bg-transparent"
+                    >
                       <a>
                         <div className="flex aspect-square size-8 items-center justify-center rounded-lg ">
-                          <Image src="/images/logo.svg" alt="CoCo AI Coach" width={32} height={32} className="size-8" />
+                          <Image
+                            src="/images/logo.svg"
+                            alt="CoCo AI Coach"
+                            width={32}
+                            height={32}
+                            className="size-8"
+                          />
                         </div>
                         <div className="grid flex-1 text-left text-sm leading-tight ml-3">
-                          <span className="truncate font-semibold">CoCo - AI Coach</span>
+                          <span className="truncate font-semibold">
+                            CoCo - AI Coach
+                          </span>
                         </div>
                       </a>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 </SidebarMenu>
-                
+
                 {/* New Chat Button - Top Right Icon for Mobile */}
                 <div className="absolute top-4 right-4">
                   <Tooltip>
@@ -263,7 +278,7 @@ export function AppSidebar({ user, ...props }: { user: User | undefined } & Reac
                       {activeItem?.title}
                     </div>
                   </div>
-                  {activeItem?.title === "Chat History" ? (
+                  {activeItem?.title === 'Chat History' ? (
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <Button
@@ -284,13 +299,17 @@ export function AppSidebar({ user, ...props }: { user: User | undefined } & Reac
                     </Label>
                   )}
                 </div>
-                <SidebarInput placeholder={activeItem?.title === "Chat History" ? "Search chats..." : `Search ${activeItem?.title.toLowerCase()}...`} />
+                <SidebarInput
+                  placeholder={
+                    activeItem?.title === 'Chat History'
+                      ? 'Search chats...'
+                      : `Search ${activeItem?.title.toLowerCase()}...`
+                  }
+                />
               </SidebarHeader>
               <SidebarContent>
                 <SidebarGroup>
-                  <SidebarGroupContent>
-                    {renderContent()}
-                  </SidebarGroupContent>
+                  <SidebarGroupContent>{renderContent()}</SidebarGroupContent>
                 </SidebarGroup>
               </SidebarContent>
             </>
@@ -302,18 +321,30 @@ export function AppSidebar({ user, ...props }: { user: User | undefined } & Reac
           {/* First sidebar - Main navigation */}
           <Sidebar
             collapsible="none"
-            className="!w-[calc(var(--sidebar-width-icon)_+_1px)] border-r !bg-[rgba(16,185,129,0.1)] relative"
+            className="!w-[calc(var(--sidebar-width-icon)_+_2px)] border-r !bg-[rgba(16,185,129,0.1)] relative"
           >
             <SidebarHeader>
               <SidebarMenu>
                 <SidebarMenuItem>
-                  <SidebarMenuButton size="lg" asChild className="h-8 p-0 hover:bg-transparent">
+                  <SidebarMenuButton
+                    size="lg"
+                    asChild
+                    className="h-8 p-0 hover:bg-transparent"
+                  >
                     <a>
                       <div className="flex aspect-square size-8 items-center justify-center rounded-lg ">
-                        <Image src="/images/logo.svg" alt="CoCo AI Coach" width={32} height={32} className="size-8" />
+                        <Image
+                          src="/images/logo.svg"
+                          alt="CoCo AI Coach"
+                          width={32}
+                          height={32}
+                          className="size-8"
+                        />
                       </div>
                       <div className="grid flex-1 text-left text-sm leading-tight ml-3">
-                        <span className="truncate font-semibold">CoCo - AI Coach</span>
+                        <span className="truncate font-semibold">
+                          CoCo - AI Coach
+                        </span>
                       </div>
                     </a>
                   </SidebarMenuButton>
@@ -348,11 +379,10 @@ export function AppSidebar({ user, ...props }: { user: User | undefined } & Reac
               {user && <SidebarUserNav user={user} />}
             </SidebarFooter>
           </Sidebar>
-          
 
           {/* Second sidebar - Content area */}
-          <Sidebar 
-            collapsible="none" 
+          <Sidebar
+            collapsible="none"
             className="flex-1 !bg-[rgba(16,185,129,0.1)]"
           >
             <SidebarHeader className="gap-3.5 border-b p-4 mr-10">
@@ -360,7 +390,7 @@ export function AppSidebar({ user, ...props }: { user: User | undefined } & Reac
                 <div className="text-base font-medium text-foreground">
                   {activeItem?.title}
                 </div>
-                {activeItem?.title === "Chat History" ? (
+                {activeItem?.title === 'Chat History' ? (
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Button
@@ -381,7 +411,13 @@ export function AppSidebar({ user, ...props }: { user: User | undefined } & Reac
                   </Label>
                 )}
               </div>
-              <SidebarInput placeholder={activeItem?.title === "Chat History" ? "Search chats..." : `Search ${activeItem?.title.toLowerCase()}...`} />
+              <SidebarInput
+                placeholder={
+                  activeItem?.title === 'Chat History'
+                    ? 'Search chats...'
+                    : `Search ${activeItem?.title.toLowerCase()}...`
+                }
+              />
             </SidebarHeader>
             <SidebarContent>
               <SidebarGroup className="pr-10">
@@ -395,5 +431,5 @@ export function AppSidebar({ user, ...props }: { user: User | undefined } & Reac
         </>
       )}
     </Sidebar>
-  )
+  );
 }

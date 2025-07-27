@@ -1,4 +1,3 @@
-
 import { cookies } from 'next/headers';
 
 import { AppSidebar } from '@/components/app-sidebar';
@@ -22,9 +21,14 @@ export default async function Layout({
         src="https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js"
         strategy="beforeInteractive"
       />
-      <SidebarProvider defaultOpen={!isCollapsed} className="relative z-10 h-screen w-full overflow-hidden">
+      <SidebarProvider
+        defaultOpen={true}
+        className="relative z-10 h-screen w-full overflow-hidden"
+      >
         <AppSidebar user={session?.user} />
-        <SidebarInset className="!bg-transparent size-full overflow-y-auto overflow-x-hidden">{children}</SidebarInset>
+        <SidebarInset className="!bg-transparent size-full overflow-y-auto overflow-x-hidden">
+          {children}
+        </SidebarInset>
       </SidebarProvider>
     </>
   );
