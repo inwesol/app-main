@@ -110,10 +110,10 @@ export default function LoginPage() {
           <div className="bg-white rounded-lg shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06),4px_0_6px_-1px_rgba(0,0,0,0.1)] p-4">
             <div className="text-center mb-6">
               <h2 className="text-3xl font-bold text-gray-900 mb-3">
-                CoCo Login
+                Welcome Back!
               </h2>
               <p className="text-gray-600 text-lg">
-                Enter your provided credentials
+                Enter your login credentials
               </p>
             </div>
 
@@ -140,7 +140,7 @@ export default function LoginPage() {
               <div className="space-y-4">
                 <AuthForm action={handleSubmit} defaultEmail={email}>
                   <SubmitButton isSuccessful={isSuccessful}>
-                    Sign in
+                    Sign In
                   </SubmitButton>
 
                   {/* Forgot Password Link */}
@@ -185,6 +185,28 @@ export default function LoginPage() {
                       Sign up
                     </Link>
                     {' for free.'}
+                    <span className="block text-xs text-gray-400 mt-3">
+                      Registering on the platform is an acknowledgement that you
+                      have read and agree to the{' '}
+                      <Link
+                        href="https://inwesol.com/privacy"
+                        className="underline hover:text-blue-600"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Privacy Policy
+                      </Link>{' '}
+                      and{' '}
+                      <Link
+                        href="https://inwesol.com/terms"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline hover:text-blue-600"
+                      >
+                        Terms &amp; Conditions
+                      </Link>
+                      .
+                    </span>
                   </p>
                 </AuthForm>
               </div>
