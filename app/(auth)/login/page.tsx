@@ -87,20 +87,13 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
-      {/* Left side - Illustration (hidden on mobile) */}
+      {/* Left side - Carousel (hidden on mobile) */}
       <div className="hidden md:flex w-full md:w-1/2 bg-white relative overflow-hidden flex-col justify-center items-center p-12">
-        <div className="absolute inset-0 bg-white" />
-
-        {/* Storyset Illustration */}
-        <div className="relative z-10 mb-8 w-full max-w-md">
-          <Image
-            src="/images/signin.svg"
-            alt="Login illustration"
-            width={400}
-            height={300}
-            className="w-full h-auto"
-            priority
-          />
+        {/* Carousel with margin and rounded corners */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="size-full m-8 rounded-2xl shadow-2xl overflow-hidden flex items-center justify-center bg-black/0">
+            <Carousel />
+          </div>
         </div>
       </div>
 
@@ -110,10 +103,10 @@ export default function LoginPage() {
           <div className="bg-white rounded-lg shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06),4px_0_6px_-1px_rgba(0,0,0,0.1)] p-4">
             <div className="text-center mb-6">
               <h2 className="text-3xl font-bold text-gray-900 mb-3">
-                CoCo Login
+                Welcome back!
               </h2>
               <p className="text-gray-600 text-lg">
-                Enter your provided credentials
+                Enter your login credentials
               </p>
             </div>
 
@@ -140,7 +133,7 @@ export default function LoginPage() {
               <div className="space-y-4">
                 <AuthForm action={handleSubmit} defaultEmail={email}>
                   <SubmitButton isSuccessful={isSuccessful}>
-                    Sign in
+                    Sign In
                   </SubmitButton>
 
                   {/* Forgot Password Link */}
@@ -190,6 +183,67 @@ export default function LoginPage() {
               </div>
             </div>
           </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Carousel() {
+  const posters = [
+    {
+      src: '/images/mouth of the seine, monet.jpg',
+      alt: 'Poster 1',
+      caption: 'Speedy, Easy and Fast',
+      desc: 'Overpay helps you set saving goals, earn cash back offers, and get paychecks up to two days early.',
+    },
+    {
+      src: '/images/signup.svg',
+      alt: 'Poster 2',
+      caption: 'Secure & Reliable',
+      desc: 'Your money is protected with industry-leading security and encryption.',
+    },
+    {
+      src: '/images/demo-thumbnail.png',
+      alt: 'Poster 3',
+      caption: 'All-in-one Dashboard',
+      desc: 'Track your income, expenses, and transfers in one place.',
+    },
+  ];
+  const [current, setCurrent] = useState(0);
+
+  // Auto-slide every 3 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrent((c) => (c === posters.length - 1 ? 0 : c + 1));
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [posters.length]);
+
+  return (
+    <div className="relative size-full">
+      <Image
+        src={posters[current].src}
+        alt={posters[current].alt}
+        fill
+        className="object-cover size-full"
+        priority
+      />
+      {/* Overlay for caption and dots */}
+      <div className="absolute bottom-0 left-0 w-full bg-black/50 py-8 px-6 flex flex-col items-center rounded-b-2xl">
+        <h3 className="text-3xl font-bold text-white mb-2 drop-shadow text-center">
+          {posters[current].caption}
+        </h3>
+        <p className="text-white/90 text-lg drop-shadow text-center mb-4">
+          {posters[current].desc}
+        </p>
+        <div className="flex justify-center gap-2">
+          {posters.map((poster, idx) => (
+            <span
+              key={poster.alt}
+              className={`size-3 rounded-full ${idx === current ? 'bg-white' : 'bg-white/40'} transition-all`}
+            />
+          ))}
         </div>
       </div>
     </div>
