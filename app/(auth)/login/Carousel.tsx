@@ -45,8 +45,6 @@ export default function Carousel() {
       subtitle: "Upskill and evolve continuously",
       description:
         "Stay ahead with curated learning paths, skill-building resources, and expert insights to support your career growth and transformation.",
-      //   gradient: "from-orange-600 via-red-600 to-pink-600",
-      //   accentGradient: "from-orange-400/30 to-red-400/30",
       gradient: "from-slate-600 via-gray-500 to-zinc-400",
       accentGradient: "from-slate-300/30 to-zinc-300/30",
     },

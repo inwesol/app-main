@@ -93,6 +93,7 @@ export default function LoginPage() {
         </div>
       </div>
 
+<<<<<<< HEAD
       {/* Right side - Enhanced Login Form */}
       <div className="flex w-full lg:w-2/5 relative items-center justify-center min-h-screen">
         {/* Background Effects */}
@@ -167,6 +168,16 @@ export default function LoginPage() {
               <h1 className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-primary-blue-600 to-primary-green-600 bg-clip-text text-transparent mb-2">
                 Welcome Back!
               </h1>
+=======
+      {/* Right side - Login Form */}
+      <div className="w-full md:w-1/2 flex items-center justify-center p-12 bg-white">
+        <div className="w-full max-w-sm">
+          <div className="bg-white rounded-lg shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06),4px_0_6px_-1px_rgba(0,0,0,0.1)] p-4">
+            <div className="text-center mb-6">
+              <h2 className="text-3xl font-bold text-gray-900 mb-3">
+                Welcome Back!
+              </h2>
+>>>>>>> 3b5e30e379f5662539510366e0d8c4aed2aa7688
               <p className="text-gray-600 text-lg">
                 Sign in to continue your journey
               </p>
@@ -246,7 +257,33 @@ export default function LoginPage() {
                     >
                       Sign up
                     </Link>
+<<<<<<< HEAD
                     {" for free."}
+=======
+                    {' for free.'}
+                    <span className="block text-xs text-gray-400 mt-3">
+                      Registering on the platform is an acknowledgement that you
+                      have read and agree to the{' '}
+                      <Link
+                        href="https://inwesol.com/privacy"
+                        className="underline hover:text-blue-600"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Privacy Policy
+                      </Link>{' '}
+                      and{' '}
+                      <Link
+                        href="https://inwesol.com/terms"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline hover:text-blue-600"
+                      >
+                        Terms &amp; Conditions
+                      </Link>
+                      .
+                    </span>
+>>>>>>> 3b5e30e379f5662539510366e0d8c4aed2aa7688
                   </p>
                 </div>
               </AuthForm>
