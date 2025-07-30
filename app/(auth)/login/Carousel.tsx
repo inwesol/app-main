@@ -69,14 +69,14 @@ export default function Carousel() {
     }, 300);
   };
 
-  const prevSlide = () => {
-    if (isTransitioning) return;
-    setIsTransitioning(true);
-    setTimeout(() => {
-      setCurrent((prev) => (prev === 0 ? slides.length - 1 : prev - 1));
-      setIsTransitioning(false);
-    }, 300);
-  };
+  // const prevSlide = () => {
+  //   if (isTransitioning) return;
+  //   setIsTransitioning(true);
+  //   setTimeout(() => {
+  //     setCurrent((prev) => (prev === 0 ? slides.length - 1 : prev - 1));
+  //     setIsTransitioning(false);
+  //   }, 300);
+  // };
 
   const goToSlide = (index: number) => {
     if (isTransitioning || index === current) return;
@@ -127,7 +127,7 @@ export default function Carousel() {
         />
       </div>
 
-      <button
+      {/* <button
         onClick={prevSlide}
         className="absolute left-8 top-1/2 -translate-y-1/2 z-20 group"
         disabled={isTransitioning}
@@ -135,9 +135,9 @@ export default function Carousel() {
         <div className="size-14 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center group-hover:bg-white/20 group-hover:scale-110 transition-all duration-300 group-hover:shadow-lg">
           <ChevronLeft className="size-7 text-white" />
         </div>
-      </button>
+      </button> */}
 
-      <button
+      {/* <button
         onClick={nextSlide}
         className="absolute right-8 top-1/2 -translate-y-1/2 z-20 group"
         disabled={isTransitioning}
@@ -145,7 +145,7 @@ export default function Carousel() {
         <div className="size-14 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center group-hover:bg-white/20 group-hover:scale-110 transition-all duration-300 group-hover:shadow-lg">
           <ChevronRight className="size-7 text-white" />
         </div>
-      </button>
+      </button> */}
 
       <div className="relative z-10 h-full flex flex-col justify-center items-center text-center px-16 py-20">
         <div

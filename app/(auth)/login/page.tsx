@@ -93,15 +93,12 @@ export default function LoginPage() {
         </div>
       </div>
 
-<<<<<<< HEAD
-      {/* Right side - Enhanced Login Form */}
+      {/* Right side - Login Form */}
       <div className="flex w-full lg:w-2/5 relative items-center justify-center min-h-screen">
-        {/* Background Effects */}
         <div className="absolute inset-0" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary-blue-200/40 via-indigo-100/20 to-transparent" />
 
         <div className="absolute inset-0 overflow-hidden">
-          {/* Top Right Illustration */}
           <div className="absolute -top-20 -right-20 size-80 opacity-[0.08]">
             <svg viewBox="0 0 200 200" className="size-full text-blue-600">
               <defs>
@@ -138,7 +135,6 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* Floating Elements */}
         <div className="absolute top-20 right-10 size-32 bg-gradient-to-br from-blue-400/15 to-indigo-400/15 rounded-full blur-3xl animate-pulse" />
         <div
           className="absolute bottom-32 left-10 size-24 bg-gradient-to-br from-purple-400/15 to-pink-400/15 rounded-2xl blur-2xl animate-pulse"
@@ -168,16 +164,6 @@ export default function LoginPage() {
               <h1 className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-primary-blue-600 to-primary-green-600 bg-clip-text text-transparent mb-2">
                 Welcome Back!
               </h1>
-=======
-      {/* Right side - Login Form */}
-      <div className="w-full md:w-1/2 flex items-center justify-center p-12 bg-white">
-        <div className="w-full max-w-sm">
-          <div className="bg-white rounded-lg shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06),4px_0_6px_-1px_rgba(0,0,0,0.1)] p-4">
-            <div className="text-center mb-6">
-              <h2 className="text-3xl font-bold text-gray-900 mb-3">
-                Welcome Back!
-              </h2>
->>>>>>> 3b5e30e379f5662539510366e0d8c4aed2aa7688
               <p className="text-gray-600 text-lg">
                 Sign in to continue your journey
               </p>
@@ -257,33 +243,7 @@ export default function LoginPage() {
                     >
                       Sign up
                     </Link>
-<<<<<<< HEAD
                     {" for free."}
-=======
-                    {' for free.'}
-                    <span className="block text-xs text-gray-400 mt-3">
-                      Registering on the platform is an acknowledgement that you
-                      have read and agree to the{' '}
-                      <Link
-                        href="https://inwesol.com/privacy"
-                        className="underline hover:text-blue-600"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        Privacy Policy
-                      </Link>{' '}
-                      and{' '}
-                      <Link
-                        href="https://inwesol.com/terms"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="underline hover:text-blue-600"
-                      >
-                        Terms &amp; Conditions
-                      </Link>
-                      .
-                    </span>
->>>>>>> 3b5e30e379f5662539510366e0d8c4aed2aa7688
                   </p>
                 </div>
               </AuthForm>
