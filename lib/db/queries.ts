@@ -50,7 +50,7 @@ export async function createUser(
     const values: any = {
       email,
       createdAt: new Date(),
-      emailVerified: false,
+      email_verified: false,
     };
 
     if (password) {
@@ -125,7 +125,7 @@ export async function updateUser(
     name?: string | null;
     image?: string | null;
     email?: string;
-    emailVerified?: boolean;
+    email_verified?: boolean;
   }
 ): Promise<User> {
   try {
@@ -269,7 +269,7 @@ export async function findOrCreateGoogleUser(
         const updatedUser = await updateUser(existingUser.id, {
           name,
           image,
-          emailVerified: true, // OAuth users are considered verified
+          email_verified: true, // OAuth users are considered verified
         });
         return updatedUser;
       }
@@ -279,7 +279,7 @@ export async function findOrCreateGoogleUser(
 
     console.log("Creating new Google user");
     const newUser = await createUser(email, null, name, image);
-    const updatedUser = await updateUser(newUser.id, { emailVerified: true });
+    const updatedUser = await updateUser(newUser.id, { email_verified: true });
     return updatedUser;
   } catch (error) {
     console.error("Failed to find or create Google user:", error);
