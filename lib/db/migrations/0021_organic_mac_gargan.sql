@@ -1,0 +1,1 @@
+ALTER TABLE "career_maturity_assessment" ADD COLUMN "score" integer NOT NULL;

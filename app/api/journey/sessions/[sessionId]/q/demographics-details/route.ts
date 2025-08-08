@@ -29,7 +29,7 @@ export async function POST(
 
   await upsertUserDemographics(session.user.id, data);
 
-  await upsertUserDemographics(session.user.id, formData);
+  // await upsertUserDemographics(session.user.id, formData);
   await completeUserSessionFormProgress({
     userId: session.user.id,
     sessionId: Number(sessionId),
