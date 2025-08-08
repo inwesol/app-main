@@ -36,6 +36,7 @@ export const JourneyPage: React.FC = () => {
   const router = useRouter();
 
   useEffect(() => {
+    console.log("in journey");
     const fetchUserProgress = async () => {
       const res = await fetch("/api/journey", { method: "GET" });
       console.log(res);

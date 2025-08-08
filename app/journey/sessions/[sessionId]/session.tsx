@@ -12,12 +12,14 @@ import {
   Calendar,
   BarChart3,
   ChevronRight,
+  Plus,  // Added this import
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { useParams, useRouter } from "next/navigation";
+
 
 interface FormData {
   id: string;
@@ -32,6 +34,7 @@ interface FormData {
   topics: string[];
   difficulty: "beginner" | "intermediate" | "advanced";
 }
+
 
 interface SessionDetailData {
   id: number;
@@ -48,23 +51,28 @@ interface SessionDetailData {
   prerequisites?: string[];
 }
 
+
 export const SessionDetail: React.FC = () => {
   const params = useParams();
   const sessionId = Number(params.sessionId);
+
 
   const [sessionData, setSessionData] = useState<SessionDetailData | null>(
     null
   );
 
+
   console.log("sessionData:", sessionData);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+
 
   useEffect(() => {
     const fetchSessionData = async () => {
       setLoading(true);
       try {
         const res = await fetch(`/api/journey/sessions/${sessionId}`);
+
 
         if (res.ok) {
           const data = await res.json();
@@ -84,14 +92,42 @@ export const SessionDetail: React.FC = () => {
     }
   }, [sessionId]);
 
+
   const handleFormClick = (formId: string) => {
     router.push(`/journey/sessions/${sessionId}/q/${formId}`);
   };
+
 
   const handleBackToJourney = () => {
     console.log("Back to journey");
     router.push("/journey");
   };
+
+
+  const handleCustomButtonClick = (formId: string) => {
+    // Handle your custom action here
+    console.log("Custom button clicked for form:", formId);
+    // Example actions:
+    // router.push('/profile/edit');
+    // router.push('/demographics/edit');
+    // or any other custom logic
+  };
+
+  // Added this new function
+  const handleAddEditDemographics = () => {
+    console.log("Schedule");
+    // You can customize this route as needed
+    router.push(`/journey/sessions/${sessionId}/schedule-zero`);
+  };
+
+  const goToFeedback = () => {
+    router.push(`/session-feedback?session=${sessionId}`);
+  };
+
+  const goToReport = () => {
+    router.push(`/journey/sessions/${sessionId}/report`);
+  };
+
 
   const getFormProgress = () => {
     if (!sessionData) return 0;
@@ -100,6 +136,7 @@ export const SessionDetail: React.FC = () => {
     ).length;
     return (completedForms / sessionData.forms.length) * 100;
   };
+
 
   const getOverallScore = () => {
     if (!sessionData) return 0;
@@ -114,6 +151,7 @@ export const SessionDetail: React.FC = () => {
     return Math.round(totalScore / completedForms.length);
   };
 
+
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
       case "beginner":
@@ -127,6 +165,7 @@ export const SessionDetail: React.FC = () => {
     }
   };
 
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-primary-green-50 via-white to-primary-blue-50 flex items-center justify-center p-4">
@@ -139,6 +178,7 @@ export const SessionDetail: React.FC = () => {
       </div>
     );
   }
+
 
   if (!sessionData) {
     return (
@@ -163,10 +203,12 @@ export const SessionDetail: React.FC = () => {
     );
   }
 
-  const IconComponent = LucideIcons[sessionData.icon];
+
+  const IconComponent = ((LucideIcons as unknown) as Record<string, React.ComponentType<any>>)[sessionData.icon] || LucideIcons.FileText;
   console.log(IconComponent);
   const isCurrent = sessionData.status === "current";
   const isCompleted = sessionData.status === "completed";
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-green-50 via-white to-primary-blue-50">
@@ -183,6 +225,7 @@ export const SessionDetail: React.FC = () => {
             <span className="text-sm sm:text-base">Back to Journey</span>
           </Button>
         </div>
+
 
         {/* Session Header */}
         <div className="mb-6 sm:mb-8">
@@ -208,6 +251,7 @@ export const SessionDetail: React.FC = () => {
                 <IconComponent className="size-6 sm:size-8 text-white" />
               </div>
 
+
               <div className="flex-1 w-full min-w-0">
                 <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-3">
                   <h1
@@ -221,6 +265,7 @@ export const SessionDetail: React.FC = () => {
                   >
                     Session {sessionData.id}: {sessionData.title}
                   </h1>
+
 
                   <div className="flex gap-2">
                     {isCompleted && (
@@ -236,9 +281,11 @@ export const SessionDetail: React.FC = () => {
                   </div>
                 </div>
 
+
                 <p className="text-sm sm:text-base lg:text-lg mb-4 text-slate-700 leading-relaxed">
                   {sessionData.description}
                 </p>
+
 
                 {/* Session Stats */}
                 <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
@@ -254,6 +301,7 @@ export const SessionDetail: React.FC = () => {
                     </p>
                   </div>
 
+
                   <div className="bg-white/60 rounded-lg p-2.5 sm:p-3 border border-white/40">
                     <div className="flex items-center gap-1.5 sm:gap-2 mb-1">
                       <FileText className="size-3 sm:size-4 text-slate-600" />
@@ -266,6 +314,7 @@ export const SessionDetail: React.FC = () => {
                     </p>
                   </div>
 
+
                   <div className="bg-white/60 rounded-lg p-2.5 sm:p-3 border border-white/40">
                     <div className="flex items-center gap-1.5 sm:gap-2 mb-1">
                       <BarChart3 className="size-3 sm:size-4 text-slate-600" />
@@ -277,6 +326,7 @@ export const SessionDetail: React.FC = () => {
                       {Math.round(getFormProgress())}%
                     </p>
                   </div>
+
 
                   {isCompleted && (
                     <div className="bg-white/60 rounded-lg p-2.5 sm:p-3 border border-white/40 ">
@@ -296,6 +346,7 @@ export const SessionDetail: React.FC = () => {
             </div>
           </div>
         </div>
+
 
         {/* Prerequisites */}
         {sessionData.prerequisites && sessionData.prerequisites.length > 0 && (
@@ -322,6 +373,7 @@ export const SessionDetail: React.FC = () => {
           </Card>
         )}
 
+
         {/* Learning Objectives */}
         <Card className="mb-6 sm:mb-8 bg-gradient-to-r from-primary-blue-50/50 to-cyan-50/50 border-primary-blue-200/50">
           <CardHeader className="pb-3 sm:pb-4">
@@ -344,10 +396,11 @@ export const SessionDetail: React.FC = () => {
                     {objective}
                   </span>
                 </li>
-              ))}
+                ))}
             </ul>
           </CardContent>
         </Card>
+
 
         {/* Forms Grid */}
         <div className="mb-6 sm:mb-8">
@@ -356,14 +409,16 @@ export const SessionDetail: React.FC = () => {
             Session Forms
           </h2>
 
+
           <div className="grid gap-4 sm:gap-6 lg:grid-cols-2">
             {sessionData.forms.map((form, index) => {
-              const FormIcon = LucideIcons[form.icon];
+              const FormIcon = ((LucideIcons as unknown) as Record<string, React.ComponentType<any>>)[form.icon] || LucideIcons.FileText;
               console.log(FormIcon);
               const isFormCompleted = form.status === "completed";
               console.log("isFormCompleted:", isFormCompleted);
               const isFormInProgress = form.status === "in-progress";
               const isFormNotStarted = form.status === "not-started";
+
 
               return (
                 <Card
@@ -396,6 +451,7 @@ export const SessionDetail: React.FC = () => {
                           )}
                         </div>
 
+
                         <div className="flex-1 min-w-0">
                           <div className="flex flex-col sm:flex-row sm:items-start gap-1 sm:gap-2 mb-2">
                             <h3
@@ -410,6 +466,7 @@ export const SessionDetail: React.FC = () => {
                               {form.title}
                             </h3>
 
+
                             <Badge
                               className={`text-xs w-fit ${getDifficultyColor(
                                 form.difficulty
@@ -419,9 +476,11 @@ export const SessionDetail: React.FC = () => {
                             </Badge>
                           </div>
 
+
                           <p className="text-xs sm:text-sm mb-3 leading-relaxed text-slate-600">
                             {form.description}
                           </p>
+
 
                           {/* Form Topics */}
                           <div className="flex flex-wrap gap-1 mb-3">
@@ -451,12 +510,14 @@ export const SessionDetail: React.FC = () => {
                             )}
                           </div>
 
+
                           {/* Form Stats */}
                           <div className="flex flex-wrap items-center gap-2 text-xs">
                             <div className="flex items-center gap-1 px-2 py-1 rounded bg-white text-slate-600 border border-slate-200">
                               <Clock className="size-3" />
                               <span>{form.estimatedTime}</span>
                             </div>
+
 
                             {isFormCompleted && form.score && (
                               <div className="flex items-center gap-1 px-2 py-1 rounded bg-primary-green-100 text-primary-green-700 border border-primary-green-200">
@@ -466,6 +527,7 @@ export const SessionDetail: React.FC = () => {
                                 </span>
                               </div>
                             )}
+
 
                             {isFormCompleted && form.completedAt && (
                               <div className="flex items-center gap-1 px-2 py-1 rounded bg-slate-100 text-slate-600 border border-slate-200">
@@ -489,6 +551,7 @@ export const SessionDetail: React.FC = () => {
                         </div>
                       </div>
 
+
                       {/* Status Badge */}
                       <div className="shrink-0">
                         {isFormCompleted && (
@@ -510,35 +573,120 @@ export const SessionDetail: React.FC = () => {
                     </div>
                   </CardHeader>
 
+
                   <CardContent className="pt-0">
-                    <Button
-                      className={`w-full text-xs sm:text-sm font-semibold transition-all duration-300 h-9 sm:h-10 ${
-                        isFormCompleted
-                          ? "bg-gradient-to-r from-primary-green-500 to-emerald-500 hover:from-primary-green-600 hover:to-emerald-600"
-                          : "bg-gradient-to-r from-primary-blue-500 to-cyan-500 hover:from-primary-blue-600 hover:to-cyan-600"
-                      } text-white border-0 shadow-sm hover:shadow-md active:scale-[0.98]`}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleFormClick(form.id);
-                      }}
-                    >
-                      <span className="flex items-center justify-center gap-2">
-                        <span className="truncate">
-                          {isFormCompleted
-                            ? "Review Form"
-                            : isFormInProgress
-                            ? "Continue Form"
-                            : "Start Form"}
+                    {/* Modified section with custom button for Demographics Details */}
+                    {form.title.toLowerCase().includes('demographics') || form.id === 'demographics' ? (
+                      <div className="flex gap-2">
+                        <Button
+                          className={`flex-1 text-xs sm:text-sm font-semibold transition-all duration-300 h-9 sm:h-10 ${
+                            isFormCompleted
+                              ? "bg-gradient-to-r from-primary-green-500 to-emerald-500 hover:from-primary-green-600 hover:to-emerald-600"
+                              : "bg-gradient-to-r from-primary-blue-500 to-cyan-500 hover:from-primary-blue-600 hover:to-cyan-600"
+                          } text-white border-0 shadow-sm hover:shadow-md active:scale-[0.98]`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleFormClick(form.id);
+                          }}
+                        >
+                          <span className="flex items-center justify-center gap-2">
+                            <span className="truncate">
+                              {isFormCompleted
+                                ? "Review Form"
+                                : isFormInProgress
+                                ? "Continue Form"
+                                : "Start Form"}
+                            </span>
+                            <ChevronRight className="size-3 sm:size-4 shrink-0" />
+                          </span>
+                        </Button>
+
+                      </div>
+                    ) : (
+                      // Original single button for other forms
+                      <Button
+                        className={`w-full text-xs sm:text-sm font-semibold transition-all duration-300 h-9 sm:h-10 ${
+                          isFormCompleted
+                            ? "bg-gradient-to-r from-primary-green-500 to-emerald-500 hover:from-primary-green-600 hover:to-emerald-600"
+                            : "bg-gradient-to-r from-primary-blue-500 to-cyan-500 hover:from-primary-blue-600 hover:to-cyan-600"
+                        } text-white border-0 shadow-sm hover:shadow-md active:scale-[0.98]`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleFormClick(form.id);
+                        }}
+                      >
+                        <span className="flex items-center justify-center gap-2">
+                          <span className="truncate">
+                            {isFormCompleted
+                              ? "Review Form"
+                              : isFormInProgress
+                              ? "Continue Form"
+                              : "Start Form"}
+                          </span>
+                          <ChevronRight className="size-3 sm:size-4 shrink-0" />
                         </span>
-                        <ChevronRight className="size-3 sm:size-4 shrink-0" />
-                      </span>
-                    </Button>
+                      </Button>
+                    )}
                   </CardContent>
                 </Card>
               );
             })}
+
+            {/* NEW: Add/Edit Demographics Card - This goes in the empty column space */}
+            <Card
+              onClick={handleAddEditDemographics}
+              className="relative overflow-hidden border-2 border-dashed border-primary-blue-300 bg-gradient-to-br from-primary-blue-50/30 to-cyan-50/30 hover:from-primary-blue-50/50 hover:to-cyan-50/50 transition-all duration-300 cursor-pointer hover:shadow-lg active:scale-[0.98] sm:hover:scale-[1.02] min-h-[200px] flex items-center justify-center"
+            >
+              <div className="text-center p-4">
+                <div className="p-3 sm:p-4 rounded-xl bg-gradient-to-r from-primary-blue-500 to-cyan-500 shadow-lg mb-4 mx-auto w-fit">
+                  <Plus className="size-6 sm:size-8 text-white" />
+                </div>
+                <h3 className="text-base sm:text-lg font-bold text-primary-blue-800 mb-2">
+                  Schedule
+                </h3>
+                <p className="text-xs sm:text-sm text-primary-blue-600 leading-relaxed">
+                </p>
+              </div>
+            </Card>
+
+            {/* NEW: Quick Feedback Card */}
+            <Card
+              onClick={goToFeedback}
+              className="relative overflow-hidden border bg-white hover:border-amber-300 transition-all duration-300 cursor-pointer hover:shadow-lg active:scale-[0.98] sm:hover:scale-[1.02] min-h-[200px] flex items-center justify-center"
+            >
+              <div className="text-center p-4">
+                <div className="p-3 sm:p-4 rounded-xl bg-amber-400 shadow-lg mb-4 mx-auto w-fit">
+                  <Star className="size-6 sm:size-8 text-white" />
+                </div>
+                <h3 className="text-base sm:text-lg font-bold text-slate-800 mb-2">
+                  Give Quick Feedback
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                  Rate this session and share a takeaway.
+                </p>
+              </div>
+            </Card>
+
+            {/* NEW: Generate Report Card */}
+            <Card
+              onClick={goToReport}
+              className="relative overflow-hidden border bg-white hover:border-emerald-300 transition-all duration-300 cursor-pointer hover:shadow-lg active:scale-[0.98] sm:hover:scale-[1.02] min-h-[200px] flex items-center justify-center"
+            >
+              <div className="text-center p-4">
+                <div className="p-3 sm:p-4 rounded-xl bg-emerald-500 shadow-lg mb-4 mx-auto w-fit">
+                  <BarChart3 className="size-6 sm:size-8 text-white" />
+                </div>
+                <h3 className="text-base sm:text-lg font-bold text-slate-800 mb-2">
+                  Generate Report
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                  View a summary of your progress and insights.
+                </p>
+              </div>
+            </Card>
           </div>
         </div>
+
 
         {/* Session Progress */}
         <Card className="bg-gradient-to-r from-primary-green-50/80 via-primary-blue-50/80 to-slate-50/80 border border-slate-200/50 shadow-sm">
@@ -588,5 +736,6 @@ export const SessionDetail: React.FC = () => {
     </div>
   );
 };
+
 
 export default SessionDetail;

@@ -172,6 +172,7 @@
 import type { InferSelectModel } from "drizzle-orm";
 import {
   pgTable,
+  serial,
   varchar,
   timestamp,
   json,
@@ -358,7 +359,6 @@ export const suggestion = pgTable(
 );
 
 export type Suggestion = InferSelectModel<typeof suggestion>;
-
 // journey table
 export const journey_progress = pgTable("journey_progress", {
   id: uuid("id").primaryKey().notNull().defaultRandom(),
@@ -436,3 +436,40 @@ export const pre_assessment = pgTable(
     userUnique: unique().on(table.user_id),
   })
 );
+
+export const career_story_1 = pgTable(
+  "career_story_1",
+  {
+    id: uuid("id").primaryKey().notNull().defaultRandom(),
+    user_id: uuid("user_id").notNull(),
+    your_current_transition: varchar("your_current_transition", { length: 4000 }).notNull(),
+    career_asp: varchar("career_asp", { length: 4000 }).notNull(),
+    // Childhood heroes - up to 3 people
+    hero_1_name: varchar("hero_1_name", { length: 500 }),
+    hero_1_description: text("hero_1_description"),
+    hero_2_name: varchar("hero_2_name", { length: 500 }),
+    hero_2_description: text("hero_2_description"),
+    hero_3_name: varchar("hero_3_name", { length: 500 }),
+    hero_3_description: text("hero_3_description"),
+    created_at: timestamp("created_at").defaultNow().notNull(),
+    updated_at: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (table) => ({
+    userUnique: unique().on(table.user_id),
+  })
+);
+export const feedback = pgTable('feedback', {
+  id: serial('id').primaryKey(),
+  feeling: text('feeling').notNull(), // e.g., 'enlightened', 'confident', etc.
+  takeaway: text('takeaway'),
+  rating: integer('rating').notNull(), // 1-5 stars
+  wouldRecommend: boolean('would_recommend').default(false),
+  suggestions: text('suggestions'),
+  sessionId: integer('session_id'), // zero-based session index
+  userId: uuid('user_id'),
+  userAgent: text('user_agent'), // Optional: for analytics
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
+export type Feedback = typeof feedback.$inferInsert;
+export type FeedbackSelect = typeof feedback.$inferSelect;

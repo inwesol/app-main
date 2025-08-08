@@ -5,10 +5,13 @@ import GoogleProvider from 'next-auth/providers/google';
 
 import { getUser, createUser, updateUser } from '@/lib/db/queries';
 import { authConfig } from './auth.config';
-// import GoogleProvider from "next-auth/providers/google";
+
+interface ExtendedUser extends User {
+  id: string; // Ensure id is always present
+}
 
 interface ExtendedSession extends Session {
-  user: User;
+  user: ExtendedUser;
 }
 
 export const {
@@ -21,10 +24,10 @@ export const {
   debug: true,
   secret: process.env.AUTH_SECRET,
   providers: [
-    // GoogleProvider({
-    //   clientId: process.env.GOOGLE_CLIENT_ID!,
-    //   clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-    // }),
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    }),
     Credentials({
       credentials: {
         email: { label: 'Email', type: 'email' },
@@ -55,7 +58,7 @@ export const {
               return null;
             }
             return {
-              id: user.id,
+              id: user.id.toString(), // Ensure ID is string
               email: user.email,
               name: user.name,
               image: user.image,
@@ -76,7 +79,7 @@ export const {
 
           console.log('Successful credential sign in');
           return {
-            id: user.id,
+            id: user.id.toString(), // Ensure ID is string
             email: user.email,
             name: user.name,
             image: user.image,
@@ -95,6 +98,7 @@ export const {
         provider: account?.provider,
         email: user.email,
         name: user.name,
+        userId: user.id,
       });
 
       if (account?.provider === 'google') {
@@ -121,6 +125,9 @@ export const {
 
               // Mark email as verified for OAuth users
               await updateUser(newUser.id, { emailVerified: true });
+              
+              // IMPORTANT: Set the user ID for the session
+              user.id = newUser.id.toString();
               console.log('Successfully created new user:', newUser.id);
             } catch (createError) {
               console.error('Failed to create user:', createError);
@@ -129,6 +136,9 @@ export const {
           } else {
             console.log('User already exists:', existingUsers[0].id);
             const existingUser = existingUsers[0];
+            
+            // IMPORTANT: Set the user ID for the session
+            user.id = existingUser.id.toString();
 
             // Update user info if needed and ensure email is verified for OAuth users
             const needsUpdate =
@@ -168,27 +178,47 @@ export const {
         hasUser: !!user,
         hasAccount: !!account,
         provider: account?.provider,
+        userId: user?.id,
+        tokenId: token?.id,
       });
 
       // First time sign in - user object will be available
       if (user) {
-        token.id = user.id;
+        // Ensure we always have a string ID
+        token.id = user.id?.toString() || token.id;
         token.email = user.email;
         token.name = user.name;
         token.image = user.image;
+        
+        console.log('JWT token updated with user data:', {
+          id: token.id,
+          email: token.email,
+        });
+      }
+
+      // If token doesn't have ID but has email, fetch from database
+      if (!token.id && token.email) {
+        console.log('Token missing ID, fetching from database for:', token.email);
+        try {
+          const users = await getUser(token.email);
+          if (users.length > 0) {
+            token.id = users[0].id.toString();
+            console.log('Token ID updated from database:', token.id);
+          }
+        } catch (error) {
+          console.error('Error fetching user ID for token:', error);
+        }
       }
 
       // Store access token if available
       if (account?.access_token) {
         token.accessToken = account.access_token;
       }
+      
       return token;
     },
 
-    async session({
-      session,
-      token,
-    }: { session: ExtendedSession; token: any }) {
+    async session({ session, token }: { session: Session; token: any }) {
       console.log('Session callback:', {
         hasSession: !!session,
         hasToken: !!token,
@@ -198,36 +228,58 @@ export const {
 
       if (session.user && token) {
         try {
-          // Use token data first (most reliable)
+          // Ensure we always have an ID in the session
           if (token.id) {
-            session.user.id = token.id;
+            (session.user as any).id = token.id.toString();
             session.user.email = token.email || session.user.email;
             session.user.name = token.name || session.user.name;
             session.user.image = token.image || session.user.image;
+            
+            console.log('Session updated from token:', {
+              id: (session.user as any).id,
+              email: session.user.email,
+            });
           } else if (session.user.email) {
             // Fallback: fetch user data if token doesn't have ID
             console.log(
-              'Token missing ID, fetching user data for:',
+              'Session missing ID, fetching user data for:',
               session.user.email,
             );
             const users = await getUser(session.user.email);
 
             if (users.length > 0) {
               const userData = users[0];
-              session.user.id = userData.id;
+              (session.user as any).id = userData.id.toString();
               session.user.name = userData.name || session.user.name;
               session.user.image = userData.image || session.user.image;
               console.log('Session user data updated from database');
             } else {
-              console.log('No user found in session callback');
+              console.error('No user found in session callback for:', session.user.email);
+              // Instead of returning null, create a fallback session with error indication
+              (session.user as any).id = 'error-no-user-found';
             }
+          } else {
+            console.error('Session has no user ID or email - this will break chatbot functionality');
+            // Instead of returning null, create a fallback session with error indication
+            (session.user as any).id = 'error-no-email';
           }
+          
+          // CRITICAL: Verify session has required data for chatbot
+          const userId = (session.user as any).id;
+          if (!userId || userId.startsWith('error-')) {
+            console.error('Session user missing valid ID - chatbot may not work properly');
+            // You can handle this in your chatbot code by checking for error- prefix
+          }
+          
         } catch (error) {
           console.error('Error in session callback:', error);
-          // Don't throw error - just log it and continue with whatever session data we have
-          // This prevents the session callback from breaking the entire auth flow
+          // Provide fallback ID to prevent complete session failure
+          if (!(session.user as any).id) {
+            (session.user as any).id = 'error-session-callback';
+          }
         }
       }
+      
       return session;
     },
   },
@@ -244,18 +296,22 @@ export const {
       console.log('SignIn event:', {
         provider: account?.provider,
         email: user.email,
+        userId: user.id,
       });
     },
     async signOut({ session, token }: any) {
       console.log('SignOut event:', {
         email: session?.user?.email || token?.email,
+        userId: session?.user?.id || token?.id,
       });
     },
     async createUser({ user }) {
-      console.log('CreateUser event:', { email: user.email, id: user.id });
+      console.log('CreateUser event:', { 
+        email: user.email, 
+        id: user.id 
+      });
     },
   },
-  // Add error handling
   logger: {
     error(code, ...message) {
       console.error(`NextAuth Error [${code}]:`, ...message);

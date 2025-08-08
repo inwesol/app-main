@@ -117,6 +117,7 @@ const questions = [
     description: "Assess your motivation and readiness for transformation",
   },
 ];
+
 const preAssessmentSchema = z.object({
   "How clear are your current career goals?": z.number().min(1).max(10),
   "How confident are you that you will achieve your career goals?": z
@@ -162,12 +163,41 @@ export function PreAssessment() {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [isCompleted, setIsCompleted] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  // const [formData, setFormData] = useState(initialFormData());
 
   const form = useForm<PreAssessmentFormData>({
     resolver: zodResolver(preAssessmentSchema),
     defaultValues,
   });
+
+  // Fixed onSubmit function and data fetching
+  const onSubmit = async (data: PreAssessmentFormData) => {
+    console.log("Assessment Results:", data);
+    setIsLoading(true);
+    try {
+      const sessionId = 1;
+      const url = `/api/journey/sessions/${sessionId}/q/pre-assessment`; // Fixed: Added backticks for template literal
+
+      // Wrap the data in the format the backend expects
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ answers: data }), // ← Wrap in 'answers' object
+      });
+
+      if (response.ok) {
+        setIsCompleted(true);
+      } else {
+        const errorText = await response.text();
+        console.error("Server error:", errorText);
+        throw new Error(`Failed to submit assessment: ${response.status}`); // Fixed: Added backticks for template literal
+      }
+    } catch (error) {
+      console.error("Submission error:", error);
+      alert("Failed to submit. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // fetching data on mount
   useEffect(() => {
@@ -176,53 +206,35 @@ export function PreAssessment() {
       try {
         const res = await fetch("/api/journey/sessions/1/q/pre-assessment");
         if (res.ok) {
-          const savedAnswers = await res.json();
-          if (savedAnswers && Object.keys(savedAnswers).length > 0) {
-            // merge saved answers with default values to ensure all fields are present
-            const formData = { ...defaultValues, ...savedAnswers };
+          const savedData = await res.json();
+          console.log("Fetched data:", savedData);
+
+          // The backend returns the raw answers object, not wrapped
+          if (savedData && typeof savedData === "object") {
+            // Merge with defaults to ensure all fields are present
+            const formData = { ...defaultValues, ...savedData };
             form.reset(formData);
           } else {
-            // use default values if no saved data
             form.reset(defaultValues);
           }
+        } else if (res.status === 404) {
+          // No previous data found, use defaults
+          console.log("No previous assessment found, using defaults");
+          form.reset(defaultValues);
         } else {
-          // use default values if fetch fails
+          console.error("Fetch error:", res.status, await res.text());
           form.reset(defaultValues);
         }
       } catch (error) {
         console.error("Failed to fetch assessment data:", error);
-        // ekep default values if fetch fails
         form.reset(defaultValues);
       } finally {
         setIsLoading(false);
       }
     }
     fetchData();
-  }, []);
+  }, [form]);
 
-  const onSubmit = async (data: PreAssessmentFormData) => {
-    console.log("Assessment Results:", data);
-    setIsLoading(true);
-    try {
-      // const sessionId = 1;
-      // const url = `/api/journey/sessions/${sessionId}/q/pre-assessment`;
-      // const response = await fetch(url, {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify(data),
-      // });
-      // if (response.ok) {
-      //   setIsCompleted(true);
-      // } else {
-      //   throw new Error("Failed to submit assessment");
-      // }
-    } catch (error) {
-      // console.error("Submission error:", error);
-      // alert("Failed to submit. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
   const nextQuestion = () => {
     if (currentQuestion < questions.length - 1) {
       setCurrentQuestion(currentQuestion + 1);
@@ -321,7 +333,7 @@ export function PreAssessment() {
           <CardHeader className="bg-gradient-to-r from-primary-blue-50 to-primary-green-50 rounded-t-2xl p-4 sm:p-6">
             <div className="flex items-center gap-4">
               <div
-                className={`size-14 bg-gradient-to-br from-${currentQuestionData.color}-500 to-${currentQuestionData.color}-600 rounded-2xl flex items-center justify-center shadow-lg`}
+                className={`size-14 bg-gradient-to-br from-${currentQuestionData.color}-500 to-${currentQuestionData.color}-600 rounded-2xl flex items-center justify-center shadow-lg`} // Fixed: Added backticks for template literal
               >
                 <currentQuestionData.icon className="size-7 text-white" />
               </div>

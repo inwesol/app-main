@@ -1,7 +1,7 @@
 // lib/db/queries.ts - Fixed version with consistent camelCase naming
 import "server-only";
 import { hash, genSaltSync, hashSync } from "bcrypt-ts";
-import { and, asc, desc, eq, gt, gte, inArray, lt, SQL } from "drizzle-orm";
+import { and, asc, desc, eq, gt, gte, inArray, lt, SQL, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import crypto from "crypto";
@@ -24,6 +24,8 @@ import {
   demographics_details_form,
   career_maturity_assessment,
   pre_assessment,
+  career_story_1,
+  feedback,
 } from "./schema";
 import { ArtifactKind } from "@/components/artifact";
 import { SESSION_TEMPLATES } from "@/lib/constants";
@@ -1050,7 +1052,9 @@ export async function updateJourneyProgressAfterForm(
     .from(journey_progress)
     .where(eq(journey_progress.user_id, userId));
   if (jp) {
-    let completedSessions: number[] = jp.completed_sessions ?? [];
+    const completedSessions: number[] = Array.isArray(jp.completed_sessions)
+      ? (jp.completed_sessions as number[])
+      : [];
     if (!completedSessions.includes(sessionId)) {
       completedSessions.push(sessionId);
     }
@@ -1196,4 +1200,216 @@ export async function insertPreAssessment(
       updated_at: new Date(),
     });
   }
+}
+
+export async function upsertCareerStory1(
+  userId: string,
+  answers: {
+    your_current_transition: string;
+    career_asp: string;
+    heroes: Array<{
+      name: string;
+      description: string;
+    }>;
+  }
+) {
+  // Prepare hero data - fill up to 3 heroes
+  const heroData = {
+    hero_1_name: answers.heroes[0]?.name || null,
+    hero_1_description: answers.heroes[0]?.description || null,
+    hero_2_name: answers.heroes[1]?.name || null,
+    hero_2_description: answers.heroes[1]?.description || null,
+    hero_3_name: answers.heroes[2]?.name || null,
+    hero_3_description: answers.heroes[2]?.description || null,
+  };
+
+  await db
+    .insert(career_story_1)
+    .values({
+      user_id: userId,
+      your_current_transition: answers.your_current_transition,
+      career_asp: answers.career_asp,
+      ...heroData,
+      created_at: new Date(),
+      updated_at: new Date(),
+    })
+    .onConflictDoUpdate({
+      target: [career_story_1.user_id],
+      set: {
+        your_current_transition: answers.your_current_transition,
+        career_asp: answers.career_asp,
+        ...heroData,
+        updated_at: new Date(),
+      },
+    });
+}
+
+export async function getCareerStory1(
+  userId: string
+): Promise<{
+  your_current_transition: string;
+  career_asp: string;
+  heroes: Array<{
+    name: string;
+    description: string;
+  }>;
+} | null> {
+  try {
+    console.log("getCareerStory1 - Querying for userId:", userId);
+    
+    const [row] = await db
+      .select({
+        your_current_transition: career_story_1.your_current_transition,
+        career_asp: career_story_1.career_asp,
+        hero_1_name: career_story_1.hero_1_name,
+        hero_1_description: career_story_1.hero_1_description,
+        hero_2_name: career_story_1.hero_2_name,
+        hero_2_description: career_story_1.hero_2_description,
+        hero_3_name: career_story_1.hero_3_name,
+        hero_3_description: career_story_1.hero_3_description,
+      })
+      .from(career_story_1)
+      .where(eq(career_story_1.user_id, userId));
+
+    console.log("getCareerStory1 - Query result:", row);
+
+    if (!row) {
+      console.log("getCareerStory1 - No row found");
+      return null;
+    }
+
+    // Convert hero columns back to array format
+    const heroes = [];
+    
+    if (row.hero_1_name) {
+      heroes.push({
+        name: row.hero_1_name,
+        description: row.hero_1_description || "",
+      });
+    }
+    
+    if (row.hero_2_name) {
+      heroes.push({
+        name: row.hero_2_name,
+        description: row.hero_2_description || "",
+      });
+    }
+    
+    if (row.hero_3_name) {
+      heroes.push({
+        name: row.hero_3_name,
+        description: row.hero_3_description || "",
+      });
+    }
+
+    return {
+      your_current_transition: row.your_current_transition,
+      career_asp: row.career_asp,
+      heroes: heroes,
+    };
+  } catch (error) {
+    console.error("getCareerStory1 - Error:", error);
+    return null;
+  }
+}
+
+// Helper function to get just the heroes data
+export async function getCareerStory1Heroes(
+  userId: string
+): Promise<Array<{
+  name: string;
+  description: string;
+}> | null> {
+  try {
+    const [row] = await db
+      .select({
+        hero_1_name: career_story_1.hero_1_name,
+        hero_1_description: career_story_1.hero_1_description,
+        hero_2_name: career_story_1.hero_2_name,
+        hero_2_description: career_story_1.hero_2_description,
+        hero_3_name: career_story_1.hero_3_name,
+        hero_3_description: career_story_1.hero_3_description,
+      })
+      .from(career_story_1)
+      .where(eq(career_story_1.user_id, userId));
+
+    if (!row) {
+      return null;
+    }
+
+    const heroes = [];
+    
+    if (row.hero_1_name) {
+      heroes.push({
+        name: row.hero_1_name,
+        description: row.hero_1_description || "",
+      });
+    }
+    
+    if (row.hero_2_name) {
+      heroes.push({
+        name: row.hero_2_name,
+        description: row.hero_2_description || "",
+      });
+    }
+    
+    if (row.hero_3_name) {
+      heroes.push({
+        name: row.hero_3_name,
+        description: row.hero_3_description || "",
+      });
+    }
+
+    return heroes;
+  } catch (error) {
+    console.error("getCareerStory1Heroes - Error:", error);
+    return null;
+  }
+}
+
+// Get feedback by session number with user info (assuming you have a users table)
+export async function getFeedbackBySessionWithUser(sessionId: number) {
+  return await db
+    .select({
+      id: feedback.id,
+      userId: feedback.userId,
+      feeling: feedback.feeling,
+      takeaway: feedback.takeaway,
+      rating: feedback.rating,
+      wouldRecommend: feedback.wouldRecommend,
+      suggestions: feedback.suggestions,
+      sessionId: feedback.sessionId,
+      createdAt: feedback.createdAt,
+      // If you have a users table, join it here:
+      // userName: users.name,
+      // userEmail: users.email,
+    })
+    .from(feedback)
+    // .leftJoin(users, eq(users.id, feedback.userId)) // Uncomment if you have users table
+    .where(eq(feedback.sessionId, sessionId))
+    .orderBy(feedback.createdAt);
+}
+
+// Get all feedback for a specific user
+export async function getFeedbackByUser(userId: string) {
+  return await db
+    .select()
+    .from(feedback)
+    .where(eq(feedback.userId, userId))
+    .orderBy(feedback.createdAt);
+}
+
+// Get feedback statistics by session
+export async function getFeedbackStatsBySession() {
+  return await db
+    .select({
+      sessionId: feedback.sessionId,
+      totalFeedbacks: sql<number>`count(*)`,
+      averageRating: sql<number>`avg(${feedback.rating})`,
+      recommendationRate: sql<number>`avg(case when ${feedback.wouldRecommend} then 1.0 else 0.0 end)`,
+    })
+    .from(feedback)
+    .where(sql`${feedback.sessionId} IS NOT NULL`)
+    .groupBy(feedback.sessionId)
+    .orderBy(feedback.sessionId);
 }
