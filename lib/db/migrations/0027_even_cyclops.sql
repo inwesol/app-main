@@ -1,0 +1,1 @@
+ALTER TABLE "psychological_wellbeing_test" ALTER COLUMN "score" SET DEFAULT 0;

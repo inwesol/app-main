@@ -1,6 +1,6 @@
 {
-  "id": "a19dd85a-c50e-4794-b1e7-1b39559003e2",
-  "prevId": "f6ceec13-382e-4d01-96d9-60fd674a3fbc",
+  "id": "2f7daaaf-cfd2-4674-a161-a2daa00b6403",
+  "prevId": "aed4da4f-20da-4a75-8eb9-ca02550b6568",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -72,53 +72,11 @@
           "primaryKey": false,
           "notNull": true
         },
-        "your_current_transition": {
-          "name": "your_current_transition",
+        "answers": {
+          "name": "answers",
           "type": "varchar(4000)",
           "primaryKey": false,
           "notNull": true
-        },
-        "career_asp": {
-          "name": "career_asp",
-          "type": "varchar(4000)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "hero_1_name": {
-          "name": "hero_1_name",
-          "type": "varchar(500)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "hero_1_description": {
-          "name": "hero_1_description",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "hero_2_name": {
-          "name": "hero_2_name",
-          "type": "varchar(500)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "hero_2_description": {
-          "name": "hero_2_description",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "hero_3_name": {
-          "name": "hero_3_name",
-          "type": "varchar(500)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "hero_3_description": {
-          "name": "hero_3_description",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
         },
         "created_at": {
           "name": "created_at",
@@ -429,78 +387,6 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "public.feedback": {
-      "name": "feedback",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "feeling": {
-          "name": "feeling",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "takeaway": {
-          "name": "takeaway",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "rating": {
-          "name": "rating",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "would_recommend": {
-          "name": "would_recommend",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false,
-          "default": false
-        },
-        "suggestions": {
-          "name": "suggestions",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "session_id": {
-          "name": "session_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "user_id": {
-          "name": "user_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "user_agent": {
-          "name": "user_agent",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "now()"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
     "public.journey_progress": {
       "name": "journey_progress",
       "schema": "",
@@ -765,6 +651,12 @@
           "primaryKey": false,
           "notNull": true
         },
+        "score": {
+          "name": "score",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp",
@@ -786,6 +678,64 @@
       "uniqueConstraints": {
         "pre_assessment_user_id_unique": {
           "name": "pre_assessment_user_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "user_id"
+          ]
+        }
+      }
+    },
+    "public.riasec_test": {
+      "name": "riasec_test",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "selected_answers": {
+          "name": "selected_answers",
+          "type": "varchar(4000)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "score": {
+          "name": "score",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "riasec_test_user_id_unique": {
+          "name": "riasec_test_user_id_unique",
           "nullsNotDistinct": false,
           "columns": [
             "user_id"

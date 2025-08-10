@@ -18,12 +18,10 @@ export async function POST(
     const { sessionId } = await params;
     const answers = await req.json();
 
-    // Debug logging
     console.log("Career maturity POST - Session ID:", sessionId);
     console.log("Career maturity POST - User ID:", session.user.id);
     console.log("Career maturity POST - Answers:", answers);
 
-    // Validate sessionId
     const sessionIdNum = Number(sessionId);
     if (isNaN(sessionIdNum)) {
       return new NextResponse("Bad Request: Invalid session ID", {
@@ -31,14 +29,12 @@ export async function POST(
       });
     }
 
-    // Validate answers object
     if (!answers || typeof answers !== "object") {
       return new NextResponse("Bad Request: Invalid answers format", {
         status: 400,
       });
     }
 
-    // Check if answers is empty
     if (Object.keys(answers).length === 0) {
       return new NextResponse("Bad Request: No answers provided", {
         status: 400,
@@ -70,11 +66,9 @@ export async function GET(
 
     const { sessionId } = await params;
 
-    // Debug logging
     console.log("Career maturity GET - Session ID:", sessionId);
     console.log("Career maturity GET - User ID:", session.user.id);
 
-    // Validate sessionId
     const sessionIdNum = Number(sessionId);
     if (isNaN(sessionIdNum)) {
       return new NextResponse("Bad Request: Invalid session ID", {

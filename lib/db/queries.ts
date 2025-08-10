@@ -24,6 +24,10 @@ import {
   demographics_details_form,
   career_maturity_assessment,
   pre_assessment,
+  career_story_1,
+  riasec_test,
+  personality_test,
+  psychological_wellbeing_test,
 } from "./schema";
 import { ArtifactKind } from "@/components/artifact";
 import { SESSION_TEMPLATES } from "@/lib/constants";
@@ -928,38 +932,34 @@ export async function getSessionDetailForUser(
     const progress = userFormProgress.find((pf) => pf.form_id === form.id);
     return {
       ...form,
-      status: progress?.status || "not-started",
-      score: progress?.score ?? undefined,
-      completedAt: progress?.completed_at ?? undefined,
+      status: progress?.status || "not-completed",
+      // score: progress?.score ?? undefined,
+      // completedAt: progress?.completed_at ?? undefined,
     };
   });
 
   // 4. Compute overall session status/score
   const isAllCompleted =
     forms.length > 0 && forms.every((f) => f.status === "completed");
-  const status = isAllCompleted
-    ? "completed"
-    : forms.some((f) => f.status === "in-progress")
-    ? "current"
-    : "locked";
+  const status = isAllCompleted ? "completed" : "not-completed";
 
-  const scoreForms = forms.filter(
-    (f) => f.status === "completed" && typeof f.score === "number"
-  );
-  const overallScore =
-    scoreForms.length > 0
-      ? Math.round(
-          scoreForms.reduce((acc, f) => acc + (f.score ?? 0), 0) /
-            scoreForms.length
-        )
-      : 0;
+  // const scoreForms = forms.filter(
+  //   (f) => f.status === "completed" && typeof f.score === "number"
+  // );
+  // const overallScore =
+  //   scoreForms.length > 0
+  //     ? Math.round(
+  //         scoreForms.reduce((acc, f) => acc + (f.score ?? 0), 0) /
+  //           scoreForms.length
+  //       )
+  //     : 0;
 
   // 5. Return session detail "hydrated" with user info
   return {
     ...template,
     forms,
     status,
-    overallScore,
+    // overallScore,
   };
 }
 export async function upsertUserDemographics(userId: string, data: any) {
@@ -1135,7 +1135,9 @@ export async function getCareerMaturityAssessment(
 export async function getPreAssessment(
   userId: string,
   sessionId: number
-): Promise<Record<string, number> | null> {
+): Promise<{
+  answers: Record<string, "agree" | "disagree">;
+} | null> {
   const [row] = await db
     .select()
     .from(pre_assessment)
@@ -1149,51 +1151,367 @@ export async function getPreAssessment(
   if (!row) return null;
 
   try {
-    return JSON.parse(row.answers) as Record<string, number>;
+    return {
+      answers: JSON.parse(row.answers),
+    };
+  } catch {
+    return null;
+  }
+}
+export async function upsertPreAssessment(
+  userId: string,
+  sessionId: number, // (Uncomment as needed)
+  answers: Record<string, number>
+) {
+  await db
+    .insert(pre_assessment)
+    .values({
+      user_id: userId,
+      // session_id: sessionId, // Uncomment if you include session_id in your schema
+      answers: JSON.stringify(answers),
+      created_at: new Date(),
+      updated_at: new Date(),
+    })
+    .onConflictDoUpdate({
+      target: [
+        pre_assessment.user_id,
+        // pre_assessment.session_id, // Uncomment if unique constraint includes session_id
+      ],
+      set: {
+        answers: JSON.stringify(answers),
+        updated_at: new Date(),
+      },
+    });
+}
+
+// export async function insertPreAssessment(
+//   userId: string,
+//   sessionId: number,
+//   score: number,
+//   answers: Record<string, number>
+// ): Promise<void> {
+//   // First, optionally check if a record exists for this user/session
+//   const existing = await db
+//     .select()
+//     .from(pre_assessment)
+//     .where(
+//       and(
+//         eq(pre_assessment.user_id, userId)
+//         // eq(pre_assessment.session_id, sessionId)
+//       )
+//     )
+//     .limit(1);
+
+//   if (existing.length > 0) {
+//     // If record exists, update instead of insert:
+//     await db
+//       .update(pre_assessment)
+//       .set({
+//         answers: JSON.stringify(answers),
+//         score,
+//         updated_at: new Date(), // if you have timestamp columns
+//       })
+//       .where(
+//         and(
+//           eq(pre_assessment.user_id, userId)
+//           // eq(pre_assessment.session_id, sessionId)
+//         )
+//       );
+//   } else {
+//     // Insert new record
+//     await db.insert(pre_assessment).values({
+//       user_id: userId,
+//       // session_id: sessionId,
+//       answers: JSON.stringify(answers),
+//       score,
+//       created_at: new Date(), // if you have timestamp columns
+//       updated_at: new Date(),
+//     });
+//   }
+// }
+
+export async function upsertCareerStory1(
+  userId: string,
+  answers: Record<string, "agree" | "disagree">
+) {
+  const answersJson = JSON.stringify(answers);
+
+  await db
+    .insert(career_story_1)
+    .values({
+      user_id: userId,
+      answers: answersJson,
+      created_at: new Date(),
+      updated_at: new Date(),
+    })
+    .onConflictDoUpdate({
+      target: [career_story_1.user_id],
+      set: {
+        answers: answersJson,
+        updated_at: new Date(),
+      },
+    });
+}
+
+export async function getCareerStory1(
+  userId: string
+): Promise<Record<string, "agree" | "disagree"> | null> {
+  try {
+    console.log("getCareerStory1 - Querying for userId:", userId);
+
+    const [row] = await db
+      .select()
+      .from(career_story_1)
+      .where(eq(career_story_1.user_id, userId));
+
+    console.log("getCareerStory1 - Query result:", row);
+
+    if (!row) {
+      console.log("getCareerStory1 - No row found");
+      return null;
+    }
+
+    console.log("getCareerStory1 - Raw answers:", row.answers);
+
+    const parsed = JSON.parse(row.answers);
+    console.log("getCareerStory1 - Parsed answers:", parsed);
+
+    return parsed;
+  } catch (error) {
+    console.error("getCareerStory1 - Error:", error);
+    return null;
+  }
+}
+
+export async function getRiasecTest(
+  userId: string
+  // sessionId?: number  // optional if you use sessions
+): Promise<{ selectedAnswers: string[]; score: number } | null> {
+  const [row] = await db
+    .select()
+    .from(riasec_test)
+    .where(eq(riasec_test.user_id, userId));
+  if (!row) return null;
+
+  try {
+    return {
+      selectedAnswers: JSON.parse(row.selected_answers),
+      score: row.score,
+    };
   } catch {
     return null;
   }
 }
 
-export async function insertPreAssessment(
-  userId: string,
-  sessionId: number,
-  answers: Record<string, number>
-): Promise<void> {
-  // First, optionally check if a record exists for this user/session
-  const existing = await db
-    .select()
-    .from(pre_assessment)
-    .where(
-      and(
-        eq(pre_assessment.user_id, userId)
-        // eq(pre_assessment.session_id, sessionId)
-      )
-    )
-    .limit(1);
+// export async function upsertRiasecTest(
+//   userId: string,
+//   // sessionId: number,
+//   score: number,
+//   selectedAnswers: string[]
+// ) {
+//   await db
+//     .insert(riasec_test)
+//     .values({
+//       user_id: userId,
+//       // session_id: sessionId,
+//       selected_answers: JSON.stringify(selectedAnswers),
+//       score,
+//       created_at: new Date(),
+//       updated_at: new Date(),
+//     })
+//     .onConflictDoUpdate({
+//       target: [riasec_test.user_id], // or [riasec_test.user_id, riasec_test.session_id]
+//       set: {
+//         selected_answers: JSON.stringify(selectedAnswers),
+//         score,
+//         updated_at: new Date(),
+//       },
+//     });
+// }
 
-  if (existing.length > 0) {
-    // If record exists, update instead of insert:
-    await db
-      .update(pre_assessment)
-      .set({
+export async function upsertRiasecTest(
+  userId: string,
+  selectedAnswers: string[],
+  categoryCounts: Record<string, number>,
+  interestCode: string
+) {
+  await db
+    .insert(riasec_test)
+    .values({
+      user_id: userId,
+      selected_answers: JSON.stringify(selectedAnswers),
+      category_counts: categoryCounts,
+      interest_code: interestCode,
+      created_at: new Date(),
+      updated_at: new Date(),
+    })
+    .onConflictDoUpdate({
+      target: [riasec_test.user_id],
+      set: {
+        selected_answers: JSON.stringify(selectedAnswers),
+        category_counts: categoryCounts,
+        interest_code: interestCode,
+        updated_at: new Date(),
+      },
+    });
+}
+
+export async function getPsychologicalWellbeingTest(
+  userId: string
+  // sessionId?: number,
+): Promise<{ answers: Record<string, string>; score: number } | null> {
+  const [row] = await db.select().from(psychological_wellbeing_test).where(
+    // Use if sessionId is active
+    // and(
+    //   eq(personality_test.user_id, userId),
+    //   eq(personality_test.session_id, sessionId)
+    // )
+    eq(psychological_wellbeing_test.user_id, userId)
+  );
+
+  if (!row) return null;
+
+  try {
+    return {
+      answers: JSON.parse(row.answers),
+      score: row.score,
+    };
+  } catch (error) {
+    console.error("JSON parse error in getPsychologicalWellbeingTest:", error);
+    return null;
+  }
+}
+
+// export async function upsertPsychologicalWellbeingTest(
+//   userId: string,
+//   // sessionId: number,
+//   score: number,
+//   answers: Record<string, string>
+// ) {
+//   await db
+//     .insert(psychological_wellbeing_test)
+//     .values({
+//       user_id: userId,
+//       // session_id: sessionId,
+//       answers: JSON.stringify(answers),
+//       score,
+//       created_at: new Date(),
+//       updated_at: new Date(),
+//     })
+//     .onConflictDoUpdate({
+//       target: [psychological_wellbeing_test.user_id], // or [personality_test.user_id, personality_test.session_id]
+//       set: {
+//         answers: JSON.stringify(answers),
+//         score,
+//         updated_at: new Date(),
+//       },
+//     });
+// }
+
+export async function upsertPsychologicalWellbeingTest(
+  userId: string,
+  score: number,
+  answers: Record<string, string>,
+  subscaleScores: Record<string, number> // JSON object for subscales
+) {
+  await db
+    .insert(psychological_wellbeing_test)
+    .values({
+      user_id: userId,
+      answers: JSON.stringify(answers),
+      score,
+      subscale_scores: subscaleScores,
+      created_at: new Date(),
+      updated_at: new Date(),
+    })
+    .onConflictDoUpdate({
+      target: [psychological_wellbeing_test.user_id], // or user_id + session_id if applicable
+      set: {
         answers: JSON.stringify(answers),
-        updated_at: new Date(), // if you have timestamp columns
-      })
-      .where(
-        and(
-          eq(pre_assessment.user_id, userId)
-          // eq(pre_assessment.session_id, sessionId)
-        )
-      );
-  } else {
-    // Insert new record
-    await db.insert(pre_assessment).values({
+        score,
+        subscale_scores: subscaleScores,
+        updated_at: new Date(),
+      },
+    });
+}
+
+export async function getPersonalityTest(
+  userId: string
+  // sessionId?: number,
+): Promise<{ answers: Record<string, string>; score: number } | null> {
+  const [row] = await db.select().from(personality_test).where(
+    // Use if sessionId is active
+    // and(
+    //   eq(personality_test.user_id, userId),
+    //   eq(personality_test.session_id, sessionId)
+    // )
+    eq(personality_test.user_id, userId)
+  );
+
+  if (!row) return null;
+
+  try {
+    return {
+      answers: JSON.parse(row.answers),
+      score: row.score,
+    };
+  } catch (error) {
+    console.error("JSON parse error in getPersonalityTest:", error);
+    return null;
+  }
+}
+
+// export async function upsertPersonalityTest(
+//   userId: string,
+//   // sessionId: number,
+//   score: number,
+//   answers: Record<string, string>
+// ) {
+//   await db
+//     .insert(personality_test)
+//     .values({
+//       user_id: userId,
+//       // session_id: sessionId,
+//       answers: JSON.stringify(answers),
+//       score,
+//       created_at: new Date(),
+//       updated_at: new Date(),
+//     })
+//     .onConflictDoUpdate({
+//       target: [personality_test.user_id], // or [personality_test.user_id, personality_test.session_id]
+//       set: {
+//         answers: JSON.stringify(answers),
+//         score,
+//         updated_at: new Date(),
+//       },
+//     });
+// }
+
+export async function upsertPersonalityTest(
+  userId: string,
+  // sessionId: number, // uncomment if you track sessions
+  score: number,
+  answers: Record<string, string>,
+  subscaleScores: Record<string, number>
+) {
+  await db
+    .insert(personality_test)
+    .values({
       user_id: userId,
       // session_id: sessionId,
       answers: JSON.stringify(answers),
-      created_at: new Date(), // if you have timestamp columns
+      score,
+      subscale_scores: subscaleScores,
+      created_at: new Date(),
       updated_at: new Date(),
+    })
+    .onConflictDoUpdate({
+      target: [personality_test.user_id], // or include session_id if used
+      set: {
+        answers: JSON.stringify(answers),
+        score,
+        subscale_scores: subscaleScores,
+        updated_at: new Date(),
+      },
     });
-  }
 }

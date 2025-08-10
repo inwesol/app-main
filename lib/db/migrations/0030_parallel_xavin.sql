@@ -1,0 +1,1 @@
+ALTER TABLE "pre_assessment" DROP COLUMN IF EXISTS "score";

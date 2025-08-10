@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Target,
   HelpCircle,
@@ -10,13 +10,12 @@ import {
   Sparkles,
   ArrowRight,
   ArrowLeft,
-  BarChart3,
   Award,
   BookOpen,
   Compass,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { useForm } from "react-hook-form";
+import { useForm, Controller, FieldValues } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import {
@@ -29,6 +28,7 @@ import {
 import { Button } from "@/components/ui/button";
 import Header from "@/components/form-components/header";
 import ProgressBar from "@/components/form-components/progress-bar";
+import { useRouter } from "next/navigation";
 
 const ResponseSchema = z.enum(["agree", "disagree"]);
 
@@ -61,7 +61,6 @@ const CareerAssessmentFormSchema = z.object({
 
 type FormData = z.infer<typeof CareerAssessmentFormSchema>;
 
-// question Configuration
 const questions = [
   {
     id: "q1",
@@ -250,7 +249,6 @@ const questions = [
   },
 ];
 
-// group questions into logical pages
 const questionPages = [
   {
     title: "Career Planning & Future Orientation",
@@ -283,43 +281,96 @@ const questionPages = [
   },
 ];
 
-export function CareerMaturity() {
+const defaultValues: FormData = {
+  q1: undefined,
+  q2: undefined,
+  q3: undefined,
+  q4: undefined,
+  q5: undefined,
+  q6: undefined,
+  q7: undefined,
+  q8: undefined,
+  q9: undefined,
+  q10: undefined,
+  q11: undefined,
+  q12: undefined,
+  q13: undefined,
+  q14: undefined,
+  q15: undefined,
+  q16: undefined,
+  q17: undefined,
+  q18: undefined,
+  q19: undefined,
+  q20: undefined,
+  q21: undefined,
+  q22: undefined,
+  q23: undefined,
+  q24: undefined,
+};
+
+export function CareerMaturity({ sessionId }: { sessionId: string }) {
   const [currentPage, setCurrentPage] = useState(0);
   const [isCompleted, setIsCompleted] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const router = useRouter();
 
   const form = useForm<FormData>({
     resolver: zodResolver(CareerAssessmentFormSchema),
-    defaultValues: {},
+    defaultValues,
+    mode: "onChange",
   });
 
-  const { watch, setValue, reset } = form;
+  const { watch, reset, control, formState } = form;
   const watchedValues = watch();
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [currentPage]);
 
-  const nextPage = () => {
-    if (currentPage < questionPages.length - 1) {
-      setCurrentPage(currentPage + 1);
-    }
-  };
+  const nextPage = useCallback(
+    (event?: React.MouseEvent) => {
+      if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
 
-  const prevPage = () => {
-    if (currentPage > 0) {
-      setCurrentPage(currentPage - 1);
-    }
-  };
+      if (currentPage < questionPages.length - 1) {
+        setCurrentPage(currentPage + 1);
+      }
+    },
+    [currentPage]
+  );
 
-  const goToPage = (pageIndex: number) => {
-    const currentPageStatus = getPageCompletionStatus(currentPage);
-    if (pageIndex <= currentPage || currentPageStatus.isComplete) {
-      setCurrentPage(pageIndex);
-    }
-  };
+  const prevPage = useCallback(
+    (event?: React.MouseEvent) => {
+      if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
 
-  // Fixed useEffect for data fetching
+      if (currentPage > 0) {
+        setCurrentPage(currentPage - 1);
+      }
+    },
+    [currentPage]
+  );
+
+  const goToPage = useCallback(
+    (pageIndex: number, event?: React.MouseEvent) => {
+      if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+
+      const currentPageStatus = getPageCompletionStatus(currentPage);
+      if (pageIndex <= currentPage || currentPageStatus.isComplete) {
+        setCurrentPage(pageIndex);
+      }
+    },
+    [currentPage]
+  );
+
   useEffect(() => {
     async function fetchData() {
       setIsLoading(true);
@@ -327,39 +378,23 @@ export function CareerMaturity() {
         const res = await fetch("/api/journey/sessions/1/q/career-maturity");
         if (res.ok) {
           const savedAnswers = await res.json();
-          console.log("Fetched career maturity data:", savedAnswers);
-
-          // Convert from question-answer format back to form format if needed
-          if (savedAnswers && typeof savedAnswers === "object") {
-            // If the backend returns question-answer pairs, convert back to q1, q2, etc.
-            const formData: Partial<FormData> = {};
-
-            // Try to match saved answers back to question IDs
-            Object.entries(savedAnswers).forEach(([questionText, answer]) => {
-              const question = questions.find(
-                (q) => q.statement === questionText
-              );
-              if (question && (answer === "agree" || answer === "disagree")) {
-                formData[question.id as keyof FormData] = answer;
-              }
-            });
-
-            // If we found matches, use them, otherwise use savedAnswers directly
-            const finalData =
-              Object.keys(formData).length > 0 ? formData : savedAnswers;
-            reset(finalData);
+          if (
+            savedAnswers &&
+            typeof savedAnswers === "object" &&
+            !Array.isArray(savedAnswers)
+          ) {
+            const mergedData = {
+              ...defaultValues,
+              ...savedAnswers,
+            };
+            reset(mergedData);
+          } else {
+            reset(defaultValues);
           }
-        } else if (res.status === 404) {
-          // No previous data found, use empty defaults
-          console.log("No previous career maturity assessment found");
-          reset({});
-        } else {
-          console.error("Fetch error:", res.status, await res.text());
-          reset({});
         }
       } catch (error) {
-        console.error("Failed to fetch career maturity data:", error);
-        reset({});
+        console.error("Failed to load saved answers:", error);
+        reset(defaultValues);
       } finally {
         setIsLoading(false);
       }
@@ -367,55 +402,30 @@ export function CareerMaturity() {
     fetchData();
   }, [reset]);
 
-  // Fixed form submit function
   const onSubmit = async (data: FormData) => {
-    console.log("Submitting career maturity assessment:", data);
-    setIsLoading(true);
+    setIsSubmitting(true);
 
     try {
-      // Convert form data to question-answer format
-      const convertedData = convertToQuestionAnswerFormat(data);
-      console.log("Converted data:", convertedData);
-
       const sessionId = 1;
       const url = `/api/journey/sessions/${sessionId}/q/career-maturity`;
       const response = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(convertedData), // Send converted data
+        body: JSON.stringify(data),
       });
 
       if (response.ok) {
         setIsCompleted(true);
       } else {
-        const errorText = await response.text();
-        console.error("Server error:", errorText);
-        throw new Error(
-          `Failed to submit assessment: ${response.status} - ${errorText}`
-        );
+        alert("Failed to submit. Please try again.");
       }
     } catch (error) {
       console.error("Submission error:", error);
       alert("Failed to submit. Please try again.");
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
+      router.push(`/journey/sessions/${sessionId}`);
     }
-  };
-
-  // Make sure this function is working correctly (it's already in your code)
-  const convertToQuestionAnswerFormat = (data: FormData) => {
-    const result: Record<string, string> = {};
-
-    Object.entries(data).forEach(([questionId, answer]) => {
-      if (answer) {
-        const question = questions.find((q) => q.id === questionId);
-        if (question) {
-          result[question.statement] = answer;
-        }
-      }
-    });
-
-    return result;
   };
 
   const getPageCompletionStatus = (pageIndex: number) => {
@@ -429,6 +439,7 @@ export function CareerMaturity() {
       isComplete: answeredInPage === pageQuestions.length,
     };
   };
+  const currentPageStatus = getPageCompletionStatus(currentPage);
 
   const canNavigateToPage = (pageIndex: number) => {
     if (pageIndex <= currentPage) return true;
@@ -442,7 +453,6 @@ export function CareerMaturity() {
   };
 
   const currentPageData = questionPages[currentPage];
-  // const currentPageStatus = getPageCompletionStatus(currentPage);
   const totalAnswered = Object.keys(watchedValues).filter(
     (key) => watchedValues[key as keyof FormData] !== undefined
   ).length;
@@ -495,7 +505,6 @@ export function CareerMaturity() {
             you agree or disagree with it."
         />
 
-        {/* Progress Bar */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-3">
             <span className="text-sm font-medium text-slate-600">
@@ -509,7 +518,6 @@ export function CareerMaturity() {
           <ProgressBar progressPercentage={progressPercentage} />
         </div>
 
-        {/* Page Navigation */}
         <div className="flex flex-wrap gap-3 justify-center mb-8">
           {questionPages.map((page, index) => {
             const status = getPageCompletionStatus(index);
@@ -518,7 +526,8 @@ export function CareerMaturity() {
             return (
               <button
                 key={index}
-                onClick={() => goToPage(index)}
+                type="button"
+                onClick={(e) => goToPage(index, e)}
                 disabled={!canNavigate}
                 className={`
                   p-2 rounded-lg font-semibold text-sm transition-all duration-300 hover:scale-105 flex items-center gap-2 size-8 justify-center sm:size-10
@@ -546,13 +555,20 @@ export function CareerMaturity() {
         </div>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)}>
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            // Prevent any accidental submissions
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+              }
+            }}
+          >
             <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl border-0">
-              {/* Header for each page */}
               <div className="bg-gradient-to-r from-primary-blue-50 to-primary-green-50 rounded-t-2xl p-4 sm:p-6">
                 <div className="flex items-center gap-4">
                   <div
-                    className={`size-10 sm:size-12 bg-gradient-to-br from-${currentPageData.color}-500 to-${currentPageData.color}-600 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-lg`}
+                    className={`size-10 sm:size-12 bg-gradient-to-br from-${currentPageData.color}-500 to-${currentPageData.color}-600 rounded-xl sm:2xl flex items-center justify-center shadow-lg`}
                   >
                     <currentPageData.icon className="size-5 sm:size-6 text-white" />
                   </div>
@@ -569,7 +585,6 @@ export function CareerMaturity() {
 
               <div className="p-4 sm:p-6">
                 <div className="space-y-8">
-                  {/* Questions for current page */}
                   <div className="space-y-6">
                     {currentPageData.questions.map((question) => {
                       const questionNumber =
@@ -591,20 +606,21 @@ export function CareerMaturity() {
                                 </h4>
                               </div>
 
-                              <FormField
-                                control={form.control}
+                              <Controller
+                                control={control}
                                 name={question.id as keyof FormData}
-                                render={({ field }) => (
+                                render={({ field, fieldState }) => (
                                   <FormItem>
                                     <FormControl>
                                       <div className="flex flex-col sm:flex-row gap-3 justify-end">
                                         <Button
                                           type="button"
-                                          onClick={() => {
-                                            setValue(
-                                              question.id as keyof FormData,
-                                              "agree"
-                                            );
+                                          disabled={formState.isSubmitting}
+                                          onClick={(e) => {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+
+                                            field.onChange("agree");
                                           }}
                                           className={`
                                             rounded-full font-semibold transition-all duration-300 border-2 flex items-center justify-center gap-2 sm:py-2 sm:px-8 py-1
@@ -621,11 +637,12 @@ export function CareerMaturity() {
 
                                         <Button
                                           type="button"
-                                          onClick={() => {
-                                            setValue(
-                                              question.id as keyof FormData,
-                                              "disagree"
-                                            );
+                                          disabled={formState.isSubmitting}
+                                          onClick={(e) => {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+
+                                            field.onChange("disagree");
                                           }}
                                           className={`
                                             rounded-full font-semibold transition-all duration-300 border-2 flex items-center justify-center gap-2 sm:py-2 sm:px-8 py-1
@@ -641,7 +658,9 @@ export function CareerMaturity() {
                                         </Button>
                                       </div>
                                     </FormControl>
-                                    <FormMessage />
+                                    <FormMessage>
+                                      {fieldState.error?.message}
+                                    </FormMessage>
                                   </FormItem>
                                 )}
                               />
@@ -654,10 +673,11 @@ export function CareerMaturity() {
                 </div>
               </div>
             </div>
+
             <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-slate-200">
               <Button
                 type="button"
-                onClick={prevPage}
+                onClick={(e) => prevPage(e)}
                 disabled={currentPage === 0}
                 className="w-full sm:flex-1 h-12 border-2 border-slate-300 hover:bg-slate-50 text-slate-700 font-semibold rounded-xl disabled:opacity-50 disabled:cursor-not-allowed group transition-all duration-200 flex items-center justify-center gap-2 bg-white"
               >
@@ -668,10 +688,12 @@ export function CareerMaturity() {
               {currentPage === questionPages.length - 1 ? (
                 <Button
                   type="submit"
-                  disabled={form.formState.isSubmitting}
+                  disabled={
+                    formState.isSubmitting || !currentPageStatus.isComplete
+                  }
                   className="w-full sm:flex-1 h-12 bg-gradient-to-r from-primary-green-500 to-primary-green-600 hover:from-primary-green-600 hover:to-primary-green-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300 group flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-lg"
                 >
-                  {form.formState.isSubmitting ? (
+                  {formState.isSubmitting ? (
                     <>
                       <svg
                         className="animate-spin size-5 mr-2 text-white"
@@ -705,7 +727,8 @@ export function CareerMaturity() {
               ) : (
                 <Button
                   type="button"
-                  onClick={nextPage}
+                  onClick={(e) => nextPage(e)}
+                  disabled={!currentPageStatus.isComplete}
                   className="w-full sm:flex-1 h-12 bg-gradient-to-r from-primary-blue-500 to-primary-blue-600 hover:from-primary-blue-600 hover:to-primary-blue-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300 group flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-lg"
                 >
                   Next Page

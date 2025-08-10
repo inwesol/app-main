@@ -1,10 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/app/(auth)/auth";
-import { insertPreAssessment, getPreAssessment } from "@/lib/db/queries";
+import {
+  upsertPreAssessment,
+  getPreAssessment,
+  completeUserSessionFormProgress,
+  updateJourneyProgressAfterForm,
+} from "@/lib/db/queries";
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { sessionId: string } }
+  { params }: { params: { sessionId: string; qId: string } }
 ) {
   try {
     const session = await auth();
@@ -12,9 +17,11 @@ export async function POST(
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    const { sessionId } = await params;
-    const body = await req.json();
-    const answers = body.answers;
+    console.log("server params: ", await params);
+    const { sessionId, qId } = await params;
+    // const body = await req.json();
+    // const answers = body.answers;
+    const answers = await req.json();
 
     // Debug logging
     console.log("Pre-assessment POST - Session ID:", sessionId);
@@ -34,8 +41,19 @@ export async function POST(
         status: 400,
       });
     }
-
-    await insertPreAssessment(session.user.id, sessionIdNum, answers);
+    // const qIdNum = Number(qId);
+    // if (isNaN(qIdNum)) {
+    //   return new NextResponse("Bad Request: Invalid q ID", {
+    //     status: 400,
+    //   });
+    // }
+    await upsertPreAssessment(session.user.id, sessionIdNum, answers);
+    // await completeUserSessionFormProgress({
+    //   userId: session.user.id,
+    //   sessionId: Number(sessionId),
+    //   qId,
+    // });
+    // await updateJourneyProgressAfterForm(session.user.id, Number(sessionId));
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error("Error inserting pre-assessment:", err);
@@ -84,7 +102,10 @@ export async function GET(
     // Return just the answers object that the frontend expects
     // Assuming your database returns { id, userId, sessionId, answers }
     // and you want to return just the answers part
-    return NextResponse.json(data.answers || data);
+    // Return both answers and score
+    return NextResponse.json({
+      answers: data.answers,
+    });
   } catch (err) {
     console.error("Error fetching pre-assessment:", err);
     return new NextResponse("Internal Server Error", { status: 500 });

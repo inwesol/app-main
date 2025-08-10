@@ -172,7 +172,6 @@
 import type { InferSelectModel } from "drizzle-orm";
 import {
   pgTable,
-  serial,
   varchar,
   timestamp,
   json,
@@ -183,6 +182,7 @@ import {
   boolean,
   integer,
   unique,
+  numeric,
 } from "drizzle-orm/pg-core";
 
 export const user = pgTable("User", {
@@ -359,6 +359,7 @@ export const suggestion = pgTable(
 );
 
 export type Suggestion = InferSelectModel<typeof suggestion>;
+
 // journey table
 export const journey_progress = pgTable("journey_progress", {
   id: uuid("id").primaryKey().notNull().defaultRandom(),
@@ -410,28 +411,43 @@ export const demographics_details_form = pgTable(
 );
 export const career_maturity_assessment = pgTable(
   "career_maturity_assessment",
+
   {
     id: uuid("id").primaryKey().notNull().defaultRandom(),
+
     user_id: uuid("user_id").notNull(),
+
     // session_id: integer("session_id").notNull(),
+
     answers: varchar("answers", { length: 4000 }).notNull(),
+
     created_at: timestamp("created_at").defaultNow().notNull(),
+
     updated_at: timestamp("updated_at").defaultNow().notNull(),
   },
+
   (table) => ({
     userUnique: unique().on(table.user_id),
   })
 );
+
 export const pre_assessment = pgTable(
   "pre_assessment",
+
   {
     id: uuid("id").primaryKey().notNull().defaultRandom(),
+
     user_id: uuid("user_id").notNull(),
+
     // session_id: integer("session_id").notNull(),
+
     answers: varchar("answers", { length: 4000 }).notNull(),
+    // score: integer("score").notNull(),
     created_at: timestamp("created_at").defaultNow().notNull(),
+
     updated_at: timestamp("updated_at").defaultNow().notNull(),
   },
+
   (table) => ({
     userUnique: unique().on(table.user_id),
   })
@@ -439,18 +455,61 @@ export const pre_assessment = pgTable(
 
 export const career_story_1 = pgTable(
   "career_story_1",
+
   {
     id: uuid("id").primaryKey().notNull().defaultRandom(),
+
     user_id: uuid("user_id").notNull(),
-    your_current_transition: varchar("your_current_transition", { length: 4000 }).notNull(),
-    career_asp: varchar("career_asp", { length: 4000 }).notNull(),
-    // Childhood heroes - up to 3 people
-    hero_1_name: varchar("hero_1_name", { length: 500 }),
-    hero_1_description: text("hero_1_description"),
-    hero_2_name: varchar("hero_2_name", { length: 500 }),
-    hero_2_description: text("hero_2_description"),
-    hero_3_name: varchar("hero_3_name", { length: 500 }),
-    hero_3_description: text("hero_3_description"),
+
+    // session_id: integer("session_id").notNull(),
+
+    answers: varchar("answers", { length: 4000 }).notNull(),
+
+    created_at: timestamp("created_at").defaultNow().notNull(),
+
+    updated_at: timestamp("updated_at").defaultNow().notNull(),
+  },
+
+  (table) => ({
+    userUnique: unique().on(table.user_id),
+  })
+);
+
+// export const riasec_test = pgTable(
+//   "riasec_test",
+//   {
+//     id: uuid("id").primaryKey().notNull().defaultRandom(),
+//     user_id: uuid("user_id").notNull(),
+//     // Uncomment if using sessions
+//     // session_id: integer("session_id").notNull(),
+//     selected_answers: varchar("selected_answers", { length: 4000 }).notNull(),
+//     score: integer("score").notNull().default(0),
+//     created_at: timestamp("created_at").defaultNow().notNull(),
+//     updated_at: timestamp("updated_at").defaultNow().notNull(),
+//   },
+//   (table) => ({
+//     userUnique: unique().on(table.user_id), // or unique on (user_id, session_id) if including session
+//   })
+// );
+
+export const riasec_test = pgTable(
+  "riasec_test",
+  {
+    id: uuid("id").primaryKey().notNull().defaultRandom(),
+
+    user_id: uuid("user_id").notNull(),
+
+    // Store the raw array of selected answers as JSON text
+    selected_answers: varchar("selected_answers", { length: 4000 }).notNull(),
+
+    // Store counts per category as JSONB
+    category_counts: json("category_counts")
+      .$type<Record<string, number>>()
+      .notNull(),
+
+    // Store the interest code (top 3 letters concatenated, e.g. "RIS")
+    interest_code: varchar("interest_code", { length: 3 }).notNull(),
+
     created_at: timestamp("created_at").defaultNow().notNull(),
     updated_at: timestamp("updated_at").defaultNow().notNull(),
   },
@@ -458,18 +517,56 @@ export const career_story_1 = pgTable(
     userUnique: unique().on(table.user_id),
   })
 );
-export const feedback = pgTable('feedback', {
-  id: serial('id').primaryKey(),
-  feeling: text('feeling').notNull(), // e.g., 'enlightened', 'confident', etc.
-  takeaway: text('takeaway'),
-  rating: integer('rating').notNull(), // 1-5 stars
-  wouldRecommend: boolean('would_recommend').default(false),
-  suggestions: text('suggestions'),
-  sessionId: integer('session_id'), // zero-based session index
-  userId: uuid('user_id'),
-  userAgent: text('user_agent'), // Optional: for analytics
-  createdAt: timestamp('created_at').defaultNow(),
-});
 
-export type Feedback = typeof feedback.$inferInsert;
-export type FeedbackSelect = typeof feedback.$inferSelect;
+export const personality_test = pgTable(
+  "personality_test",
+  {
+    id: uuid("id").primaryKey().notNull().defaultRandom(),
+
+    user_id: uuid("user_id").notNull(),
+
+    answers: varchar("answers", { length: 4000 }).notNull(), // JSON stringified answers
+
+    score: numeric("score", { precision: 5, scale: 2 }).notNull().default(0), // overall score
+
+    subscale_scores: json("subscale_scores")
+      .$type<Record<string, number>>()
+      .notNull()
+      .default({}), // subscale averages JSON
+
+    created_at: timestamp("created_at").defaultNow().notNull(),
+
+    updated_at: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (table) => ({
+    userUnique: unique().on(table.user_id), // unique by user_id, or add session_id if required
+  })
+);
+
+export const psychological_wellbeing_test = pgTable(
+  "psychological_wellbeing_test",
+  {
+    id: uuid("id").primaryKey().notNull().defaultRandom(),
+
+    user_id: uuid("user_id").notNull(),
+
+    // Uncomment if tracking session:
+    // session_id: integer("session_id").notNull(),
+
+    answers: varchar("answers", { length: 4000 }).notNull(), // JSON string of answers
+
+    score: numeric("score", { precision: 5, scale: 2 }).notNull().default(0), // float score
+
+    subscale_scores: json("subscale_scores")
+      .$type<Record<string, number>>()
+      .notNull()
+      .default({}), // empty JSON object default
+
+    created_at: timestamp("created_at").defaultNow().notNull(),
+
+    updated_at: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (table) => ({
+    userUnique: unique().on(table.user_id), // unique constraint on user_id (or user_id + session_id)
+  })
+);
