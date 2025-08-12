@@ -1,6 +1,9 @@
 import { CareerMaturity } from "@/components/questionnaire-forms/career-maturity";
 import { DemographicsDetailsForm } from "@/components/questionnaire-forms/demographics-details-form";
+import PersonalityTest from "@/components/questionnaire-forms/personality-test";
 import { PreAssessment } from "@/components/questionnaire-forms/pre-assessment";
+import PsychologicalWellbeing from "@/components/questionnaire-forms/psychological-wellbeing";
+import RiasecTest from "@/components/questionnaire-forms/riasecTest";
 import { notFound } from "next/navigation";
 
 interface PageProps {
@@ -22,6 +25,21 @@ export default async function Page({ params }: PageProps) {
       id: "career-maturity",
       Component: CareerMaturity,
       session: "1",
+    },
+    {
+      id: "riasec-test",
+      Component: RiasecTest,
+      session: "2",
+    },
+    {
+      id: "personality-test",
+      Component: PersonalityTest,
+      session: "2",
+    },
+    {
+      id: "psychological-wellbeing",
+      Component: PsychologicalWellbeing,
+      session: "3",
     },
   ];
   console.log(await params);

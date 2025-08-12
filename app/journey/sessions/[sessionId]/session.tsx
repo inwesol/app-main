@@ -154,6 +154,11 @@ export function SessionDetail() {
     // Check if all prerequisite forms are completed
     return form.prerequisites.every((prereqId) => {
       const prereqForm = allForms.find((f) => f.id === prereqId);
+      console.log(
+        "for eacch form status: ",
+        prereqForm?.status === "completed"
+      );
+      console.log("asdf", prereqForm?.status);
       return prereqForm?.status === "completed";
     });
   };
@@ -305,125 +310,128 @@ export function SessionDetail() {
               Session Forms
             </h2>
 
+            {/* new */}
             <div className="grid gap-4 sm:gap-6 lg:grid-cols-2">
-              {sessionData.forms.map((form, index) => {
+              {sessionData.forms.map((form) => {
                 const FormIcon = LucideIcons[form.icon];
                 const isFormCompleted = form.status === "completed";
-                const isFormNotCompleted = form.status === "not-completed";
-                // const isFormUnlocked = checkFormStatus(form, sessionData.forms);
-                const isFormUnlocked = true;
+                const isFormUnlocked = checkFormStatus(form, sessionData.forms);
+
+                const cardStyles = isFormCompleted
+                  ? "bg-gradient-to-br from-primary-green-50 to-emerald-50 border-primary-green-200"
+                  : isFormUnlocked
+                  ? "bg-gradient-to-br from-primary-blue-50 to-cyan-50 border-primary-blue-200"
+                  : "bg-gradient-to-br from-gray-50 to-gray-100 border-gray-200 opacity-70";
+
+                const iconBg = isFormCompleted
+                  ? "bg-gradient-to-r from-primary-green-500 to-emerald-500"
+                  : isFormUnlocked
+                  ? "bg-gradient-to-r from-primary-blue-500 to-cyan-500"
+                  : "bg-gray-300";
 
                 return (
                   <Card
                     key={form.id}
-                    className={`relative overflow-hidden border transition-all duration-300 cursor-pointer hover:shadow-lg active:scale-[0.98] sm:hover:scale-[1.02] ${
-                      isFormCompleted
-                        ? "bg-gradient-to-br from-primary-green-50 to-emerald-50 border-primary-green-200 shadow-md"
-                        : "bg-gradient-to-br from-primary-blue-50 to-cyan-50 border-primary-blue-200 shadow-md"
+                    className={`relative overflow-hidden flex flex-col border shadow-sm hover:shadow-lg transition-all duration-300 rounded-lg justify-between ${cardStyles} ${
+                      isFormUnlocked ? "cursor-pointer" : "cursor-not-allowed"
                     }`}
                     onClick={() =>
                       isFormUnlocked && handleFormClick(form.route)
                     }
                   >
                     <CardHeader className="pb-3">
-                      <div className="flex items-start justify-between gap-3 sm:gap-4">
-                        <div className="flex items-start gap-3 sm:gap-4 flex-1 min-w-0">
-                          <div
-                            className={`p-2.5 sm:p-3 rounded-lg sm:rounded-xl shadow-md shrink-0 ${
+                      <div className="flex items-start justify-between gap-4">
+                        {/* Icon */}
+                        <div
+                          className={`p-3 rounded-lg shadow-md shrink-0 ${iconBg}`}
+                        >
+                          {isFormCompleted ? (
+                            <CheckCircle className="size-6 text-white" />
+                          ) : (
+                            <FormIcon className="size-6 text-white" />
+                          )}
+                        </div>
+
+                        {/* Title & Description */}
+                        <div className="flex-1 min-w-0">
+                          <h3
+                            className={`text-lg font-bold truncate ${
                               isFormCompleted
-                                ? "bg-gradient-to-r from-primary-green-500 to-emerald-500"
-                                : "bg-gradient-to-r from-primary-blue-500 to-cyan-500"
+                                ? "text-primary-green-800"
+                                : isFormUnlocked
+                                ? "text-primary-blue-800"
+                                : "text-gray-500"
                             }`}
                           >
-                            {isFormCompleted ? (
-                              <CheckCircle className="size-5 sm:size-6 text-white" />
-                            ) : (
-                              <FormIcon className="size-5 sm:size-6 text-white" />
-                            )}
-                          </div>
+                            {form.title}
+                          </h3>
+                          <p
+                            className={`text-sm mt-1 ${
+                              isFormUnlocked
+                                ? "text-slate-600"
+                                : "text-gray-400"
+                            }`}
+                          >
+                            {form.description}
+                          </p>
 
-                          <div className="flex-1 min-w-0">
-                            <div className="flex flex-col sm:flex-row sm:items-start gap-1 sm:gap-2 mb-2">
-                              <h3
-                                className={`text-base sm:text-lg font-bold leading-tight ${
-                                  isFormCompleted
-                                    ? "text-primary-green-800"
-                                    : "text-primary-blue-800"
-                                }`}
-                              >
-                                {form.title}
-                              </h3>
-                            </div>
-
-                            <p className="text-xs sm:text-sm mb-3 leading-relaxed text-slate-600">
-                              {form.description}
-                            </p>
-
-                            {/* Form Topics */}
-                            <div className="flex flex-wrap gap-1 mb-3">
-                              {form.topics
-                                .slice(0, window.innerWidth < 640 ? 2 : 3)
-                                .map((topic, topicIndex) => (
-                                  <span
-                                    key={topicIndex}
-                                    className={`px-2 py-1 rounded text-xs font-medium ${
-                                      isFormCompleted
-                                        ? "bg-primary-green-100 text-primary-green-700"
-                                        : "bg-primary-blue-100 text-primary-blue-700"
-                                    }`}
-                                  >
-                                    {topic}
-                                  </span>
-                                ))}
-                              {form.topics.length >
-                                (window.innerWidth < 640 ? 2 : 3) && (
-                                <span className="px-2 py-1 rounded text-xs font-medium bg-slate-100 text-slate-500">
-                                  +
-                                  {form.topics.length -
-                                    (window.innerWidth < 640 ? 2 : 3)}
+                          {/* Topics */}
+                          <div className="flex flex-wrap gap-1 mt-2">
+                            {form.topics
+                              .slice(0, window.innerWidth < 640 ? 2 : 3)
+                              .map((topic, idx) => (
+                                <span
+                                  key={idx}
+                                  className={`px-2 py-1 rounded text-xs font-medium ${
+                                    isFormCompleted
+                                      ? "bg-primary-green-100 text-primary-green-700"
+                                      : isFormUnlocked
+                                      ? "bg-primary-blue-100 text-primary-blue-700"
+                                      : "bg-gray-200 text-gray-500"
+                                  }`}
+                                >
+                                  {topic}
                                 </span>
-                              )}
-                            </div>
-
-                            {/* Form Stats */}
-                            <div className="flex flex-wrap items-center gap-2 text-xs">
-                              {isFormCompleted && form.score && (
-                                <div className="flex items-center gap-1 px-2 py-1 rounded bg-primary-green-100 text-primary-green-700 border border-primary-green-200">
-                                  <Star className="size-3 fill-current" />
-                                  <span className="font-semibold">
-                                    {form.score}/100
-                                  </span>
-                                </div>
-                              )}
-                            </div>
+                              ))}
+                            {form.topics.length >
+                              (window.innerWidth < 640 ? 2 : 3) && (
+                              <span className="px-2 py-1 rounded text-xs font-medium bg-slate-100 text-slate-500">
+                                +
+                                {form.topics.length -
+                                  (window.innerWidth < 640 ? 2 : 3)}
+                              </span>
+                            )}
                           </div>
                         </div>
 
                         {/* Status Badge */}
-                        <div className="shrink-0">
-                          {isFormCompleted ? (
-                            <Badge className="bg-primary-green-100 text-primary-green-700 border-primary-green-300 text-xs">
-                              ✓ Done
-                            </Badge>
-                          ) : isFormUnlocked ? (
-                            <Badge className="bg-slate-100 text-slate-600 border-slate-300 text-xs">
-                              Start
-                            </Badge>
-                          ) : (
-                            <Badge className="text-xs bg-yellow-100 text-yellow-800 border-yellow-200">
-                              Locked
-                            </Badge>
-                          )}
-                        </div>
+                        <Badge
+                          className={`text-xs ${
+                            isFormCompleted
+                              ? "bg-primary-green-100 text-primary-green-700  hover:bg-primary-green-50 border-primary-green-300"
+                              : isFormUnlocked
+                              ? "bg-primary-blue-100 text-primary-blue-700 border-primary-blue-300 hover:bg-primary-blue-50"
+                              : "bg-yellow-100 text-yellow-800 border-yellow-300 hover:bg-yellow-50"
+                          }`}
+                        >
+                          {isFormCompleted
+                            ? "✓ Done"
+                            : isFormUnlocked
+                            ? "🚀 Start"
+                            : "🔒 Locked"}
+                        </Badge>
                       </div>
                     </CardHeader>
 
                     <CardContent className="pt-0">
                       <Button
-                        className={`w-full text-xs sm:text-sm font-semibold transition-all duration-300 h-9 sm:h-10 ${
+                        disabled={!isFormUnlocked}
+                        className={`w-full text-sm font-semibold transition-all duration-300 h-10 ${
                           isFormCompleted
                             ? "bg-gradient-to-r from-primary-green-500 to-emerald-500 hover:from-primary-green-600 hover:to-emerald-600"
-                            : "bg-gradient-to-r from-primary-blue-500 to-cyan-500 hover:from-primary-blue-600 hover:to-cyan-600"
+                            : isFormUnlocked
+                            ? "bg-gradient-to-r from-primary-blue-500 to-cyan-500 hover:from-primary-blue-600 hover:to-cyan-600"
+                            : "bg-gray-300 text-gray-500"
                         } text-white border-0 shadow-sm hover:shadow-md active:scale-[0.98]`}
                         onClick={(e) => {
                           e.stopPropagation();
@@ -438,7 +446,7 @@ export function SessionDetail() {
                               ? "Start"
                               : "Locked"}
                           </span>
-                          <ChevronRight className="size-3 sm:size-4 shrink-0" />
+                          <ChevronRight className="size-4 shrink-0" />
                         </span>
                       </Button>
                     </CardContent>
