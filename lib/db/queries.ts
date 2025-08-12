@@ -1184,52 +1184,6 @@ export async function upsertPreAssessment(
     });
 }
 
-// export async function insertPreAssessment(
-//   userId: string,
-//   sessionId: number,
-//   score: number,
-//   answers: Record<string, number>
-// ): Promise<void> {
-//   // First, optionally check if a record exists for this user/session
-//   const existing = await db
-//     .select()
-//     .from(pre_assessment)
-//     .where(
-//       and(
-//         eq(pre_assessment.user_id, userId)
-//         // eq(pre_assessment.session_id, sessionId)
-//       )
-//     )
-//     .limit(1);
-
-//   if (existing.length > 0) {
-//     // If record exists, update instead of insert:
-//     await db
-//       .update(pre_assessment)
-//       .set({
-//         answers: JSON.stringify(answers),
-//         score,
-//         updated_at: new Date(), // if you have timestamp columns
-//       })
-//       .where(
-//         and(
-//           eq(pre_assessment.user_id, userId)
-//           // eq(pre_assessment.session_id, sessionId)
-//         )
-//       );
-//   } else {
-//     // Insert new record
-//     await db.insert(pre_assessment).values({
-//       user_id: userId,
-//       // session_id: sessionId,
-//       answers: JSON.stringify(answers),
-//       score,
-//       created_at: new Date(), // if you have timestamp columns
-//       updated_at: new Date(),
-//     });
-//   }
-// }
-
 export async function upsertCareerStory1(
   userId: string,
   answers: Record<string, "agree" | "disagree">
@@ -1286,7 +1240,11 @@ export async function getCareerStory1(
 export async function getRiasecTest(
   userId: string
   // sessionId?: number  // optional if you use sessions
-): Promise<{ selectedAnswers: string[]; score: number } | null> {
+): Promise<{
+  selectedAnswers: string[];
+  interestCode: string;
+  categoryCounts: {};
+} | null> {
   const [row] = await db
     .select()
     .from(riasec_test)
@@ -1296,39 +1254,13 @@ export async function getRiasecTest(
   try {
     return {
       selectedAnswers: JSON.parse(row.selected_answers),
-      score: row.score,
+      interestCode: row.interest_code,
+      categoryCounts: row.category_counts,
     };
   } catch {
     return null;
   }
 }
-
-// export async function upsertRiasecTest(
-//   userId: string,
-//   // sessionId: number,
-//   score: number,
-//   selectedAnswers: string[]
-// ) {
-//   await db
-//     .insert(riasec_test)
-//     .values({
-//       user_id: userId,
-//       // session_id: sessionId,
-//       selected_answers: JSON.stringify(selectedAnswers),
-//       score,
-//       created_at: new Date(),
-//       updated_at: new Date(),
-//     })
-//     .onConflictDoUpdate({
-//       target: [riasec_test.user_id], // or [riasec_test.user_id, riasec_test.session_id]
-//       set: {
-//         selected_answers: JSON.stringify(selectedAnswers),
-//         score,
-//         updated_at: new Date(),
-//       },
-//     });
-// }
-
 export async function upsertRiasecTest(
   userId: string,
   selectedAnswers: string[],
@@ -1359,7 +1291,11 @@ export async function upsertRiasecTest(
 export async function getPsychologicalWellbeingTest(
   userId: string
   // sessionId?: number,
-): Promise<{ answers: Record<string, string>; score: number } | null> {
+): Promise<{
+  answers: Record<string, string>;
+  score: string;
+  subscaleScores: Record<string, number>;
+} | null> {
   const [row] = await db.select().from(psychological_wellbeing_test).where(
     // Use if sessionId is active
     // and(
@@ -1375,6 +1311,7 @@ export async function getPsychologicalWellbeingTest(
     return {
       answers: JSON.parse(row.answers),
       score: row.score,
+      subscaleScores: row.subscale_scores,
     };
   } catch (error) {
     console.error("JSON parse error in getPsychologicalWellbeingTest:", error);
@@ -1438,15 +1375,15 @@ export async function upsertPsychologicalWellbeingTest(
 export async function getPersonalityTest(
   userId: string
   // sessionId?: number,
-): Promise<{ answers: Record<string, string>; score: number } | null> {
-  const [row] = await db.select().from(personality_test).where(
-    // Use if sessionId is active
-    // and(
-    //   eq(personality_test.user_id, userId),
-    //   eq(personality_test.session_id, sessionId)
-    // )
-    eq(personality_test.user_id, userId)
-  );
+): Promise<{
+  answers: Record<string, string>;
+  score: string;
+  subscaleScores: Record<string, number>;
+} | null> {
+  const [row] = await db
+    .select()
+    .from(personality_test)
+    .where(eq(personality_test.user_id, userId));
 
   if (!row) return null;
 
@@ -1454,6 +1391,7 @@ export async function getPersonalityTest(
     return {
       answers: JSON.parse(row.answers),
       score: row.score,
+      subscaleScores: row.subscale_scores,
     };
   } catch (error) {
     console.error("JSON parse error in getPersonalityTest:", error);

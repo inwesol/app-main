@@ -2,22 +2,23 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import {
-  User,
   Brain,
-  Heart,
-  Zap,
   Target,
   Award,
   Loader2,
   ArrowRight,
   ArrowLeft,
   CheckCircle,
+  Shield,
+  Lightbulb,
+  Users,
+  Compass,
+  Smile,
 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import Header from "@/components/form-components/header";
-import RatingButtons from "@/components/form-components/rating-buttons";
 import ProgressBar from "@/components/form-components/progress-bar";
 import { Card, CardHeader } from "@/components/ui/card";
 import {
@@ -29,6 +30,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
+import RatingButtonsPsychological from "@/components/form-components/rating-buttons-pshychological";
+import { useRouter } from "next/navigation";
 
 interface Question {
   id: number;
@@ -40,265 +43,253 @@ interface Question {
 const questions: Question[] = [
   {
     id: 1,
-    text: "Is talkative",
+    text: "I am not afraid to voice my opinions, even when they are in opposition to the opinions of most people",
     lowLabel: "Strongly Disagree",
     highLabel: "Strongly Agree",
   },
   {
     id: 2,
-    text: "Tends to find fault with others",
+    text: "For me, life has been a continuous process of learning, changing, and growth",
     lowLabel: "Strongly Disagree",
     highLabel: "Strongly Agree",
   },
   {
     id: 3,
-    text: "Does a thorough job",
+    text: "In general, I feel I am in charge of the situation in which I live",
     lowLabel: "Strongly Disagree",
     highLabel: "Strongly Agree",
   },
   {
     id: 4,
-    text: "Is depressed, blue",
+    text: "People would describe me as a giving person, willing to share my time with others",
     lowLabel: "Strongly Disagree",
     highLabel: "Strongly Agree",
   },
   {
     id: 5,
-    text: "Is original, comes up with new ideas",
+    text: "I am not interested in activities that will expand my horizons",
     lowLabel: "Strongly Disagree",
     highLabel: "Strongly Agree",
   },
   {
     id: 6,
-    text: "Is reserved",
+    text: "I enjoy making plans for the future and working to make them a reality",
     lowLabel: "Strongly Disagree",
     highLabel: "Strongly Agree",
   },
   {
     id: 7,
-    text: "Is helpful and unselfish with others",
+    text: "Most people see me as loving and affectionate",
     lowLabel: "Strongly Disagree",
     highLabel: "Strongly Agree",
   },
   {
     id: 8,
-    text: "Can be somewhat careless",
+    text: "In many ways I feel disappointed about my achievements in life",
     lowLabel: "Strongly Disagree",
     highLabel: "Strongly Agree",
   },
   {
     id: 9,
-    text: "Is relaxed, handles stress well",
+    text: "I live life one day at a time and do not really think about the future",
     lowLabel: "Strongly Disagree",
     highLabel: "Strongly Agree",
   },
   {
     id: 10,
-    text: "Is curious about many different things",
+    text: "I tend to worry about what other people think of me",
     lowLabel: "Strongly Disagree",
     highLabel: "Strongly Agree",
   },
   {
     id: 11,
-    text: "Is full of energy",
+    text: "When I look at the story of my life, I am pleased with how things have turned out",
     lowLabel: "Strongly Disagree",
     highLabel: "Strongly Agree",
   },
   {
     id: 12,
-    text: "Starts quarrels with others",
+    text: "I have difficulty arranging my life in a way that is satisfying to me",
     lowLabel: "Strongly Disagree",
     highLabel: "Strongly Agree",
   },
   {
     id: 13,
-    text: "Is a reliable worker",
+    text: "My decisions are not usually influenced by what everyone else is doing",
     lowLabel: "Strongly Disagree",
     highLabel: "Strongly Agree",
   },
   {
     id: 14,
-    text: "Can be tense",
+    text: "I gave up trying to make big improvements or changes in my life a long time ago",
     lowLabel: "Strongly Disagree",
     highLabel: "Strongly Agree",
   },
   {
     id: 15,
-    text: "Is ingenious, a deep thinker",
+    text: "The demands of everyday life often get me down",
     lowLabel: "Strongly Disagree",
     highLabel: "Strongly Agree",
   },
   {
     id: 16,
-    text: "Generates a lot of enthusiasm",
+    text: "I have not experienced many warm and trusting relationships with others",
     lowLabel: "Strongly Disagree",
     highLabel: "Strongly Agree",
   },
   {
     id: 17,
-    text: "Has a forgiving nature",
+    text: "I think it is important to have new experiences that challenge how you think about yourself and the world",
     lowLabel: "Strongly Disagree",
     highLabel: "Strongly Agree",
   },
   {
     id: 18,
-    text: "Tends to be disorganized",
+    text: "Maintaining close relationships has been difficult and frustrating for me",
     lowLabel: "Strongly Disagree",
     highLabel: "Strongly Agree",
   },
   {
     id: 19,
-    text: "Worries a lot",
+    text: "My attitude about myself is probably not as positive as most people feel about themselves",
     lowLabel: "Strongly Disagree",
     highLabel: "Strongly Agree",
   },
   {
     id: 20,
-    text: "Has an active imagination",
+    text: "I have a sense of direction and purpose in life",
     lowLabel: "Strongly Disagree",
     highLabel: "Strongly Agree",
   },
   {
     id: 21,
-    text: "Tends to be quiet",
+    text: "I judge myself by what I think is important, not by the values of what others think is important",
     lowLabel: "Strongly Disagree",
     highLabel: "Strongly Agree",
   },
   {
     id: 22,
-    text: "Is generally trusting",
+    text: "In general, I feel confident and positive about myself",
     lowLabel: "Strongly Disagree",
     highLabel: "Strongly Agree",
   },
   {
     id: 23,
-    text: "Tends to be lazy",
+    text: "I have been able to build a living environment and a lifestyle for myself that is much to my liking",
     lowLabel: "Strongly Disagree",
     highLabel: "Strongly Agree",
   },
   {
     id: 24,
-    text: "Is emotionally stable, not easily upset",
+    text: "I tend to be influenced by people with strong opinions",
     lowLabel: "Strongly Disagree",
     highLabel: "Strongly Agree",
   },
   {
     id: 25,
-    text: "Is inventive",
+    text: "I do not enjoy being in new situations that require me to change my old familiar ways of doing things",
     lowLabel: "Strongly Disagree",
     highLabel: "Strongly Agree",
   },
   {
     id: 26,
-    text: "Has an assertive personality",
+    text: "I do not fit very well with the people and the community around me",
     lowLabel: "Strongly Disagree",
     highLabel: "Strongly Agree",
   },
   {
     id: 27,
-    text: "Can be cold and aloof",
+    text: "I know that I can trust my friends, and they know they can trust me",
     lowLabel: "Strongly Disagree",
     highLabel: "Strongly Agree",
   },
   {
     id: 28,
-    text: "Perseveres until the task is finished",
+    text: "When I think about it, I have not really improved much as a person over the years",
     lowLabel: "Strongly Disagree",
     highLabel: "Strongly Agree",
   },
   {
     id: 29,
-    text: "Can be moody",
+    text: "Some people wander aimlessly through life, but I am not one of them",
     lowLabel: "Strongly Disagree",
     highLabel: "Strongly Agree",
   },
   {
     id: 30,
-    text: "Values artistic, aesthetic experiences",
+    text: "I often feel lonely because I have few close friends with whom to share my concerns",
     lowLabel: "Strongly Disagree",
     highLabel: "Strongly Agree",
   },
   {
     id: 31,
-    text: "Is sometimes shy, inhibited",
+    text: "When I compare myself to friends and acquaintances, it makes me feel good about who I am",
     lowLabel: "Strongly Disagree",
     highLabel: "Strongly Agree",
   },
   {
     id: 32,
-    text: "Is considerate and kind to almost everyone",
+    text: "I do not have a good sense of what it is I am trying to accomplish in life",
     lowLabel: "Strongly Disagree",
     highLabel: "Strongly Agree",
   },
   {
     id: 33,
-    text: "Does things efficiently",
+    text: "I sometimes feel as if I have done all there is to do in life",
     lowLabel: "Strongly Disagree",
     highLabel: "Strongly Agree",
   },
   {
     id: 34,
-    text: "Remains calm in tense situations",
+    text: "I feel like many of the people I know have gotten more out of life than I have",
     lowLabel: "Strongly Disagree",
     highLabel: "Strongly Agree",
   },
   {
     id: 35,
-    text: "Prefers work that is routine",
+    text: "I have confidence in my opinions, even if they are contrary to the general consensus",
     lowLabel: "Strongly Disagree",
     highLabel: "Strongly Agree",
   },
   {
     id: 36,
-    text: "Is outgoing, sociable",
+    text: "I am quite good at managing the many responsibilities of my daily life",
     lowLabel: "Strongly Disagree",
     highLabel: "Strongly Agree",
   },
   {
     id: 37,
-    text: "Is sometimes rude to others",
+    text: "I have the sense that I have developed a lot as a person over time",
     lowLabel: "Strongly Disagree",
     highLabel: "Strongly Agree",
   },
   {
     id: 38,
-    text: "Makes plans and follows through with them",
+    text: "I enjoy personal and mutual conversations with family members and friends",
     lowLabel: "Strongly Disagree",
     highLabel: "Strongly Agree",
   },
   {
     id: 39,
-    text: "Gets nervous easily",
+    text: "My daily activities often seem trivial and unimportant to me",
     lowLabel: "Strongly Disagree",
     highLabel: "Strongly Agree",
   },
   {
     id: 40,
-    text: "Likes to reflect, play with ideas",
+    text: "I like most parts of my personality",
     lowLabel: "Strongly Disagree",
     highLabel: "Strongly Agree",
   },
   {
     id: 41,
-    text: "Has few artistic interests",
+    text: "It is difficult for me to voice my own opinions on controversial matters",
     lowLabel: "Strongly Disagree",
     highLabel: "Strongly Agree",
   },
   {
     id: 42,
-    text: "Likes to cooperate with others",
-    lowLabel: "Strongly Disagree",
-    highLabel: "Strongly Agree",
-  },
-  {
-    id: 43,
-    text: "Is easily distracted",
-    lowLabel: "Strongly Disagree",
-    highLabel: "Strongly Agree",
-  },
-  {
-    id: 44,
-    text: "Is sophisticated in art, music, or literature",
+    text: "I often feel overwhelmed by my responsibilities",
     lowLabel: "Strongly Disagree",
     highLabel: "Strongly Agree",
   },
@@ -306,20 +297,23 @@ const questions: Question[] = [
 
 const allowedAnswers = [
   "Strongly Disagree",
-  "Disagree",
+  "Somewhat Disagree",
+  "A Little Disagree",
   "Neutral",
-  "Agree",
+  "A Little Agree",
+  "Somewhat Agree",
   "Strongly Agree",
 ] as const;
 
-const personalitySchema = z.object(
+const psychologicalWellbeingSchema = z.object(
   questions.reduce((acc, question) => {
     acc[question.text] = z.enum(allowedAnswers).optional();
     return acc;
   }, {} as Record<string, z.ZodTypeAny>)
 );
-type PersonalityFormData = z.infer<typeof personalitySchema>;
-
+type PsychologicalWellbeingFormData = z.infer<
+  typeof psychologicalWellbeingSchema
+>;
 interface QuestionPage {
   title: string;
   description: string;
@@ -327,62 +321,68 @@ interface QuestionPage {
   icon: React.ComponentType<any>;
   color: string;
 }
-
 const questionPages: QuestionPage[] = [
   {
-    title: "Social & Communication Style",
-    description:
-      "Questions about how you interact with others and express yourself",
-    questions: questions.slice(0, 9),
-    icon: Zap,
-    color: "orange",
+    title: "Self-Direction & Independence",
+    description: "Questions about your autonomy and self-determination",
+    questions: questions.slice(0, 7),
+    icon: Shield,
+    color: "primary-blue",
   },
   {
-    title: "Work Style & Organization",
-    description: "Questions about your approach to tasks and responsibilities",
-    questions: questions.slice(9, 18),
+    title: "Life Management & Control",
+    description:
+      "Questions about managing your environment and responsibilities",
+    questions: questions.slice(7, 14),
     icon: Target,
-    color: "blue",
+    color: "primary-green",
   },
   {
-    title: "Emotional Patterns & Stress",
-    description:
-      "Questions about your emotional responses and stress management",
-    questions: questions.slice(18, 27),
-    icon: Brain,
-    color: "purple",
+    title: "Growth & Development",
+    description: "Questions about personal growth and openness to experiences",
+    questions: questions.slice(14, 21),
+    icon: Lightbulb,
+    color: "primary-blue",
   },
   {
-    title: "Creativity & Openness",
-    description: "Questions about your openness to new experiences and ideas",
-    questions: questions.slice(27, 36),
-    icon: User,
-    color: "green",
+    title: "Relationships & Connection",
+    description: "Questions about your relationships and social connections",
+    questions: questions.slice(21, 28),
+    icon: Users,
+    color: "primary-green",
   },
   {
-    title: "Relationships & Cooperation",
-    description: "Questions about how you relate to and work with others",
-    questions: questions.slice(36, 44),
-    icon: Heart,
-    color: "pink",
+    title: "Purpose & Self-Worth",
+    description: "Questions about life purpose and self-acceptance",
+    questions: questions.slice(28, 35),
+    icon: Compass,
+    color: "primary-blue",
+  },
+  {
+    title: "Personal Reflection",
+    description: "Final questions about your overall well-being",
+    questions: questions.slice(35, 42),
+    icon: Smile,
+    color: "primary-green",
   },
 ];
 
-function PersonalityTest() {
+function PsychologicalWellbeing({ sessionId }: { sessionId: string }) {
   const [currentPage, setCurrentPage] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const router = useRouter();
 
-  const defaultValues: PersonalityFormData = questions.reduce(
+  const defaultValues: PsychologicalWellbeingFormData = questions.reduce(
     (acc, question) => {
-      acc[question.text as keyof PersonalityFormData] = undefined;
+      acc[question.text as keyof PsychologicalWellbeingFormData] = undefined;
       return acc;
     },
-    {} as PersonalityFormData
+    {} as PsychologicalWellbeingFormData
   );
 
-  const form = useForm<PersonalityFormData>({
-    resolver: zodResolver(personalitySchema),
+  const form = useForm<PsychologicalWellbeingFormData>({
+    resolver: zodResolver(psychologicalWellbeingSchema),
     defaultValues,
   });
 
@@ -391,14 +391,15 @@ function PersonalityTest() {
       setIsLoading(true);
       try {
         const response = await fetch(
-          "/api/journey/sessions/2/q/personality-test"
+          "/api/journey/sessions/3/q/psychological-wellbeing"
         );
         if (response.status === 404) {
           form.reset(defaultValues);
         } else if (!response.ok) {
           throw new Error("Failed to fetch saved answers");
         } else {
-          const savedData: Partial<PersonalityFormData> = await response.json();
+          const savedData: Partial<PsychologicalWellbeingFormData> =
+            await response.json();
           form.reset({ ...defaultValues, ...savedData.answers });
         }
       } catch (error) {
@@ -411,11 +412,12 @@ function PersonalityTest() {
     fetchSavedData();
   }, [form]);
 
-  const onSubmit = async (data: PersonalityFormData) => {
+  const onSubmit = async (data: PsychologicalWellbeingFormData) => {
+    console.log("psychologicalwellbeing data:", data);
     setIsSubmitting(true);
     try {
       const response = await fetch(
-        "/api/journey/sessions/2/q/personality-test",
+        "/api/journey/sessions/3/q/psychological-wellbeing",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -426,13 +428,11 @@ function PersonalityTest() {
       if (!response.ok) {
         throw new Error("Submission failed");
       }
-
-      alert("Personality test submitted successfully!");
     } catch (error) {
       console.error("Submission error:", error);
-      alert("Failed to submit personality test. Please try again.");
     } finally {
       setIsSubmitting(false);
+      router.push(`/journey/sessions/${sessionId}`);
     }
   };
 
@@ -466,9 +466,13 @@ function PersonalityTest() {
   const getPageCompletionStatus = useCallback(
     (pageIndex: number) => {
       const pageQuestions = questionPages[pageIndex].questions;
-      const answeredInPage = pageQuestions.filter(
-        (q) => watchedValues[q.text as keyof PersonalityFormData] !== undefined
-      ).length;
+      const answeredInPage = pageQuestions.filter((q) => {
+        const fieldValue =
+          watchedValues[q.text as keyof PsychologicalWellbeingFormData];
+        return (
+          fieldValue !== undefined && fieldValue !== null && fieldValue !== ""
+        );
+      }).length;
       return {
         answered: answeredInPage,
         total: pageQuestions.length,
@@ -502,11 +506,15 @@ function PersonalityTest() {
   );
 
   const currentPageStatus = getPageCompletionStatus(currentPage);
-
   const currentPageData = questionPages[currentPage];
-  const totalAnswered = Object.keys(watchedValues).filter(
-    (key) => watchedValues[key as keyof PersonalityFormData] !== undefined
-  ).length;
+
+  // Fixed totalAnswered calculation to match the working PersonalityTest component
+  const totalAnswered = questions.filter((question) => {
+    const fieldValue =
+      watchedValues[question.text as keyof PsychologicalWellbeingFormData];
+    return fieldValue !== undefined && fieldValue !== null && fieldValue !== "";
+  }).length;
+
   const progressPercentage = ((currentPage + 1) / questionPages.length) * 100;
 
   if (isLoading) {
@@ -516,21 +524,21 @@ function PersonalityTest() {
           <div className="animate-spin rounded-full size-12 border-b-2 border-primary-blue-600 mx-auto mb-4"></div>
           <p className="text-slate-600 text-sm sm:text-base">Loading...</p>
           <p className="text-slate-600 text-xs sm:text-base mt-2">
-            Please wait while we prepare your personality test...
+            Please wait while we prepare your psychological wellbeing test...
           </p>
         </div>
       </div>
     );
   }
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 p-4 sm:py-8">
       <div className="max-w-4xl mx-auto">
+        {/* Header */}
         <Header
-          headerIcon={User}
-          headerText="Big Five Personality Test"
-          headerDescription="Discover your personality across five key dimensions. Rate how much
-            you agree with each statement about yourself."
+          headerIcon={Brain}
+          headerText="Psychological Well-being Assessment"
+          headerDescription="Explore your psychological well-being across six key dimensions.
+            Rate how much you agree with each statement about yourself."
         />
 
         <div className="mb-8">
@@ -557,19 +565,19 @@ function PersonalityTest() {
                 onClick={() => goToPage(index)}
                 disabled={!canNavigate}
                 className={`
-                  p-2 rounded-lg font-semibold text-sm transition-all duration-300 hover:scale-105 flex items-center gap-2 size-8 justify-center sm:size-10
-                  ${
-                    index === currentPage
-                      ? "bg-gradient-to-r from-primary-blue-500 to-primary-green-500 text-white shadow-lg"
-                      : status.isComplete
-                      ? "bg-primary-green-100 text-primary-green-700 hover:bg-primary-green-200"
-                      : status.answered > 0 && canNavigate
-                      ? "bg-amber-100 text-amber-700 hover:bg-amber-200"
-                      : canNavigate
-                      ? "bg-slate-100 text-slate-500 hover:bg-slate-200"
-                      : "bg-slate-50 text-slate-300 cursor-not-allowed"
-                  }
-                `}
+                     p-2 rounded-lg font-semibold text-sm transition-all duration-300 hover:scale-105 flex items-center gap-2 size-8 justify-center sm:size-10
+                     ${
+                       index === currentPage
+                         ? "bg-gradient-to-r from-primary-blue-500 to-primary-green-500 text-white shadow-lg"
+                         : status.isComplete
+                         ? "bg-primary-green-100 text-primary-green-700 hover:bg-primary-green-200"
+                         : status.answered > 0 && canNavigate
+                         ? "bg-amber-100 text-amber-700 hover:bg-amber-200"
+                         : canNavigate
+                         ? "bg-slate-100 text-slate-500 hover:bg-slate-200"
+                         : "bg-slate-50 text-slate-300 cursor-not-allowed"
+                     }
+                   `}
               >
                 {status.isComplete ? (
                   <CheckCircle className="sm:size-5 size-4" />
@@ -608,7 +616,9 @@ function PersonalityTest() {
                     <FormField
                       key={question.id}
                       control={form.control}
-                      name={question.text as keyof PersonalityFormData}
+                      name={
+                        question.text as keyof PsychologicalWellbeingFormData
+                      }
                       render={({ field }) => (
                         <FormItem>
                           <div className="p-4 sm:p-6 bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl border border-slate-200">
@@ -618,7 +628,6 @@ function PersonalityTest() {
                                   Q{question.id}
                                 </span>
                                 <FormLabel className="text-base sm:text-lg text-slate-800 leading-relaxed">
-                                  I see myself as someone who...
                                   <span className="font-semibold">
                                     &quot;{question.text}&quot;
                                   </span>
@@ -627,7 +636,7 @@ function PersonalityTest() {
                             </div>
 
                             <FormControl>
-                              <RatingButtons
+                              <RatingButtonsPsychological
                                 value={field.value}
                                 onChange={field.onChange}
                                 lowLabel={question.lowLabel}
@@ -696,4 +705,4 @@ function PersonalityTest() {
   );
 }
 
-export default PersonalityTest;
+export default PsychologicalWellbeing;

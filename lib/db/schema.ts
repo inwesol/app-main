@@ -475,23 +475,6 @@ export const career_story_1 = pgTable(
   })
 );
 
-// export const riasec_test = pgTable(
-//   "riasec_test",
-//   {
-//     id: uuid("id").primaryKey().notNull().defaultRandom(),
-//     user_id: uuid("user_id").notNull(),
-//     // Uncomment if using sessions
-//     // session_id: integer("session_id").notNull(),
-//     selected_answers: varchar("selected_answers", { length: 4000 }).notNull(),
-//     score: integer("score").notNull().default(0),
-//     created_at: timestamp("created_at").defaultNow().notNull(),
-//     updated_at: timestamp("updated_at").defaultNow().notNull(),
-//   },
-//   (table) => ({
-//     userUnique: unique().on(table.user_id), // or unique on (user_id, session_id) if including session
-//   })
-// );
-
 export const riasec_test = pgTable(
   "riasec_test",
   {
@@ -527,7 +510,7 @@ export const personality_test = pgTable(
 
     answers: varchar("answers", { length: 4000 }).notNull(), // JSON stringified answers
 
-    score: numeric("score", { precision: 5, scale: 2 }).notNull().default(0), // overall score
+    score: numeric("score", { precision: 5, scale: 2 }).notNull().default("0"), // overall score
 
     subscale_scores: json("subscale_scores")
       .$type<Record<string, number>>()
@@ -555,7 +538,7 @@ export const psychological_wellbeing_test = pgTable(
 
     answers: varchar("answers", { length: 4000 }).notNull(), // JSON string of answers
 
-    score: numeric("score", { precision: 5, scale: 2 }).notNull().default(0), // float score
+    score: numeric("score", { precision: 5, scale: 2 }).notNull().default("0"), // float score
 
     subscale_scores: json("subscale_scores")
       .$type<Record<string, number>>()

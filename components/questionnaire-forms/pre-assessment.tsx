@@ -220,7 +220,6 @@ export function PreAssessment({ sessionId }: { sessionId: string }) {
       }
     } catch (error) {
       console.error("Submission error:", error);
-      alert("Failed to submit assessment. Please try again.");
     } finally {
       setIsSubmitting(false);
       router.push(`/journey/sessions/${sessionId}`);

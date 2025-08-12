@@ -23,6 +23,8 @@ import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import Header from "@/components/form-components/header";
 import * as z from "zod";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 interface Question {
   id: number;
@@ -151,10 +153,11 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
-export default function RiasecTest() {
+export default function RiasecTest({ sessionId }: { sessionId: string }) {
   const [showResults, setShowResults] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -219,7 +222,6 @@ export default function RiasecTest() {
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true);
     try {
-      console.log("Selected answers:", data.selectedAnswers);
       // Send to backend
       const response = await fetch("/api/journey/sessions/2/q/riasec-test", {
         method: "POST",
@@ -232,6 +234,7 @@ export default function RiasecTest() {
       console.error("Submission error:", error);
     } finally {
       setIsSubmitting(false);
+      router.push(`/journey/sessions/${sessionId}`);
     }
   };
 
@@ -505,7 +508,7 @@ export default function RiasecTest() {
             <div className="flex justify-center pt-6 border-t border-slate-200 mt-6">
               <Button
                 type="submit"
-                disabled={isSubmitting}
+                disabled={isSubmitting || watchedAnswers.length === 0}
                 className="px-8 py-4 sm:px-10 sm:py-6 bg-gradient-to-r from-primary-green-500 to-primary-green-600 hover:from-primary-green-600 hover:to-primary-green-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300 flex items-center gap-2 sm:text-base disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
               >
                 {isSubmitting ? (

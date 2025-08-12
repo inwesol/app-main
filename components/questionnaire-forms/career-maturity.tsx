@@ -421,7 +421,6 @@ export function CareerMaturity({ sessionId }: { sessionId: string }) {
       }
     } catch (error) {
       console.error("Submission error:", error);
-      alert("Failed to submit. Please try again.");
     } finally {
       setIsSubmitting(false);
       router.push(`/journey/sessions/${sessionId}`);

@@ -1,4 +1,6 @@
 import SessionReport from "./session-report";
+// import SessionReport from "./hm";
+// import SessionReport from "./vm";
 
 interface SessionPageProps {
   params: { sessionId: string };
@@ -7,5 +9,6 @@ interface SessionPageProps {
 export default async function SessionPage({ params }: SessionPageProps) {
   const { sessionId } = await params;
 
+  // return <SessionReport sessionId={sessionId} />;
   return <SessionReport sessionId={sessionId} />;
 }
