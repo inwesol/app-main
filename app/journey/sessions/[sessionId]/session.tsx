@@ -9,6 +9,8 @@ import {
   Target,
   BarChart3,
   ChevronRight,
+  Home,
+  ChevronDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -43,6 +45,12 @@ interface SessionDetailData {
   forms: FormData[];
   learningObjectives: string[];
   prerequisites?: string[];
+}
+
+interface BreadcrumbItem {
+  label: string;
+  href?: string;
+  isActive?: boolean;
 }
 
 export function SessionDetail() {
@@ -84,9 +92,25 @@ export function SessionDetail() {
     router.push(formRoute);
   };
 
-  const handleBackToJourney = () => {
-    console.log("Back to journey");
-    router.push("/journey");
+  const handleBreadcrumbClick = (href: string) => {
+    console.log("Navigate to: ", href);
+    router.push(href);
+  };
+
+  const getBreadcrumbs = (): BreadcrumbItem[] => {
+    const breadcrumbs: BreadcrumbItem[] = [
+      { label: "Home", href: "/" },
+      { label: "Career Journey", href: "/journey" },
+    ];
+
+    if (sessionData) {
+      breadcrumbs.push({
+        label: `Session ${sessionData.id}: ${sessionData.title}`,
+        isActive: true,
+      });
+    }
+
+    return breadcrumbs;
   };
 
   const getFormProgress = () => {
@@ -109,6 +133,45 @@ export function SessionDetail() {
   //       return "bg-slate-100 text-slate-700 border-slate-200";
   //   }
   // };
+
+  const BreadcrumbNavigation = () => {
+    const breadcrumbs = getBreadcrumbs();
+
+    return (
+      <nav aria-label="Breadcrumb" className="mb-4 sm:mb-6">
+        <div className="bg-white rounded-lg border border-slate-200 px-3 py-2 sm:px-4 sm:py-3 shadow-sm">
+          <ol className="flex items-center space-x-1 sm:space-x-2">
+            {breadcrumbs.map((crumb, index) => (
+              <li key={index} className="flex items-center">
+                {index === 0 && (
+                  <Home className="size-4 text-slate-500 mr-1 sm:mr-2" />
+                )}
+
+                {crumb.isActive ? (
+                  <span className="text-sm sm:text-base font-semibold text-primary-blue-700 truncate max-w-[120px] sm:max-w-none">
+                    {crumb.label}
+                  </span>
+                ) : (
+                  <button
+                    onClick={() =>
+                      crumb.href && handleBreadcrumbClick(crumb.href)
+                    }
+                    className="text-sm sm:text-base text-slate-600 hover:text-primary-blue-700 transition-colors duration-200 font-medium truncate max-w-[100px] sm:max-w-none"
+                  >
+                    {crumb.label}
+                  </button>
+                )}
+
+                {index < breadcrumbs.length - 1 && (
+                  <ChevronRight className="size-4 text-slate-400 mx-1 sm:mx-2 shrink-0" />
+                )}
+              </li>
+            ))}
+          </ol>
+        </div>
+      </nav>
+    );
+  };
 
   if (loading) {
     return (
@@ -134,7 +197,7 @@ export function SessionDetail() {
             The requested session could not be found.
           </p>
           <Button
-            onClick={handleBackToJourney}
+            onClick={() => handleBreadcrumbClick("/journey")}
             className="bg-primary-blue-600 hover:bg-primary-blue-700 w-full sm:w-auto"
             size="sm"
           >
@@ -171,18 +234,8 @@ export function SessionDetail() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-green-50 via-white to-primary-blue-50">
       <div className="max-w-6xl mx-auto px-3 py-4 sm:px-4 sm:py-6 lg:px-8">
-        {/* Back Navigation */}
-        <div className="mb-4 sm:mb-6">
-          <Button
-            variant="ghost"
-            onClick={handleBackToJourney}
-            className="text-slate-600 hover:text-slate-800 hover:bg-slate-100 p-2 sm:p-3"
-            size="sm"
-          >
-            <ArrowLeft className="size-4 mr-1 sm:mr-2" />
-            <span className="text-sm sm:text-base">Back to Journey</span>
-          </Button>
-        </div>
+        {/* Breadcrumb Navigation */}
+        <BreadcrumbNavigation />
 
         <div className="bg-white sm:rounded-xl rounded-lg p-4 sm:p-6 shadow-md border border-slate-200">
           {/* Session Header */}

@@ -1,133 +1,192 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { db, feedback } from '@/lib/db';
+// app/api/feedback/route.ts
+import { NextRequest, NextResponse } from "next/server";
+import { db } from "@/lib/db"; // Adjust path to your database connection
+import { feedback } from "@/lib/db/schema"; // Adjust path to your schema
+import { z } from "zod";
+import { eq, desc, and } from "drizzle-orm";
 
-export async function GET() {
-  return NextResponse.json({
-    message: 'Feedback API endpoint. Submit feedback via POST to this URL.',
-    method: 'POST',
-    requiredFields: ['userId', 'feeling', 'rating'],
-    optionalFields: ['takeaway', 'wouldRecommend', 'suggestions', 'sessionId'],
-  });
-}
+// Validation schema for the incoming request
+const feedbackRequestSchema = z.object({
+  userId: z.string().uuid("Invalid user ID format"),
+  feeling: z.string().min(1, "Feeling is required"),
+  takeaway: z.string().min(10, "Takeaway must be at least 10 characters"),
+  rating: z.number().int().min(1).max(5, "Rating must be between 1 and 5"),
+  wouldRecommend: z.boolean(),
+  suggestions: z.string().nullable().optional(),
+  sessionId: z
+    .number()
+    .int()
+    .min(0)
+    .max(8, "Session ID must be between 0 and 8"), // 0-8 range
+  sessionNumber: z.number().int().min(0).max(8).optional(), // Same as sessionId, for logging
+});
 
 export async function POST(request: NextRequest) {
-  console.log('🚀 Feedback API route called');
-  
   try {
+    console.log("🚀 API: Feedback submission started");
+
+    // Parse and validate the request body
     const body = await request.json();
-    console.log('📥 Received feedback data:', JSON.stringify(body, null, 2));
-    
-    // Validate required fields
-    if (!body.userId) {
-      return NextResponse.json(
-        { error: 'User ID is required' },
-        { status: 400 }
-      );
-    }
-    
-    if (!body.feeling || !body.rating) {
-      console.log('❌ Validation failed: Missing required fields');
-      return NextResponse.json(
-        { error: 'Feeling and rating are required' },
-        { status: 400 }
-      );
-    }
+    console.log("📋 API: Raw request body:", body);
 
-    // Validate rating range
-    if (body.rating < 1 || body.rating > 5) {
-      console.log('❌ Validation failed: Invalid rating range');
-      return NextResponse.json(
-        { error: 'Rating must be between 1 and 5' },
-        { status: 400 }
-      );
-    }
+    const validatedData = feedbackRequestSchema.parse(body);
+    console.log("✅ API: Validation passed:", validatedData);
 
-    // Validate sessionId (zero-based integer)
-    let sessionIdInt: number | null = null;
-    if (body.sessionNumber !== undefined && body.sessionNumber !== null) {
-      // Backward compat: allow sessionNumber and convert to zero-based session_id
-      const n = Number(body.sessionNumber);
-      if (!Number.isFinite(n) || n < 1) {
-        return NextResponse.json(
-          { error: 'sessionNumber must be a positive integer' },
-          { status: 400 }
-        );
-      }
-      sessionIdInt = n - 1; // convert to zero-based
-    }
-    if (body.sessionId !== undefined && body.sessionId !== null) {
-      const n = Number(body.sessionId);
-      if (!Number.isFinite(n) || n < 0) {
-        return NextResponse.json(
-          { error: 'session_id must be a non-negative integer' },
-          { status: 400 }
-        );
-      }
-      sessionIdInt = n;
-    }
+    // Extract user agent for analytics (optional)
+    const userAgent = request.headers.get("user-agent") || null;
 
-    console.log('✅ Validation passed, preparing to insert into database...');
+    // Prepare data for database insertion
+    const insertData = {
+      userId: validatedData.userId,
+      feeling: validatedData.feeling,
+      takeaway: validatedData.takeaway,
+      rating: validatedData.rating,
+      wouldRecommend: validatedData.wouldRecommend,
+      suggestions: validatedData.suggestions || null,
+      sessionId: validatedData.sessionId, // Store 0-based session ID
+      userAgent,
+      // createdAt will be set automatically by the database default
+    };
 
-    const feedbackData = {
-      userId: String(body.userId),
-      feeling: String(body.feeling),
-      takeaway: body.takeaway ? String(body.takeaway) : null,
-      rating: Number(body.rating),
-      wouldRecommend: Boolean(body.wouldRecommend),
-      suggestions: body.suggestions ? String(body.suggestions) : null,
-      sessionId: sessionIdInt,
-      userAgent: request.headers.get('user-agent') || null,
-      createdAt: new Date(),
-    } as const;
+    console.log("💾 API: Inserting data into database:", insertData);
 
-    console.log('📊 Data to be inserted:', JSON.stringify(feedbackData, null, 2));
+    // Insert into database
+    const result = await db.insert(feedback).values(insertData).returning({
+      id: feedback.id,
+      sessionId: feedback.sessionId,
+      createdAt: feedback.createdAt,
+    });
 
-    // Add retry logic for database operations
-    let retries = 3;
-    let result;
-    
-    while (retries > 0) {
-      try {
-        result = await db.insert(feedback).values(feedbackData).returning();
-        break; // Success, break out of retry loop
-      } catch (dbError: any) {
-        retries--;
-        console.log(`❌ Database error (${retries} retries left):`, dbError.message);
-        
-        if (retries === 0) {
-          throw dbError; // Re-throw after all retries failed
-        }
-        
-        // Wait before retrying
-        await new Promise(resolve => setTimeout(resolve, 1000));
-      }
-    }
+    console.log("✅ API: Database insertion successful:", result[0]);
 
-    console.log('✅ Feedback successfully saved to database!');
-    console.log('📝 Inserted record:', JSON.stringify(result![0], null, 2));
-    console.log('🆔 Generated ID:', result![0].id);
-
+    // Return success response
     return NextResponse.json(
-      { 
-        message: 'Feedback submitted successfully',
-        id: result![0].id
+      {
+        success: true,
+        message: "Feedback submitted successfully",
+        data: {
+          id: result[0].id,
+          sessionId: result[0].sessionId,
+          sessionNumber: validatedData.sessionId, // Same as sessionId (no conversion)
+          submittedAt: result[0].createdAt,
+        },
       },
       { status: 201 }
     );
+  } catch (error) {
+    console.error("❌ API: Error processing feedback:", error);
 
-  } catch (error: any) {
-    console.error('❌ Error submitting feedback:', error);
-    
-    // Handle specific error types
-    if (error.message?.includes('timeout') || error.message?.includes('session')) {
+    // Handle Zod validation errors
+    if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: 'Database connection timeout. Please try again.' },
-        { status: 503 } // Service Unavailable
+        {
+          success: false,
+          error: "Validation failed",
+          details: error.errors.map((err) => ({
+            field: err.path.join("."),
+            message: err.message,
+          })),
+        },
+        { status: 400 }
       );
     }
-    
+
+    // Handle database errors
+    if (error && typeof error === "object" && "code" in error) {
+      console.error("💾 API: Database error code:", error.code);
+
+      // Handle specific database error codes
+      switch (error.code) {
+        case "23505": // Unique violation
+          return NextResponse.json(
+            {
+              success: false,
+              error: "Duplicate feedback submission detected",
+            },
+            { status: 409 }
+          );
+        case "23503": // Foreign key violation
+          return NextResponse.json(
+            {
+              success: false,
+              error: "Invalid user ID or session reference",
+            },
+            { status: 400 }
+          );
+        default:
+          return NextResponse.json(
+            {
+              success: false,
+              error: "Database error occurred",
+            },
+            { status: 500 }
+          );
+      }
+    }
+
+    // Handle other errors
     return NextResponse.json(
-      { error: 'Failed to submit feedback. Please try again.' },
+      {
+        success: false,
+        error: "Internal server error",
+        message:
+          process.env.NODE_ENV === "development"
+            ? error instanceof Error
+              ? error.message
+              : "Unknown error"
+            : "An unexpected error occurred",
+      },
+      { status: 500 }
+    );
+  }
+}
+
+// Optional: Add GET endpoint to retrieve feedback
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const sessionId = searchParams.get("sessionId");
+    const userId = searchParams.get("userId");
+
+    if (!userId) {
+      return NextResponse.json(
+        { success: false, error: "User ID is required" },
+        { status: 400 }
+      );
+    }
+
+    // Build where conditions array
+    const whereConditions = [eq(feedback.userId, userId)];
+
+    if (sessionId !== null) {
+      const sessionIdNum = parseInt(sessionId);
+      if (!isNaN(sessionIdNum)) {
+        whereConditions.push(eq(feedback.sessionId, sessionIdNum));
+      }
+    }
+
+    // Apply all conditions at once using 'and'
+    const results = await db
+      .select()
+      .from(feedback)
+      .where(
+        whereConditions.length === 1
+          ? whereConditions[0]
+          : and(...whereConditions)
+      )
+      .orderBy(desc(feedback.createdAt));
+
+    return NextResponse.json({
+      success: true,
+      data: results.map((item) => ({
+        ...item,
+        sessionNumber: item.sessionId ?? 0, // Same as sessionId (no conversion)
+      })),
+    });
+  } catch (error) {
+    console.error("❌ API: Error retrieving feedback:", error);
+    return NextResponse.json(
+      { success: false, error: "Failed to retrieve feedback" },
       { status: 500 }
     );
   }

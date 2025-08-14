@@ -34,7 +34,7 @@ type FeedbackFormData = z.infer<typeof feedbackSchema>;
 interface SessionFeedbackFormProps {
   sessionNumber?: number;
   sessionTitle?: string;
-  userId?: string;                    // NEW: Add userId prop
+  userId?: string;
   onSubmit?: (
     feedback: FeedbackFormData & {
       sessionNumber?: number;
@@ -87,7 +87,7 @@ const FEELING_OPTIONS = [
 export function SessionFeedbackForm({
   sessionNumber = 1,
   sessionTitle = "Feedback Session",
-  userId,                             // NEW: Accept userId prop
+  userId,
   onSubmit,
   className = "",
 }: SessionFeedbackFormProps) {
@@ -114,65 +114,82 @@ export function SessionFeedbackForm({
 
   const watchedValues = watch();
 
-  // If sessionNumber comes from query param like ?session=2 (one-based in UI), normalize here
-  const zeroBasedSessionId = Math.max(0, Number(sessionNumber) - 1);
-
   const onFormSubmit = async (data: FeedbackFormData) => {
-    console.log('🚀 Form submission started');
-    console.log('📋 Form data:', data);
-    
+    console.log("🚀 Form submission started");
+    console.log("📋 Form data:", data);
+    console.log("🎯 Session number:", sessionNumber);
+
     // Validate userId is provided
     if (!userId) {
-      setSubmitError('User identification is required');
+      setSubmitError("User identification is required");
       return;
     }
-    
+
+    // Validate sessionNumber (0-8 range)
+    if (sessionNumber < 0 || sessionNumber > 8) {
+      setSubmitError("Invalid session number. Must be between 0 and 8");
+      return;
+    }
+
     setIsSubmitting(true);
     setSubmitError(null);
 
     try {
-      // Transform data to match your API expectations exactly
-      const zeroBasedSessionIdSafe = Math.max(0, Number(sessionNumber || 1) - 1);
+      // Use sessionNumber directly as sessionId (no conversion needed)
+      const sessionId = sessionNumber;
+
+      console.log("🔢 Session ID for database:", sessionId);
 
       const apiData = {
-        userId: userId,                           // NEW: Include userId
+        userId: userId,
         feeling: String(data.overallFeeling),
         takeaway: String(data.keyInsight),
         rating: Number(data.overallRating),
         wouldRecommend: Boolean(data.wouldRecommend),
-        suggestions: data.improvementSuggestion ? String(data.improvementSuggestion) : null,
-        sessionId: zeroBasedSessionIdSafe,
+        suggestions: data.improvementSuggestion
+          ? String(data.improvementSuggestion)
+          : null,
+        sessionId: sessionId, // Direct mapping: URL param = database value
+        sessionNumber: sessionNumber, // Same as sessionId for logging
       };
 
-      console.log('🌐 Sending data to API:', apiData);
+      console.log("🌐 Sending data to API:", apiData);
 
-      const response = await fetch('/api/feedback', {
-        method: 'POST',
+      const response = await fetch("/api/feedback", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(apiData),
       });
 
-      console.log('📡 Response status:', response.status);
-      console.log('📡 Response headers:', Object.fromEntries(response.headers.entries()));
-      
+      console.log("📡 Response status:", response.status);
+      console.log(
+        "📡 Response headers:",
+        Object.fromEntries(response.headers.entries())
+      );
+
       // Check if response is actually JSON
-      const contentType = response.headers.get('content-type');
-      if (!contentType || !contentType.includes('application/json')) {
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
         const textResponse = await response.text();
-        console.error('❌ Non-JSON response received:', textResponse);
-        throw new Error('Server returned non-JSON response. Check your API endpoint.');
+        console.error("❌ Non-JSON response received:", textResponse);
+        throw new Error(
+          "Server returned non-JSON response. Check your API endpoint."
+        );
       }
-      
+
       if (!response.ok) {
         const errorData = await response.json();
-        console.error('❌ API Error Response:', errorData);
-        throw new Error(errorData.error || `HTTP ${response.status}: Failed to submit feedback`);
+        console.error("❌ API Error Response:", errorData);
+        throw new Error(
+          errorData.error ||
+            `HTTP ${response.status}: Failed to submit feedback`
+        );
       }
 
       const result = await response.json();
-      console.log('✅ Success! Response:', result);
+      console.log("✅ Success! Response:", result);
 
       // Call the optional onSubmit callback if provided
       const completeData = {
@@ -184,18 +201,17 @@ export function SessionFeedbackForm({
       onSubmit?.(completeData);
 
       setIsSubmitted(true);
-
     } catch (error) {
-      console.error('❌ Submission error:', error);
-      
-      let errorMessage = 'An unexpected error occurred';
-      
-      if (error instanceof TypeError && error.message.includes('fetch')) {
-        errorMessage = 'Network error. Please check your connection.';
+      console.error("❌ Submission error:", error);
+
+      let errorMessage = "An unexpected error occurred";
+
+      if (error instanceof TypeError && error.message.includes("fetch")) {
+        errorMessage = "Network error. Please check your connection.";
       } else if (error instanceof Error) {
         errorMessage = error.message;
       }
-      
+
       setSubmitError(errorMessage);
     } finally {
       setIsSubmitting(false);
@@ -226,7 +242,9 @@ export function SessionFeedbackForm({
 
   if (isSubmitted) {
     return (
-      <div className={`min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 p-4 sm:py-8 ${className}`}>
+      <div
+        className={`min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 p-4 sm:py-8 ${className}`}
+      >
         <div className="max-w-2xl mx-auto">
           <div className="bg-white/95 backdrop-blur-xl border-2 border-green-200/50 shadow-2xl shadow-green-100/20 rounded-3xl overflow-hidden">
             <div className="p-12 text-center">
@@ -238,20 +256,24 @@ export function SessionFeedbackForm({
                   Thank You!
                 </h2>
                 <p className="text-green-700/80 text-lg leading-relaxed">
-                  Your feedback has been successfully saved and helps us create better experiences for your
-                  journey of self-discovery.
+                  Your feedback for {sessionTitle} has been successfully saved
+                  and helps us create better experiences for your journey of
+                  self-discovery.
                 </p>
               </div>
 
               <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl p-6 border border-green-200/50 mb-8">
-                <h3 className="font-bold text-green-800 mb-2">What's Next?</h3>
+                <h3 className="font-bold text-green-800 mb-2">
+                  What&apos;s Next?
+                </h3>
                 <p className="text-green-700/90 text-sm">
-                  You'll receive a summary and next steps via email within 24 hours.
+                  You&apos;ll receive a summary and next steps via email within
+                  24 hours.
                 </p>
               </div>
 
-              <button 
-                onClick={() => router.push('/journey')}
+              <button
+                onClick={() => router.push("/journey")}
                 className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white px-8 py-3 rounded-2xl font-semibold shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
               >
                 Continue Your Journey
@@ -264,7 +286,9 @@ export function SessionFeedbackForm({
   }
 
   return (
-    <div className={`min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 p-4 sm:py-8 ${className}`}>
+    <div
+      className={`min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 p-4 sm:py-8 ${className}`}
+    >
       <div className="max-w-3xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
@@ -274,8 +298,9 @@ export function SessionFeedbackForm({
             </div>
             <div>
               <h1 className="sm:text-2xl text-xl font-bold bg-gradient-to-r from-blue-700 to-green-700 bg-clip-text text-transparent">
-                Quick Feedback
+                {sessionTitle} Feedback
               </h1>
+              <p className="text-sm text-slate-500">Session {sessionNumber}</p>
             </div>
           </div>
           <p className="text-slate-600 max-w-2xl mx-auto">
@@ -305,7 +330,8 @@ export function SessionFeedbackForm({
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   {FEELING_OPTIONS.map((feeling) => {
                     const Icon = feeling.icon;
-                    const isSelected = watchedValues.overallFeeling === feeling.value;
+                    const isSelected =
+                      watchedValues.overallFeeling === feeling.value;
                     return (
                       <button
                         key={feeling.value}
@@ -320,7 +346,9 @@ export function SessionFeedbackForm({
                             : "border-gray-200 hover:border-blue-300 bg-white hover:bg-gradient-to-br hover:from-blue-25 hover:to-green-25"
                         }`}
                       >
-                        <div className={`inline-flex p-3 rounded-xl mb-2 bg-gradient-to-br ${feeling.color} shadow-lg`}>
+                        <div
+                          className={`inline-flex p-3 rounded-xl mb-2 bg-gradient-to-br ${feeling.color} shadow-lg`}
+                        >
                           <Icon className="size-5 text-white" />
                         </div>
                         <h3 className="font-bold text-blue-800 text-sm">
@@ -341,7 +369,7 @@ export function SessionFeedbackForm({
               {/* 2. Key Insight */}
               <div>
                 <label className="block text-xl font-bold text-blue-800 mb-3 text-center">
-                  What's your biggest takeaway from this session?
+                  What&apos;s your biggest takeaway from this session?
                 </label>
                 <textarea
                   {...register("keyInsight")}

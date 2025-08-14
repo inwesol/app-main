@@ -553,3 +553,35 @@ export const psychological_wellbeing_test = pgTable(
     userUnique: unique().on(table.user_id), // unique constraint on user_id (or user_id + session_id)
   })
 );
+
+export const chat_feedback = pgTable("chat_feedback", {
+  id: uuid("id").primaryKey().notNull().defaultRandom(),
+  chat_id: varchar("chat_id", { length: 255 }).notNull(),
+  user_email: varchar("user_email", { length: 255 }).notNull(),
+  rating: integer("rating").notNull(),
+  comment: text("comment"), // Optional feedback comment
+  created_at: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updated_at: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+export type ChatFeedback = InferSelectModel<typeof chat_feedback>;
+
+export const feedback = pgTable("feedback", {
+  id: uuid("id").primaryKey().notNull().defaultRandom(),
+  feeling: text("feeling").notNull(), // e.g., 'enlightened', 'confident', etc.
+  takeaway: text("takeaway"),
+  rating: integer("rating").notNull(), // 1-5 stars
+  wouldRecommend: boolean("would_recommend").default(false),
+  suggestions: text("suggestions"),
+  sessionId: integer("session_id"), // zero-based session index
+  userId: uuid("user_id"),
+  userAgent: text("user_agent"), // Optional: for analytics
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export type Feedback = typeof feedback.$inferInsert;
+export type FeedbackSelect = typeof feedback.$inferSelect;

@@ -135,7 +135,7 @@ const FeedbackCard = ({ onFeedback, onDismiss }: FeedbackCardProps) => {
             <button
               onClick={handleSubmit}
               disabled={rating === 0 || isSubmitting}
-              className="px-4 py-2 bg-green-500 hover:bg-green-500 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-md transition-colors"
+              className="px-4 py-2 bg-green-400 hover:bg-green-400 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-md transition-colors"
             >
               {isSubmitting ? "Submitting..." : "Submit Feedback"}
             </button>
@@ -160,9 +160,40 @@ function PureMessages({
 
   const [showFeedback, setShowFeedback] = useState(false);
   const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
+  const [feedbackChecked, setFeedbackChecked] = useState(false);
+
+  // Check if user has ever submitted feedback (for any chat) on component mount
+  useEffect(() => {
+    const checkUserFeedbackHistory = async () => {
+      if (feedbackChecked) return;
+
+      try {
+        // Check if user has submitted feedback for any chat
+        const response = await fetch(`/api/chat_feedback/user`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.hasFeedback) {
+            console.log(
+              "User has already submitted feedback before, not showing form"
+            );
+            setFeedbackSubmitted(true);
+          }
+        }
+      } catch (error) {
+        console.error("Error checking user feedback history:", error);
+      } finally {
+        setFeedbackChecked(true);
+      }
+    };
+
+    checkUserFeedbackHistory();
+  }, [feedbackChecked]);
 
   // Check if we should show feedback after 4 user messages
   useEffect(() => {
+    // Don't proceed if we haven't checked for existing feedback yet
+    if (!feedbackChecked) return;
+
     const userMessageCount = messages.filter((m) => m.role === "user").length;
 
     console.log("User message count:", userMessageCount); // Debug log
@@ -182,13 +213,13 @@ function PureMessages({
 
       return () => clearTimeout(timer);
     }
-  }, [messages, feedbackSubmitted, isReadonly, showFeedback]);
+  }, [messages, feedbackSubmitted, isReadonly, showFeedback, feedbackChecked]);
 
   const handleFeedback = async (rating: number, comment?: string) => {
     try {
       console.log("Submitting feedback:", { rating, comment }); // Debug log
 
-      const response = await fetch("/api/feedback", {
+      const response = await fetch("/api/chat_feedback", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -197,13 +228,12 @@ function PureMessages({
           chatId,
           rating,
           comment,
-          messageCount: messages.length,
-          timestamp: new Date().toISOString(),
         }),
       });
 
       if (!response.ok) {
-        throw new Error("Failed to submit feedback");
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to submit feedback");
       }
 
       // Don't display response, just mark as submitted
