@@ -1,5 +1,6 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
 
 import { QuestionSection } from "@/components/activity-components/question-section";
 import { TextArea } from "@/components/activity-components/text-area";
@@ -15,6 +16,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { toast } from "@/components/toast";
 import {
   User,
   MapPin,
@@ -27,6 +29,7 @@ import {
   Info,
   Star,
   Lightbulb,
+  Loader2,
 } from "lucide-react";
 
 interface CareerStoryThreeData {
@@ -63,9 +66,34 @@ const occupationOptions = [
   "Environmental Scientist",
   "Chef",
   "Photographer",
+  "Accountant",
+  "Pharmacist",
+  "Physical Therapist",
+  "Veterinarian",
+  "Journalist",
+  "Police Officer",
+  "Firefighter",
+  "Pilot",
+  "Lawyer",
+  "Doctor",
+  "Dentist",
+  "Psychologist",
+  "Interior Designer",
+  "Web Designer",
+  "Game Developer",
+  "Business Analyst",
+  "Consultant",
+  "Real Estate Agent",
+  "Event Planner",
+  "Translator",
 ];
 
 export default function CareerStoryThree() {
+  const params = useParams();
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
+
   const [formData, setFormData] = useState<CareerStoryThreeData>({
     selfStatement: "",
     settingStatement: "",
@@ -114,7 +142,7 @@ export default function CareerStoryThree() {
       "'The only way to do great work is to love what you do.' - Steve Jobs. This quote reminds me that passion is essential for meaningful work and that I should never settle for something that doesn't ignite my enthusiasm.",
   };
 
-  // Mock data for Career Story 2 (will come from API) - matches CareerStoryTwoData interface
+  // Mock data for Career Story 2 (will come from API)
   const mockCareerStoryTwoData = {
     firstAdjectives: "brave, innovative, compassionate",
     repeatedWords: "determined, caring, creative",
@@ -129,6 +157,32 @@ export default function CareerStoryThree() {
     settingStatement:
       "I like being in places where people collaborate on creative solutions, use technology to solve problems, and work together to make the world better. I enjoy environments that are dynamic, supportive, and focused on growth and learning.",
   };
+
+  // Load existing data on component mount
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const response = await fetch(
+          `/api/journey/sessions/${params.sessionId}/a/career-story-3`
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          setFormData(data);
+        }
+      } catch (error) {
+        console.error("Error loading data:", error);
+      } finally {
+        setInitialLoading(false);
+      }
+    };
+
+    if (params.sessionId) {
+      loadData();
+    } else {
+      setInitialLoading(false);
+    }
+  }, [params.sessionId]);
 
   // Helper function to get RIASEC option details
   const getRiasecDetails = (code: string) => {
@@ -151,6 +205,130 @@ export default function CareerStoryThree() {
         : [...prev.selectedOccupations, occupation],
     }));
   };
+
+  const handleSave = async () => {
+    setLoading(true);
+    try {
+      // Validate required fields
+      if (!formData.selfStatement.trim()) {
+        toast({
+          type: "error",
+          description: "Self statement is required",
+        });
+        return;
+      }
+
+      if (!formData.settingStatement.trim()) {
+        toast({
+          type: "error",
+          description: "Setting statement is required",
+        });
+        return;
+      }
+
+      if (!formData.plotDescription.trim()) {
+        toast({
+          type: "error",
+          description: "Plot description is required",
+        });
+        return;
+      }
+
+      if (!formData.plotActivities.trim()) {
+        toast({
+          type: "error",
+          description: "Plot activities are required",
+        });
+        return;
+      }
+
+      if (!formData.ableToBeStatement.trim()) {
+        toast({
+          type: "error",
+          description: "Able to be statement is required",
+        });
+        return;
+      }
+
+      if (!formData.placesWhereStatement.trim()) {
+        toast({
+          type: "error",
+          description: "Places where statement is required",
+        });
+        return;
+      }
+
+      if (!formData.soThatStatement.trim()) {
+        toast({
+          type: "error",
+          description: "So that statement is required",
+        });
+        return;
+      }
+
+      if (!formData.mottoStatement.trim()) {
+        toast({
+          type: "error",
+          description: "Motto statement is required",
+        });
+        return;
+      }
+
+      if (formData.selectedOccupations.length === 0) {
+        toast({
+          type: "error",
+          description: "At least one occupation must be selected",
+        });
+        return;
+      }
+
+      const response = await fetch(
+        `/api/journey/sessions/${params.sessionId}/a/career-story-3`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to save data");
+      }
+
+      toast({
+        type: "success",
+        description: "Career Story 3 saved successfully!",
+      });
+
+      // Navigate to session page
+      setTimeout(() => {
+        router.push(`/journey/sessions/${params.sessionId}`);
+      }, 1000); // Small delay to show the success toast
+    } catch (error) {
+      console.error("Error saving data:", error);
+      toast({
+        type: "error",
+        description:
+          error instanceof Error ? error.message : "Failed to save data",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (initialLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-primary-blue-50 to-primary-green-50 flex items-center justify-center">
+        <div className="flex items-center gap-3">
+          <Loader2 className="size-6 animate-spin text-primary-blue-500" />
+          <span className="text-primary-blue-600 font-medium">Loading...</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-blue-50 to primary-green-50 p-4 sm:py-8">
@@ -201,7 +379,7 @@ export default function CareerStoryThree() {
                           </div>
                           <div className="bg-white/90 rounded-xl p-4 border border-primary-green-200/60 shadow-md">
                             <h5 className="text-primary-green-600 font-semibold mb-2">
-                              "I AM / I AM BECOMING..."
+                              &quot;I AM / I AM BECOMING...&quot;
                             </h5>
                             <p className="text-sm text-slate-600 leading-relaxed">
                               {mockCareerStoryTwoData.selfStatement}
@@ -323,7 +501,7 @@ export default function CareerStoryThree() {
                           </div>
                           <div className="bg-white/90 rounded-xl p-4 border border-primary-blue-200/60 shadow-md">
                             <h5 className="text-primary-blue-600 font-semibold mb-2">
-                              "I LIKE BEING IN PLACES WHERE..."
+                              &quot;I LIKE BEING IN PLACES WHERE...&quot;
                             </h5>
                             <p className="text-sm text-slate-600 leading-relaxed">
                               {mockCareerStoryTwoData.settingStatement}
@@ -713,7 +891,7 @@ export default function CareerStoryThree() {
                   career story analysis:
                 </p>
 
-                <div className="grid gap-3 max-h-64 overflow-y-auto">
+                <div className="grid gap-3 max-h-64 overflow-y-auto border border-slate-200 rounded-lg p-4 bg-white/50">
                   {occupationOptions.map((occupation) => (
                     <div
                       key={occupation}
@@ -770,11 +948,24 @@ export default function CareerStoryThree() {
 
         {/* Save Button */}
         <div className="text-center mt-8">
-          <Button className="group relative px-10 py-6 bg-gradient-to-r from-primary-green-500 to-primary-blue-500 text-white rounded-2xl font-bold text-lg hover:from-primary-green-600 hover:to-primary-blue-600 transition-all duration-300 shadow-2xl hover:shadow-3xl hover:-translate-y-1">
+          <Button
+            onClick={handleSave}
+            disabled={loading}
+            className="group relative px-10 py-6 bg-gradient-to-r from-primary-green-500 to-primary-blue-500 text-white rounded-2xl font-bold text-lg hover:from-primary-green-600 hover:to-primary-blue-600 transition-all duration-300 shadow-2xl hover:shadow-3xl hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
             <div className="absolute inset-0 bg-gradient-to-r from-primary-green-400 to-primary-blue-400 rounded-2xl blur opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
             <div className="relative flex items-center gap-3">
-              <span>Save Progress</span>
-              <ArrowRight className="size-5 group-hover:translate-x-1 transition-transform duration-200" />
+              {loading ? (
+                <>
+                  <Loader2 className="size-5 animate-spin" />
+                  <span>Saving...</span>
+                </>
+              ) : (
+                <>
+                  <span>Save Progress</span>
+                  <ArrowRight className="size-5 group-hover:translate-x-1 transition-transform duration-200" />
+                </>
+              )}
             </div>
           </Button>
         </div>

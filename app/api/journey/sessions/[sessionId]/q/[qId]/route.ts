@@ -15,6 +15,12 @@ import {
   getPsychologicalWellbeingTest,
   upsertPsychologicalWellbeingTest,
   upsertRiasecTest,
+  upsertPostCareerMaturityAssessment,
+  getPostCareerMaturityAssessment,
+  getPostPsychologicalWellbeingTest,
+  upsertPostPsychologicalWellbeingTest,
+  getPostCoachingAssessment,
+  upsertPostCoachingAssessment,
 } from "@/lib/db/queries";
 import { demographicsDetailsSchema } from "@/lib/schemas/questionnaire-schemas/demographics-details-form-schema";
 
@@ -436,6 +442,125 @@ export async function GET(
         console.error("Error fetching psychological test:", err);
         return new NextResponse("Internal Server Error", { status: 500 });
       }
+    case "post-career-maturity":
+      try {
+        const session = await auth();
+        if (!session?.user?.id) {
+          return new NextResponse("Unauthorized", { status: 401 });
+        }
+
+        const { sessionId } = await params;
+
+        console.log("Post Career maturity GET - Session ID:", sessionId);
+        console.log("Post Career maturity GET - User ID:", session.user.id);
+
+        const sessionIdNum = Number(sessionId);
+        if (isNaN(sessionIdNum)) {
+          return new NextResponse("Bad Request: Invalid session ID", {
+            status: 400,
+          });
+        }
+
+        const data = await getPostCareerMaturityAssessment(
+          session.user.id,
+          sessionIdNum
+        );
+
+        if (!data) {
+          console.log(
+            "Post Career maturity assessment not found for user:",
+            session.user.id,
+            "session:",
+            sessionIdNum
+          );
+          return new NextResponse("Not found", { status: 404 });
+        }
+
+        console.log("Post Career maturity assessment found:", data);
+        // Return the answers object that the frontend expects
+        // Assuming your database returns { id, userId, sessionId, answers }
+        return NextResponse.json(data.answers || data);
+      } catch (error) {
+        console.error("Error in post career maturity GET:", error);
+        return new NextResponse("Internal Server Error", { status: 500 });
+      }
+    case "post-psychological-wellbeing":
+      try {
+        const session = await auth();
+        if (!session?.user?.id) {
+          return new NextResponse("Unauthorized", { status: 401 });
+        }
+
+        const sessionIdNum = Number(sessionId);
+        if (isNaN(sessionIdNum)) {
+          return new NextResponse("Bad Request: Invalid session ID", {
+            status: 400,
+          });
+        }
+
+        const data = await getPostPsychologicalWellbeingTest(
+          session.user.id,
+          sessionIdNum
+        );
+
+        if (!data) {
+          return new NextResponse("Not Found", { status: 404 });
+        }
+
+        return NextResponse.json({
+          answers: data.answers,
+          score: data.score,
+          subscaleScores: data.subscaleScores,
+        });
+      } catch (err) {
+        console.error("Error fetching post psychological wellbeing test:", err);
+        return new NextResponse("Internal Server Error", { status: 500 });
+      }
+    case "post-coaching":
+      try {
+        const session = await auth();
+        if (!session?.user?.id) {
+          return new NextResponse("Unauthorized", { status: 401 });
+        }
+
+        const { sessionId } = await params;
+
+        console.log("Post-coaching GET - Session ID:", sessionId);
+        console.log("Post-coaching GET - User ID:", session.user.id);
+
+        // Validate sessionId
+        const sessionIdNum = Number(sessionId);
+        if (isNaN(sessionIdNum)) {
+          return new NextResponse("Bad Request: Invalid session ID", {
+            status: 400,
+          });
+        }
+
+        const data = await getPostCoachingAssessment(
+          session.user.id,
+          sessionIdNum
+        );
+
+        if (!data) {
+          console.log(
+            "Post-coaching assessment not found for user:",
+            session.user.id,
+            "session:",
+            sessionIdNum
+          );
+          return new NextResponse("Not Found", { status: 404 });
+        }
+
+        console.log("Post-coaching assessment found:", data);
+
+        // Return the answers object that the frontend expects
+        return NextResponse.json({
+          answers: data.answers,
+        });
+      } catch (err) {
+        console.error("Error fetching post-coaching assessment:", err);
+        return new NextResponse("Internal Server Error", { status: 500 });
+      }
     default:
       return NextResponse.json({ error: "Unknown formId" }, { status: 404 });
   }
@@ -855,6 +980,199 @@ export async function POST(
         });
       } catch (err) {
         console.error("Error processing RIASEC test:", err);
+        return new NextResponse("Internal Server Error", { status: 500 });
+      }
+    case "post-career-maturity":
+      try {
+        const session = await auth();
+        if (!session?.user?.id) {
+          return new NextResponse("Unauthorized", { status: 401 });
+        }
+
+        const { sessionId } = await params;
+        const answers = await req.json();
+
+        console.log("Post Career maturity POST - Session ID:", sessionId);
+        console.log("Post Career maturity POST - User ID:", session.user.id);
+        console.log("Post Career maturity POST - Answers:", answers);
+
+        const sessionIdNum = Number(sessionId);
+        if (isNaN(sessionIdNum)) {
+          return new NextResponse("Bad Request: Invalid session ID", {
+            status: 400,
+          });
+        }
+
+        if (!answers || typeof answers !== "object") {
+          return new NextResponse("Bad Request: Invalid answers format", {
+            status: 400,
+          });
+        }
+
+        if (Object.keys(answers).length === 0) {
+          return new NextResponse("Bad Request: No answers provided", {
+            status: 400,
+          });
+        }
+
+        await upsertPostCareerMaturityAssessment(
+          session.user.id,
+          sessionIdNum,
+          answers
+        );
+        await completeUserSessionFormProgress({
+          userId: session.user.id,
+          sessionId: Number(sessionId),
+          qId,
+        });
+        await updateJourneyProgressAfterForm(
+          session.user.id,
+          Number(sessionId)
+        );
+
+        return NextResponse.json({ success: true });
+      } catch (error) {
+        console.error("Error in post career maturity POST:", error);
+        return new NextResponse("Internal Server Error", { status: 500 });
+      }
+    case "post-psychological-wellbeing":
+      try {
+        const session = await auth();
+        if (!session?.user?.id) {
+          return new NextResponse("Unauthorized", { status: 401 });
+        }
+
+        const sessionIdNum = Number(sessionId);
+        if (isNaN(sessionIdNum)) {
+          return new NextResponse("Bad Request: Invalid session ID", {
+            status: 400,
+          });
+        }
+        const {
+          answerTextToValue,
+          reverseScoredQuestions,
+          subscaleMap,
+          questionTextToNumber,
+          reverseScore,
+        } = psychologicalWellbeingScore();
+        const body = await req.json();
+        const { answers } = body;
+
+        if (
+          !answers ||
+          typeof answers !== "object" ||
+          Array.isArray(answers) ||
+          Object.values(answers).some((v) => typeof v !== "string")
+        ) {
+          return new NextResponse("Bad Request: Invalid 'answers' format", {
+            status: 400,
+          });
+        }
+
+        // Initialize subscale accumulators
+        const subscaleSums: Record<string, number> = {
+          autonomy: 0,
+          environmentalMastery: 0,
+          personalGrowth: 0,
+          positiveRelations: 0,
+          purposeInLife: 0,
+          selfAcceptance: 0,
+        };
+        // Calculate subscale scores
+        for (const [qTextRaw, answerText] of Object.entries(answers)) {
+          const qText = qTextRaw.trim();
+          const qNum = questionTextToNumber[qText];
+          if (!qNum) continue;
+          let val = answerTextToValue[answerText];
+          if (val === undefined) continue;
+
+          const rev = reverseScoredQuestions.has(qNum)
+            ? reverseScore(val, 7)
+            : val;
+
+          for (const [sub, questionNums] of Object.entries(subscaleMap)) {
+            if (questionNums.includes(qNum)) {
+              subscaleSums[sub] += rev;
+            }
+          }
+        }
+
+        const overallScore =
+          (Object.values(subscaleSums).reduce((a, b) => a + b, 0) / 294) * 100;
+
+        await upsertPostPsychologicalWellbeingTest(
+          session.user.id,
+          sessionIdNum,
+          overallScore,
+          answers,
+          subscaleSums
+        );
+        await completeUserSessionFormProgress({
+          userId: session.user.id,
+          sessionId: Number(sessionId),
+          qId,
+        });
+        await updateJourneyProgressAfterForm(
+          session.user.id,
+          Number(sessionId)
+        );
+        return NextResponse.json({
+          success: true,
+          subscaleSums,
+          overallScore,
+        });
+      } catch (err) {
+        console.error("Error in post psychological wellbeing scoring:", err);
+        return new NextResponse("Internal Server Error", { status: 500 });
+      }
+    case "post-coaching":
+      try {
+        const session = await auth();
+        if (!session?.user?.id) {
+          return new NextResponse("Unauthorized", { status: 401 });
+        }
+
+        console.log("server params: ", await params);
+        const { sessionId, qId } = await params;
+        const answers = await req.json();
+
+        // Debug logging
+        console.log("Post-coaching POST - Session ID:", sessionId);
+        console.log("Post-coaching POST - User ID:", session.user.id);
+        console.log("Post-coaching POST - Answers:", answers);
+
+        if (!answers || typeof answers !== "object") {
+          return new NextResponse("Bad Request: Missing or invalid 'answers'", {
+            status: 400,
+          });
+        }
+
+        // Validate sessionId
+        const sessionIdNum = Number(sessionId);
+        if (isNaN(sessionIdNum)) {
+          return new NextResponse("Bad Request: Invalid session ID", {
+            status: 400,
+          });
+        }
+
+        await upsertPostCoachingAssessment(
+          session.user.id,
+          sessionIdNum,
+          answers
+        );
+        await completeUserSessionFormProgress({
+          userId: session.user.id,
+          sessionId: Number(sessionId),
+          qId,
+        });
+        await updateJourneyProgressAfterForm(
+          session.user.id,
+          Number(sessionId)
+        );
+
+        return NextResponse.json({ success: true });
+      } catch (err) {
+        console.error("Error inserting post-coaching assessment:", err);
         return new NextResponse("Internal Server Error", { status: 500 });
       }
     default:

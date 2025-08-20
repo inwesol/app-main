@@ -1,8 +1,9 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { useRouter } from "next/navigation";
 import {
   ArrowRight,
   Book,
@@ -50,6 +51,10 @@ const careerStory4Schema = z.object({
 
 type CareerStory4FormData = z.infer<typeof careerStory4Schema>;
 
+interface CareerStory4Props {
+  sessionId: string;
+}
+
 interface CareerStory1Data {
   transitionEssay: string;
   occupations: string;
@@ -68,9 +73,12 @@ interface CareerStory3Data {
   selectedOccupations: string[];
 }
 
-export const CareerStory4: React.FC = () => {
+export const CareerStory4: React.FC<CareerStory4Props> = ({ sessionId }) => {
+  const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   // mock data career story 1
   const mockCareerStoryOneData: CareerStory1Data = {
@@ -140,6 +148,36 @@ export const CareerStory4: React.FC = () => {
   } = form;
   const watchedStory = watch("rewrittenStory");
 
+  // Load existing data on component mount
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setIsLoading(true);
+        const response = await fetch(
+          `/api/journey/sessions/${sessionId}/a/career-story-4`
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.rewrittenStory) {
+            form.setValue("rewrittenStory", data.rewrittenStory);
+          }
+        } else if (response.status !== 404) {
+          setError("Failed to load existing data");
+        }
+      } catch (err) {
+        console.error("Error loading data:", err);
+        setError("Failed to load existing data");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (sessionId) {
+      loadData();
+    }
+  }, [sessionId, form]);
+
   const getWordCount = (text: string): number => {
     return text.trim() ? text.trim().split(/\s+/).length : 0;
   };
@@ -150,20 +188,85 @@ export const CareerStory4: React.FC = () => {
 
   const onSubmit = async (data: CareerStory4FormData) => {
     setIsSubmitting(true);
+    setError(null);
 
     try {
-      // API call
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      const response = await fetch(
+        `/api/journey/sessions/${sessionId}/a/career-story-4`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        }
+      );
 
-      console.log("Submitting Career Story 4:", data);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to save career story");
+      }
 
+      console.log("Career Story 4 saved successfully");
       setIsSubmitted(true);
     } catch (error) {
       console.error("Error submitting form:", error);
+      setError(
+        error instanceof Error ? error.message : "An unexpected error occurred"
+      );
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  const handleWriteAnotherStory = () => {
+    router.push(`/journey/sessions/${sessionId}`);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-cyan-50 to-primary-blue-50 p-4 sm:py-8 flex items-center justify-center">
+        <Card className="max-w-md mx-auto">
+          <div className="text-center py-8 px-6">
+            <Loader2 className="size-8 text-primary-green-600 mx-auto mb-4 animate-spin" />
+            <h2 className="text-xl font-semibold text-slate-700 mb-2">
+              Loading Career Story 4
+            </h2>
+            <p className="text-slate-500">
+              Please wait while we load your data...
+            </p>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-cyan-50 to-primary-blue-50 p-4 sm:py-8 flex items-center justify-center">
+        <Card className="max-w-md mx-auto border-red-200">
+          <div className="text-center py-8 px-6">
+            <AlertCircle className="size-8 text-red-600 mx-auto mb-4" />
+            <h2 className="text-xl font-semibold text-red-700 mb-2">
+              Error Loading Data
+            </h2>
+            <p className="text-red-600 mb-4">{error}</p>
+            <Button
+              onClick={() => {
+                setError(null);
+                setIsLoading(true);
+                window.location.reload();
+              }}
+              variant="outline"
+              className="border-red-200 text-red-700 hover:bg-red-50"
+            >
+              Try Again
+            </Button>
+          </div>
+        </Card>
+      </div>
+    );
+  }
 
   if (isSubmitted) {
     return (
@@ -187,10 +290,7 @@ export const CareerStory4: React.FC = () => {
             </div>
             <Button
               className="bg-primary-green-600 hover:bg-primary-green-700"
-              onClick={() => {
-                setIsSubmitted(false);
-                form.reset();
-              }}
+              onClick={handleWriteAnotherStory}
             >
               Write Another Story
               <ArrowRight className="size-4 ml-2" />
@@ -401,8 +501,8 @@ export const CareerStory4: React.FC = () => {
                           <div className="space-y-4">
                             <div className="bg-white/90 rounded-xl p-4 border border-primary-green-200/60 shadow-md">
                               <h5 className="text-primary-green-600 font-semibold mb-2">
-                                "I will be most happy and successful when I am
-                                able to be..."
+                                &quot;I will be most happy and successful when I
+                                am able to be...&quot;
                               </h5>
                               <p className="text-sm text-slate-600 leading-relaxed">
                                 {mockCareerStoryThreeData.ableToBeStatement}
@@ -410,8 +510,8 @@ export const CareerStory4: React.FC = () => {
                             </div>
                             <div className="bg-white/90 rounded-xl p-4 border border-primary-green-200/60 shadow-md">
                               <h5 className="text-primary-green-600 font-semibold mb-2">
-                                "I will be most happy and successful in places
-                                where people..."
+                                &quot;I will be most happy and successful in
+                                places where people...&quot;
                               </h5>
                               <p className="text-sm text-slate-600 leading-relaxed">
                                 {mockCareerStoryThreeData.placesWhereStatement}
@@ -419,8 +519,8 @@ export const CareerStory4: React.FC = () => {
                             </div>
                             <div className="bg-white/90 rounded-xl p-4 border border-primary-green-200/60 shadow-md">
                               <h5 className="text-primary-green-600 font-semibold mb-2">
-                                "I will be most happy and successful so that I
-                                can..."
+                                &quot;I will be most happy and successful so
+                                that I can...&quot;
                               </h5>
                               <p className="text-sm text-slate-600 leading-relaxed">
                                 {mockCareerStoryThreeData.soThatStatement}
@@ -450,7 +550,7 @@ export const CareerStory4: React.FC = () => {
                         <div className="mt-6">
                           <div className="flex items-center gap-3 mb-4">
                             <h4 className="font-medium text-slate-600 text-sm">
-                              Occupations You're Considering
+                              Occupations You&apos;re Considering
                             </h4>
                           </div>
                           <div className="space-y-2">
@@ -529,8 +629,8 @@ export const CareerStory4: React.FC = () => {
                   <div className="bg-white/60 rounded-lg p-3 border border-emerald-200/40">
                     <p className="font-semibold mb-2">3. Rewrite Your Future</p>
                     <p className="text-xs text-slate-600">
-                      Create a new narrative that shows how you'll make this
-                      transition successfully
+                      Create a new narrative that shows how you&apos;ll make
+                      this transition successfully
                     </p>
                   </div>
                 </div>
@@ -600,11 +700,12 @@ export const CareerStory4: React.FC = () => {
                     </li>
                     <li className="flex items-start gap-2">
                       <div className="size-1.5 bg-cyan-500 rounded-full mt-2 shrink-0"></div>
-                      Specific actions you'll take based on your self-advice
+                      Specific actions you&apos;ll take based on your
+                      self-advice
                     </li>
                     <li className="flex items-start gap-2">
                       <div className="size-1.5 bg-cyan-500 rounded-full mt-2 shrink-0"></div>
-                      How you'll overcome challenges mentioned in Story 1
+                      How you&apos;ll overcome challenges mentioned in Story 1
                     </li>
                     <li className="flex items-start gap-2">
                       <div className="size-1.5 bg-cyan-500 rounded-full mt-2 shrink-0"></div>
@@ -619,7 +720,7 @@ export const CareerStory4: React.FC = () => {
                   <ul className="space-y-2 text-slate-600">
                     <li className="flex items-start gap-2">
                       <div className="size-1.5 bg-cyan-500 rounded-full mt-2 shrink-0"></div>
-                      Write in first person ("I will...")
+                      Write in first person (&quot;I will...&quot;)
                     </li>
                     <li className="flex items-start gap-2">
                       <div className="size-1.5 bg-cyan-500 rounded-full mt-2 shrink-0"></div>

@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Target,
   TrendingUp,
   Shield,
   Brain,
-  Scale as Balance,
+  Scale,
   Heart,
   Zap,
   CheckCircle,
@@ -25,6 +25,7 @@ import ProgressBar from "@/components/form-components/progress-bar";
 import PageNavigation from "@/components/form-components/page-navigation";
 import PreviousButton from "@/components/form-components/previous-button";
 import NextButton from "@/components/form-components/next-button";
+import { useRouter } from "next/navigation";
 
 // Post-Coaching Question Configuration
 const questions = [
@@ -87,7 +88,7 @@ const questions = [
     title: "Work-Life Balance",
     question:
       "How satisfied are you with your work-life balance after coaching?",
-    icon: Balance,
+    icon: Scale,
     color: "primary-green",
     lowLabel: "Not at all satisfied",
     highLabel: "Extremely satisfied",
@@ -168,16 +169,59 @@ const questions = [
   },
 ];
 
-export function PostCoachingTest() {
+interface PostCoachingTestProps {
+  sessionId?: string;
+  onComplete?: () => void;
+}
+
+export function PostCoachingTest({
+  sessionId,
+  onComplete,
+}: PostCoachingTestProps) {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [isCompleted, setIsCompleted] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = useState(initialFormData());
+  const router = useRouter();
   function initialFormData(): { [key: string]: number } {
     return questions.reduce((acc, currElem) => {
       acc[currElem.question] = 5;
       return acc;
     }, {} as { [key: string]: number });
   }
+
+  // Load existing data on component mount
+  useEffect(() => {
+    const loadExistingData = async () => {
+      if (!sessionId) {
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          `/api/journey/sessions/${sessionId}/q/post-coaching`
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.answers) {
+            setFormData(data.answers);
+          }
+        } else if (response.status !== 404) {
+          console.error("Error loading existing data:", response.statusText);
+        }
+      } catch (error) {
+        console.error("Error loading existing data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadExistingData();
+  }, [sessionId]);
+
   const handleSliderChange = (key: string, value: number) => {
     setFormData((prev) => ({
       ...prev,
@@ -196,9 +240,41 @@ export function PostCoachingTest() {
       setCurrentQuestion(currentQuestion - 1);
     }
   };
-  const handleSubmit = () => {
-    console.log("Assessment Results:", formData);
-    setIsCompleted(true);
+
+  const handleSubmit = async () => {
+    if (!sessionId) {
+      console.error("No session ID provided");
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const response = await fetch(
+        `/api/journey/sessions/${sessionId}/q/post-coaching`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        }
+      );
+
+      if (response.ok) {
+        setIsCompleted(true);
+        if (onComplete) {
+          onComplete();
+        }
+      } else {
+        console.error("Error saving assessment:", response.statusText);
+        alert("Error saving assessment. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error saving assessment:", error);
+      alert("Error saving assessment. Please try again.");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const getValueText = (value: number, question: (typeof questions)[0]) => {
@@ -212,6 +288,17 @@ export function PostCoachingTest() {
       return "High";
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-primary-blue-50 via-white to-primary-green-50 flex items-center justify-center p-4">
+        <div className="text-center">
+          <div className="animate-spin rounded-full size-12 border-b-2 border-primary-blue-500 mx-auto mb-4"></div>
+          <p className="text-slate-600">Loading assessment...</p>
+        </div>
+      </div>
+    );
+  }
 
   const currentQuestionData = questions[currentQuestion];
   const currentValue = formData[currentQuestionData.question];
@@ -228,9 +315,16 @@ export function PostCoachingTest() {
             <h2 className="text-2xl font-bold text-slate-800">
               Assessment Complete!
             </h2>
-            <p className="text-slate-600">
-              Thank you for completing the pre-coaching assessment.
+            <p className="text-slate-600 mb-6">
+              Thank you for completing the post-coaching assessment.
             </p>
+            <button
+              onClick={() => router.push(`/journey/sessions/${sessionId}`)}
+              className="w-full h-12 bg-gradient-to-r from-primary-blue-500 to-primary-blue-600 hover:from-primary-blue-600 hover:to-primary-blue-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300 flex items-center justify-center gap-2"
+            >
+              Continue to Session
+              <ArrowUpRight className="size-5" />
+            </button>
           </CardHeader>
         </Card>
       </div>
@@ -242,9 +336,8 @@ export function PostCoachingTest() {
       <div className="max-w-4xl mx-auto">
         <Header
           headerIcon={BarChart3}
-          headerText=" Post-Coaching Assessment"
-          headerDescription="This assessment will help us understand your current state and readiness
-        for coaching. Please answer honestly based on how you feel right now."
+          headerText="Post-Coaching Assessment"
+          headerDescription="This assessment will help us understand your progress and outcomes after coaching. Please answer honestly based on how you feel right now."
         />
 
         {/* Progress Bar */}
@@ -364,10 +457,20 @@ export function PostCoachingTest() {
                 {currentQuestion === questions.length - 1 ? (
                   <button
                     onClick={handleSubmit}
-                    className="w-full sm:flex-1 h-12 bg-gradient-to-r from-primary-green-500 to-primary-green-600 hover:from-primary-green-600 hover:to-primary-green-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300 group flex items-center justify-center gap-2"
+                    disabled={isSaving}
+                    className="w-full sm:flex-1 h-12 bg-gradient-to-r from-primary-green-500 to-primary-green-600 hover:from-primary-green-600 hover:to-primary-green-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300 group flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Complete Assessment
-                    <Award className="size-5 group-hover:rotate-12 transition-transform duration-200" />
+                    {isSaving ? (
+                      <>
+                        <div className="animate-spin rounded-full size-5 border-b-2 border-white"></div>
+                        Saving...
+                      </>
+                    ) : (
+                      <>
+                        Complete Assessment
+                        <Award className="size-5 group-hover:rotate-12 transition-transform duration-200" />
+                      </>
+                    )}
                   </button>
                 ) : (
                   <NextButton onClicking={nextQuestion} />

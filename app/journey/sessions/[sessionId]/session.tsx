@@ -29,7 +29,7 @@ interface FormData {
   icon: string;
   route: string;
   topics: string[];
-  prerequisites: string[];
+  prerequisites?: string[];
   // difficulty: "beginner" | "intermediate" | "advanced";
 }
 
@@ -70,19 +70,20 @@ export function SessionDetail() {
 
         if (res.ok) {
           const data = await res.json();
+          console.log("API Response:", data);
+          console.log("Forms array:", data.forms);
           setSessionData(data);
         } else {
           setSessionData(null);
         }
-      } catch {
+      } catch (error) {
+        console.error("Error fetching session data:", error);
         setSessionData(null);
       } finally {
         setLoading(false);
       }
     };
-    // if (!Number.isNaN(sessionId)) {
     fetchSessionData();
-    // }
   }, [sessionId]);
 
   console.log("session data: ", sessionData);
@@ -114,25 +115,14 @@ export function SessionDetail() {
   };
 
   const getFormProgress = () => {
-    if (!sessionData) return 0;
+    if (!sessionData || !sessionData.forms || sessionData.forms.length === 0) {
+      return 0;
+    }
     const completedForms = sessionData.forms.filter(
       (form) => form.status === "completed"
     ).length;
     return (completedForms / sessionData.forms.length) * 100;
   };
-
-  // const getDifficultyColor = (difficulty: string) => {
-  //   switch (difficulty) {
-  //     case "beginner":
-  //       return "bg-primary-green-100 text-primary-green-700 border-primary-green-200";
-  //     case "intermediate":
-  //       return "bg-primary-blue-100 text-primary-blue-700 border-primary-blue-200";
-  //     case "advanced":
-  //       return "bg-purple-100 text-purple-700 border-purple-200";
-  //     default:
-  //       return "bg-slate-100 text-slate-700 border-slate-200";
-  //   }
-  // };
 
   const BreadcrumbNavigation = () => {
     const breadcrumbs = getBreadcrumbs();
@@ -209,6 +199,30 @@ export function SessionDetail() {
     );
   }
 
+  // Additional check for forms array
+  if (!sessionData.forms) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-primary-green-50 via-white to-primary-blue-50 flex items-center justify-center p-4">
+        <Card className="max-w-md mx-auto p-6 sm:p-8 text-center">
+          <h2 className="text-lg sm:text-xl font-bold text-slate-800 mb-2">
+            Session Data Incomplete
+          </h2>
+          <p className="text-slate-600 mb-4 text-sm sm:text-base">
+            This session doesn't have any forms configured.
+          </p>
+          <Button
+            onClick={() => handleBreadcrumbClick("/journey")}
+            className="bg-primary-blue-600 hover:bg-primary-blue-700 w-full sm:w-auto"
+            size="sm"
+          >
+            <ArrowLeft className="size-4 mr-2" />
+            Back to Journey
+          </Button>
+        </Card>
+      </div>
+    );
+  }
+
   const checkFormStatus = (form: FormData, allForms: FormData[]) => {
     if (!form.prerequisites || form.prerequisites.length === 0) {
       return true;
@@ -217,16 +231,13 @@ export function SessionDetail() {
     // Check if all prerequisite forms are completed
     return form.prerequisites.every((prereqId) => {
       const prereqForm = allForms.find((f) => f.id === prereqId);
-      console.log(
-        "for eacch form status: ",
-        prereqForm?.status === "completed"
-      );
+      console.log("for each form status: ", prereqForm?.status === "completed");
       console.log("asdf", prereqForm?.status);
       return prereqForm?.status === "completed";
     });
   };
 
-  const IconComponent = LucideIcons[sessionData.icon];
+  const IconComponent = LucideIcons[sessionData.icon] || FileText; // Fallback icon
   console.log(IconComponent);
   const isCurrent = sessionData.status === "current";
   const isCompleted = sessionData.status === "completed";
@@ -248,18 +259,6 @@ export function SessionDetail() {
               }`}
             >
               <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-6">
-                {/* <div
-                className={`p-1 sm:p-2 rounded-lg sm:rounded-2xl shadow-lg shrink-0 ${
-                  isCompleted
-                    ? "bg-gradient-to-r from-primary-green-500 to-emerald-500"
-                    : isCurrent
-                    ? "bg-gradient-to-r from-primary-blue-500 to-cyan-500"
-                    : "bg-gradient-to-r from-slate-400 to-gray-400"
-                }`}
-              >
-                <IconComponent className="size-4 sm:size-5 text-white" />
-              </div> */}
-
                 <div className="flex-1 w-full min-w-0">
                   <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-3">
                     <h1
@@ -297,33 +296,37 @@ export function SessionDetail() {
           </div>
 
           {/* Learning Objectives */}
-          <Card className="mb-6 sm:mb-8 bg-gradient-to-r from-primary-blue-50/50 to-cyan-50/50 border-primary-blue-200/50">
-            <CardHeader className="pb-3 sm:pb-4">
-              <CardTitle className="text-primary-blue-800 flex items-center gap-2 text-base sm:text-lg">
-                <Target className="size-4 sm:size-5" />
-                Learning Objectives
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <ul className="space-y-3 sm:space-y-4">
-                {sessionData.learningObjectives.map((objective, index) => (
-                  <li
-                    key={index}
-                    className="flex items-start gap-3 text-primary-blue-700"
-                  >
-                    <div className="size-5 sm:size-6 bg-primary-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold mt-0.5 shrink-0">
-                      {index + 1}
-                    </div>
-                    <span className="leading-relaxed text-sm sm:text-base">
-                      {objective}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </CardContent>
-          </Card>
+          {sessionData.learningObjectives &&
+            sessionData.learningObjectives.length > 0 && (
+              <Card className="mb-6 sm:mb-8 bg-gradient-to-r from-primary-blue-50/50 to-cyan-50/50 border-primary-blue-200/50">
+                <CardHeader className="pb-3 sm:pb-4">
+                  <CardTitle className="text-primary-blue-800 flex items-center gap-2 text-base sm:text-lg">
+                    <Target className="size-4 sm:size-5" />
+                    Learning Objectives
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <ul className="space-y-3 sm:space-y-4">
+                    {sessionData.learningObjectives.map((objective, index) => (
+                      <li
+                        key={index}
+                        className="flex items-start gap-3 text-primary-blue-700"
+                      >
+                        <div className="size-5 sm:size-6 bg-primary-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold mt-0.5 shrink-0">
+                          {index + 1}
+                        </div>
+                        <span className="leading-relaxed text-sm sm:text-base">
+                          {objective}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+            )}
+
           {/* Session Progress */}
-          <Card className="bg-gradient-to-r from-primary-green-50/80 via-primary-blue-50/80 to-slate-50/80 border border-slate-200/50 shadow-sm">
+          <Card className="mb-6 sm:mb-8 bg-gradient-to-r from-primary-green-50/80 via-primary-blue-50/80 to-slate-50/80 border border-slate-200/50 shadow-sm">
             <CardContent className="p-4 sm:p-6">
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                 <div className="bg-gradient-to-r from-primary-green-500 to-primary-blue-500 rounded-lg sm:rounded-xl p-2.5 sm:p-3 shadow-sm shrink-0 hidden sm:block">
@@ -346,16 +349,15 @@ export function SessionDetail() {
                     />
                   </div>
                   <p className="text-slate-600 text-xs sm:text-sm">
-                    {
-                      sessionData.forms.filter((f) => f.status === "completed")
-                        .length
-                    }{" "}
-                    of {sessionData.forms.length} forms completed
+                    {sessionData?.forms?.filter((f) => f.status === "completed")
+                      ?.length || 0}{" "}
+                    of {sessionData?.forms?.length || 0} forms completed
                   </p>
                 </div>
               </div>
             </CardContent>
           </Card>
+
           {/* Forms Grid */}
           <div className="my-6 sm:my-8">
             <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-slate-800 mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
@@ -363,149 +365,173 @@ export function SessionDetail() {
               Session Forms
             </h2>
 
-            {/* new */}
             <div className="grid gap-4 sm:gap-6 lg:grid-cols-2">
-              {sessionData.forms.map((form) => {
-                const FormIcon = LucideIcons[form.icon];
-                const isFormCompleted = form.status === "completed";
-                const isFormUnlocked = checkFormStatus(form, sessionData.forms);
+              {sessionData.forms && sessionData.forms.length > 0 ? (
+                sessionData.forms.map((form) => {
+                  const FormIcon = LucideIcons[form.icon] || FileText; // Fallback icon
+                  const isFormCompleted = form.status === "completed";
+                  const isFormUnlocked = checkFormStatus(
+                    form,
+                    sessionData.forms
+                  );
 
-                const cardStyles = isFormCompleted
-                  ? "bg-gradient-to-br from-primary-green-50 to-emerald-50 border-primary-green-200"
-                  : isFormUnlocked
-                  ? "bg-gradient-to-br from-primary-blue-50 to-cyan-50 border-primary-blue-200"
-                  : "bg-gradient-to-br from-gray-50 to-gray-100 border-gray-200 opacity-70";
+                  const cardStyles = isFormCompleted
+                    ? "bg-gradient-to-br from-primary-green-50 to-emerald-50 border-primary-green-200"
+                    : isFormUnlocked
+                    ? "bg-gradient-to-br from-primary-blue-50 to-cyan-50 border-primary-blue-200"
+                    : "bg-gradient-to-br from-gray-50 to-gray-100 border-gray-200 opacity-70";
 
-                const iconBg = isFormCompleted
-                  ? "bg-gradient-to-r from-primary-green-500 to-emerald-500"
-                  : isFormUnlocked
-                  ? "bg-gradient-to-r from-primary-blue-500 to-cyan-500"
-                  : "bg-gray-300";
+                  const iconBg = isFormCompleted
+                    ? "bg-gradient-to-r from-primary-green-500 to-emerald-500"
+                    : isFormUnlocked
+                    ? "bg-gradient-to-r from-primary-blue-500 to-cyan-500"
+                    : "bg-gray-300";
 
-                return (
-                  <Card
-                    key={form.id}
-                    className={`relative overflow-hidden flex flex-col border shadow-sm hover:shadow-lg transition-all duration-300 rounded-lg justify-between ${cardStyles} ${
-                      isFormUnlocked ? "cursor-pointer" : "cursor-not-allowed"
-                    }`}
-                    onClick={() =>
-                      isFormUnlocked && handleFormClick(form.route)
-                    }
-                  >
-                    <CardHeader className="pb-3">
-                      <div className="flex items-start justify-between gap-4">
-                        {/* Icon */}
-                        <div
-                          className={`p-3 rounded-lg shadow-md shrink-0 ${iconBg}`}
-                        >
-                          {isFormCompleted ? (
-                            <CheckCircle className="size-6 text-white" />
-                          ) : (
-                            <FormIcon className="size-6 text-white" />
-                          )}
-                        </div>
-
-                        {/* Title & Description */}
-                        <div className="flex-1 min-w-0">
-                          <h3
-                            className={`text-lg font-bold truncate ${
-                              isFormCompleted
-                                ? "text-primary-green-800"
-                                : isFormUnlocked
-                                ? "text-primary-blue-800"
-                                : "text-gray-500"
-                            }`}
+                  return (
+                    <Card
+                      key={form.id}
+                      className={`relative overflow-hidden flex flex-col border shadow-sm hover:shadow-lg transition-all duration-300 rounded-lg justify-between ${cardStyles} ${
+                        isFormUnlocked ? "cursor-pointer" : "cursor-not-allowed"
+                      }`}
+                      onClick={() =>
+                        isFormUnlocked && handleFormClick(form.route)
+                      }
+                    >
+                      <CardHeader className="pb-3">
+                        <div className="flex items-start justify-between gap-4">
+                          {/* Icon */}
+                          <div
+                            className={`p-3 rounded-lg shadow-md shrink-0 ${iconBg}`}
                           >
-                            {form.title}
-                          </h3>
-                          <p
-                            className={`text-sm mt-1 ${
-                              isFormUnlocked
-                                ? "text-slate-600"
-                                : "text-gray-400"
-                            }`}
-                          >
-                            {form.description}
-                          </p>
-
-                          {/* Topics */}
-                          <div className="flex flex-wrap gap-1 mt-2">
-                            {form.topics
-                              .slice(0, window.innerWidth < 640 ? 2 : 3)
-                              .map((topic, idx) => (
-                                <span
-                                  key={idx}
-                                  className={`px-2 py-1 rounded text-xs font-medium ${
-                                    isFormCompleted
-                                      ? "bg-primary-green-100 text-primary-green-700"
-                                      : isFormUnlocked
-                                      ? "bg-primary-blue-100 text-primary-blue-700"
-                                      : "bg-gray-200 text-gray-500"
-                                  }`}
-                                >
-                                  {topic}
-                                </span>
-                              ))}
-                            {form.topics.length >
-                              (window.innerWidth < 640 ? 2 : 3) && (
-                              <span className="px-2 py-1 rounded text-xs font-medium bg-slate-100 text-slate-500">
-                                +
-                                {form.topics.length -
-                                  (window.innerWidth < 640 ? 2 : 3)}
-                              </span>
+                            {isFormCompleted ? (
+                              <CheckCircle className="size-6 text-white" />
+                            ) : (
+                              <FormIcon className="size-6 text-white" />
                             )}
                           </div>
-                        </div>
 
-                        {/* Status Badge */}
-                        <Badge
-                          className={`text-xs ${
-                            isFormCompleted
-                              ? "bg-primary-green-100 text-primary-green-700  hover:bg-primary-green-50 border-primary-green-300"
-                              : isFormUnlocked
-                              ? "bg-primary-blue-100 text-primary-blue-700 border-primary-blue-300 hover:bg-primary-blue-50"
-                              : "bg-yellow-100 text-yellow-800 border-yellow-300 hover:bg-yellow-50"
-                          }`}
-                        >
-                          {isFormCompleted
-                            ? "✓ Done"
-                            : isFormUnlocked
-                            ? "🚀 Start"
-                            : "🔒 Locked"}
-                        </Badge>
-                      </div>
-                    </CardHeader>
+                          {/* Title & Description */}
+                          <div className="flex-1 min-w-0">
+                            <h3
+                              className={`text-lg font-bold truncate ${
+                                isFormCompleted
+                                  ? "text-primary-green-800"
+                                  : isFormUnlocked
+                                  ? "text-primary-blue-800"
+                                  : "text-gray-500"
+                              }`}
+                            >
+                              {form.title}
+                            </h3>
+                            <p
+                              className={`text-sm mt-1 ${
+                                isFormUnlocked
+                                  ? "text-slate-600"
+                                  : "text-gray-400"
+                              }`}
+                            >
+                              {form.description}
+                            </p>
 
-                    <CardContent className="pt-0">
-                      <Button
-                        disabled={!isFormUnlocked}
-                        className={`w-full text-sm font-semibold transition-all duration-300 h-10 ${
-                          isFormCompleted
-                            ? "bg-gradient-to-r from-primary-green-500 to-emerald-500 hover:from-primary-green-600 hover:to-emerald-600"
-                            : isFormUnlocked
-                            ? "bg-gradient-to-r from-primary-blue-500 to-cyan-500 hover:from-primary-blue-600 hover:to-cyan-600"
-                            : "bg-gray-300 text-gray-500"
-                        } text-white border-0 shadow-sm hover:shadow-md active:scale-[0.98]`}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          isFormUnlocked && handleFormClick(form.route);
-                        }}
-                      >
-                        <span className="flex items-center justify-center gap-2">
-                          <span className="truncate">
+                            {/* Topics */}
+                            {form.topics && form.topics.length > 0 && (
+                              <div className="flex flex-wrap gap-1 mt-2">
+                                {form.topics
+                                  .slice(
+                                    0,
+                                    typeof window !== "undefined" &&
+                                      window.innerWidth < 640
+                                      ? 2
+                                      : 3
+                                  )
+                                  .map((topic, idx) => (
+                                    <span
+                                      key={idx}
+                                      className={`px-2 py-1 rounded text-xs font-medium ${
+                                        isFormCompleted
+                                          ? "bg-primary-green-100 text-primary-green-700"
+                                          : isFormUnlocked
+                                          ? "bg-primary-blue-100 text-primary-blue-700"
+                                          : "bg-gray-200 text-gray-500"
+                                      }`}
+                                    >
+                                      {topic}
+                                    </span>
+                                  ))}
+                                {form.topics.length >
+                                  (typeof window !== "undefined" &&
+                                  window.innerWidth < 640
+                                    ? 2
+                                    : 3) && (
+                                  <span className="px-2 py-1 rounded text-xs font-medium bg-slate-100 text-slate-500">
+                                    +
+                                    {form.topics.length -
+                                      (typeof window !== "undefined" &&
+                                      window.innerWidth < 640
+                                        ? 2
+                                        : 3)}
+                                  </span>
+                                )}
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Status Badge */}
+                          <Badge
+                            className={`text-xs ${
+                              isFormCompleted
+                                ? "bg-primary-green-100 text-primary-green-700  hover:bg-primary-green-50 border-primary-green-300"
+                                : isFormUnlocked
+                                ? "bg-primary-blue-100 text-primary-blue-700 border-primary-blue-300 hover:bg-primary-blue-50"
+                                : "bg-yellow-100 text-yellow-800 border-yellow-300 hover:bg-yellow-50"
+                            }`}
+                          >
                             {isFormCompleted
-                              ? "Review Form"
+                              ? "✓ Done"
                               : isFormUnlocked
-                              ? "Start"
-                              : "Locked"}
+                              ? "🚀 Start"
+                              : "🔒 Locked"}
+                          </Badge>
+                        </div>
+                      </CardHeader>
+
+                      <CardContent className="pt-0">
+                        <Button
+                          disabled={!isFormUnlocked}
+                          className={`w-full text-sm font-semibold transition-all duration-300 h-10 ${
+                            isFormCompleted
+                              ? "bg-gradient-to-r from-primary-green-500 to-emerald-500 hover:from-primary-green-600 hover:to-emerald-600"
+                              : isFormUnlocked
+                              ? "bg-gradient-to-r from-primary-blue-500 to-cyan-500 hover:from-primary-blue-600 hover:to-cyan-600"
+                              : "bg-gray-300 text-gray-500"
+                          } text-white border-0 shadow-sm hover:shadow-md active:scale-[0.98]`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            isFormUnlocked && handleFormClick(form.route);
+                          }}
+                        >
+                          <span className="flex items-center justify-center gap-2">
+                            <span className="truncate">
+                              {isFormCompleted
+                                ? "Review Form"
+                                : isFormUnlocked
+                                ? "Start"
+                                : "Locked"}
+                            </span>
+                            <ChevronRight className="size-4 shrink-0" />
                           </span>
-                          <ChevronRight className="size-4 shrink-0" />
-                        </span>
-                      </Button>
-                    </CardContent>
-                  </Card>
-                );
-              })}
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  );
+                })
+              ) : (
+                <div className="col-span-full text-center py-8">
+                  <p className="text-slate-500">
+                    No forms available for this session.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </div>

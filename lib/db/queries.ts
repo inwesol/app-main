@@ -1,7 +1,18 @@
 // lib/db/queries.ts - Fixed version with consistent camelCase naming
 import "server-only";
 import { hash, genSaltSync, hashSync } from "bcrypt-ts";
-import { and, asc, desc, eq, gt, gte, inArray, lt, SQL } from "drizzle-orm";
+import {
+  and,
+  asc,
+  desc,
+  eq,
+  gt,
+  gte,
+  inArray,
+  lt,
+  SQL,
+  sql,
+} from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import crypto from "crypto";
@@ -24,13 +35,33 @@ import {
   demographics_details_form,
   career_maturity_assessment,
   pre_assessment,
-  career_story_1,
   riasec_test,
   personality_test,
   psychological_wellbeing_test,
+  feedback,
+  career_story_boards,
+  dailyJournalingTable,
+  careerStoryThree,
+  letterFromFutureSelfTable,
+  careerOptionsMatrix,
+  careerStoryFours,
+  careerStoryOneTable,
+  myLifeCollageTable,
+  postCareerMaturityTable,
+  post_psychological_wellbeing_test,
+  postCoachingAssessments,
 } from "./schema";
 import { ArtifactKind } from "@/components/artifact";
 import { SESSION_TEMPLATES } from "@/lib/constants";
+import { careerStoryTwo } from "@/lib/db/schema";
+
+import type { DailyJournalingData } from "@/lib/schemas/activity-schemas/daily-journaling-schema";
+import type { CareerStoryTwoData } from "@/lib/schemas/activity-schemas/career-story-two-schema";
+import type { CareerStoryThreeData } from "@/lib/schemas/activity-schemas/career-story-three-schema";
+import { CareerOptionsMatrixData } from "../schemas/activity-schemas/career-option-matrix-schema";
+import { CareerStoryFour } from "@/lib/schemas/activity-schemas/career-story-four-schema";
+import { CareerStoryOneData } from "@/lib/schemas/activity-schemas/career-story-one-schema";
+import type { LifeCollageFormData } from "@/lib/schemas/activity-schemas/life-collage-schema";
 
 // Database connection
 const client = postgres(process.env.POSTGRES_URL!);
@@ -1184,59 +1215,6 @@ export async function upsertPreAssessment(
     });
 }
 
-export async function upsertCareerStory1(
-  userId: string,
-  answers: Record<string, "agree" | "disagree">
-) {
-  const answersJson = JSON.stringify(answers);
-
-  await db
-    .insert(career_story_1)
-    .values({
-      user_id: userId,
-      answers: answersJson,
-      created_at: new Date(),
-      updated_at: new Date(),
-    })
-    .onConflictDoUpdate({
-      target: [career_story_1.user_id],
-      set: {
-        answers: answersJson,
-        updated_at: new Date(),
-      },
-    });
-}
-
-export async function getCareerStory1(
-  userId: string
-): Promise<Record<string, "agree" | "disagree"> | null> {
-  try {
-    console.log("getCareerStory1 - Querying for userId:", userId);
-
-    const [row] = await db
-      .select()
-      .from(career_story_1)
-      .where(eq(career_story_1.user_id, userId));
-
-    console.log("getCareerStory1 - Query result:", row);
-
-    if (!row) {
-      console.log("getCareerStory1 - No row found");
-      return null;
-    }
-
-    console.log("getCareerStory1 - Raw answers:", row.answers);
-
-    const parsed = JSON.parse(row.answers);
-    console.log("getCareerStory1 - Parsed answers:", parsed);
-
-    return parsed;
-  } catch (error) {
-    console.error("getCareerStory1 - Error:", error);
-    return null;
-  }
-}
-
 export async function getRiasecTest(
   userId: string
   // sessionId?: number  // optional if you use sessions
@@ -1454,3 +1432,810 @@ export async function upsertPersonalityTest(
     });
 }
 
+// Career Story Board Functions
+export async function getCareerStoryBoard(userId: string, sessionId: number) {
+  try {
+    const [result] = await db
+      .select()
+      .from(career_story_boards)
+      .where(
+        and(
+          eq(career_story_boards.user_id, userId),
+          eq(career_story_boards.session_id, sessionId)
+        )
+      )
+      .limit(1);
+
+    if (!result) return null;
+
+    // Parse the JSON sticky_notes back to object
+    return {
+      ...result,
+      stickyNotes: result.sticky_notes,
+    };
+  } catch (error) {
+    console.error("Error fetching career story board:", error);
+    throw error;
+  }
+}
+
+export async function upsertCareerStoryBoard(
+  userId: string,
+  sessionId: number,
+  data: { stickyNotes: any[] }
+) {
+  try {
+    const stickyNotesJson = JSON.stringify(data.stickyNotes);
+
+    await db
+      .insert(career_story_boards)
+      .values({
+        user_id: userId,
+        session_id: sessionId,
+        sticky_notes: stickyNotesJson,
+        created_at: new Date(),
+        updated_at: new Date(),
+      })
+      .onConflictDoUpdate({
+        target: [career_story_boards.user_id, career_story_boards.session_id],
+        set: {
+          sticky_notes: stickyNotesJson,
+          updated_at: new Date(),
+        },
+      });
+
+    console.log("Career story board saved successfully");
+  } catch (error) {
+    console.error("Error upserting career story board:", error);
+    throw error;
+  }
+}
+
+// Add these functions to your existing queries.ts file
+
+// Get daily journaling data for a user and session
+export async function getDailyJournaling(
+  userId: string,
+  sessionId: number
+): Promise<DailyJournalingData | null> {
+  try {
+    const result = await db
+      .select()
+      .from(dailyJournalingTable)
+      .where(
+        and(
+          eq(dailyJournalingTable.userId, userId),
+          eq(dailyJournalingTable.sessionId, sessionId)
+        )
+      )
+      .limit(1);
+
+    if (result.length === 0) {
+      return null;
+    }
+
+    const data = result[0];
+
+    // Parse JSON fields safely
+    return {
+      date: data.date,
+      tookAction: data.tookAction as "yes" | "no" | "",
+      whatHeldBack: data.whatHeldBack || "",
+      challenges: data.challenges ? JSON.parse(data.challenges) : [],
+      progress: data.progress ? JSON.parse(data.progress) : [],
+      gratitude: data.gratitude ? JSON.parse(data.gratitude) : [],
+      gratitudeHelp: data.gratitudeHelp ? JSON.parse(data.gratitudeHelp) : [],
+      tomorrowStep: data.tomorrowStep || "",
+    };
+  } catch (error) {
+    console.error("Error getting daily journaling:", error);
+    throw error;
+  }
+}
+
+// Upsert daily journaling data
+export async function upsertDailyJournaling(
+  userId: string,
+  sessionId: number,
+  data: DailyJournalingData
+): Promise<void> {
+  try {
+    // Check if record exists
+    const existing = await db
+      .select({ id: dailyJournalingTable.id })
+      .from(dailyJournalingTable)
+      .where(
+        and(
+          eq(dailyJournalingTable.userId, userId),
+          eq(dailyJournalingTable.sessionId, sessionId)
+        )
+      )
+      .limit(1);
+
+    const journalData = {
+      userId,
+      sessionId,
+      date: data.date,
+      tookAction: data.tookAction || "",
+      whatHeldBack: data.whatHeldBack || "",
+      challenges: JSON.stringify(data.challenges || []),
+      progress: JSON.stringify(data.progress || []),
+      gratitude: JSON.stringify(data.gratitude || []),
+      gratitudeHelp: JSON.stringify(data.gratitudeHelp || []),
+      tomorrowStep: data.tomorrowStep || "",
+      updatedAt: new Date(),
+    };
+
+    if (existing.length > 0) {
+      // Update existing record
+      await db
+        .update(dailyJournalingTable)
+        .set(journalData)
+        .where(
+          and(
+            eq(dailyJournalingTable.userId, userId),
+            eq(dailyJournalingTable.sessionId, sessionId)
+          )
+        );
+    } else {
+      // Insert new record
+      await db.insert(dailyJournalingTable).values({
+        ...journalData,
+        createdAt: new Date(),
+      });
+    }
+  } catch (error) {
+    console.error("Error upserting daily journaling:", error);
+    throw error;
+  }
+}
+
+export async function getCareerStoryTwo(
+  userId: string,
+  sessionId: number
+): Promise<CareerStoryTwoData | null> {
+  try {
+    const result = await db
+      .select()
+      .from(careerStoryTwo)
+      .where(
+        and(
+          eq(careerStoryTwo.userId, userId),
+          eq(careerStoryTwo.sessionId, sessionId)
+        )
+      )
+      .limit(1);
+
+    if (result.length === 0) {
+      return null;
+    }
+
+    const data = result[0];
+    return {
+      firstAdjectives: data.firstAdjectives,
+      repeatedWords: data.repeatedWords,
+      commonTraits: data.commonTraits,
+      significantWords: data.significantWords,
+      selfStatement: data.selfStatement,
+      mediaActivities: data.mediaActivities,
+      selectedRiasec: data.selectedRiasec,
+      settingStatement: data.settingStatement,
+    };
+  } catch (error) {
+    console.error("Error fetching career story two:", error);
+    throw error;
+  }
+}
+
+export async function upsertCareerStoryTwo(
+  userId: string,
+  sessionId: number,
+  data: CareerStoryTwoData
+): Promise<void> {
+  try {
+    const existingRecord = await db
+      .select()
+      .from(careerStoryTwo)
+      .where(
+        and(
+          eq(careerStoryTwo.userId, userId),
+          eq(careerStoryTwo.sessionId, sessionId)
+        )
+      )
+      .limit(1);
+
+    const recordData = {
+      userId,
+      sessionId,
+      firstAdjectives: data.firstAdjectives,
+      repeatedWords: data.repeatedWords,
+      commonTraits: data.commonTraits,
+      significantWords: data.significantWords,
+      selfStatement: data.selfStatement,
+      mediaActivities: data.mediaActivities,
+      selectedRiasec: data.selectedRiasec,
+      settingStatement: data.settingStatement,
+      updatedAt: new Date(),
+    };
+
+    if (existingRecord.length > 0) {
+      // Update existing record
+      await db
+        .update(careerStoryTwo)
+        .set(recordData)
+        .where(
+          and(
+            eq(careerStoryTwo.userId, userId),
+            eq(careerStoryTwo.sessionId, sessionId)
+          )
+        );
+    } else {
+      // Insert new record
+      await db.insert(careerStoryTwo).values({
+        ...recordData,
+        createdAt: new Date(),
+      });
+    }
+  } catch (error) {
+    console.error("Error upserting career story two:", error);
+    throw error;
+  }
+}
+
+export async function getCareerStoryThree(
+  userId: string,
+  sessionId: number
+): Promise<CareerStoryThreeData | null> {
+  try {
+    const result = await db
+      .select()
+      .from(careerStoryThree)
+      .where(
+        and(
+          eq(careerStoryThree.userId, userId),
+          eq(careerStoryThree.sessionId, sessionId)
+        )
+      )
+      .limit(1);
+
+    if (result.length === 0) {
+      return null;
+    }
+
+    const data = result[0];
+    return {
+      selfStatement: data.selfStatement,
+      settingStatement: data.settingStatement,
+      plotDescription: data.plotDescription,
+      plotActivities: data.plotActivities,
+      ableToBeStatement: data.ableToBeStatement,
+      placesWhereStatement: data.placesWhereStatement,
+      soThatStatement: data.soThatStatement,
+      mottoStatement: data.mottoStatement,
+      selectedOccupations: data.selectedOccupations,
+    };
+  } catch (error) {
+    console.error("Error fetching career story three:", error);
+    throw error;
+  }
+}
+
+export async function upsertCareerStoryThree(
+  userId: string,
+  sessionId: number,
+  data: CareerStoryThreeData
+): Promise<void> {
+  try {
+    await db
+      .insert(careerStoryThree)
+      .values({
+        userId,
+        sessionId,
+        selfStatement: data.selfStatement,
+        settingStatement: data.settingStatement,
+        plotDescription: data.plotDescription,
+        plotActivities: data.plotActivities,
+        ableToBeStatement: data.ableToBeStatement,
+        placesWhereStatement: data.placesWhereStatement,
+        soThatStatement: data.soThatStatement,
+        mottoStatement: data.mottoStatement,
+        selectedOccupations: data.selectedOccupations,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .onConflictDoUpdate({
+        target: [careerStoryThree.userId, careerStoryThree.sessionId],
+        set: {
+          selfStatement: data.selfStatement,
+          settingStatement: data.settingStatement,
+          plotDescription: data.plotDescription,
+          plotActivities: data.plotActivities,
+          ableToBeStatement: data.ableToBeStatement,
+          placesWhereStatement: data.placesWhereStatement,
+          soThatStatement: data.soThatStatement,
+          mottoStatement: data.mottoStatement,
+          selectedOccupations: data.selectedOccupations,
+          updatedAt: new Date(),
+        },
+      });
+  } catch (error) {
+    console.error("Error upserting career story three:", error);
+    throw error;
+  }
+}
+
+// Add these functions to your existing queries.ts file
+
+export async function getLetterFromFutureSelf(
+  userId: string,
+  sessionId: number
+) {
+  const result = await db.query.letterFromFutureSelfTable.findFirst({
+    where: and(
+      eq(letterFromFutureSelfTable.userId, userId),
+      eq(letterFromFutureSelfTable.sessionId, sessionId)
+    ),
+  });
+
+  return result;
+}
+
+export async function upsertLetterFromFutureSelf(
+  userId: string,
+  sessionId: number,
+  data: {
+    letter: string;
+  }
+) {
+  await db
+    .insert(letterFromFutureSelfTable)
+    .values({
+      userId,
+      sessionId,
+      letter: data.letter,
+      updatedAt: new Date(),
+    })
+    .onConflictDoUpdate({
+      target: [
+        letterFromFutureSelfTable.userId,
+        letterFromFutureSelfTable.sessionId,
+      ],
+      set: {
+        letter: data.letter,
+        updatedAt: new Date(),
+      },
+    });
+}
+
+export async function getCareerOptionsMatrix(
+  userId: string,
+  sessionId: number
+) {
+  try {
+    const result = await db
+      .select()
+      .from(careerOptionsMatrix)
+      .where(
+        and(
+          eq(careerOptionsMatrix.userId, userId),
+          eq(careerOptionsMatrix.sessionId, sessionId)
+        )
+      )
+      .limit(1);
+
+    if (result.length === 0) {
+      return null;
+    }
+
+    const data = result[0];
+
+    // Return the data in the expected format
+    return {
+      rows: data.rows,
+      columns: data.columns,
+      cells: data.cells,
+    };
+  } catch (error) {
+    console.error("Error getting career options matrix:", error);
+    throw error;
+  }
+}
+
+// Upsert Career Options Matrix
+export async function upsertCareerOptionsMatrix(
+  userId: string,
+  sessionId: number,
+  data: CareerOptionsMatrixData
+) {
+  try {
+    const existingRecord = await db
+      .select({ id: careerOptionsMatrix.id })
+      .from(careerOptionsMatrix)
+      .where(
+        and(
+          eq(careerOptionsMatrix.userId, userId),
+          eq(careerOptionsMatrix.sessionId, sessionId)
+        )
+      )
+      .limit(1);
+
+    if (existingRecord.length > 0) {
+      // Update existing record
+      await db
+        .update(careerOptionsMatrix)
+        .set({
+          rows: data.rows,
+          columns: data.columns,
+          cells: data.cells,
+          updatedAt: new Date(),
+        })
+        .where(
+          and(
+            eq(careerOptionsMatrix.userId, userId),
+            eq(careerOptionsMatrix.sessionId, sessionId)
+          )
+        );
+    } else {
+      // Insert new record
+      await db.insert(careerOptionsMatrix).values({
+        userId,
+        sessionId,
+        rows: data.rows,
+        columns: data.columns,
+        cells: data.cells,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+    }
+  } catch (error) {
+    console.error("Error upserting career options matrix:", error);
+    throw error;
+  }
+}
+
+export async function getCareerStoryFour(
+  userId: string,
+  sessionId: number
+): Promise<CareerStoryFour | null> {
+  try {
+    const [result] = await db
+      .select({
+        rewrittenStory: careerStoryFours.rewrittenStory,
+      })
+      .from(careerStoryFours)
+      .where(
+        and(
+          eq(careerStoryFours.userId, userId),
+          eq(careerStoryFours.sessionId, sessionId)
+        )
+      )
+      .limit(1);
+
+    if (!result) {
+      return null;
+    }
+
+    return {
+      rewrittenStory: result.rewrittenStory,
+    };
+  } catch (error) {
+    console.error("Error fetching career story four:", error);
+    throw new Error("Failed to fetch career story four");
+  }
+}
+
+// Upsert career story four data
+export async function upsertCareerStoryFour(
+  userId: string,
+  sessionId: number,
+  data: CareerStoryFour
+): Promise<void> {
+  try {
+    await db
+      .insert(careerStoryFours)
+      .values({
+        userId,
+        sessionId,
+        rewrittenStory: data.rewrittenStory,
+        updatedAt: new Date(),
+      })
+      .onConflictDoUpdate({
+        target: [careerStoryFours.userId, careerStoryFours.sessionId],
+        set: {
+          rewrittenStory: data.rewrittenStory,
+          updatedAt: new Date(),
+        },
+      });
+
+    console.log("Career story four upserted successfully");
+  } catch (error) {
+    console.error("Error upserting career story four:", error);
+    throw new Error("Failed to save career story four");
+  }
+}
+
+export async function getCareerStoryOne(
+  userId: string,
+  sessionId: number
+): Promise<CareerStoryOneData | null> {
+  try {
+    const result = await db.query.careerStoryOneTable.findFirst({
+      where: and(
+        eq(careerStoryOneTable.userId, userId),
+        eq(careerStoryOneTable.sessionId, sessionId)
+      ),
+    });
+
+    if (!result) {
+      return null;
+    }
+
+    return {
+      transitionEssay: result.transitionEssay,
+      occupations: result.occupations,
+      heroes: result.heroes as Array<{
+        id: string;
+        title: string;
+        description: string;
+      }>,
+    };
+  } catch (error) {
+    console.error("Error getting career story one:", error);
+    return null;
+  }
+}
+
+export async function upsertCareerStoryOne(
+  userId: string,
+  sessionId: number,
+  data: CareerStoryOneData
+): Promise<void> {
+  try {
+    await db
+      .insert(careerStoryOneTable)
+      .values({
+        userId,
+        sessionId,
+        transitionEssay: data.transitionEssay,
+        occupations: data.occupations,
+        heroes: data.heroes,
+        updatedAt: new Date(),
+      })
+      .onConflictDoUpdate({
+        target: [careerStoryOneTable.userId, careerStoryOneTable.sessionId],
+        set: {
+          transitionEssay: data.transitionEssay,
+          occupations: data.occupations,
+          heroes: data.heroes,
+          updatedAt: new Date(),
+        },
+      });
+  } catch (error) {
+    console.error("Error upserting career story one:", error);
+    throw error;
+  }
+}
+
+export async function getMyLifeCollage(userId: string, sessionId: number) {
+  try {
+    const result = await db
+      .select()
+      .from(myLifeCollageTable)
+      .where(
+        and(
+          eq(myLifeCollageTable.userId, userId),
+          eq(myLifeCollageTable.sessionId, sessionId)
+        )
+      )
+      .limit(1);
+
+    if (result.length === 0) {
+      return null;
+    }
+
+    const data = result[0];
+
+    return {
+      presentLifeCollage: data.presentLifeCollage || [],
+      futureLifeCollage: data.futureLifeCollage || [],
+      retirementValues: data.retirementValues || "",
+    };
+  } catch (error) {
+    console.error("Error fetching my life collage:", error);
+    throw error;
+  }
+}
+
+// Upsert my life collage data
+export async function upsertMyLifeCollage(
+  userId: string,
+  sessionId: number,
+  data: LifeCollageFormData
+) {
+  try {
+    const result = await db
+      .insert(myLifeCollageTable)
+      .values({
+        userId,
+        sessionId,
+        presentLifeCollage: data.presentLifeCollage,
+        futureLifeCollage: data.futureLifeCollage,
+        retirementValues: data.retirementValues,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .onConflictDoUpdate({
+        target: [myLifeCollageTable.userId, myLifeCollageTable.sessionId],
+        set: {
+          presentLifeCollage: data.presentLifeCollage,
+          futureLifeCollage: data.futureLifeCollage,
+          retirementValues: data.retirementValues,
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
+
+    return result[0];
+  } catch (error) {
+    console.error("Error upserting my life collage:", error);
+    throw error;
+  }
+}
+
+export async function upsertPostCareerMaturityAssessment(
+  userId: string,
+  sessionId: number,
+  answers: Record<string, string>
+) {
+  await db
+    .insert(postCareerMaturityTable)
+    .values({
+      user_id: userId,
+      answers: answers,
+    })
+    .onConflictDoUpdate({
+      target: [postCareerMaturityTable.user_id],
+      set: {
+        answers: answers,
+        updated_at: sql`CURRENT_TIMESTAMP`,
+      },
+    });
+}
+
+export async function getPostCareerMaturityAssessment(
+  userId: string,
+  sessionId: number
+) {
+  const result = await db
+    .select()
+    .from(postCareerMaturityTable)
+    .where(eq(postCareerMaturityTable.user_id, userId))
+    .limit(1);
+
+  if (!result[0]) return null;
+
+  return result[0]; // No need to parse for jsonb
+}
+
+// Add these functions to your queries.ts file
+export async function getPostPsychologicalWellbeingTest(
+  userId: string,
+  sessionId: number
+): Promise<{
+  answers: Record<string, string>;
+  score: string;
+  subscaleScores: Record<string, number>;
+} | null> {
+  const [row] = await db
+    .select()
+    .from(post_psychological_wellbeing_test)
+    .where(
+      and(
+        eq(post_psychological_wellbeing_test.user_id, userId),
+        eq(post_psychological_wellbeing_test.session_id, sessionId)
+      )
+    );
+  if (!row) return null;
+  try {
+    return {
+      answers: JSON.parse(row.answers),
+      score: row.score,
+      subscaleScores: row.subscale_scores,
+    };
+  } catch (error) {
+    console.error(
+      "JSON parse error in getPostPsychologicalWellbeingTest:",
+      error
+    );
+    return null;
+  }
+}
+
+export async function upsertPostPsychologicalWellbeingTest(
+  userId: string,
+  sessionId: number,
+  score: number,
+  answers: Record<string, string>,
+  subscaleScores: Record<string, number>
+) {
+  await db
+    .insert(post_psychological_wellbeing_test)
+    .values({
+      user_id: userId,
+      session_id: sessionId,
+      answers: JSON.stringify(answers),
+      score,
+      subscale_scores: subscaleScores,
+      created_at: new Date(),
+      updated_at: new Date(),
+    })
+    .onConflictDoUpdate({
+      target: [
+        post_psychological_wellbeing_test.user_id,
+        post_psychological_wellbeing_test.session_id,
+      ],
+      set: {
+        answers: JSON.stringify(answers),
+        score,
+        subscale_scores: subscaleScores,
+        updated_at: new Date(),
+      },
+    });
+}
+
+export async function getPostCoachingAssessment(
+  userId: string,
+  sessionId: number
+) {
+  try {
+    const result = await db
+      .select()
+      .from(postCoachingAssessments)
+      .where(
+        and(
+          eq(postCoachingAssessments.userId, userId),
+          eq(postCoachingAssessments.sessionId, sessionId)
+        )
+      )
+      .limit(1);
+
+    return result[0] || null;
+  } catch (error) {
+    console.error("Error fetching post-coaching assessment:", error);
+    throw error;
+  }
+}
+
+export async function upsertPostCoachingAssessment(
+  userId: string,
+  sessionId: number,
+  answers: Record<string, number>
+) {
+  try {
+    const result = await db
+      .insert(postCoachingAssessments)
+      .values({
+        userId,
+        sessionId,
+        answers,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .onConflictDoUpdate({
+        target: [
+          postCoachingAssessments.userId,
+          postCoachingAssessments.sessionId,
+        ],
+        set: {
+          answers,
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
+
+    return result[0];
+  } catch (error) {
+    console.error("Error upserting post-coaching assessment:", error);
+    throw error;
+  }
+}

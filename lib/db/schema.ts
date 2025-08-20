@@ -183,7 +183,10 @@ import {
   integer,
   unique,
   numeric,
+  uniqueIndex,
+  jsonb,
 } from "drizzle-orm/pg-core";
+import { z } from "zod";
 
 export const user = pgTable("User", {
   id: uuid("id").primaryKey().notNull().defaultRandom(),
@@ -453,28 +456,6 @@ export const pre_assessment = pgTable(
   })
 );
 
-export const career_story_1 = pgTable(
-  "career_story_1",
-
-  {
-    id: uuid("id").primaryKey().notNull().defaultRandom(),
-
-    user_id: uuid("user_id").notNull(),
-
-    // session_id: integer("session_id").notNull(),
-
-    answers: varchar("answers", { length: 4000 }).notNull(),
-
-    created_at: timestamp("created_at").defaultNow().notNull(),
-
-    updated_at: timestamp("updated_at").defaultNow().notNull(),
-  },
-
-  (table) => ({
-    userUnique: unique().on(table.user_id),
-  })
-);
-
 export const riasec_test = pgTable(
   "riasec_test",
   {
@@ -585,3 +566,247 @@ export const feedback = pgTable("feedback", {
 
 export type Feedback = typeof feedback.$inferInsert;
 export type FeedbackSelect = typeof feedback.$inferSelect;
+
+// Add this table definition to your existing schema.ts file
+export const career_story_boards = pgTable(
+  "career_story_boards",
+  {
+    id: uuid("id").primaryKey().notNull().defaultRandom(),
+    user_id: varchar("user_id", { length: 255 }).notNull(),
+    session_id: integer("session_id").notNull(),
+    sticky_notes: json("sticky_notes").notNull(),
+    created_at: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updated_at: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => ({
+    userSessionIdx: uniqueIndex("career_story_boards_user_session_idx").on(
+      table.user_id,
+      table.session_id
+    ),
+  })
+);
+
+// Add this type export at the bottom of your schema.ts file
+export type CareerStoryBoard = typeof career_story_boards.$inferSelect;
+export type NewCareerStoryBoard = typeof career_story_boards.$inferInsert;
+
+export const dailyJournalingTable = pgTable("daily_journaling", {
+  id: uuid("id").primaryKey().notNull().defaultRandom(),
+  userId: varchar("user_id", { length: 255 }).notNull(),
+  sessionId: integer("session_id").notNull(),
+  date: varchar("date", { length: 10 }).notNull(), // YYYY-MM-DD format
+  tookAction: varchar("took_action", { length: 3 }).default(""), // "yes", "no", or ""
+  whatHeldBack: text("what_held_back").default(""),
+  challenges: text("challenges").default("[]"), // JSON string
+  progress: text("progress").default("[]"), // JSON string
+  gratitude: text("gratitude").default("[]"), // JSON string
+  gratitudeHelp: text("gratitude_help").default("[]"), // JSON string
+  tomorrowStep: text("tomorrow_step").default(""),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Export the table type for TypeScript
+export type DailyJournalingTable = typeof dailyJournalingTable;
+
+export const careerStoryTwo = pgTable(
+  "career_story_two",
+  {
+    id: uuid("id").primaryKey().notNull().defaultRandom(),
+    userId: varchar("user_id", { length: 255 }).notNull(),
+    sessionId: integer("session_id").notNull(),
+    firstAdjectives: text("first_adjectives").notNull(),
+    repeatedWords: text("repeated_words").notNull(),
+    commonTraits: text("common_traits").notNull(),
+    significantWords: text("significant_words").notNull(),
+    selfStatement: text("self_statement").notNull(),
+    mediaActivities: text("media_activities").notNull(),
+    selectedRiasec: jsonb("selected_riasec").notNull().default([]),
+    settingStatement: text("setting_statement").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+  },
+  (table) => {
+    return {
+      userSessionUnique: uniqueIndex("career_story_two_user_session_unique").on(
+        table.userId,
+        table.sessionId
+      ),
+    };
+  }
+);
+
+export const careerStoryThree = pgTable(
+  "career_story_three",
+  {
+    id: uuid("id").primaryKey().notNull().defaultRandom(),
+    userId: text("user_id").notNull(),
+    sessionId: integer("session_id").notNull(),
+    selfStatement: text("self_statement").notNull(),
+    settingStatement: text("setting_statement").notNull(),
+    plotDescription: text("plot_description").notNull(),
+    plotActivities: text("plot_activities").notNull(),
+    ableToBeStatement: text("able_to_be_statement").notNull(),
+    placesWhereStatement: text("places_where_statement").notNull(),
+    soThatStatement: text("so_that_statement").notNull(),
+    mottoStatement: text("motto_statement").notNull(),
+    selectedOccupations: jsonb("selected_occupations").notNull().default([]),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+  },
+  (table) => ({
+    userSessionUnique: unique().on(table.userId, table.sessionId),
+  })
+);
+
+export const letterFromFutureSelfTable = pgTable(
+  "letter_from_future_self",
+  {
+    id: uuid("id").primaryKey().notNull().defaultRandom(),
+    userId: varchar("user_id").notNull(),
+    sessionId: integer("session_id").notNull(),
+    letter: text("letter").notNull(),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (table) => ({
+    uniqueUserSession: unique().on(table.userId, table.sessionId),
+  })
+);
+
+export const careerOptionsMatrix = pgTable("career_options_matrix", {
+  id: uuid("id").primaryKey().notNull().defaultRandom(),
+  userId: varchar("user_id", { length: 255 }).notNull(),
+  sessionId: integer("session_id").notNull(),
+  rows: jsonb("rows").notNull(), // Array of MatrixRow objects
+  columns: jsonb("columns").notNull(), // Array of MatrixColumn objects
+  cells: jsonb("cells").notNull(), // Array of MatrixCell objects
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const careerStoryFours = pgTable(
+  "career_story_fours",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: text("user_id").notNull(),
+    sessionId: integer("session_id").notNull(),
+    rewrittenStory: text("rewritten_story").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+  },
+  (table) => ({
+    userSessionUnique: unique().on(table.userId, table.sessionId),
+  })
+);
+
+export const careerStoryOneTable = pgTable(
+  "career_story_one",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    userId: text("user_id").notNull(),
+    sessionId: integer("session_id").notNull(),
+    transitionEssay: text("transition_essay").notNull(),
+    occupations: text("occupations").notNull(),
+    heroes: jsonb("heroes")
+      .$type<
+        Array<{
+          id: string;
+          title: string;
+          description: string;
+        }>
+      >()
+      .notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (table) => ({
+    userSessionIdx: uniqueIndex("career_story_one_user_session_idx").on(
+      table.userId,
+      table.sessionId
+    ),
+  })
+);
+
+export const myLifeCollageTable = pgTable(
+  "my_life_collage",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: varchar("user_id", { length: 255 }).notNull(),
+    sessionId: integer("session_id").notNull(),
+    presentLifeCollage: jsonb("present_life_collage").notNull().default([]),
+    futureLifeCollage: jsonb("future_life_collage").notNull().default([]),
+    retirementValues: text("retirement_values").notNull().default(""),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+  },
+  (table) => ({
+    userSessionUnique: unique("my_life_collage_user_session_unique").on(
+      table.userId,
+      table.sessionId
+    ),
+  })
+);
+
+export const postCareerMaturityTable = pgTable(
+  "post_career_maturity",
+  {
+    id: uuid("id").primaryKey().notNull().defaultRandom(),
+    user_id: uuid("user_id")
+      .notNull()
+      .references(() => user.id),
+    answers: jsonb("answers").notNull(),
+    created_at: timestamp("created_at").defaultNow().notNull(),
+    updated_at: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (table) => ({
+    userSessionUnique: unique().on(table.user_id),
+  })
+);
+
+export type PostCareerMaturity = typeof postCareerMaturityTable.$inferSelect;
+export type InsertPostCareerMaturity =
+  typeof postCareerMaturityTable.$inferInsert;
+
+// Add this to your schema.ts file exports
+export const post_psychological_wellbeing_test = pgTable(
+  "post_psychological_wellbeing_test",
+  {
+    id: uuid("id").primaryKey().notNull().defaultRandom(),
+    user_id: uuid("user_id").notNull(),
+    session_id: integer("session_id").notNull(),
+    answers: varchar("answers", { length: 4000 }).notNull(), // JSON string of answers
+    score: numeric("score", { precision: 5, scale: 2 }).notNull().default("0"), // float score
+    subscale_scores: json("subscale_scores")
+      .$type<Record<string, number>>()
+      .notNull()
+      .default({}), // empty JSON object default
+    created_at: timestamp("created_at").defaultNow().notNull(),
+    updated_at: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (table) => ({
+    userSessionUnique: unique().on(table.user_id, table.session_id), // unique constraint on user_id + session_id
+  })
+);
+
+export const postCoachingAssessments = pgTable(
+  "post_coaching_assessments",
+  {
+    id: uuid("id").primaryKey().notNull().defaultRandom(),
+    userId: varchar("user_id", { length: 255 }).notNull(),
+    sessionId: integer("session_id").notNull(),
+    answers: jsonb("answers").notNull(),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (table) => ({
+    uniqueUserSession: unique("unique_user_session_post_coaching").on(
+      table.userId,
+      table.sessionId
+    ),
+  })
+);

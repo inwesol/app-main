@@ -3,8 +3,8 @@
 import * as React from "react";
 import type { User } from "next-auth";
 import Image from "next/image";
-import { useRouter, usePathname } from "next/navigation";
-import { MessageSquare, PlusIcon, ChevronLeft, Map } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { MessageSquare, PlusIcon, ChevronLeft } from "lucide-react";
 import { SidebarHistory } from "@/components/sidebar-history";
 import { SidebarUserNav } from "@/components/sidebar-user-nav";
 import { Button } from "@/components/ui/button";
@@ -35,19 +35,53 @@ const data = {
   navMain: [
     {
       title: "Chat History",
-      url: "/",
+      url: "#",
       icon: MessageSquare,
       isActive: true,
-      hasNestedSidebar: true,
     },
-    {
-      title: "Journey",
-      url: "/journey",
-      icon: Map,
-      isActive: false,
-      hasNestedSidebar: false,
-    },
+    //   {
+    //     title: "Inbox",
+    //     url: "#",
+    //     icon: Inbox,
+    //     isActive: false,
+    //   },
+    //   {
+    //     title: "Drafts",
+    //     url: "#",
+    //     icon: File,
+    //     isActive: false,
+    //   },
+    //   {
+    //     title: "Sent",
+    //     url: "#",
+    //     icon: Send,
+    //     isActive: false,
+    //   },
+    //   {
+    //     title: "Junk",
+    //     url: "#",
+    //     icon: ArchiveX,
+    //     isActive: false,
+    //   },
+    //   {
+    //     title: "Trash",
+    //     url: "#",
+    //     icon: Trash2,
+    //     isActive: false,
+    //   },
   ],
+  // Commented out mail data since we're not using it anymore
+  // mails: [
+  //   {
+  //     name: "William Smith",
+  //     email: "williamsmith@example.com",
+  //     subject: "Meeting Tomorrow",
+  //     date: "09:34 AM",
+  //     teaser:
+  //       "Hi team, just a reminder about our meeting tomorrow at 10 AM.\nPlease come prepared with your project updates.",
+  //   },
+  //   // ... rest of mail data
+  // ],
 };
 
 export function AppSidebar({
@@ -55,29 +89,9 @@ export function AppSidebar({
   ...props
 }: { user: User | undefined } & React.ComponentProps<typeof Sidebar>) {
   const router = useRouter();
-  const pathname = usePathname();
+  const [activeItem, setActiveItem] = React.useState(data.navMain[0]);
   const { setOpen, setOpenMobile, isMobile } = useSidebar();
   const [showSecondSidebar, setShowSecondSidebar] = React.useState(false);
-
-  // Determine if we're on a chat page (root or any chat route)
-  const isChatPage = pathname === "/" || pathname.startsWith("/chat");
-
-  // Set active item based on current route
-  const activeItem = React.useMemo(() => {
-    if (isChatPage) {
-      return data.navMain.find((item) => item.title === "Chat History");
-    } else if (pathname.startsWith("/journey")) {
-      return data.navMain.find((item) => item.title === "Journey");
-    }
-    return data.navMain[0];
-  }, [pathname, isChatPage]);
-
-  // Close nested sidebar when navigating away from chat page
-  React.useEffect(() => {
-    if (!isChatPage) {
-      setShowSecondSidebar(false);
-    }
-  }, [isChatPage]);
 
   // Handler for new chat creation
   const handleNewChat = () => {
@@ -89,23 +103,11 @@ export function AppSidebar({
 
   // Handle navigation item click
   const handleNavItemClick = (item: (typeof data.navMain)[0]) => {
-    if (item.hasNestedSidebar && isMobile) {
+    setActiveItem(item);
+    if (isMobile) {
       setShowSecondSidebar(true);
     } else {
-      // For navigation away from chat page, close nested sidebar first
-      if (isChatPage && !item.hasNestedSidebar) {
-        setShowSecondSidebar(false);
-        // Small delay to allow UI to update before navigation
-        setTimeout(() => {
-          setOpenMobile(false);
-          router.push(item.url);
-        }, 100);
-      } else {
-        // Direct navigation for items without nested sidebar or when not on chat page
-        setOpenMobile(false);
-        setShowSecondSidebar(false);
-        router.push(item.url);
-      }
+      setOpen(true);
     }
   };
 
@@ -114,20 +116,63 @@ export function AppSidebar({
     setShowSecondSidebar(false);
   };
 
-  // Function to render content based on active item (only for chat page)
+  // Function to render content based on active item
   const renderContent = () => {
-    if (activeItem?.title === "Chat History" && isChatPage) {
-      return (
-        <div className="p-2">
-          <SidebarHistory user={user} />
-        </div>
-      );
+    switch (activeItem?.title) {
+      case "Chat History":
+        return (
+          <div className="p-2">
+            <SidebarHistory user={user} />
+          </div>
+        );
+
+      // case "Inbox":
+      //   // TODO: Add Inbox component here
+      //   return (
+      //     <div className="p-4 text-sm text-muted-foreground">
+      //       Inbox component will be added here
+      //     </div>
+      //   );
+
+      // case "Drafts":
+      //   // TODO: Add Drafts component here
+      //   return (
+      //     <div className="p-4 text-sm text-muted-foreground">
+      //       Drafts component will be added here
+      //     </div>
+      //   );
+
+      // case "Sent":
+      //   // TODO: Add Sent component here
+      //   return (
+      //     <div className="p-4 text-sm text-muted-foreground">
+      //       Sent component will be added here
+      //     </div>
+      //   );
+
+      // case "Junk":
+      //   // TODO: Add Junk component here
+      //   return (
+      //     <div className="p-4 text-sm text-muted-foreground">
+      //       Junk component will be added here
+      //     </div>
+      //   );
+
+      // case "Trash":
+      //   // TODO: Add Trash component here
+      //   return (
+      //     <div className="p-4 text-sm text-muted-foreground">
+      //       Trash component will be added here
+      //     </div>
+      //   );
+
+      default:
+        return (
+          <div className="p-4 text-sm text-muted-foreground">
+            Select an item from the sidebar
+          </div>
+        );
     }
-    return (
-      <div className="p-4 text-sm text-muted-foreground">
-        Select an item from the sidebar
-      </div>
-    );
   };
 
   return (
@@ -173,24 +218,22 @@ export function AppSidebar({
                   </SidebarMenuItem>
                 </SidebarMenu>
 
-                {/* New Chat Button - Top Right Icon for Mobile (only show on chat page) */}
-                {isChatPage && (
-                  <div className="absolute top-4 right-4">
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={handleNewChat}
-                          className="size-8 p-0 rounded-md border-2 border-black bg-transparent "
-                        >
-                          <PlusIcon className="size-4 text-black" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent align="end">New Chat</TooltipContent>
-                    </Tooltip>
-                  </div>
-                )}
+                {/* New Chat Button - Top Right Icon for Mobile */}
+                <div className="absolute top-4 right-4">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleNewChat}
+                        className="size-8 p-0 rounded-md border-2 border-black bg-transparent "
+                      >
+                        <PlusIcon className="size-4 text-black" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent align="end">New Chat</TooltipContent>
+                  </Tooltip>
+                </div>
               </SidebarHeader>
               <SidebarContent>
                 <SidebarGroup>
@@ -217,7 +260,7 @@ export function AppSidebar({
               </SidebarFooter>
             </>
           ) : (
-            // Inner sidebar for mobile (only for chat page with nested sidebar)
+            // Inner sidebar for mobile
             <>
               <SidebarHeader className="gap-3.5 border-b p-4">
                 <div className="flex w-full items-center justify-between">
@@ -275,7 +318,7 @@ export function AppSidebar({
       ) : (
         // Desktop: Both sidebars side by side
         <>
-          {/* First sidebar - Main navigation (always visible) */}
+          {/* First sidebar - Main navigation */}
           <Sidebar
             collapsible="none"
             className="!w-[calc(var(--sidebar-width-icon)_+_2px)] border-r !bg-[rgba(16,185,129,0.1)] relative"
@@ -337,56 +380,54 @@ export function AppSidebar({
             </SidebarFooter>
           </Sidebar>
 
-          {/* Second sidebar - Content area (only for chat page) */}
-          {isChatPage && activeItem?.hasNestedSidebar && (
-            <Sidebar
-              collapsible="none"
-              className="flex-1 !bg-[rgba(16,185,129,0.1)]"
-            >
-              <SidebarHeader className="gap-3.5 border-b p-4 mr-10">
-                <div className="flex w-full items-center justify-between">
-                  <div className="text-base font-medium text-foreground">
-                    {activeItem?.title}
-                  </div>
-                  {activeItem?.title === "Chat History" ? (
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          type="button"
-                          className="p-2 h-fit hover:bg-transparent"
-                          onClick={handleNewChat}
-                        >
-                          <PlusIcon />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent align="end">New Chat</TooltipContent>
-                    </Tooltip>
-                  ) : (
-                    <Label className="flex items-center gap-2 text-sm">
-                      <span>Unreads</span>
-                      <Switch className="shadow-none" />
-                    </Label>
-                  )}
+          {/* Second sidebar - Content area */}
+          <Sidebar
+            collapsible="none"
+            className="flex-1 !bg-[rgba(16,185,129,0.1)]"
+          >
+            <SidebarHeader className="gap-3.5 border-b p-4 mr-10">
+              <div className="flex w-full items-center justify-between">
+                <div className="text-base font-medium text-foreground">
+                  {activeItem?.title}
                 </div>
-                <SidebarInput
-                  placeholder={
-                    activeItem?.title === "Chat History"
-                      ? "Search chats..."
-                      : `Search ${activeItem?.title.toLowerCase()}...`
-                  }
-                />
-              </SidebarHeader>
-              <SidebarContent>
-                <SidebarGroup className="pr-10">
-                  <SidebarGroupContent>
-                    <div></div>
-                    {renderContent()}
-                  </SidebarGroupContent>
-                </SidebarGroup>
-              </SidebarContent>
-            </Sidebar>
-          )}
+                {activeItem?.title === "Chat History" ? (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        type="button"
+                        className="p-2 h-fit hover:bg-transparent"
+                        onClick={handleNewChat}
+                      >
+                        <PlusIcon />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent align="end">New Chat</TooltipContent>
+                  </Tooltip>
+                ) : (
+                  <Label className="flex items-center gap-2 text-sm">
+                    <span>Unreads</span>
+                    <Switch className="shadow-none" />
+                  </Label>
+                )}
+              </div>
+              <SidebarInput
+                placeholder={
+                  activeItem?.title === "Chat History"
+                    ? "Search chats..."
+                    : `Search ${activeItem?.title.toLowerCase()}...`
+                }
+              />
+            </SidebarHeader>
+            <SidebarContent>
+              <SidebarGroup className="pr-10">
+                <SidebarGroupContent>
+                  <div></div>
+                  {renderContent()}
+                </SidebarGroupContent>
+              </SidebarGroup>
+            </SidebarContent>
+          </Sidebar>
         </>
       )}
     </Sidebar>

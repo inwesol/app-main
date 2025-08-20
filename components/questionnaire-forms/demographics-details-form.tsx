@@ -137,7 +137,7 @@ export function DemographicsDetailsForm() {
     if (res.ok) {
       setIsSubmitted(true);
       setTimeout(() => {
-        router.push("/journey");
+        router.push("/journey/sessions/0");
       }, 2000);
     } else {
       setIsSubmitted(false);
@@ -935,7 +935,7 @@ export function DemographicsDetailsForm() {
                                 className="animate-spin size-5 mr-2 text-white"
                                 xmlns="http://www.w3.org/2000/svg"
                                 fill="none"
-                                viewBox="0 0 24 24"
+                                // viewBox="0 0 24 24"
                               >
                                 <circle
                                   className="opacity-25"

@@ -5,7 +5,9 @@ import { PreAssessment } from "@/components/questionnaire-forms/pre-assessment";
 import PsychologicalWellbeing from "@/components/questionnaire-forms/psychological-wellbeing";
 import RiasecTest from "@/components/questionnaire-forms/riasecTest";
 import { notFound } from "next/navigation";
-
+import { PostCareerMaturity } from "@/components/questionnaire-forms/post-career-maturity";
+import PostPsychologicalWellbeing from "@/components/questionnaire-forms/post-psychological-wellbeing";
+import { PostCoachingTest } from "@/app/postCoaching/post-coaching";
 interface PageProps {
   params: { qId: string; sessionId: string };
 }
@@ -40,6 +42,21 @@ export default async function Page({ params }: PageProps) {
       id: "psychological-wellbeing",
       Component: PsychologicalWellbeing,
       session: "3",
+    },
+    {
+      id: "post-coaching",
+      Component: PostCoachingTest,
+      session: "8",
+    },
+    {
+      id: "post-career-maturity",
+      Component: PostCareerMaturity,
+      session: "8",
+    },
+    {
+      id: "post-psychological-wellbeing",
+      Component: PostPsychologicalWellbeing,
+      session: "8",
     },
   ];
   console.log(await params);

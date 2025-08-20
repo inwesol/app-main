@@ -273,7 +273,9 @@ export function SessionFeedbackForm({
               </div>
 
               <button
-                onClick={() => router.push("/journey")}
+                onClick={() =>
+                  router.push(`/journey/sessions/${sessionNumber}`)
+                }
                 className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white px-8 py-3 rounded-2xl font-semibold shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
               >
                 Continue Your Journey

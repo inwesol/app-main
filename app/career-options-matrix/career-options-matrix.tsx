@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Plus,
   X,
@@ -11,12 +11,15 @@ import {
   HelpCircle,
   Sparkles,
   TrendingUp,
+  Save,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import Header from "@/components/form-components/header";
+import { useRouter } from "next/navigation";
 
 interface MatrixCell {
   rowId: string;
@@ -36,7 +39,17 @@ interface MatrixColumn {
   name: string;
 }
 
-export const CareerOptionsMatrix: React.FC = () => {
+interface CareerOptionsMatrixProps {
+  sessionId: string;
+}
+
+export const CareerOptionsMatrix: React.FC<CareerOptionsMatrixProps> = ({
+  sessionId,
+}) => {
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const router = useRouter();
+
   // default rows (criteria)
   const [rows, setRows] = useState<MatrixRow[]>([
     { id: "1", name: "Work-Life Balance", weight: 4 },
@@ -54,6 +67,82 @@ export const CareerOptionsMatrix: React.FC = () => {
 
   // Matrix cell values
   const [cells, setCells] = useState<MatrixCell[]>([]);
+
+  // Load data on component mount
+  useEffect(() => {
+    loadData();
+  }, [sessionId]);
+
+  const loadData = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch(
+        `/api/journey/sessions/${sessionId}/a/career-options-matrix`
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+
+        // Only update state if we have actual data
+        if (data.rows && data.rows.length > 0) {
+          setRows(data.rows);
+        }
+        if (data.columns && data.columns.length > 0) {
+          setColumns(data.columns);
+        }
+        if (data.cells && data.cells.length > 0) {
+          setCells(data.cells);
+        }
+      }
+    } catch (error) {
+      console.error("Error loading matrix data:", error);
+      toast.error("Failed to load matrix data");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const saveData = async () => {
+    try {
+      setIsSaving(true);
+
+      const dataToSave = {
+        rows,
+        columns,
+        cells,
+      };
+
+      const response = await fetch(
+        `/api/journey/sessions/${sessionId}/a/career-options-matrix`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(dataToSave),
+        }
+      );
+
+      if (response.ok) {
+        toast.success("✅ Matrix saved successfully!", {
+          className:
+            "bg-primary-green-100 text-primary-green-600 border-primary-green-600",
+        });
+
+        // Add redirect after successful save
+        setTimeout(() => {
+          router.push(`/journey/sessions/${sessionId}`);
+        }, 1000); // 1 second delay to show the success message
+      } else {
+        throw new Error("Failed to save");
+      }
+    } catch (error) {
+      console.error("Error saving matrix data:", error);
+      toast.error("Failed to save matrix data");
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   // Add new row
   const addRow = () => {
@@ -257,14 +346,46 @@ export const CareerOptionsMatrix: React.FC = () => {
 
   const bestOption = getBestOption();
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-primary-green-50 via-primary-blue-50 to-cyan-50 flex items-center justify-center">
+        <div className="flex items-center gap-3 text-slate-600">
+          <Loader2 className="size-6 animate-spin" />
+          <span>Loading your matrix...</span>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-green-50 via-primary-blue-50 to-cyan-50 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-primary-green-50 via-primary-blue-50 to-cyan-50 relative ">
       <div className="relative z-10 max-w-7xl mx-auto p-6">
         <Header
           headerIcon={Grid}
           headerText="Career Options Matrix"
           headerDescription="Make data-driven career decisions using weighted criteria analysis"
         />
+
+        {/* Save Button */}
+        <div className="fixed top-6 right-6 z-50">
+          <Button
+            onClick={saveData}
+            disabled={isSaving}
+            className="bg-gradient-to-r from-primary-green-500 to-emerald-500 hover:from-primary-green-600 hover:to-emerald-600 text-white shadow-xl rounded-2xl px-6 py-3 transition-all duration-300 hover:scale-105 hover:shadow-2xl"
+          >
+            {isSaving ? (
+              <>
+                <Loader2 className="size-4 mr-2 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              <>
+                <Save className="size-4 mr-2" />
+                Save Matrix
+              </>
+            )}
+          </Button>
+        </div>
 
         {/* instructions Card */}
         {/* how to use  */}

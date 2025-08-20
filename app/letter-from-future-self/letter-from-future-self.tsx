@@ -1,5 +1,6 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
   Send,
   Clock,
@@ -20,16 +21,47 @@ import { Button } from "@/components/ui/button";
 import { TextArea } from "@/components/activity-components/text-area";
 import Header from "@/components/form-components/header";
 
-const LetterFromFutureSelf: React.FC = () => {
-  //   const [letter, setLetter] = useState("");
+interface LetterFromFutureSelfProps {
+  sessionId: number;
+  activityId: string;
+}
+
+const LetterFromFutureSelf: React.FC<LetterFromFutureSelfProps> = ({
+  sessionId,
+  activityId,
+}) => {
+  const router = useRouter();
   const [formData, setFormData] = useState({
     letter: "",
   });
   const [charCount, setCharCount] = useState(0);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Load existing data
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const response = await fetch(
+          `/api/journey/sessions/${sessionId}/a/${activityId}`
+        );
+        if (response.ok) {
+          const data = await response.json();
+          setFormData(data);
+          setCharCount(data.letter?.length || 0);
+        }
+      } catch (error) {
+        console.error("Error loading letter from future self data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadData();
+  }, [sessionId, activityId]);
 
   const handleTextChange = (text: string) => {
-    // const text = e.target.value;
     setFormData((prev) => ({
       ...prev,
       letter: text,
@@ -37,19 +69,50 @@ const LetterFromFutureSelf: React.FC = () => {
     setCharCount(text.length);
   };
 
-  const handleSubmit = () => {
-    if (formData.letter.trim()) {
-      setIsSubmitted(true);
+  const handleSubmit = async () => {
+    if (!formData.letter.trim()) return;
+
+    setIsSaving(true);
+    try {
+      const response = await fetch(
+        `/api/journey/sessions/${sessionId}/a/${activityId}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        }
+      );
+
+      if (response.ok) {
+        setIsSubmitted(true);
+      } else {
+        console.error("Failed to save letter from future self");
+        // Handle error (you might want to show a toast notification)
+      }
+    } catch (error) {
+      console.error("Error saving letter from future self:", error);
+      // Handle error
+    } finally {
+      setIsSaving(false);
     }
   };
 
-  const handleReset = () => {
-    setFormData({
-      letter: "",
-    });
-    setCharCount(0);
-    setIsSubmitted(false);
+  const handleWriteAnother = () => {
+    router.push(`/journey/sessions/${sessionId}`);
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-primary-green-50 via-teal-50 to-primary-blue-50 flex items-center justify-center p-4">
+        <div className="text-center">
+          <div className="animate-spin rounded-full size-12 border-b-2 border-primary-green-600 mx-auto"></div>
+          <p className="mt-4 text-slate-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (isSubmitted) {
     return (
@@ -79,7 +142,7 @@ const LetterFromFutureSelf: React.FC = () => {
             </div>
             <div className="flex justify-center">
               <Button
-                onClick={handleReset}
+                onClick={handleWriteAnother}
                 className="bg-gradient-to-r from-primary-green-500 to-teal-600 hover:from-primary-green-600 hover:to-teal-700 text-white font-medium px-8 py-3 rounded-lg shadow-md transition-all duration-300 hover:scale-105"
               >
                 Write Another Letter
@@ -128,7 +191,7 @@ const LetterFromFutureSelf: React.FC = () => {
           <div className="bg-gradient-to-br from-primary-blue-50 to-primary-blue-100 p-4 rounded-lg border border-primary-blue-200">
             <div className="flex items-center gap-2 mb-2">
               <Heart className="size-5 text-primary-blue-600" />
-              <h3 className="font-semibold text-primary-blue-800">
+              <h3 className="font-semibent text-primary-blue-800">
                 Express Love
               </h3>
             </div>
@@ -160,11 +223,11 @@ Future Me`}
         <div className="flex justify-center mt-5">
           <Button
             onClick={handleSubmit}
-            disabled={!formData.letter.trim()}
+            disabled={!formData.letter.trim() || isSaving}
             className="bg-gradient-to-r from-primary-green-500 to-teal-600 hover:from-primary-green-600 hover:to-teal-700 disabled:from-slate-300 disabled:to-slate-400 text-white font-medium px-8 py-3 rounded-lg shadow-md transition-all duration-300 hover:scale-105 disabled:scale-100 disabled:cursor-not-allowed"
           >
             <Send className="size-5 mr-2" />
-            Send Letter from Future Self
+            {isSaving ? "Sending..." : "Send Letter from Future Self"}
             <ArrowRight className="size-5 ml-2" />
           </Button>
         </div>

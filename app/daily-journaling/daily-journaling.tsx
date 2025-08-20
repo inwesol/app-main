@@ -1,11 +1,12 @@
 "use client";
-import React, { useState } from "react";
-
+import React, { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
 import { QuestionSection } from "@/components/activity-components/question-section";
 import { TextArea } from "@/components/activity-components/text-area";
 import { InputField } from "@/components/activity-components/input-field";
 import Header from "@/components/form-components/header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
 import {
   Calendar,
   Target,
@@ -18,6 +19,8 @@ import {
   TrendingUp,
   Plus,
   X,
+  Save,
+  Loader2,
 } from "lucide-react";
 
 interface BulletPoint {
@@ -38,6 +41,10 @@ interface DailyJournalingData {
 }
 
 export const DailyJournaling: React.FC = () => {
+  const params = useParams();
+  const router = useRouter();
+  const sessionId = params?.sessionId as string;
+
   const [journalData, setJournalData] = useState<DailyJournalingData>({
     date: new Date().toISOString().split("T")[0],
     tookAction: "",
@@ -48,6 +55,84 @@ export const DailyJournaling: React.FC = () => {
     gratitudeHelp: [],
     tomorrowStep: "",
   });
+
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveMessage, setSaveMessage] = useState<{
+    type: "success" | "error";
+    text: string;
+  } | null>(null);
+
+  // Load existing data on component mount
+  useEffect(() => {
+    const loadData = async () => {
+      if (!sessionId) return;
+      try {
+        const response = await fetch(
+          `/api/journey/sessions/${sessionId}/a/daily-journaling`
+        );
+        if (response.ok) {
+          const data = await response.json();
+          setJournalData(data);
+        }
+      } catch (error) {
+        console.error("Error loading daily journaling data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadData();
+  }, [sessionId]);
+
+  // Save data to API
+  const handleSave = async () => {
+    if (!sessionId) return;
+    setIsSaving(true);
+    setSaveMessage(null);
+
+    try {
+      const response = await fetch(
+        `/api/journey/sessions/${sessionId}/a/daily-journaling`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(journalData),
+        }
+      );
+
+      if (response.ok) {
+        setSaveMessage({
+          type: "success",
+          text: "Your daily journal has been saved successfully!",
+        });
+
+        // Redirect after successful save
+        setTimeout(() => {
+          router.push(`/journey/sessions/${sessionId}`);
+        }, 1500); // Short delay to show success message
+      } else {
+        const errorData = await response.json();
+        setSaveMessage({
+          type: "error",
+          text: errorData.errors
+            ? "Please check your entries and try again."
+            : "Failed to save journal entry.",
+        });
+      }
+    } catch (error) {
+      console.error("Error saving daily journaling:", error);
+      setSaveMessage({
+        type: "error",
+        text: "An error occurred while saving. Please try again.",
+      });
+    } finally {
+      setIsSaving(false);
+      // Clear message after 5 seconds (only if there was an error)
+      setTimeout(() => setSaveMessage(null), 5000);
+    }
+  };
 
   const addBulletPoint = (
     section: "challenges" | "progress" | "gratitude" | "gratitudeHelp"
@@ -105,14 +190,53 @@ export const DailyJournaling: React.FC = () => {
     return null;
   };
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-primary-green-50 via-primary-blue-50 to-blue-50 flex items-center justify-center">
+        <div className="flex items-center gap-3 text-primary-green-600">
+          <Loader2 className="size-6 animate-spin" />
+          <span className="text-lg font-medium">Loading your journal...</span>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-green-50 via-primary-blue-50 to-blue-50 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-primary-green-50 via-primary-blue-50 to-blue-50 relative ">
       <div className="relative z-10 max-w-4xl mx-auto p-6">
         <Header
           headerIcon={Calendar}
           headerText="Daily Journaling"
           headerDescription="Reflect on your daily progress and set intentions for tomorrow"
         />
+
+        {/* Save Message */}
+        {saveMessage && (
+          <Card
+            className={`mb-6 ${
+              saveMessage.type === "success"
+                ? "bg-green-50 border-green-200"
+                : "bg-red-50 border-red-200"
+            }`}
+          >
+            <div className="flex items-center gap-3 p-4">
+              {saveMessage.type === "success" ? (
+                <CheckCircle className="size-5 text-green-600" />
+              ) : (
+                <XCircle className="size-5 text-red-600" />
+              )}
+              <span
+                className={`font-medium ${
+                  saveMessage.type === "success"
+                    ? "text-green-800"
+                    : "text-red-800"
+                }`}
+              >
+                {saveMessage.text}
+              </span>
+            </div>
+          </Card>
+        )}
 
         {/* Date Selection */}
         <Card className="bg-gradient-to-r from-slate-50/80 to-slate-100/80 border-slate-200/60 shadow-lg mb-8">
@@ -127,7 +251,7 @@ export const DailyJournaling: React.FC = () => {
               onChange={(e) =>
                 setJournalData((prev) => ({ ...prev, date: e.target.value }))
               }
-              className="px-4 py-2 border border-slate-300 rounded-lgbg-white font-medium"
+              className="px-4 py-2 border border-slate-300 rounded-lg bg-white font-medium"
             />
           </div>
         </Card>
@@ -379,7 +503,7 @@ export const DailyJournaling: React.FC = () => {
                         }
                         placeholder="Describe this progress in detail..."
                         rows={2}
-                        className="border-primary-blue-20 bg-white/80"
+                        className="border-primary-blue-200 focus:border-primary-blue-500 bg-white/80"
                       />
                     </div>
                   ))}
@@ -445,7 +569,7 @@ export const DailyJournaling: React.FC = () => {
                             )
                           }
                           placeholder={`Gratitude ${index + 1}`}
-                          className="flex-1 border-primary-green-200 "
+                          className="flex-1 border-primary-green-200 focus:border-primary-green-500"
                         />
                         <button
                           onClick={() =>
@@ -468,7 +592,7 @@ export const DailyJournaling: React.FC = () => {
                         }
                         placeholder="Describe why you're grateful for this..."
                         rows={2}
-                        className="border-primary-green-200  bg-white/80"
+                        className="border-primary-green-200 focus:border-primary-green-500 bg-white/80"
                       />
                     </div>
                   ))}
@@ -510,7 +634,7 @@ export const DailyJournaling: React.FC = () => {
                             )
                           }
                           placeholder={`Connection ${index + 1}`}
-                          className="flex-1 border-primary-green-200 "
+                          className="flex-1 border-primary-green-200 focus:border-primary-green-500"
                         />
                         <button
                           onClick={() =>
@@ -533,7 +657,7 @@ export const DailyJournaling: React.FC = () => {
                         }
                         placeholder="Explain how this positive aspect moved you closer to your goal..."
                         rows={2}
-                        className="border-primary-green-200  bg-white/80"
+                        className="border-primary-green-200 focus:border-primary-green-500 bg-white/80"
                       />
                     </div>
                   ))}
@@ -574,8 +698,9 @@ export const DailyJournaling: React.FC = () => {
             <div className="mt-4 p-4 bg-blue-50/50 rounded-lg border border-blue-200/40">
               <p className="text-sm text-blue-700 leading-relaxed">
                 <strong>Tip:</strong> Make your tomorrow step specific and
-                small. Instead of "work on my goal," try "spend 15 minutes
-                researching about something" or "send one email to someone."
+                small. Instead of &quot;work on my goal,&quot; try &quot;spend
+                15 minutes researching about something&quot; or &quot;send one
+                email to someone.&quot;
               </p>
             </div>
           </div>
@@ -594,20 +719,35 @@ export const DailyJournaling: React.FC = () => {
               Your Journey Continues
             </h3>
             <p className="text-primary-green-700 leading-relaxed max-w-2xl mx-auto">
-              You've completed today's reflection. Remember that progress isn't
-              always linear, and every small step counts. Your commitment to
-              daily reflection is building the foundation for lasting change.
+              You&apos;ve completed today&apos;s reflection. Remember that
+              progress isn&apos;t always linear, and every small step counts.
+              Your commitment to daily reflection is building the foundation for
+              lasting change.
             </p>
           </div>
         </Card>
 
         {/* Enhanced Save Button */}
         <div className="text-center">
-          <button className="group relative px-10 py-4 bg-gradient-to-r from-primary-green-500 via-primary-blue-500 to-blue-500 text-white rounded-2xl font-bold text-lg hover:from-primary-green-600 hover:via-primary-blue-600 hover:to-blue-600 transition-all duration-300 shadow-2xl hover:shadow-3xl hover:-translate-y-1">
+          <button
+            onClick={handleSave}
+            disabled={isSaving}
+            className="group relative px-10 py-4 bg-gradient-to-r from-primary-green-500 via-primary-blue-500 to-blue-500 text-white rounded-2xl font-bold text-lg hover:from-primary-green-600 hover:via-primary-blue-600 hover:to-blue-600 transition-all duration-300 shadow-2xl hover:shadow-3xl hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+          >
             <div className="absolute inset-0 bg-gradient-to-r from-primary-green-400 via-primary-blue-400 to-blue-400 rounded-2xl blur opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
             <div className="relative flex items-center gap-3">
-              <span>Save Today&apos;s Journal</span>
-              <ArrowRight className="size-5 group-hover:translate-x-1 transition-transform duration-200" />
+              {isSaving ? (
+                <>
+                  <Loader2 className="size-5 animate-spin" />
+                  <span>Saving...</span>
+                </>
+              ) : (
+                <>
+                  <Save className="size-5" />
+                  <span>Save Today&apos;s Journal</span>
+                  <ArrowRight className="size-5 group-hover:translate-x-1 transition-transform duration-200" />
+                </>
+              )}
             </div>
           </button>
         </div>
@@ -615,3 +755,38 @@ export const DailyJournaling: React.FC = () => {
     </div>
   );
 };
+
+{
+  /* Summary Card */
+}
+<Card className="bg-gradient-to-r from-primary-green-50/80 to-primary-blue-50/80 border-primary-green-200/60 shadow-xl mb-8">
+  <div className="text-center p-4">
+    <div className="inline-flex items-center gap-3 bg-gradient-to-r from-primary-green-200/60 to-primary-blue-200/60 px-4 py-2 rounded-full mb-4">
+      <Calendar className="size-5 text-primary-green-700" />
+      <span className="text-sm font-semibold text-primary-green-800">
+        Daily Reflection Complete
+      </span>
+    </div>
+    <h3 className="text-xl font-bold text-primary-green-800 mb-3">
+      Your Journey Continues
+    </h3>
+    <p className="text-primary-green-700 leading-relaxed max-w-2xl mx-auto">
+      You&apos;ve completed today&apos;s reflection. Remember that progress
+      isn&apos;t always linear, and every small step counts. Your commitment to
+      daily reflection is building the foundation for lasting change.
+    </p>
+  </div>
+</Card>;
+
+{
+  /* Enhanced Save Button */
+}
+<div className="text-center">
+  <button className="group relative px-10 py-4 bg-gradient-to-r from-primary-green-500 via-primary-blue-500 to-blue-500 text-white rounded-2xl font-bold text-lg hover:from-primary-green-600 hover:via-primary-blue-600 hover:to-blue-600 transition-all duration-300 shadow-2xl hover:shadow-3xl hover:-translate-y-1">
+    <div className="absolute inset-0 bg-gradient-to-r from-primary-green-400 via-primary-blue-400 to-blue-400 rounded-2xl blur opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
+    <div className="relative flex items-center gap-3">
+      <span>Save Today&apos;s Journal</span>
+      <ArrowRight className="size-5 group-hover:translate-x-1 transition-transform duration-200" />
+    </div>
+  </button>
+</div>;

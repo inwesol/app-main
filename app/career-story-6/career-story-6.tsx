@@ -16,9 +16,8 @@ import {
   Loader2,
 } from "lucide-react";
 import Header from "@/components/form-components/header";
-import { useRouter } from "next/navigation";
 import { toast } from "@/components/toast";
-
+import { useRouter } from "next/navigation";
 interface StickyNote {
   id: string;
   content: string;
@@ -27,7 +26,7 @@ interface StickyNote {
   createdAt: Date;
 }
 
-interface CareerStoryFiveProps {
+interface CareerStorySixProps {
   className?: string;
   sessionId: number; // Add sessionId prop
 }
@@ -105,10 +104,10 @@ const DEFAULT_STICKY_NOTES: StickyNote[] = [
   },
 ];
 
-export function CareerStoryFive({
+export function CareerStorySix({
   className = "",
   sessionId,
-}: CareerStoryFiveProps) {
+}: CareerStorySixProps) {
   const [stickyNotes, setStickyNotes] = useState<StickyNote[]>([]);
   const [editingNote, setEditingNote] = useState<string | null>(null);
   const [editContent, setEditContent] = useState("");
@@ -128,7 +127,7 @@ export function CareerStoryFive({
   const loadStoryBoard = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/journey/sessions/6/a/career-story-5`);
+      const response = await fetch(`/api/journey/sessions/7/a/career-story-5`);
 
       if (response.ok) {
         const data = await response.json();
@@ -164,7 +163,7 @@ export function CareerStoryFive({
   const saveStoryBoard = async () => {
     try {
       setSaving(true);
-      const response = await fetch(`/api/journey/sessions/6/a/career-story-5`, {
+      const response = await fetch(`/api/journey/sessions/7/a/career-story-5`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -672,7 +671,8 @@ export function CareerStoryFive({
         </Card>
 
         {/* Final Save Progress Button */}
-        <div className="flex justify-center gap-4 mt-8">
+        {/* Action Buttons */}
+        <div className="flex justify-center items-center gap-4 mt-8">
           <Button
             onClick={() => router.push(`/journey/sessions/${sessionId}`)}
             className="group relative px-8 py-6 bg-gradient-to-r from-slate-500 to-slate-600 text-white rounded-2xl font-bold text-lg hover:from-slate-600 hover:to-slate-700 transition-all duration-300 shadow-2xl hover:shadow-3xl hover:-translate-y-1"
@@ -683,7 +683,6 @@ export function CareerStoryFive({
               <ArrowRight className="size-5 group-hover:translate-x-1 transition-transform duration-200" />
             </div>
           </Button>
-
           <Button
             onClick={saveStoryBoard}
             disabled={saving}

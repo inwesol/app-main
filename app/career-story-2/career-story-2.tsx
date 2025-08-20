@@ -1,5 +1,6 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
 
 import { QuestionSection } from "@/components/activity-components/question-section";
 import { TextArea } from "@/components/activity-components/text-area";
@@ -27,7 +28,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { CareerStorySummary } from "./../../components/activity-components/career-story-summary";
+import { toast } from "sonner";
 
 interface RiasecOption {
   code: string;
@@ -35,6 +36,7 @@ interface RiasecOption {
   description: string;
   keywords: string[];
 }
+
 interface CareerStoryTwoData {
   firstAdjectives: string;
   repeatedWords: string;
@@ -45,6 +47,7 @@ interface CareerStoryTwoData {
   selectedRiasec: string[];
   settingStatement: string;
 }
+
 const riasecOptions: RiasecOption[] = [
   {
     code: "R",
@@ -139,6 +142,10 @@ const riasecOptions: RiasecOption[] = [
 ];
 
 export default function CareerStoryTwo() {
+  const params = useParams();
+  const router = useRouter();
+  const sessionId = params?.sessionId as string;
+
   const [formData, setFormData] = useState<CareerStoryTwoData>({
     firstAdjectives: "",
     repeatedWords: "",
@@ -149,8 +156,11 @@ export default function CareerStoryTwo() {
     selectedRiasec: [],
     settingStatement: "",
   });
-  // Mock data for demonstration
-  // from calling api for career-story-1 data
+
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Mock data for demonstration - would come from career-story-1 API call
   const mockCareerStoryData = {
     transitionEssay:
       "I am currently facing a transition from college to the professional world. This is an exciting but challenging time as I close the chapter of my academic journey and begin the next phase of my career. I'm seeking guidance on how to identify my true passions and find a career path that aligns with my values and interests.",
@@ -186,6 +196,30 @@ export default function CareerStoryTwo() {
       "'The only way to do great work is to love what you do.' - Steve Jobs. This quote reminds me that passion is essential for meaningful work and that I should never settle for something that doesn't ignite my enthusiasm.",
   };
 
+  // Load existing data on component mount
+  useEffect(() => {
+    const loadData = async () => {
+      if (!sessionId) return;
+
+      try {
+        const response = await fetch(
+          `/api/journey/sessions/${sessionId}/a/career-story-2`
+        );
+        if (response.ok) {
+          const data = await response.json();
+          setFormData(data);
+        }
+      } catch (error) {
+        console.error("Error loading career story 2 data:", error);
+        toast.error("Failed to load existing data");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadData();
+  }, [sessionId]);
+
   const handleRiasecChange = (code: string) => {
     setFormData((prev) => ({
       ...prev,
@@ -194,6 +228,78 @@ export default function CareerStoryTwo() {
         : [...prev.selectedRiasec, code],
     }));
   };
+
+  const handleSave = async () => {
+    if (!sessionId) {
+      toast.error("Session ID is required");
+      return;
+    }
+
+    // Validate required fields
+    const requiredFields: (keyof CareerStoryTwoData)[] = [
+      "firstAdjectives",
+      "repeatedWords",
+      "commonTraits",
+      "significantWords",
+      "selfStatement",
+      "mediaActivities",
+      "settingStatement",
+    ];
+
+    const missingFields = requiredFields.filter(
+      (field) => !formData[field].trim()
+    );
+
+    if (missingFields.length > 0) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
+
+    if (formData.selectedRiasec.length === 0) {
+      toast.error("Please select at least one RIASEC work setting");
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const response = await fetch(
+        `/api/journey/sessions/${sessionId}/a/career-story-2`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        }
+      );
+
+      if (response.ok) {
+        toast.success("Career Story 2 saved successfully!");
+        // Redirect to the session page after successful save
+        router.push(`/journey/sessions/${sessionId}`);
+      } else {
+        const errorData = await response.json();
+        console.error("Save error:", errorData);
+        toast.error("Failed to save. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error saving career story 2:", error);
+      toast.error("An error occurred while saving");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-primary-blue-50 to-primary-green-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full size-12 border-b-2 border-primary-blue-500 mx-auto mb-4"></div>
+          <p className="text-slate-600">Loading your career story...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-blue-50 to primary-green-50 p-4 sm:py-8">
@@ -206,12 +312,6 @@ export default function CareerStoryTwo() {
             analysis"
         />
 
-        {/* Career Story 1 Summary */}
-        {/* <CareerStorySummary
-          storyNumber={1}
-          data={mockCareerStoryData}
-          title="Career Story 1 Summary"
-        /> */}
         {/* SELF Section */}
         <div className="mb-8">
           <div className="bg-gradient-to-r from-primary-green-100/80 to-primary-blue-100/80 rounded-xl p-6 mb-6 border border-primary-green-200/60 shadow-xl backdrop-blur-sm">
@@ -303,6 +403,7 @@ export default function CareerStoryTwo() {
                     to understand your core values and aspirations.
                   </p>
                 </div>
+                <div></div>
               </div>
             </CardHeader>
             <CardContent>
@@ -661,11 +762,24 @@ export default function CareerStoryTwo() {
 
         {/* Enhanced Save Button */}
         <div className="flex justify-center">
-          <Button className="group relative px-10 py-6 bg-gradient-to-r from-primary-green-500 to-primary-blue-500 text-white rounded-2xl font-bold text-lg hover:from-primary-green-600 hover:to-primary-blue-600 transition-all duration-300 shadow-2xl hover:shadow-3xl hover:-translate-y-1">
+          <Button
+            onClick={handleSave}
+            disabled={isSaving}
+            className="group relative px-10 py-6 bg-gradient-to-r from-primary-green-500 to-primary-blue-500 text-white rounded-2xl font-bold text-lg hover:from-primary-green-600 hover:to-primary-blue-600 transition-all duration-300 shadow-2xl hover:shadow-3xl hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
             <div className="absolute inset-0 bg-gradient-to-r from-primary-green-400 to-primary-blue-400 rounded-2xl blur opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
             <div className="relative flex items-center gap-3">
-              <span>Save Progress</span>
-              <ArrowRight className="size-5 group-hover:translate-x-1 transition-transform duration-200" />
+              {isSaving ? (
+                <>
+                  <div className="animate-spin rounded-full size-5 border-b-2 border-white"></div>
+                  <span>Saving...</span>
+                </>
+              ) : (
+                <>
+                  <span>Save Progress</span>
+                  <ArrowRight className="size-5 group-hover:translate-x-1 transition-transform duration-200" />
+                </>
+              )}
             </div>
           </Button>
         </div>

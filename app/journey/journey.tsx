@@ -66,7 +66,7 @@ export const JourneyPage: React.FC = () => {
 
   if (loading || userProgress === null) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-primary-green-50 via-white to-primary-blue-50 flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full size-12 border-b-2 border-primary-blue-600 mx-auto mb-4"></div>
           <p className="text-slate-600">Loading journey details...</p>
@@ -90,7 +90,7 @@ export const JourneyPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-primary-green-50 to-primary-blue-50">
+    <div className="min-h-screen bg-white">
       <div className="max-w-4xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
         <Header
           headerIcon={Trophy}
@@ -338,15 +338,15 @@ export const JourneyPage: React.FC = () => {
                                       : "bg-white text-slate-600 border border-slate-200"
                                   }`}
                                 >
-                                  <Clock className="size-3" />
-                                  <span>{session.duration}</span>
+                                  {/* <Clock className="size-3" /> */}
+                                  {/* <span>{session.duration}</span> */}
                                 </div>
 
                                 {isCompleted && session.score && (
                                   <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-primary-green-100 text-primary-green-700 border border-primary-green-200">
                                     <Star className="size-3 fill-current" />
                                     <span className="font-semibold">
-                                      {session.score}/100
+                                      {/* {session.score}/100 */}
                                     </span>
                                   </div>
                                 )}
@@ -354,11 +354,11 @@ export const JourneyPage: React.FC = () => {
                                 {isCompleted && session.completedAt && (
                                   <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-slate-100 text-slate-600 border border-slate-200">
                                     <Calendar className="size-3" />
-                                    <span>
+                                    {/* <span>
                                       {new Date(
                                         session.completedAt
                                       ).toLocaleDateString()}
-                                    </span>
+                                    </span> */}
                                   </div>
                                 )}
                               </div>
@@ -400,7 +400,7 @@ export const JourneyPage: React.FC = () => {
         </div>
 
         {/* Responsive Motivational Footer */}
-        <Card className="mt-8 p-4 sm:p-6 bg-gradient-to-r from-primary-green-50/80 via-primary-blue-50/80 to-slate-50/80 border border-slate-200/50 shadow-sm">
+        {/* <Card className="mt-8 p-4 sm:p-6 bg-gradient-to-r from-primary-green-50/80 via-primary-blue-50/80 to-slate-50/80 border border-slate-200/50 shadow-sm">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
             <div className="hidden sm:block bg-gradient-to-r from-primary-green-500 to-primary-blue-500 rounded-xl p-3 shadow-sm shrink-0">
               <Rocket className="size-6 text-white" />
@@ -423,7 +423,7 @@ export const JourneyPage: React.FC = () => {
               <p className="text-slate-600 text-xs font-medium">Complete</p>
             </div>
           </div>
-        </Card>
+        </Card> */}
       </div>
     </div>
   );

@@ -1,7 +1,8 @@
 "use client";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Palette,
@@ -14,6 +15,7 @@ import {
   Target,
   Camera,
   Scissors,
+  Loader2,
 } from "lucide-react";
 import { QuestionSection } from "@/components/activity-components/question-section";
 import { Button } from "@/components/ui/button";
@@ -31,11 +33,18 @@ import { toast } from "sonner";
 import {
   lifeCollageSchema,
   type LifeCollageFormData,
-} from "@/lib/schemas/questionnaire-schemas/collage-schema";
+} from "@/lib/schemas/activity-schemas/life-collage-schema";
 import { CollageCanvas } from "@/components/activity-components/collage-canvas";
 import Header from "@/components/form-components/header";
+import { useParams } from "next/navigation";
 
 export const LifeCollage: React.FC = () => {
+  const params = useParams();
+  const router = useRouter();
+  const sessionId = params.sessionId as string;
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const form = useForm<LifeCollageFormData>({
     resolver: zodResolver(lifeCollageSchema),
     defaultValues: {
@@ -45,23 +54,81 @@ export const LifeCollage: React.FC = () => {
     },
   });
 
-  const onSubmit = (data: LifeCollageFormData) => {
-    console.log("Life Collage Data:", data);
-    toast.success("Life collage saved successfully!");
-    // Here you would typically save to a database or local storage
+  // Load existing data
+  useEffect(() => {
+    const loadData = async () => {
+      if (!sessionId) return;
+
+      setIsLoading(true);
+      try {
+        const response = await fetch(
+          `/api/journey/sessions/${sessionId}/a/my-life-collage`
+        );
+        if (response.ok) {
+          const data = await response.json();
+          form.reset(data);
+        }
+      } catch (error) {
+        console.error("Failed to load life collage data:", error);
+        toast.error("Failed to load your previous data");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadData();
+  }, [sessionId, form]);
+
+  const onSubmit = async (data: LifeCollageFormData) => {
+    if (!sessionId) {
+      toast.error("Session not found");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const response = await fetch(
+        `/api/journey/sessions/${sessionId}/a/my-life-collage`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to save");
+      }
+
+      toast.success("Life collage saved successfully!");
+
+      // Redirect to the session page after successful save
+      router.push(`/journey/sessions/${sessionId}`);
+    } catch (error) {
+      console.error("Error saving life collage:", error);
+      toast.error("Failed to save your life collage");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const getCurrentDate = () => {
-    return new Date().toLocaleDateString("en-US", {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-  };
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-primary-green-50 via-primary-blue-50 to-blue-50 relative flex items-center justify-center">
+        <div className="flex items-center gap-3">
+          <Loader2 className="size-6 animate-spin text-primary-blue-600" />
+          <span className="text-primary-blue-600 font-medium">
+            Loading your collage...
+          </span>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-green-50 via-primary-blue-50 to-blue-50 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-primary-green-50 via-primary-blue-50 to-blue-50 relative ">
       <div className="relative z-10 max-w-7xl mx-auto p-6">
         <Header
           headerIcon={Palette}
@@ -121,6 +188,7 @@ export const LifeCollage: React.FC = () => {
                               onElementsChange={field.onChange}
                               title="My Present Life"
                               className="mt-4"
+                              sessionId={sessionId}
                             />
                           </FormControl>
                           <FormDescription>
@@ -168,6 +236,7 @@ export const LifeCollage: React.FC = () => {
                             onElementsChange={field.onChange}
                             title="My Future Life (3-5 Years)"
                             className="mt-4"
+                            sessionId={sessionId}
                           />
                         </FormControl>
                         <FormDescription>
@@ -228,11 +297,24 @@ export const LifeCollage: React.FC = () => {
                   </p>
                 </div>
 
-                <Button className="group relative px-10 py-6 bg-gradient-to-r from-primary-green-500 to-primary-blue-500 text-white rounded-2xl font-bold text-lg hover:from-primary-green-600 hover:to-primary-blue-600 transition-all duration-300 shadow-2xl hover:shadow-3xl hover:-translate-y-1">
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="group relative px-10 py-6 bg-gradient-to-r from-primary-green-500 to-primary-blue-500 text-white rounded-2xl font-bold text-lg hover:from-primary-green-600 hover:to-primary-blue-600 transition-all duration-300 shadow-2xl hover:shadow-3xl hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
                   <div className="absolute inset-0 bg-gradient-to-r from-primary-green-400 to-primary-blue-400 rounded-2xl blur opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
                   <div className="relative flex items-center gap-3">
-                    <span>Save Progress</span>
-                    <ArrowRight className="size-5 group-hover:translate-x-1 transition-transform duration-200" />
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="size-5 animate-spin" />
+                        <span>Saving...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>Save Progress</span>
+                        <ArrowRight className="size-5 group-hover:translate-x-1 transition-transform duration-200" />
+                      </>
+                    )}
                   </div>
                 </Button>
 
