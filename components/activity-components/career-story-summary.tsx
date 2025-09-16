@@ -1,6 +1,14 @@
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import {
   ChevronDown,
   ChevronUp,
   Book,
@@ -10,9 +18,12 @@ import {
   Tv,
   BookOpen,
   Heart,
-  FileText,
   Target,
+  Lightbulb,
+  Info,
 } from "lucide-react";
+import { InputField } from "@/components/activity-components/input-field";
+import { TextArea } from "@/components/activity-components/text-area";
 
 interface HeroItem {
   id: string;
@@ -437,10 +448,14 @@ export function CareerStorySummary({
   <CardContent>
     <div className="space-y-6">
       <div>
-        <label className="block text-sm font-medium text-slate-600 mb-2">
+        <label
+          htmlFor="firstAdjectives"
+          className="block text-sm font-medium text-slate-600 mb-2"
+        >
           Write down the first adjective you used to describe each one of them:
         </label>
         <InputField
+          id="firstAdjectives"
           value={formData.firstAdjectives}
           onChange={(value) =>
             setFormData((prev) => ({
@@ -453,11 +468,15 @@ export function CareerStorySummary({
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-slate-600 mb-2">
+        <label
+          htmlFor="repeatedWords"
+          className="block text-sm font-medium text-slate-600 mb-2"
+        >
           Write down any words or similar words that you used more than once to
           describe them:
         </label>
         <InputField
+          id="repeatedWords"
           value={formData.repeatedWords}
           onChange={(value) =>
             setFormData((prev) => ({ ...prev, repeatedWords: value }))
@@ -467,10 +486,14 @@ export function CareerStorySummary({
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-slate-600 mb-2">
+        <label
+          htmlFor="commonTraits"
+          className="block text-sm font-medium text-slate-600 mb-2"
+        >
           Write down two or more things your heroes or heroines have in common:
         </label>
         <TextArea
+          id="commonTraits"
           value={formData.commonTraits}
           onChange={(value) =>
             setFormData((prev) => ({ ...prev, commonTraits: value }))
@@ -481,10 +504,14 @@ export function CareerStorySummary({
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-slate-600 mb-2">
+        <label
+          htmlFor="significantWords"
+          className="block text-sm font-medium text-slate-600 mb-2"
+        >
           List any other significant words or phrases you used to describe them:
         </label>
         <TextArea
+          id="significantWords"
           value={formData.significantWords}
           onChange={(value) =>
             setFormData((prev) => ({

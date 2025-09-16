@@ -69,7 +69,7 @@ export const JourneyPage: React.FC = () => {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full size-12 border-b-2 border-primary-blue-600 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full size-12 border-b-2 border-primary-blue-600 mx-auto mb-4" />
           <p className="text-slate-600">Loading journey details...</p>
         </div>
       </div>
@@ -193,11 +193,11 @@ export const JourneyPage: React.FC = () => {
         {/* journey timeline */}
         <div className="relative">
           {/* Timeline Line - Hidden on mobile, visible on larger screens */}
-          <div className="absolute left-6 inset-y-0 w-0.5 bg-gradient-to-b from-primary-green-300 via-primary-blue-300 to-slate-300 rounded-full"></div>
+          <div className="absolute left-6 inset-y-0 w-0.5 bg-gradient-to-b from-primary-green-300 via-primary-blue-300 to-slate-300 rounded-full" />
 
           <div className="space-y-4">
             {sessions.map((session, index) => {
-              const IconComponent = LucideIcons[session.icon];
+              const IconComponent = (LucideIcons as any)[session.icon];
               const isLocked = session.status === "locked";
               const isCurrent = session.status === "current";
               const isCompleted = session.status === "completed";
@@ -232,7 +232,7 @@ export const JourneyPage: React.FC = () => {
 
                       {/* Pulse for current session */}
                       {isCurrent && (
-                        <div className="absolute inset-0 rounded-xl border-2 border-primary-blue-400 animate-ping opacity-50"></div>
+                        <div className="absolute inset-0 rounded-xl border-2 border-primary-blue-400 animate-ping opacity-50" />
                       )}
                     </div>
 

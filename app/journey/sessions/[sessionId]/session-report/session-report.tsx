@@ -6,17 +6,11 @@ import {
   Calendar,
   Clock,
   CheckCircle2,
-  TrendingUp,
-  FileText,
   Activity,
   Loader2,
-  Star,
   Target,
-  Brain,
   Heart,
   User,
-  BarChart3,
-  Award,
   MessageCircle,
   CheckCircle,
   Sparkles,
@@ -25,18 +19,8 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import PsychologicalWellbeingResults from "./PsychologyWellbeingResults";
 
 // Session Report Types
 export interface FormReport {
@@ -190,7 +174,7 @@ const CircularGauge = ({
   return (
     <div className="flex flex-col items-center space-y-3">
       <div className="relative">
-        <svg width="120" height="120" className="transform -rotate-90">
+        <svg width="120" height="120" className="-rotate-90">
           <circle
             cx="60"
             cy="60"
@@ -428,14 +412,14 @@ export default function SessionReport({ sessionId }: { sessionId: string }) {
                 </div>
               </div>
               <div className="hidden sm:flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-2 py-1 border border-white/30">
-                <CheckCircle className="w-4 h-4 text-primary-green-300" />
+                <CheckCircle className="size-4 text-primary-green-300" />
                 <span className="text-sm font-semibold">Completed</span>
               </div>
             </div>
 
             <div className="flex items-center gap-4 text-primary-blue-100">
               <div className="flex items-center gap-2">
-                <Calendar className="w-4 h-4" />
+                <Calendar className="size-4" />
                 <span className="text-sm">
                   {formatDate(new Date().toISOString())}
                 </span>
@@ -449,7 +433,7 @@ export default function SessionReport({ sessionId }: { sessionId: string }) {
           <div className="bg-gradient-to-r from-gray-50 to-primary-blue-50 p-4 sm:p-6 border-b border-gray-100">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-primary-blue-100 rounded-lg">
-                <Clock className="w-6 h-6 text-primary-blue-600" />
+                <Clock className="size-6 text-primary-blue-600" />
               </div>
               <div>
                 <h2 className="text-lg sm:text-xl font-bold text-gray-900">
@@ -480,7 +464,7 @@ export default function SessionReport({ sessionId }: { sessionId: string }) {
           <div className="bg-gradient-to-r from-primary-green-50 to-emerald-50 p-4 sm:p-6 border-b border-gray-100">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-primary-green-100 rounded-lg">
-                <Activity className="w-6 h-6 text-primary-green-600" />
+                <Activity className="size-6 text-primary-green-600" />
               </div>
               <div>
                 <h2 className="text-lg sm:text-xl font-bold text-gray-900">
@@ -504,7 +488,7 @@ export default function SessionReport({ sessionId }: { sessionId: string }) {
                              hover:from-primary-green-100 hover:to-emerald-100"
                   >
                     <div className="p-2 bg-primary-green-500 rounded-full">
-                      <CheckCircle2 className="w-5 h-5 text-white" />
+                      <CheckCircle2 className="size-5 text-white" />
                     </div>
                     <div className="flex-1">
                       <h3 className="font-semibold text-primary-green-800">
@@ -541,7 +525,7 @@ export default function SessionReport({ sessionId }: { sessionId: string }) {
                 <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100">
                   <div className="bg-gradient-to-r from-primary-blue-500 to-primary-blue-600 text-white p-4 sm:p-6">
                     <div className="flex items-center gap-3">
-                      <Target className="w-7 h-7" />
+                      <Target className="size-7" />
                       <div>
                         <h3 className="text-lg sm:text-xl font-bold">
                           RIASEC Career Assessment
@@ -605,7 +589,7 @@ export default function SessionReport({ sessionId }: { sessionId: string }) {
                                rounded-lg border border-purple-200 transition-all duration-200"
                       >
                         <div className="flex items-center gap-3">
-                          <Eye className="w-5 h-5 text-purple-600" />
+                          <Eye className="size-5 text-purple-600" />
                           <span className="text-sm sm:text-base font-semibold text-purple-800">
                             View Your Responses{" "}
                             <span className="hidden sm:inline-block">
@@ -614,9 +598,9 @@ export default function SessionReport({ sessionId }: { sessionId: string }) {
                           </span>
                         </div>
                         {showRiasecTestAnswers ? (
-                          <ChevronUp className="w-5 h-5 text-purple-600" />
+                          <ChevronUp className="size-5 text-purple-600" />
                         ) : (
-                          <ChevronDown className="w-5 h-5 text-purple-600" />
+                          <ChevronDown className="size-5 text-purple-600" />
                         )}
                       </button>
 
@@ -657,7 +641,7 @@ export default function SessionReport({ sessionId }: { sessionId: string }) {
                 <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100">
                   <div className="bg-gradient-to-r from-primary-green-500 to-emerald-600 text-white p-6">
                     <div className="flex items-center gap-3">
-                      <User className="w-7 h-7" />
+                      <User className="size-7" />
                       <div>
                         <h3 className="text-xl font-bold">
                           Personality Assessment
@@ -694,7 +678,7 @@ export default function SessionReport({ sessionId }: { sessionId: string }) {
                       {/* Overall Score */}
                       <div className="flex justify-center items-center">
                         <CircularGauge
-                          score={parseInt(personalityTestResults.score)}
+                          score={Number.parseInt(personalityTestResults.score)}
                           maxScore={100}
                           label="Overall Personality Score"
                         />
@@ -713,7 +697,7 @@ export default function SessionReport({ sessionId }: { sessionId: string }) {
                                rounded-lg border border-purple-200 transition-all duration-200"
                       >
                         <div className="flex items-center gap-3">
-                          <Eye className="w-5 h-5 text-purple-600" />
+                          <Eye className="size-5 text-purple-600" />
                           <span className="text-sm sm:text-base font-semibold text-purple-800">
                             View Your Responses{" "}
                             <span className="hidden sm:inline-block">
@@ -727,9 +711,9 @@ export default function SessionReport({ sessionId }: { sessionId: string }) {
                           </span>
                         </div>
                         {showWellbeingAnswers ? (
-                          <ChevronUp className="w-5 h-5 text-purple-600" />
+                          <ChevronUp className="size-5 text-purple-600" />
                         ) : (
-                          <ChevronDown className="w-5 h-5 text-purple-600" />
+                          <ChevronDown className="size-5 text-purple-600" />
                         )}
                       </button>
 
@@ -825,7 +809,9 @@ export default function SessionReport({ sessionId }: { sessionId: string }) {
                   {/* Overall Wellbeing Score */}
                   <div className="flex justify-center items-center">
                     <CircularGauge
-                      score={parseInt(psychologicalWellbeingTestResults.score)}
+                      score={Number.parseInt(
+                        psychologicalWellbeingTestResults.score
+                      )}
                       maxScore={100}
                       label="Overall Wellbeing Score"
                     />
@@ -842,7 +828,7 @@ export default function SessionReport({ sessionId }: { sessionId: string }) {
                                rounded-lg border border-purple-200 transition-all duration-200"
                   >
                     <div className="flex items-center gap-3">
-                      <Eye className="w-5 h-5 text-purple-600" />
+                      <Eye className="size-5 text-purple-600" />
                       <span className="text-sm sm:text-base font-semibold text-purple-800">
                         View Your Responses{" "}
                         <span className="hidden sm:inline-block">
@@ -857,9 +843,9 @@ export default function SessionReport({ sessionId }: { sessionId: string }) {
                       </span>
                     </div>
                     {showWellbeingAnswers ? (
-                      <ChevronUp className="w-5 h-5 text-purple-600" />
+                      <ChevronUp className="size-5 text-purple-600" />
                     ) : (
-                      <ChevronDown className="w-5 h-5 text-purple-600" />
+                      <ChevronDown className="size-5 text-purple-600" />
                     )}
                   </button>
 
@@ -927,7 +913,7 @@ export default function SessionReport({ sessionId }: { sessionId: string }) {
           <div className="p-4 sm:p-6">
             <div className="flex items-center gap-4 mb-2 sm:mb-3 ">
               <div className="p-2 bg-orange-100 rounded-lg mt-1">
-                <MessageCircle className="w-6 h-6 text-orange-600" />
+                <MessageCircle className="size-6 text-orange-600" />
               </div>
               <h3 className="text-lg sm:text-xl font-bold text-gray-900 ">
                 Coach's Notes
@@ -936,10 +922,10 @@ export default function SessionReport({ sessionId }: { sessionId: string }) {
             <div className="flex-1">
               <div className="bg-white/80 backdrop-blur-sm rounded-lg p-4 border-l-4 border-orange-400">
                 <p className="text-sm sm:text-base text-gray-700 leading-relaxed italic">
-                  "Excellent progress on your assessment journey! Your results
-                  show strong self-awareness and thoughtful responses across all
-                  evaluations. Continue building on these insights for your
-                  personal and professional development."
+                  &ldquo;Excellent progress on your assessment journey! Your
+                  results show strong self-awareness and thoughtful responses
+                  across all evaluations. Continue building on these insights
+                  for your personal and professional development.&rdquo;
                 </p>
                 <div className="mt-3 text-sm text-orange-600 font-medium">
                   — Your Wellness Coach
@@ -979,12 +965,12 @@ export default function SessionReport({ sessionId }: { sessionId: string }) {
               >
                 {isEmailLoading ? (
                   <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
+                    <Loader2 className="size-5 animate-spin" />
                     Sending Your Report...
                   </>
                 ) : (
                   <>
-                    <Mail className="w-5 h-5" />
+                    <Mail className="size-5" />
                     Send Report to My Email
                   </>
                 )}

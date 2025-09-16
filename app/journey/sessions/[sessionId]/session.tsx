@@ -5,12 +5,10 @@ import {
   ArrowLeft,
   CheckCircle,
   FileText,
-  Star,
   Target,
   BarChart3,
   ChevronRight,
   Home,
-  ChevronDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -208,7 +206,7 @@ export function SessionDetail() {
             Session Data Incomplete
           </h2>
           <p className="text-slate-600 mb-4 text-sm sm:text-base">
-            This session doesn't have any forms configured.
+            This session doesn&apos;t have any forms configured.
           </p>
           <Button
             onClick={() => handleBreadcrumbClick("/journey")}
@@ -237,7 +235,7 @@ export function SessionDetail() {
     });
   };
 
-  const IconComponent = LucideIcons[sessionData.icon] || FileText; // Fallback icon
+  const IconComponent = (LucideIcons as any)[sessionData.icon] || FileText; // Fallback icon
   console.log(IconComponent);
   const isCurrent = sessionData.status === "current";
   const isCompleted = sessionData.status === "completed";
@@ -368,7 +366,7 @@ export function SessionDetail() {
             <div className="grid gap-4 sm:gap-6 lg:grid-cols-2">
               {sessionData.forms && sessionData.forms.length > 0 ? (
                 sessionData.forms.map((form) => {
-                  const FormIcon = LucideIcons[form.icon] || FileText; // Fallback icon
+                  const FormIcon = (LucideIcons as any)[form.icon] || FileText; // Fallback icon
                   const isFormCompleted = form.status === "completed";
                   const isFormUnlocked = checkFormStatus(
                     form,

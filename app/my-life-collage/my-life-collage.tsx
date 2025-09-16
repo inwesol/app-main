@@ -2,15 +2,12 @@
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Palette,
-  Clock,
   Sparkles,
   ArrowRight,
-  CheckCircle,
-  Calendar,
   Heart,
   Target,
   Camera,
@@ -36,7 +33,6 @@ import {
 } from "@/lib/schemas/activity-schemas/life-collage-schema";
 import { CollageCanvas } from "@/components/activity-components/collage-canvas";
 import Header from "@/components/form-components/header";
-import { useParams } from "next/navigation";
 
 export const LifeCollage: React.FC = () => {
   const params = useParams();
