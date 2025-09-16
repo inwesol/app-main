@@ -755,7 +755,6 @@ export const DailyJournaling: React.FC = () => {
     </div>
   );
 };
-
 {
   /* Summary Card */
 }

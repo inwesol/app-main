@@ -810,3 +810,29 @@ export const postCoachingAssessments = pgTable(
     ),
   })
 );
+
+// Daily Journal Entries table for simple journaling
+export const dailyJournalEntries = pgTable(
+  "daily_journal_entries",
+  {
+    id: uuid("id").primaryKey().notNull().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    title: text("title"),
+    content: text("content").notNull(),
+    wordCount: integer("word_count").notNull().default(0),
+    entryDate: varchar("entry_date", { length: 10 }).notNull(), // YYYY-MM-DD format
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (table) => ({
+    userDateUnique: unique("daily_journal_user_date_unique").on(
+      table.userId,
+      table.entryDate
+    ),
+  })
+);
+
+export type DailyJournalEntry = typeof dailyJournalEntries.$inferSelect;
+export type NewDailyJournalEntry = typeof dailyJournalEntries.$inferInsert;

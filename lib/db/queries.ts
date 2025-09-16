@@ -50,6 +50,9 @@ import {
   postCareerMaturityTable,
   post_psychological_wellbeing_test,
   postCoachingAssessments,
+  dailyJournalEntries,
+  type DailyJournalEntry,
+  type NewDailyJournalEntry,
 } from "./schema";
 import { ArtifactKind } from "@/components/artifact";
 import { SESSION_TEMPLATES } from "@/lib/constants";
@@ -2236,6 +2239,202 @@ export async function upsertPostCoachingAssessment(
     return result[0];
   } catch (error) {
     console.error("Error upserting post-coaching assessment:", error);
+    throw error;
+  }
+}
+
+// Daily Journal Entries Functions
+
+export async function createJournalEntry(
+  userId: string,
+  title: string | null,
+  content: string,
+  entryDate: string
+): Promise<DailyJournalEntry> {
+  try {
+    const wordCount = content
+      .trim()
+      .split(/\s+/)
+      .filter((word) => word.length > 0).length;
+
+    const [entry] = await db
+      .insert(dailyJournalEntries)
+      .values({
+        userId,
+        title: title || null,
+        content: content.trim(),
+        wordCount,
+        entryDate,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .returning();
+
+    return entry;
+  } catch (error) {
+    console.error("Error creating journal entry:", error);
+    throw error;
+  }
+}
+
+export async function getJournalEntries(
+  userId: string,
+  limit: number = 50,
+  offset: number = 0
+): Promise<DailyJournalEntry[]> {
+  try {
+    const entries = await db
+      .select()
+      .from(dailyJournalEntries)
+      .where(eq(dailyJournalEntries.userId, userId))
+      .orderBy(
+        desc(dailyJournalEntries.entryDate),
+        desc(dailyJournalEntries.createdAt)
+      )
+      .limit(limit)
+      .offset(offset);
+
+    return entries;
+  } catch (error) {
+    console.error("Error fetching journal entries:", error);
+    throw error;
+  }
+}
+
+export async function getJournalEntryByDate(
+  userId: string,
+  entryDate: string
+): Promise<DailyJournalEntry | null> {
+  try {
+    const [entry] = await db
+      .select()
+      .from(dailyJournalEntries)
+      .where(
+        and(
+          eq(dailyJournalEntries.userId, userId),
+          eq(dailyJournalEntries.entryDate, entryDate)
+        )
+      )
+      .limit(1);
+
+    return entry || null;
+  } catch (error) {
+    console.error("Error fetching journal entry by date:", error);
+    throw error;
+  }
+}
+
+export async function updateJournalEntry(
+  entryId: string,
+  title: string | null,
+  content: string
+): Promise<DailyJournalEntry | null> {
+  try {
+    const wordCount = content
+      .trim()
+      .split(/\s+/)
+      .filter((word) => word.length > 0).length;
+
+    const [updatedEntry] = await db
+      .update(dailyJournalEntries)
+      .set({
+        title: title || null,
+        content: content.trim(),
+        wordCount,
+        updatedAt: new Date(),
+      })
+      .where(eq(dailyJournalEntries.id, entryId))
+      .returning();
+
+    return updatedEntry || null;
+  } catch (error) {
+    console.error("Error updating journal entry:", error);
+    throw error;
+  }
+}
+
+export async function deleteJournalEntry(entryId: string): Promise<boolean> {
+  try {
+    const result = await db
+      .delete(dailyJournalEntries)
+      .where(eq(dailyJournalEntries.id, entryId))
+      .returning({ id: dailyJournalEntries.id });
+
+    return result.length > 0;
+  } catch (error) {
+    console.error("Error deleting journal entry:", error);
+    throw error;
+  }
+}
+
+export async function searchJournalEntries(
+  userId: string,
+  searchTerm: string,
+  limit: number = 50
+): Promise<DailyJournalEntry[]> {
+  try {
+    const entries = await db
+      .select()
+      .from(dailyJournalEntries)
+      .where(
+        and(
+          eq(dailyJournalEntries.userId, userId),
+          sql`(
+            ${dailyJournalEntries.title} ILIKE ${`%${searchTerm}%`} OR
+            ${dailyJournalEntries.content} ILIKE ${`%${searchTerm}%`}
+          )`
+        )
+      )
+      .orderBy(
+        desc(dailyJournalEntries.entryDate),
+        desc(dailyJournalEntries.createdAt)
+      )
+      .limit(limit);
+
+    return entries;
+  } catch (error) {
+    console.error("Error searching journal entries:", error);
+    throw error;
+  }
+}
+
+export async function upsertJournalEntry(
+  userId: string,
+  title: string | null,
+  content: string,
+  entryDate: string
+): Promise<DailyJournalEntry> {
+  try {
+    const wordCount = content
+      .trim()
+      .split(/\s+/)
+      .filter((word) => word.length > 0).length;
+
+    const [entry] = await db
+      .insert(dailyJournalEntries)
+      .values({
+        userId,
+        title: title || null,
+        content: content.trim(),
+        wordCount,
+        entryDate,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .onConflictDoUpdate({
+        target: [dailyJournalEntries.userId, dailyJournalEntries.entryDate],
+        set: {
+          title: title || null,
+          content: content.trim(),
+          wordCount,
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
+
+    return entry;
+  } catch (error) {
+    console.error("Error upserting journal entry:", error);
     throw error;
   }
 }

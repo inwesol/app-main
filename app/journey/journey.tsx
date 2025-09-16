@@ -3,11 +3,9 @@ import React, { useState, useEffect } from "react";
 import * as LucideIcons from "lucide-react";
 import {
   CheckCircle,
-  Clock,
   Star,
   Trophy,
   Target,
-  Rocket,
   ArrowRight,
   Zap,
   Calendar,
@@ -20,6 +18,8 @@ import { Progress } from "@/components/ui/progress";
 import Header from "@/components/form-components/header";
 import { useRouter } from "next/navigation";
 import { SESSION_TEMPLATES } from "@/lib/constants";
+import { SidebarToggle } from "@/components/sidebar-toggle";
+import { useSidebar } from "@/components/ui/sidebar";
 
 interface UserProgress {
   userId: string;
@@ -34,6 +34,7 @@ export const JourneyPage: React.FC = () => {
   const [sessions, setSessions] = useState(SESSION_TEMPLATES);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const { isMobile } = useSidebar();
 
   useEffect(() => {
     console.log("in journey");
@@ -90,7 +91,8 @@ export const JourneyPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="p-2">
+      {isMobile ? <SidebarToggle /> : <div />}
       <div className="max-w-4xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
         <Header
           headerIcon={Trophy}
