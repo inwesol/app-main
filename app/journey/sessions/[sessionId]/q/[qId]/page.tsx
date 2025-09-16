@@ -9,7 +9,7 @@ import { PostCareerMaturity } from "@/components/questionnaire-forms/post-career
 import PostPsychologicalWellbeing from "@/components/questionnaire-forms/post-psychological-wellbeing";
 import { PostCoachingTest } from "@/app/postCoaching/post-coaching";
 interface PageProps {
-  params: { qId: string; sessionId: string };
+  params: Promise<{ qId: string; sessionId: string }>;
 }
 export default async function Page({ params }: PageProps) {
   const componentsMap = [

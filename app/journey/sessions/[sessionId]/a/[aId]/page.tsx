@@ -10,10 +10,10 @@ import LetterFromFutureSelf from "@/app/letter-from-future-self/letter-from-futu
 import { LifeCollage } from "@/app/my-life-collage/my-life-collage";
 
 interface ActivityPageProps {
-  params: {
+  params: Promise<{
     sessionId: string;
     aId: string;
-  };
+  }>;
 }
 
 export default async function ActivityPage({ params }: ActivityPageProps) {
@@ -22,7 +22,7 @@ export default async function ActivityPage({ params }: ActivityPageProps) {
 
   console.log("Activity page accessed with params:", { sessionId, aId });
 
-  const sessionIdNum = parseInt(sessionId);
+  const sessionIdNum = Number.parseInt(sessionId);
 
   // Route to correct activity component based on aId
   switch (aId) {
@@ -36,7 +36,7 @@ export default async function ActivityPage({ params }: ActivityPageProps) {
       return <CareerStoryThree />;
 
     case "career-story-4":
-      return <CareerStory4 sessionId={sessionIdNum} activityId={aId} />;
+      return <CareerStory4 sessionId={sessionId} />;
 
     case "career-story-5":
       return <CareerStoryFive sessionId={sessionIdNum} />;
@@ -51,7 +51,7 @@ export default async function ActivityPage({ params }: ActivityPageProps) {
       return <LetterFromFutureSelf sessionId={sessionIdNum} activityId={aId} />;
 
     case "career-option-matrix":
-      return <CareerOptionsMatrix sessionId={sessionIdNum} activityId={aId} />;
+      return <CareerOptionsMatrix sessionId={sessionId} />;
 
     case "life-collage":
       return <LifeCollage />;

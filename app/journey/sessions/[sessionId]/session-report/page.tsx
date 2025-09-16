@@ -3,7 +3,7 @@ import SessionReport from "./session-report";
 // import SessionReport from "./vm";
 
 interface SessionPageProps {
-  params: { sessionId: string };
+  params: Promise<{ sessionId: string }>;
 }
 
 export default async function SessionPage({ params }: SessionPageProps) {
