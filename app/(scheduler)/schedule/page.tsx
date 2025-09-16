@@ -14,8 +14,11 @@ import {
 } from "lucide-react";
 
 const MeetingScheduler = () => {
-  const [selectedDate, setSelectedDate] = useState(null);
-  const [selectedTime, setSelectedTime] = useState("");
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [selectedTime, setSelectedTime] = useState<{
+    value: string;
+    display: string;
+  } | null>(null);
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [generatedLink, setGeneratedLink] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
@@ -26,7 +29,7 @@ const MeetingScheduler = () => {
   const generateTimeSlots = () => {
     const slots = [];
     for (let hour = 9; hour <= 17; hour++) {
-      for (let minute of [0, 30]) {
+      for (const minute of [0, 30]) {
         const time = `${hour.toString().padStart(2, "0")}:${minute
           .toString()
           .padStart(2, "0")}`;
@@ -82,19 +85,19 @@ const MeetingScheduler = () => {
 
   const calendarDays = getCalendarDays();
 
-  const navigateMonth = (direction) => {
+  const navigateMonth = (direction: any) => {
     const newMonth = new Date(currentMonth);
     newMonth.setMonth(currentMonth.getMonth() + direction);
     setCurrentMonth(newMonth);
   };
 
-  const selectDate = (day) => {
+  const selectDate = (day: any) => {
     if (!day.isAvailable) return;
     setSelectedDate(day.date);
     setTimeout(() => setStep(2), 300);
   };
 
-  const selectTime = (time) => {
+  const selectTime = (time: any) => {
     setSelectedTime(time);
     setTimeout(() => setStep(3), 300);
   };
@@ -130,7 +133,7 @@ const MeetingScheduler = () => {
 
   const resetScheduler = () => {
     setSelectedDate(null);
-    setSelectedTime("");
+    setSelectedTime(null);
     setGeneratedLink("");
     setStep(1);
     setIsCopied(false);
@@ -235,6 +238,7 @@ const MeetingScheduler = () => {
               {/* Calendar Header */}
               <div className="flex items-center justify-between mb-6">
                 <button
+                  type="button"
                   onClick={() => navigateMonth(-1)}
                   className="p-2 rounded-lg hover:bg-slate-100 transition-colors duration-200"
                 >
@@ -247,6 +251,7 @@ const MeetingScheduler = () => {
                 </h3>
 
                 <button
+                  type="button"
                   onClick={() => navigateMonth(1)}
                   className="p-2 rounded-lg hover:bg-slate-100 transition-colors duration-200"
                 >
@@ -271,7 +276,8 @@ const MeetingScheduler = () => {
               <div className="grid grid-cols-7 gap-1">
                 {calendarDays.map((day, index) => (
                   <button
-                    key={index}
+                    key={day.date.toISOString()}
+                    type="button"
                     onClick={() => selectDate(day)}
                     disabled={!day.isAvailable}
                     className={`h-12 flex items-center justify-center text-sm font-medium rounded-lg transition-all duration-200 ${
@@ -307,9 +313,10 @@ const MeetingScheduler = () => {
                 {timeSlots.map((slot) => (
                   <button
                     key={slot.value}
+                    type="button"
                     onClick={() => selectTime(slot)}
                     className={`p-4 rounded-xl text-sm font-medium transition-all duration-200 border-2 ${
-                      selectedTime.value === slot.value
+                      selectedTime?.value === slot.value
                         ? "bg-gradient-to-r from-blue-500 to-green-500 text-white border-transparent shadow-lg scale-105"
                         : "bg-white border-slate-200 text-slate-700 hover:border-blue-300 hover:bg-blue-50 hover:scale-105"
                     }`}
@@ -321,6 +328,7 @@ const MeetingScheduler = () => {
 
               <div className="flex justify-center mt-6">
                 <button
+                  type="button"
                   onClick={() => setStep(1)}
                   className="px-6 py-2 text-slate-600 hover:text-slate-800 transition-colors duration-200"
                 >
@@ -349,7 +357,7 @@ const MeetingScheduler = () => {
                     <div className="flex items-center justify-center gap-3">
                       <Clock className="size-5 text-blue-600" />
                       <span className="font-medium text-slate-800">
-                        {selectedTime.display}
+                        {selectedTime?.display}
                       </span>
                     </div>
                   </div>
@@ -359,6 +367,7 @@ const MeetingScheduler = () => {
               {!generatedLink ? (
                 <div className="space-y-4">
                   <button
+                    type="button"
                     onClick={generateMeetingLink}
                     disabled={isGenerating}
                     className={`w-full py-4 px-6 rounded-xl font-semibold text-white transition-all duration-300 shadow-lg ${
@@ -383,6 +392,7 @@ const MeetingScheduler = () => {
 
                   <div className="flex justify-center">
                     <button
+                      type="button"
                       onClick={() => setStep(2)}
                       className="px-6 py-2 text-slate-600 hover:text-slate-800 transition-colors duration-200"
                     >
@@ -409,6 +419,7 @@ const MeetingScheduler = () => {
 
                   <div className="space-y-3">
                     <button
+                      type="button"
                       onClick={copyToClipboard}
                       className={`w-full py-3 px-4 rounded-xl font-medium transition-all duration-200 flex items-center justify-center gap-2 ${
                         isCopied
@@ -431,6 +442,7 @@ const MeetingScheduler = () => {
 
                     {/* Journey Redirect Button */}
                     <button
+                      type="button"
                       onClick={redirectToJourney}
                       className="w-full py-3 px-4 rounded-xl font-medium transition-all duration-200 flex items-center justify-center gap-2 bg-gradient-to-r from-green-500 to-blue-500 text-white hover:from-green-600 hover:to-blue-600 hover:shadow-lg hover:scale-[1.02]"
                     >
@@ -441,7 +453,7 @@ const MeetingScheduler = () => {
 
                     <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-xl p-6 border border-green-200/50 text-center">
                       <div className="flex items-center justify-center gap-2 mb-3">
-                        <div className="size-2 bg-green-500 rounded-full animate-pulse"></div>
+                        <div className="size-2 bg-green-500 rounded-full animate-pulse" />
                         <p className="text-green-700 font-semibold">
                           Confirmation email will be sent to you soon!
                         </p>

@@ -254,7 +254,7 @@ export default function SessionReport({ sessionId }: { sessionId: string }) {
       }
     };
     fetchSessionData();
-  }, []);
+  }, [sessionId]);
 
   useEffect(() => {
     const fetchQuestionnairesData = async () => {
@@ -308,7 +308,7 @@ export default function SessionReport({ sessionId }: { sessionId: string }) {
     if (sessionId === "3") {
       fetchPsychologicalWellbeingResults();
     }
-  }, []);
+  }, [sessionId]);
 
   // console.log("riasecResults: ", riasecResults);
   // console.log("personalityTestResults: ", personalityTestResults);
@@ -482,7 +482,7 @@ export default function SessionReport({ sessionId }: { sessionId: string }) {
                 .filter((form) => form.status === "completed")
                 .map((form, index) => (
                   <div
-                    key={index}
+                    key={form.id}
                     className="flex items-center gap-4 p-4 bg-gradient-to-r from-primary-green-50 to-emerald-50 
                              border border-primary-green-200 rounded-xl hover:shadow-md transition-all duration-200
                              hover:from-primary-green-100 hover:to-emerald-100"
@@ -548,7 +548,7 @@ export default function SessionReport({ sessionId }: { sessionId: string }) {
                           ?.split("")
                           .map((char, i) => (
                             <div
-                              key={i}
+                              key={char}
                               className="size-10 sm:size-16 bg-gradient-to-r from-primary-blue-500 to-primary-green-500 
                                    text-white rounded-full flex items-center justify-center 
                                    tetx-xl sm:text-2xl font-bold shadow-lg"
@@ -582,6 +582,7 @@ export default function SessionReport({ sessionId }: { sessionId: string }) {
                     {/* User's Question Answers */}
                     <div className="col-span-full">
                       <button
+                        type="button"
                         onClick={() =>
                           setShowRiasecTestAnswers(!showRiasecTestAnswers)
                         }
@@ -613,7 +614,7 @@ export default function SessionReport({ sessionId }: { sessionId: string }) {
                             {riasecResults.selectedAnswers.map(
                               (statement, index) => (
                                 <div
-                                  key={index}
+                                  key={statement}
                                   className="p-4 bg-primary-blue-50/90 rounded-md border border-primary-blue-400 hover:bg-primary-blue-100/90 hover:border-primary-blue-500
                                        transition-colors duration-200"
                                 >
@@ -668,7 +669,11 @@ export default function SessionReport({ sessionId }: { sessionId: string }) {
                               key={trait}
                               label={trait}
                               score={score}
-                              maxScore={MaxScoresPersonalityTest[trait] || 100}
+                              maxScore={
+                                MaxScoresPersonalityTest[
+                                  trait as keyof PersonalityTraits
+                                ] || 100
+                              }
                               color="primary-green"
                             />
                           ))}
@@ -688,6 +693,7 @@ export default function SessionReport({ sessionId }: { sessionId: string }) {
                     {/* User's Question Answers */}
                     <div className="col-span-full">
                       <button
+                        type="button"
                         onClick={() =>
                           setShowPersonalityTestAnswers(
                             !showPersonalityTestAnswers
@@ -726,7 +732,7 @@ export default function SessionReport({ sessionId }: { sessionId: string }) {
                             {Object.entries(personalityTestResults.answers).map(
                               ([question, answer], index) => (
                                 <div
-                                  key={index}
+                                  key={question}
                                   className="p-4 bg-white rounded-md border border-gray-200 hover:border-purple-300 
                                        transition-colors duration-200"
                                 >
@@ -821,6 +827,7 @@ export default function SessionReport({ sessionId }: { sessionId: string }) {
                 {/* User's Question Answers */}
                 <div className="col-span-full">
                   <button
+                    type="button"
                     onClick={() =>
                       setShowWellbeingAnswers(!showWellbeingAnswers)
                     }
@@ -859,7 +866,7 @@ export default function SessionReport({ sessionId }: { sessionId: string }) {
                           psychologicalWellbeingTestResults.answers
                         ).map(([question, answer], index) => (
                           <div
-                            key={index}
+                            key={question}
                             className="p-4 bg-white rounded-md border border-gray-200 hover:border-purple-300 
                                        transition-colors duration-200"
                           >
