@@ -1,5 +1,5 @@
-import CareeerStoryOne from "../../../../../../components/activity-forms/CareeerStoryOne";
+import CareerStory1 from "../../../../../../app/career-story-1/career-story-1";
 
 export default function Page() {
-  return <CareeerStoryOne />;
+  return <CareerStory1 />;
 }
