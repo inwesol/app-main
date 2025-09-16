@@ -45,7 +45,7 @@ export async function POST(
 
     // Parse sessionId to number and validate
     const sessionIdNum = Number(sessionId);
-    if (isNaN(sessionIdNum)) {
+    if (Number.isNaN(sessionIdNum)) {
       return NextResponse.json(
         { error: "Invalid session ID" },
         { status: 400 }

@@ -92,7 +92,7 @@ function personalityTestScore() {
     "Is sophisticated in art, music, or literature": 44,
   };
 
-  function reverseScore(value: number, maxScore: number = 5): number {
+  function reverseScore(value: number, maxScore = 5) {
     return maxScore + 1 - value;
   }
 
@@ -176,7 +176,7 @@ function psychologicalWellbeingScore() {
     "I often feel overwhelmed by my responsibilities": 42,
   };
 
-  function reverseScore(value: number, points: number = 7) {
+  function reverseScore(value: number, points = 7) {
     return points + 1 - value;
   }
 
@@ -252,7 +252,7 @@ export async function GET(
   const { qId, sessionId } = await params;
   console.log("qId: ", qId, "sessionId: ", sessionId);
   switch (qId) {
-    case "demographics-details":
+    case "demographics-details": {
       const session = await auth();
       if (!session?.user?.id)
         return new NextResponse("Unauthorized", { status: 401 });
@@ -262,6 +262,7 @@ export async function GET(
       if (!details) return new NextResponse("Not found", { status: 404 });
 
       return NextResponse.json(details);
+    }
 
     case "pre-assessment":
       try {
@@ -278,7 +279,7 @@ export async function GET(
 
         // Validate sessionId
         const sessionIdNum = Number(sessionId);
-        if (isNaN(sessionIdNum)) {
+        if (Number.isNaN(sessionIdNum)) {
           return new NextResponse("Bad Request: Invalid session ID", {
             status: 400,
           });
@@ -322,7 +323,7 @@ export async function GET(
         console.log("Career maturity GET - User ID:", session.user.id);
 
         const sessionIdNum = Number(sessionId);
-        if (isNaN(sessionIdNum)) {
+        if (Number.isNaN(sessionIdNum)) {
           return new NextResponse("Bad Request: Invalid session ID", {
             status: 400,
           });
@@ -359,7 +360,7 @@ export async function GET(
         }
 
         const sessionIdNum = Number(sessionId);
-        if (isNaN(sessionIdNum)) {
+        if (Number.isNaN(sessionIdNum)) {
           return new NextResponse("Bad Request: Invalid session ID", {
             status: 400,
           });
@@ -388,7 +389,7 @@ export async function GET(
         }
 
         const sessionIdNum = Number(sessionId);
-        if (isNaN(sessionIdNum)) {
+        if (Number.isNaN(sessionIdNum)) {
           return new NextResponse("Bad Request: Invalid session ID", {
             status: 400,
           });
@@ -419,7 +420,7 @@ export async function GET(
         }
 
         const sessionIdNum = Number(sessionId);
-        if (isNaN(sessionIdNum)) {
+        if (Number.isNaN(sessionIdNum)) {
           return new NextResponse("Bad Request: Invalid session ID", {
             status: 400,
           });
@@ -455,7 +456,7 @@ export async function GET(
         console.log("Post Career maturity GET - User ID:", session.user.id);
 
         const sessionIdNum = Number(sessionId);
-        if (isNaN(sessionIdNum)) {
+        if (Number.isNaN(sessionIdNum)) {
           return new NextResponse("Bad Request: Invalid session ID", {
             status: 400,
           });
@@ -492,7 +493,7 @@ export async function GET(
         }
 
         const sessionIdNum = Number(sessionId);
-        if (isNaN(sessionIdNum)) {
+        if (Number.isNaN(sessionIdNum)) {
           return new NextResponse("Bad Request: Invalid session ID", {
             status: 400,
           });
@@ -530,7 +531,7 @@ export async function GET(
 
         // Validate sessionId
         const sessionIdNum = Number(sessionId);
-        if (isNaN(sessionIdNum)) {
+        if (Number.isNaN(sessionIdNum)) {
           return new NextResponse("Bad Request: Invalid session ID", {
             status: 400,
           });
@@ -571,7 +572,7 @@ export async function POST(
 ) {
   const { qId, sessionId } = await params;
   switch (qId) {
-    case "demographics-details":
+    case "demographics-details": {
       const session = await auth();
       if (!session?.user?.id)
         return new NextResponse("Unauthorized", { status: 401 });
@@ -597,6 +598,7 @@ export async function POST(
       await updateJourneyProgressAfterForm(session.user.id, Number(sessionId));
 
       return NextResponse.json({ success: true });
+    }
     case "pre-assessment":
       try {
         const session = await auth();
@@ -620,7 +622,7 @@ export async function POST(
         }
         // Validate sessionId
         const sessionIdNum = Number(sessionId);
-        if (isNaN(sessionIdNum)) {
+        if (Number.isNaN(sessionIdNum)) {
           return new NextResponse("Bad Request: Invalid session ID", {
             status: 400,
           });
@@ -655,7 +657,7 @@ export async function POST(
         console.log("Career maturity POST - Answers:", answers);
 
         const sessionIdNum = Number(sessionId);
-        if (isNaN(sessionIdNum)) {
+        if (Number.isNaN(sessionIdNum)) {
           return new NextResponse("Bad Request: Invalid session ID", {
             status: 400,
           });
@@ -702,7 +704,7 @@ export async function POST(
 
         const { sessionId } = await params;
         const sessionIdNum = Number(sessionId);
-        if (isNaN(sessionIdNum)) {
+        if (Number.isNaN(sessionIdNum)) {
           return new NextResponse("Bad Request: Invalid session ID", {
             status: 400,
           });
@@ -751,7 +753,7 @@ export async function POST(
           const qText = qTextRaw.trim();
           const qNum = questionTextToNumber[qText];
           if (!qNum) continue;
-          let val = answerTextToValue[answerText];
+          const val = answerTextToValue[answerText as string];
           if (val === undefined) continue;
 
           const rev = reverseScoredQuestions.has(qNum)
@@ -818,7 +820,7 @@ export async function POST(
         }
 
         const sessionIdNum = Number(sessionId);
-        if (isNaN(sessionIdNum)) {
+        if (Number.isNaN(sessionIdNum)) {
           return new NextResponse("Bad Request: Invalid session ID", {
             status: 400,
           });
@@ -858,7 +860,7 @@ export async function POST(
           const qText = qTextRaw.trim();
           const qNum = questionTextToNumber[qText];
           if (!qNum) continue;
-          let val = answerTextToValue[answerText];
+          const val = answerTextToValue[answerText as string];
           if (val === undefined) continue;
 
           const rev = reverseScoredQuestions.has(qNum)
@@ -907,7 +909,7 @@ export async function POST(
         }
 
         const sessionIdNum = Number(sessionId);
-        if (isNaN(sessionIdNum)) {
+        if (Number.isNaN(sessionIdNum)) {
           return new NextResponse("Bad Request: Invalid session ID", {
             status: 400,
           });
@@ -997,7 +999,7 @@ export async function POST(
         console.log("Post Career maturity POST - Answers:", answers);
 
         const sessionIdNum = Number(sessionId);
-        if (isNaN(sessionIdNum)) {
+        if (Number.isNaN(sessionIdNum)) {
           return new NextResponse("Bad Request: Invalid session ID", {
             status: 400,
           });
@@ -1043,7 +1045,7 @@ export async function POST(
         }
 
         const sessionIdNum = Number(sessionId);
-        if (isNaN(sessionIdNum)) {
+        if (Number.isNaN(sessionIdNum)) {
           return new NextResponse("Bad Request: Invalid session ID", {
             status: 400,
           });
@@ -1083,7 +1085,7 @@ export async function POST(
           const qText = qTextRaw.trim();
           const qNum = questionTextToNumber[qText];
           if (!qNum) continue;
-          let val = answerTextToValue[answerText];
+          const val = answerTextToValue[answerText as string];
           if (val === undefined) continue;
 
           const rev = reverseScoredQuestions.has(qNum)
@@ -1149,7 +1151,7 @@ export async function POST(
 
         // Validate sessionId
         const sessionIdNum = Number(sessionId);
-        if (isNaN(sessionIdNum)) {
+        if (Number.isNaN(sessionIdNum)) {
           return new NextResponse("Bad Request: Invalid session ID", {
             status: 400,
           });
