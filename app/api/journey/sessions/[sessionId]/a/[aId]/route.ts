@@ -34,7 +34,7 @@ import { lifeCollageSchema } from "@/lib/schemas/activity-schemas/life-collage-s
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { sessionId: string; aId: string } }
+  { params }: { params: Promise<{ sessionId: string; aId: string }> }
 ) {
   console.log("get activity api working");
   const { aId, sessionId } = await params;
@@ -341,7 +341,7 @@ export async function GET(
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { sessionId: string; aId: string } }
+  { params }: { params: Promise<{ sessionId: string; aId: string }> }
 ) {
   const { aId, sessionId } = await params;
 

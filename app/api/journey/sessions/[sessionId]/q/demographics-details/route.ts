@@ -10,7 +10,7 @@ import { demographicsDetailsSchema } from "@/lib/schemas/questionnaire-schemas/d
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { sessionId: string; qId?: string } }
+  { params }: { params: Promise<{ sessionId: string; qId?: string }> }
 ) {
   try {
     const session = await auth();
@@ -77,7 +77,7 @@ export async function POST(
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { sessionId: string; qId?: string } }
+  { params }: { params: Promise<{ sessionId: string; qId?: string }> }
 ) {
   try {
     const session = await auth();

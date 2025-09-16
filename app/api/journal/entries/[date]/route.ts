@@ -9,7 +9,7 @@ import {
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { date: string } }
+  { params }: { params: Promise<{ date: string }> }
 ) {
   try {
     const session = await auth();
@@ -17,7 +17,8 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const entry = await getJournalEntryByDate(session.user.id, params.date);
+    const { date } = await params;
+    const entry = await getJournalEntryByDate(session.user.id, date);
 
     if (!entry) {
       return NextResponse.json({ error: "Entry not found" }, { status: 404 });
@@ -35,7 +36,7 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { date: string } }
+  { params }: { params: Promise<{ date: string }> }
 ) {
   try {
     const session = await auth();
@@ -43,6 +44,7 @@ export async function PUT(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const { date } = await params;
     const { title, content } = await request.json();
 
     if (!content) {
@@ -56,7 +58,7 @@ export async function PUT(
       session.user.id,
       title || null,
       content,
-      params.date
+      date
     );
 
     return NextResponse.json({ entry });
@@ -71,7 +73,7 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { date: string } }
+  { params }: { params: Promise<{ date: string }> }
 ) {
   try {
     const session = await auth();
@@ -79,8 +81,9 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const { date } = await params;
     // First get the entry to find its ID
-    const entry = await getJournalEntryByDate(session.user.id, params.date);
+    const entry = await getJournalEntryByDate(session.user.id, date);
 
     if (!entry) {
       return NextResponse.json({ error: "Entry not found" }, { status: 404 });

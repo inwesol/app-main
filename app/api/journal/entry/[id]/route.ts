@@ -5,7 +5,7 @@ import { updateJournalEntry, deleteJournalEntry } from "@/lib/db/queries";
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
@@ -13,6 +13,7 @@ export async function PUT(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const { id } = await params;
     const { title, content } = await request.json();
 
     if (!content) {
@@ -22,7 +23,7 @@ export async function PUT(
       );
     }
 
-    const entry = await updateJournalEntry(params.id, title || null, content);
+    const entry = await updateJournalEntry(id, title || null, content);
 
     if (!entry) {
       return NextResponse.json({ error: "Entry not found" }, { status: 404 });
@@ -40,7 +41,7 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
@@ -48,7 +49,8 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const success = await deleteJournalEntry(params.id);
+    const { id } = await params;
+    const success = await deleteJournalEntry(id);
 
     if (!success) {
       return NextResponse.json({ error: "Entry not found" }, { status: 404 });

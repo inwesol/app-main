@@ -4,7 +4,7 @@ import { getSessionDetailForUser } from "@/lib/db/queries";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { sessionId: string } }
+  { params }: { params: Promise<{ sessionId: string }> }
 ) {
   const session = await auth();
   if (!session || !session.user || !session.user.id) {

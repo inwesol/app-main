@@ -246,7 +246,7 @@ function riasecScore() {
 }
 export async function GET(
   req: NextRequest,
-  { params }: { params: { sessionId: string; qId: string } }
+  { params }: { params: Promise<{ sessionId: string; qId: string }> }
 ) {
   console.log("get api working");
   const { qId, sessionId } = await params;
@@ -567,7 +567,7 @@ export async function GET(
 }
 export async function POST(
   req: NextRequest,
-  { params }: { params: { sessionId: string; qId: string } }
+  { params }: { params: Promise<{ sessionId: string; qId: string }> }
 ) {
   const { qId, sessionId } = await params;
   switch (qId) {
