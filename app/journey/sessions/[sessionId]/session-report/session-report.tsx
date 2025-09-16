@@ -321,7 +321,7 @@ export default function SessionReport({ sessionId }: { sessionId: string }) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-primary-primary-green-50 via-white to-primary-primary-blue-50 flex items-center justify-center p-4">
         <div className="text-center">
-          <div className="animate-spin rounded-full size-12 border-b-2 border-primary-blue-600 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full size-12 border-b-2 border-primary-blue-600 mx-auto mb-4" />
           <p className="text-slate-600 text-sm sm:text-base">
             Generating Report...
           </p>
@@ -396,7 +396,7 @@ export default function SessionReport({ sessionId }: { sessionId: string }) {
       <div className="max-w-5xl mx-auto p-4 space-y-8">
         {/* Session Header */}
         <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-primary-blue-600 via-primary-blue-500 to-primary-green-600 p-4 sm:p-8 text-white shadow-2xl">
-          <div className="absolute inset-0 bg-black/10"></div>
+          <div className="absolute inset-0 bg-black/10" />
           <div className="relative z-10">
             <div className="flex items-start justify-between sm:mb-6 mb-4">
               <div className="space-y-3">
@@ -916,7 +916,7 @@ export default function SessionReport({ sessionId }: { sessionId: string }) {
                 <MessageCircle className="size-6 text-orange-600" />
               </div>
               <h3 className="text-lg sm:text-xl font-bold text-gray-900 ">
-                Coach's Notes
+                Coach&apos;s Notes
               </h3>
             </div>
             <div className="flex-1">
