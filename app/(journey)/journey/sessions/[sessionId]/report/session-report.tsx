@@ -287,7 +287,7 @@ export default function SessionReport({ sessionId }: { sessionId: string }) {
     const fetchPsychologicalWellbeingResults = async () => {
       try {
         const psychologicalWellbeingRes = await fetch(
-          `/api/journey/sessions/3/q/psychological-wellbeing`
+          `/api/journey/sessions/1/q/psychological-wellbeing`
         );
 
         if (psychologicalWellbeingRes.ok) {
@@ -392,129 +392,130 @@ export default function SessionReport({ sessionId }: { sessionId: string }) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-green-50/30 via-white to-primary-blue-50/30">
-      <div className="max-w-5xl mx-auto p-4 space-y-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-emerald-50/50">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {/* Session Header */}
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-primary-blue-600 via-primary-blue-500 to-primary-green-600 p-4 sm:p-8 text-white shadow-2xl">
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-blue-600 via-blue-500 to-emerald-600 p-6 sm:p-8 text-white shadow-2xl mb-8">
           <div className="absolute inset-0 bg-black/10" />
           <div className="relative z-10">
-            <div className="flex items-start justify-between sm:mb-6 mb-4">
-              <div className="space-y-3">
+            <div className="flex flex-col sm:flex-row items-start justify-between gap-4 sm:gap-6">
+              <div className="space-y-3 flex-1">
                 <div className="flex items-center gap-3">
+                  <div className="p-2 bg-white/20 rounded-xl">
+                    <Activity className="size-6 sm:size-8" />
+                  </div>
                   <div>
-                    <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight">
+                    <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight">
                       {sessionData?.title}
                     </h1>
-                    <p className="text-primary-blue-100 text-base sm:text-lg mt-1">
+                    <p className="text-blue-100 text-sm sm:text-base mt-1">
                       Session #{sessionId} Assessment Report
                     </p>
                   </div>
                 </div>
+                <div className="flex items-center gap-4 text-blue-100">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="size-4" />
+                    <span className="text-sm">
+                      {formatDate(new Date().toISOString())}
+                    </span>
+                  </div>
+                </div>
               </div>
-              <div className="hidden sm:flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-2 py-1 border border-white/30">
-                <CheckCircle className="size-4 text-primary-green-300" />
+              <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-3 py-2 border border-white/30">
+                <CheckCircle className="size-4 text-emerald-300" />
                 <span className="text-sm font-semibold">Completed</span>
               </div>
             </div>
-
-            <div className="flex items-center gap-4 text-primary-blue-100">
-              <div className="flex items-center gap-2">
-                <Calendar className="size-4" />
-                <span className="text-sm">
-                  {formatDate(new Date().toISOString())}
-                </span>
-              </div>
-            </div>
           </div>
         </div>
 
-        {/* Schedule Summary */}
-        <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100">
-          <div className="bg-gradient-to-r from-gray-50 to-primary-blue-50 p-4 sm:p-6 border-b border-gray-100">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-primary-blue-100 rounded-lg">
-                <Clock className="size-6 text-primary-blue-600" />
-              </div>
-              <div>
-                <h2 className="text-lg sm:text-xl font-bold text-gray-900">
-                  Schedule Summary
-                </h2>
-                <p className="text-gray-600 text-sm sm:text-base">
-                  Your structured wellness journey
-                </p>
+        {/* Schedule Summary & Completed Forms Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          {/* Schedule Summary */}
+          <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-slate-200/60">
+            <div className="bg-gradient-to-r from-slate-50 to-blue-50 p-4 sm:p-6 border-b border-slate-100">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-blue-100 rounded-lg">
+                  <Clock className="size-5 sm:size-6 text-blue-600" />
+                </div>
+                <div>
+                  <h2 className="text-lg sm:text-xl font-bold text-slate-900">
+                    Schedule Summary
+                  </h2>
+                  <p className="text-slate-600 text-sm">
+                    Your structured wellness journey
+                  </p>
+                </div>
               </div>
             </div>
+            <div className="p-4 sm:p-6">
+              <p className="text-slate-700 leading-relaxed text-sm sm:text-base">
+                The scheduler in our psychological well-being application is
+                designed to help users build consistent and structured mental
+                health routines. It allows users to plan and manage daily
+                activities such as meditation, journaling, therapy sessions, and
+                medication reminders, all in one place.
+              </p>
+            </div>
           </div>
-          <div className="p-4 sm:p-6">
-            <p className="text-gray-700 leading-relaxed sm:text-base text-sm">
-              The scheduler in our psychological well-being application is
-              designed to help users build consistent and structured mental
-              health routines. It allows users to plan and manage daily
-              activities such as meditation, journaling, therapy sessions, and
-              medication reminders, all in one place. With features like
-              recurring event setup, smart notifications, and mood-based
-              suggestions, the scheduler ensures that users stay engaged with
-              their wellness journey.
-            </p>
-          </div>
-        </div>
 
-        {/* Completed Forms */}
-        <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100">
-          <div className="bg-gradient-to-r from-primary-green-50 to-emerald-50 p-4 sm:p-6 border-b border-gray-100">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-primary-green-100 rounded-lg">
-                <Activity className="size-6 text-primary-green-600" />
-              </div>
-              <div>
-                <h2 className="text-lg sm:text-xl font-bold text-gray-900">
-                  Completed Assessments
-                </h2>
-                <p className="text-gray-600 text-xs sm:text-base">
-                  Successfully completed evaluations
-                </p>
+          {/* Completed Forms */}
+          <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-slate-200/60">
+            <div className="bg-gradient-to-r from-emerald-50 to-green-50 p-4 sm:p-6 border-b border-slate-100">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-emerald-100 rounded-lg">
+                  <Activity className="size-5 sm:size-6 text-emerald-600" />
+                </div>
+                <div>
+                  <h2 className="text-lg sm:text-xl font-bold text-slate-900">
+                    Completed Assessments
+                  </h2>
+                  <p className="text-slate-600 text-sm">
+                    Successfully completed evaluations
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
-          <div className="p-6">
-            <div className="grid gap-4">
-              {sessionData?.forms
-                .filter((form) => form.status === "completed")
-                .map((form, index) => (
-                  <div
-                    key={form.id}
-                    className="flex items-center gap-4 p-4 bg-gradient-to-r from-primary-green-50 to-emerald-50 
-                             border border-primary-green-200 rounded-xl hover:shadow-md transition-all duration-200
-                             hover:from-primary-green-100 hover:to-emerald-100"
-                  >
-                    <div className="p-2 bg-primary-green-500 rounded-full">
-                      <CheckCircle2 className="size-5 text-white" />
+            <div className="p-4 sm:p-6">
+              <div className="space-y-3">
+                {sessionData?.forms
+                  .filter((form) => form.status === "completed")
+                  .map((form, index) => (
+                    <div
+                      key={form.id}
+                      className="flex items-center gap-3 p-3 bg-gradient-to-r from-emerald-50 to-green-50 
+                               border border-emerald-200 rounded-xl hover:shadow-md transition-all duration-200
+                               hover:from-emerald-100 hover:to-green-100"
+                    >
+                      <div className="p-1.5 bg-emerald-500 rounded-full">
+                        <CheckCircle2 className="size-4 text-white" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-emerald-800 text-sm sm:text-base truncate">
+                          {form.title}
+                        </h3>
+                        <p className="text-xs sm:text-sm text-emerald-600 truncate">
+                          {form.description}
+                        </p>
+                      </div>
+                      <div className="px-2 py-1 bg-emerald-500 text-white text-xs font-medium rounded-full shrink-0">
+                        ✓
+                      </div>
                     </div>
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-primary-green-800">
-                        {form.title}
-                      </h3>
-                      <p className="text-sm text-primary-green-600">
-                        {form.description}
-                      </p>
-                    </div>
-                    <div className="px-3 py-1 bg-primary-green-500 text-white text-xs font-medium rounded-full">
-                      ✓ Complete
-                    </div>
-                  </div>
-                ))}
+                  ))}
+              </div>
             </div>
           </div>
         </div>
 
         {/* Assessment Results */}
-
-        <div className="space-y-6">
+        <div className="space-y-6 mb-8">
           <div className="text-center">
-            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 sm:mb-2 mb-1">
+            <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-800 mb-2">
               Assessment Results
             </h2>
-            <p className="text-gray-600 text-sm sm:text-base">
+            <p className="text-slate-600 text-sm sm:text-base">
               Your comprehensive psychological evaluation
             </p>
           </div>
@@ -522,15 +523,15 @@ export default function SessionReport({ sessionId }: { sessionId: string }) {
             <>
               {/* RIASEC Results */}
               {riasecResults && (
-                <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100">
-                  <div className="bg-gradient-to-r from-primary-blue-500 to-primary-blue-600 text-white p-4 sm:p-6">
+                <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-slate-200/60">
+                  <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-4 sm:p-6">
                     <div className="flex items-center gap-3">
-                      <Target className="size-7" />
+                      <Target className="size-6 sm:size-7" />
                       <div>
                         <h3 className="text-lg sm:text-xl font-bold">
                           RIASEC Career Assessment
                         </h3>
-                        <p className="text-sm sm:text-base text-primary-blue-100">
+                        <p className="text-sm text-blue-100">
                           Discover your career interests and aptitudes
                         </p>
                       </div>
@@ -540,18 +541,18 @@ export default function SessionReport({ sessionId }: { sessionId: string }) {
                   <div className="p-4 sm:p-6 space-y-6">
                     {/* Interest Code */}
                     <div className="text-center">
-                      <h4 className="tetx-base sm:text-lg font-semibold text-gray-900 mb-4">
+                      <h4 className="text-base sm:text-lg font-semibold text-slate-900 mb-4">
                         Your Interest Code
                       </h4>
-                      <div className="flex justify-center gap-3">
+                      <div className="flex justify-center gap-2 sm:gap-3">
                         {riasecResults.interestCode
                           ?.split("")
                           .map((char, i) => (
                             <div
                               key={char}
-                              className="size-10 sm:size-16 bg-gradient-to-r from-primary-blue-500 to-primary-green-500 
+                              className="size-10 sm:size-14 bg-gradient-to-r from-blue-500 to-emerald-500 
                                    text-white rounded-full flex items-center justify-center 
-                                   tetx-xl sm:text-2xl font-bold shadow-lg"
+                                   text-lg sm:text-xl font-bold shadow-lg"
                             >
                               {char}
                             </div>
@@ -561,10 +562,10 @@ export default function SessionReport({ sessionId }: { sessionId: string }) {
 
                     {/* Category Scores */}
                     <div>
-                      <h4 className="text-lg font-semibold text-gray-900 mb-4">
+                      <h4 className="text-base sm:text-lg font-semibold text-slate-900 mb-4">
                         Interest Categories
                       </h4>
-                      <div className="grid gap-4">
+                      <div className="grid gap-3">
                         {Object.entries(riasecResults.categoryCounts).map(
                           ([category, score]) => (
                             <ProgressBar
@@ -639,29 +640,29 @@ export default function SessionReport({ sessionId }: { sessionId: string }) {
 
               {/* Personality Test Results */}
               {personalityTestResults && (
-                <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100">
-                  <div className="bg-gradient-to-r from-primary-green-500 to-emerald-600 text-white p-6">
+                <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-slate-200/60">
+                  <div className="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white p-4 sm:p-6">
                     <div className="flex items-center gap-3">
-                      <User className="size-7" />
+                      <User className="size-6 sm:size-7" />
                       <div>
-                        <h3 className="text-xl font-bold">
+                        <h3 className="text-lg sm:text-xl font-bold">
                           Personality Assessment
                         </h3>
-                        <p className="text-primary-green-100">
+                        <p className="text-sm text-emerald-100">
                           Big Five personality traits analysis
                         </p>
                       </div>
                     </div>
                   </div>
 
-                  <div className="p-4 sm:p-6 flex flex-col gap-4">
-                    <div className="grid lg:grid-cols-2 gap-8">
+                  <div className="p-4 sm:p-6">
+                    <div className="grid lg:grid-cols-2 gap-6 lg:gap-8">
                       {/* Trait Scores */}
                       <div>
-                        <h4 className="text-lg font-semibold text-gray-900 mb-4">
+                        <h4 className="text-base sm:text-lg font-semibold text-slate-900 mb-4">
                           Personality Traits
                         </h4>
-                        <div className="space-y-4">
+                        <div className="space-y-3">
                           {Object.entries(
                             personalityTestResults.subscaleScores
                           ).map(([trait, score]) => (
@@ -775,29 +776,29 @@ export default function SessionReport({ sessionId }: { sessionId: string }) {
           )}
           {/* Psychological Wellbeing Results */}
           {psychologicalWellbeingTestResults && (
-            <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100">
+            <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-slate-200/60">
               <div className="bg-gradient-to-r from-purple-500 to-pink-600 text-white p-4 sm:p-6">
                 <div className="flex items-center gap-3">
-                  <Heart className="size-5 sm:size-7" />
+                  <Heart className="size-5 sm:size-6" />
                   <div>
                     <h3 className="text-lg sm:text-xl font-bold">
                       Psychological Wellbeing
                     </h3>
-                    <p className="text-sm sm:text-base text-purple-100">
+                    <p className="text-sm text-purple-100">
                       Six dimensions of psychological wellness
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="p-4 sm:p-6 flex flex-col gap-4">
-                <div className="grid lg:grid-cols-2 gap-8">
+              <div className="p-4 sm:p-6">
+                <div className="grid lg:grid-cols-2 gap-6 lg:gap-8">
                   {/* Wellbeing Dimensions */}
                   <div>
-                    <h4 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">
+                    <h4 className="text-base sm:text-lg font-semibold text-slate-900 mb-4">
                       Wellbeing Dimensions
                     </h4>
-                    <div className="space-y-4">
+                    <div className="space-y-3">
                       {Object.entries(
                         psychologicalWellbeingTestResults.subscaleScores
                       ).map(([dimension, score]) => (
@@ -915,20 +916,21 @@ export default function SessionReport({ sessionId }: { sessionId: string }) {
           )}
         </div>
 
-        {/* Additional Notes */}
-        <div className="bg-gradient-to-br from-orange-50 to-yellow-50 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-orange-200">
-          <div className="p-4 sm:p-6">
-            <div className="flex items-center gap-4 mb-2 sm:mb-3 ">
-              <div className="p-2 bg-orange-100 rounded-lg mt-1">
-                <MessageCircle className="size-6 text-orange-600" />
+        {/* Coach's Notes & Email CTA Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Coach's Notes */}
+          <div className="bg-gradient-to-br from-orange-50 to-yellow-50 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-orange-200">
+            <div className="p-4 sm:p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-2 bg-orange-100 rounded-lg">
+                  <MessageCircle className="size-5 sm:size-6 text-orange-600" />
+                </div>
+                <h3 className="text-lg sm:text-xl font-bold text-slate-900">
+                  Coach&apos;s Notes
+                </h3>
               </div>
-              <h3 className="text-lg sm:text-xl font-bold text-gray-900 ">
-                Coach&apos;s Notes
-              </h3>
-            </div>
-            <div className="flex-1">
-              <div className="bg-white/80 backdrop-blur-sm rounded-lg p-4 border-l-4 border-orange-400">
-                <p className="text-sm sm:text-base text-gray-700 leading-relaxed italic">
+              <div className="bg-white/80 backdrop-blur-sm rounded-xl p-4 border-l-4 border-orange-400">
+                <p className="text-sm sm:text-base text-slate-700 leading-relaxed italic">
                   &ldquo;Excellent progress on your assessment journey! Your
                   results show strong self-awareness and thoughtful responses
                   across all evaluations. Continue building on these insights
@@ -940,52 +942,53 @@ export default function SessionReport({ sessionId }: { sessionId: string }) {
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Email CTA */}
-        <div className="bg-gradient-to-r from-primary-blue-600 via-purple-600 to-primary-green-600 rounded-xl shadow-2xl overflow-hidden">
-          <div className="bg-black/20 p-5 sm:p-8 text-center">
-            <div className="space-y-6">
-              <div className="flex justify-center">
-                <div className="p-3 bg-white/20 backdrop-blur-sm rounded-full">
-                  <Sparkles className="size-6 sm:size-8 text-white" />
+          {/* Email CTA */}
+          <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-emerald-600 rounded-2xl shadow-2xl overflow-hidden">
+            <div className="bg-black/20 p-4 sm:p-6 text-center">
+              <div className="space-y-4">
+                <div className="flex justify-center">
+                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-full">
+                    <Sparkles className="size-6 sm:size-8 text-white" />
+                  </div>
                 </div>
-              </div>
 
-              <div className="text-white">
-                <h3 className="text-xl sm:text-2xl font-bold mb-2">
-                  Get Your Complete Report
-                </h3>
-                <p className="text-sm sm:text-base text-primary-blue-100 max-w-md mx-auto">
-                  Receive a professionally formatted PDF copy of your assessment
-                  results and recommendations directly in your inbox.
+                <div className="text-white">
+                  <h3 className="text-lg sm:text-xl font-bold mb-2">
+                    Get Your Complete Report
+                  </h3>
+                  <p className="text-xs sm:text-sm text-blue-100 max-w-sm mx-auto">
+                    Receive a professionally formatted PDF copy of your
+                    assessment results and recommendations directly in your
+                    inbox.
+                  </p>
+                </div>
+
+                <Button
+                  onClick={handleSendEmail}
+                  disabled={isEmailLoading}
+                  className="inline-flex items-center gap-2 bg-white text-slate-900 p-3 sm:p-4 
+                           rounded-xl font-semibold text-sm sm:text-base shadow-lg hover:shadow-xl hover:bg-white
+                           transition-all duration-200 hover:scale-105 disabled:opacity-70 
+                           disabled:cursor-not-allowed disabled:hover:scale-100 w-full sm:w-auto"
+                >
+                  {isEmailLoading ? (
+                    <>
+                      <Loader2 className="size-4 animate-spin" />
+                      Sending...
+                    </>
+                  ) : (
+                    <>
+                      <Mail className="size-4" />
+                      Send Report to Email
+                    </>
+                  )}
+                </Button>
+
+                <p className="text-xs text-blue-200">
+                  Free delivery • Professional formatting • Instant access
                 </p>
               </div>
-
-              <Button
-                onClick={handleSendEmail}
-                disabled={isEmailLoading}
-                className="inline-flex items-center gap-3 bg-white text-gray-900 p-4 sm:p-6 
-                         rounded-full font-semibold sm:text-lg shadow-lg hover:shadow-xl hover:bg-white
-                         transition-all duration-200 hover:scale-105 disabled:opacity-70 
-                         disabled:cursor-not-allowed disabled:hover:scale-100 text-base"
-              >
-                {isEmailLoading ? (
-                  <>
-                    <Loader2 className="size-5 animate-spin" />
-                    Sending Your Report...
-                  </>
-                ) : (
-                  <>
-                    <Mail className="size-5" />
-                    Send Report to My Email
-                  </>
-                )}
-              </Button>
-
-              <p className="text-xs text-primary-blue-200">
-                Free delivery • Professional formatting • Instant access
-              </p>
             </div>
           </div>
         </div>

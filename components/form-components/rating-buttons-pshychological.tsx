@@ -33,10 +33,7 @@ export default function RatingButtonsPsychological({
 }: RatingButtonsPsychologicalProps) {
   return (
     <div className="space-y-4">
-      <div className="flex justify-between text-xs md:text-sm text-slate-600 font-medium">
-        <span>{lowLabel}</span>
-        <span>{highLabel}</span>
-      </div>
+      <div className="flex justify-between text-xs md:text-sm text-slate-600 font-medium" />
 
       <div className="flex flex-col md:flex-row gap-2 md:gap-3">
         {allowedAnswers.map((option) => (

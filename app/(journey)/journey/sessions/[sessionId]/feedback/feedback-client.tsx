@@ -1,15 +1,15 @@
 "use client";
 import React from "react";
 import { useSearchParams } from "next/navigation";
-import { SessionFeedbackForm } from "./session-feedback";
+import { SessionFeedbackForm } from "./feedback";
 
 function parseSessionNumber(value: string | null): number {
   if (!value) return 0; // Default to session 0
 
-  const parsed = parseInt(value, 10);
+  const parsed = Number.parseInt(value, 10);
 
   // Ensure the session number is between 0-8
-  if (isNaN(parsed) || parsed < 0 || parsed > 8) {
+  if (Number.isNaN(parsed) || parsed < 0 || parsed > 8) {
     console.warn(`Invalid session parameter: "${value}", defaulting to 0`);
     return 0;
   }
@@ -65,12 +65,12 @@ export default function ClientSessionFeedback({
   if (!userId) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-red-50 p-4 flex items-center justify-center">
-        <div className="bg-white border-2 border-red-200 rounded-2xl p-8 text-center max-w-md">
-          <div className="text-red-500 mb-4">⚠️</div>
-          <h2 className="text-xl font-bold text-red-700 mb-2">
+        <div className="bg-white border-2 border-red-200 rounded-xl p-6 text-center max-w-sm">
+          <div className="text-red-500 mb-3 text-2xl">⚠️</div>
+          <h2 className="text-lg sm:text-xl font-bold text-red-700 mb-2">
             Missing User Information
           </h2>
-          <p className="text-red-600 text-sm">
+          <p className="text-red-600 text-xs sm:text-sm">
             Unable to load feedback form. Please make sure you&apos;re logged in
             and try again.
           </p>

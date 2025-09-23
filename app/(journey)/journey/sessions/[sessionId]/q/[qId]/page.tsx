@@ -29,6 +29,11 @@ export default async function Page({ params }: PageProps) {
       session: "1",
     },
     {
+      id: "psychological-wellbeing",
+      Component: PsychologicalWellbeing,
+      session: "1",
+    },
+    {
       id: "riasec-test",
       Component: RiasecTest,
       session: "2",
@@ -37,11 +42,6 @@ export default async function Page({ params }: PageProps) {
       id: "personality-test",
       Component: PersonalityTest,
       session: "2",
-    },
-    {
-      id: "psychological-wellbeing",
-      Component: PsychologicalWellbeing,
-      session: "3",
     },
     {
       id: "post-coaching",

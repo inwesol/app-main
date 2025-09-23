@@ -1,11 +1,10 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
 import {
-  Heart,
   Star,
   Send,
   CheckCircle,
@@ -16,7 +15,6 @@ import {
   Target,
   MessageCircle,
   AlertCircle,
-  ThumbsUp,
   Loader2,
 } from "lucide-react";
 
@@ -95,6 +93,24 @@ export function SessionFeedbackForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const router = useRouter();
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const suggestionRef = useRef<HTMLTextAreaElement>(null);
+
+  // Auto-resize textareas
+  const autoResize = (textarea: HTMLTextAreaElement) => {
+    textarea.style.height = "auto";
+    textarea.style.height = `${textarea.scrollHeight}px`;
+  };
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (textareaRef.current) autoResize(textareaRef.current);
+      if (suggestionRef.current) autoResize(suggestionRef.current);
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const {
     register,
@@ -226,16 +242,18 @@ export function SessionFeedbackForm({
   const renderStars = (rating: number) => {
     return Array.from({ length: 5 }, (_, index) => (
       <button
-        key={index}
+        key={`star-${index + 1}`}
         type="button"
         onClick={() => handleRatingClick(index + 1)}
-        className={`transition-all duration-300 hover:scale-125 ${
+        className={`transition-all duration-300 hover:scale-110 ${
           index < rating
             ? "text-yellow-400 hover:text-yellow-500"
             : "text-gray-300 hover:text-yellow-300"
         }`}
       >
-        <Star className={`size-8 ${index < rating ? "fill-current" : ""}`} />
+        <Star
+          className={`size-6 sm:size-7 ${index < rating ? "fill-current" : ""}`}
+        />
       </button>
     ));
   };
@@ -243,40 +261,41 @@ export function SessionFeedbackForm({
   if (isSubmitted) {
     return (
       <div
-        className={`min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 p-4 sm:py-8 ${className}`}
+        className={`min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 p-4 py-6 sm:py-8 ${className}`}
       >
-        <div className="max-w-2xl mx-auto">
-          <div className="bg-white/95 backdrop-blur-xl border-2 border-green-200/50 shadow-2xl shadow-green-100/20 rounded-3xl overflow-hidden">
-            <div className="p-12 text-center">
-              <div className="mb-8">
-                <div className="inline-flex p-6 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full shadow-2xl mb-6">
-                  <CheckCircle className="size-16 text-white" />
+        <div className="max-w-xl mx-auto">
+          <div className="bg-white/95 backdrop-blur-xl border-2 border-green-200/50 shadow-2xl shadow-green-100/20 rounded-2xl overflow-hidden">
+            <div className="p-6 sm:p-8 text-center">
+              <div className="mb-6">
+                <div className="inline-flex p-4 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full shadow-xl mb-4">
+                  <CheckCircle className="size-12 text-white" />
                 </div>
-                <h2 className="text-3xl font-bold bg-gradient-to-r from-green-700 to-emerald-700 bg-clip-text text-transparent mb-4">
+                <h2 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-green-700 to-emerald-700 bg-clip-text text-transparent mb-3">
                   Thank You!
                 </h2>
-                <p className="text-green-700/80 text-lg leading-relaxed">
+                <p className="text-green-700/80 text-base sm:text-lg leading-relaxed">
                   Your feedback for {sessionTitle} has been successfully saved
                   and helps us create better experiences for your journey of
                   self-discovery.
                 </p>
               </div>
 
-              <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl p-6 border border-green-200/50 mb-8">
-                <h3 className="font-bold text-green-800 mb-2">
+              <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-4 border border-green-200/50 mb-6">
+                <h3 className="font-bold text-green-800 mb-1 text-sm sm:text-base">
                   What&apos;s Next?
                 </h3>
-                <p className="text-green-700/90 text-sm">
+                <p className="text-green-700/90 text-xs sm:text-sm">
                   You&apos;ll receive a summary and next steps via email within
                   24 hours.
                 </p>
               </div>
 
               <button
+                type="button"
                 onClick={() =>
                   router.push(`/journey/sessions/${sessionNumber}`)
                 }
-                className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white px-8 py-3 rounded-2xl font-semibold shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
+                className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white px-6 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5 text-sm sm:text-base"
               >
                 Continue Your Journey
               </button>
@@ -289,30 +308,32 @@ export function SessionFeedbackForm({
 
   return (
     <div
-      className={`min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 p-4 sm:py-8 ${className}`}
+      className={`min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 p-4 py-6 sm:py-12 ${className}`}
     >
-      <div className="max-w-3xl mx-auto">
+      <div className="max-w-2xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-4 mb-6">
-            <div className="p-3 bg-gradient-to-br from-blue-500 to-green-500 rounded-2xl shadow-xl">
-              <Heart className="size-5 sm:size-6 text-white" />
+        {/* <div className="text-center mb-6">
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <div className="p-2.5 bg-gradient-to-br from-blue-500 to-green-500 rounded-xl shadow-lg">
+              <Heart className="size-4 sm:size-5 text-white" />
             </div>
             <div>
-              <h1 className="sm:text-2xl text-xl font-bold bg-gradient-to-r from-blue-700 to-green-700 bg-clip-text text-transparent">
+              <h1 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-blue-700 to-green-700 bg-clip-text text-transparent">
                 {sessionTitle} Feedback
               </h1>
-              <p className="text-sm text-slate-500">Session {sessionNumber}</p>
+              <p className="text-xs sm:text-sm text-slate-500">
+                Session {sessionNumber}
+              </p>
             </div>
           </div>
-          <p className="text-slate-600 max-w-2xl mx-auto">
+          <p className="text-slate-600 text-sm sm:text-base max-w-xl mx-auto">
             Just 5 quick questions to help us improve your experience
           </p>
-        </div>
+        </div> */}
 
         <form onSubmit={handleSubmit(onFormSubmit)}>
-          <div className="bg-white/95 backdrop-blur-xl border-2 border-blue-100/50 shadow-xl shadow-blue-100/20 rounded-3xl overflow-hidden">
-            <div className="p-8 space-y-8">
+          <div className="bg-white/95 backdrop-blur-xl border-2 border-blue-100/50 shadow-xl shadow-blue-100/20 rounded-2xl overflow-hidden">
+            <div className="p-4 sm:p-6 space-y-5 sm:space-y-6">
               {/* Error Display */}
               {submitError && (
                 <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-center">
@@ -326,58 +347,66 @@ export function SessionFeedbackForm({
 
               {/* 1. Overall Feeling */}
               <div>
-                <label className="block text-xl font-bold text-blue-800 mb-4 text-center">
-                  How are you feeling after this session?
-                </label>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {FEELING_OPTIONS.map((feeling) => {
-                    const Icon = feeling.icon;
-                    const isSelected =
-                      watchedValues.overallFeeling === feeling.value;
-                    return (
-                      <button
-                        key={feeling.value}
-                        type="button"
-                        onClick={() => {
-                          setValue("overallFeeling", feeling.value);
-                          trigger("overallFeeling");
-                        }}
-                        className={`p-4 rounded-2xl border-2 transition-all duration-300 hover:scale-105 hover:shadow-xl ${
-                          isSelected
-                            ? "border-blue-400 bg-gradient-to-br from-blue-50 to-green-50 shadow-xl scale-105"
-                            : "border-gray-200 hover:border-blue-300 bg-white hover:bg-gradient-to-br hover:from-blue-25 hover:to-green-25"
-                        }`}
-                      >
-                        <div
-                          className={`inline-flex p-3 rounded-xl mb-2 bg-gradient-to-br ${feeling.color} shadow-lg`}
+                <fieldset>
+                  <legend className="block text-lg sm:text-xl font-bold text-blue-800 mb-3 text-center">
+                    How are you feeling after this session?
+                  </legend>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    {FEELING_OPTIONS.map((feeling) => {
+                      const Icon = feeling.icon;
+                      const isSelected =
+                        watchedValues.overallFeeling === feeling.value;
+                      return (
+                        <button
+                          key={feeling.value}
+                          type="button"
+                          onClick={() => {
+                            setValue("overallFeeling", feeling.value);
+                            trigger("overallFeeling");
+                          }}
+                          className={`p-3 rounded-xl border-2 transition-all duration-300 hover:scale-105 hover:shadow-lg ${
+                            isSelected
+                              ? "border-blue-400 bg-gradient-to-br from-blue-50 to-green-50 shadow-lg scale-105"
+                              : "border-gray-200 hover:border-blue-300 bg-white hover:bg-gradient-to-br hover:from-blue-25 hover:to-green-25"
+                          }`}
                         >
-                          <Icon className="size-5 text-white" />
-                        </div>
-                        <h3 className="font-bold text-blue-800 text-sm">
-                          {feeling.label}
-                        </h3>
-                      </button>
-                    );
-                  })}
-                </div>
-                {errors.overallFeeling && (
-                  <p className="text-red-500 text-sm mt-2 flex items-center justify-center gap-2">
-                    <AlertCircle className="size-4" />
-                    {errors.overallFeeling.message}
-                  </p>
-                )}
+                          <div
+                            className={`inline-flex p-2 rounded-lg mb-2 bg-gradient-to-br ${feeling.color} shadow-md`}
+                          >
+                            <Icon className="size-4 text-white" />
+                          </div>
+                          <h3 className="font-bold text-blue-800 text-xs sm:text-sm">
+                            {feeling.label}
+                          </h3>
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {errors.overallFeeling && (
+                    <p className="text-red-500 text-sm mt-2 flex items-center justify-center gap-2">
+                      <AlertCircle className="size-4" />
+                      {errors.overallFeeling.message}
+                    </p>
+                  )}
+                </fieldset>
               </div>
 
               {/* 2. Key Insight */}
               <div>
-                <label className="block text-xl font-bold text-blue-800 mb-3 text-center">
+                <label
+                  htmlFor="keyInsight"
+                  className="block text-lg sm:text-xl font-bold text-blue-800 mb-3 text-center"
+                >
                   What&apos;s your biggest takeaway from this session?
                 </label>
                 <textarea
+                  id="keyInsight"
                   {...register("keyInsight")}
-                  className="w-full p-4 border-2 border-gray-200 rounded-xl focus-visible:ring-transparent outline-none resize-none text-center"
-                  rows={3}
+                  ref={textareaRef}
+                  className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none resize-none text-center min-h-[80px]"
+                  rows={2}
                   placeholder="Share your key insight or realization..."
+                  onInput={(e) => autoResize(e.target as HTMLTextAreaElement)}
                 />
                 {errors.keyInsight && (
                   <p className="text-red-500 text-sm mt-2 flex items-center justify-center gap-2">
@@ -389,71 +418,83 @@ export function SessionFeedbackForm({
 
               {/* 3. Overall Rating */}
               <div className="text-center">
-                <label className="block text-xl font-bold text-blue-800 mb-3">
-                  How would you rate this session overall?
-                </label>
-                <div className="flex justify-center gap-2 mb-2">
-                  {renderStars(watchedValues.overallRating || 0)}
-                </div>
-                <p className="text-slate-600 text-sm">
-                  Click the stars to rate from 1 to 5
-                </p>
-                {errors.overallRating && (
-                  <p className="text-red-500 text-sm mt-2 flex items-center justify-center gap-2">
-                    <AlertCircle className="size-4" />
-                    {errors.overallRating.message}
+                <fieldset>
+                  <legend className="block text-lg sm:text-xl font-bold text-blue-800 mb-3">
+                    How would you rate this session overall?
+                  </legend>
+                  <div className="flex justify-center gap-1 sm:gap-2 mb-2">
+                    {renderStars(watchedValues.overallRating || 0)}
+                  </div>
+                  <p className="text-slate-600 text-xs sm:text-sm">
+                    Click the stars to rate from 1 to 5
                   </p>
-                )}
+                  {errors.overallRating && (
+                    <p className="text-red-500 text-sm mt-2 flex items-center justify-center gap-2">
+                      <AlertCircle className="size-4" />
+                      {errors.overallRating.message}
+                    </p>
+                  )}
+                </fieldset>
               </div>
 
               {/* 4. Would Recommend */}
-              <div className="bg-gradient-to-r from-blue-25 to-green-25 rounded-2xl p-6 border border-blue-200/50">
-                <div className="flex items-center justify-center gap-4">
+              <div className="bg-gradient-to-r from-blue-25 to-green-25 rounded-xl p-4 border border-blue-200/50">
+                <div className="flex items-center justify-center gap-3">
                   <input
+                    id="wouldRecommend"
                     type="checkbox"
                     {...register("wouldRecommend")}
-                    className="size-6 text-blue-600 border-2 border-blue-300 rounded focus-visible:ring-transparent"
+                    className="size-5 text-blue-600 border-2 border-blue-300 rounded focus-visible:ring-transparent"
                   />
-                  <label className="text-lg font-bold text-blue-800 text-center">
+                  <label
+                    htmlFor="wouldRecommend"
+                    className="text-sm sm:text-base font-bold text-blue-800 text-center"
+                  >
                     I would recommend this session to others
                   </label>
                 </div>
               </div>
 
               {/* 5. Improvement Suggestion (Optional) */}
-              <div>
-                <label className="block text-lg font-semibold text-blue-800 mb-3 text-center">
+              {/* <div>
+                <label
+                  htmlFor="improvementSuggestion"
+                  className="block text-base sm:text-lg font-semibold text-blue-800 mb-3 text-center"
+                >
                   Any quick suggestion to make it even better? (Optional)
                 </label>
                 <textarea
+                  id="improvementSuggestion"
                   {...register("improvementSuggestion")}
-                  className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-blue-400 focus:ring-4 focus:ring-blue-100 transition-all duration-300 resize-none text-center"
-                  rows={2}
+                  ref={suggestionRef}
+                  className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all duration-300 resize-none text-center min-h-[60px]"
+                  rows={1}
                   placeholder="One thing we could improve..."
+                  onInput={(e) => autoResize(e.target as HTMLTextAreaElement)}
                 />
-              </div>
+              </div> */}
             </div>
 
             {/* Submit Button */}
-            <div className="p-8 bg-gradient-to-r from-blue-25/50 to-green-25/50 border-t border-blue-100/50 text-center">
+            <div className="p-4 sm:p-6 bg-gradient-to-r from-blue-25/50 to-green-25/50 border-t border-blue-100/50 text-center">
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="flex items-center gap-3 bg-gradient-to-r from-blue-500 to-green-500 hover:from-blue-600 hover:to-green-600 text-white px-12 py-4 rounded-2xl font-bold text-lg shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 mx-auto disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-green-500 hover:from-blue-600 hover:to-green-600 text-white px-6 py-2.5 rounded-lg font-semibold text-sm sm:text-base shadow-md hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5 mx-auto disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
               >
                 {isSubmitting ? (
                   <>
-                    <Loader2 className="size-6 animate-spin" />
+                    <Loader2 className="size-4 animate-spin" />
                     Submitting...
                   </>
                 ) : (
                   <>
-                    <Send className="size-6" />
+                    <Send className="size-4" />
                     Submit Feedback
                   </>
                 )}
               </button>
-              <p className="text-slate-600 text-sm mt-3">
+              <p className="text-slate-600 text-xs sm:text-sm mt-2">
                 Takes less than 2 minutes • Your privacy is protected
               </p>
             </div>

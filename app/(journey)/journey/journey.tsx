@@ -3,13 +3,10 @@ import React, { useState, useEffect } from "react";
 import * as LucideIcons from "lucide-react";
 import {
   CheckCircle,
-  Star,
   Trophy,
-  Target,
   ArrowRight,
-  Zap,
-  Calendar,
   BarChart3,
+  Rocket,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -93,7 +90,7 @@ export const JourneyPage: React.FC = () => {
   return (
     <div className="p-2">
       {isMobile ? <SidebarToggle /> : <div />}
-      <div className="max-w-4xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
         <Header
           headerIcon={Trophy}
           headerText="Your Career Journey"
@@ -101,23 +98,25 @@ export const JourneyPage: React.FC = () => {
         />
 
         {/* progress dashboard */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 mb-8">
           {/* progress journey */}
-          <Card className="p-4 bg-primary-green-50 border border-primary-green-200/50 shadow-sm hover:shadow-md transition-all duration-300">
+          <Card className="p-4 bg-white border-primary-green-200/50 shadow-sm hover:shadow-md transition-all duration-300">
             <div className="flex items-center gap-3 mb-3">
               <div className="bg-primary-green-500 rounded-lg p-2 shrink-0">
                 <BarChart3 className="size-4 text-white" />
               </div>
               <div className="min-w-0">
                 <h3 className="font-semibold text-primary-green-800 text-sm">
-                  Progress
+                  Journey Progress
                 </h3>
-                <p className="text-primary-green-600 text-xs">Journey</p>
+                <p className="text-xs text-primary-green-700">
+                  Get snippet of your Journey Status
+                </p>
               </div>
             </div>
             <div className="mb-2">
               <div className="flex items-center justify-between text-xs text-primary-green-700 mb-1">
-                <span>Overall</span>
+                <span>Status</span>
                 <span className="font-bold">
                   {Math.round(getProgressPercentage())}%
                 </span>
@@ -126,76 +125,61 @@ export const JourneyPage: React.FC = () => {
                 value={getProgressPercentage()}
                 className="h-2 bg-primary-green-100"
               />
-            </div>
-            <p className="text-xs text-primary-green-600">
-              {userProgress.completedSessions.length} of {sessions.length}{" "}
-              sessions
-            </p>
-          </Card>
-
-          {/*score points  */}
-          <Card className="p-4 bg-primary-blue-50 to-primary-green-50/80 border border-primary-blue-200/50 shadow-sm hover:shadow-md transition-all duration-300">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="bg-primary-blue-500 rounded-lg p-2 shrink-0">
-                <Zap className="size-4 text-white" />
-              </div>
-              <div className="min-w-0">
-                <h3 className="font-semibold text-primary-blue-800 text-sm">
-                  Score
-                </h3>
-                <p className="text-primary-blue-600 text-xs">Points</p>
+              <div className="flex items-center justify-between text-xs text-primary-green-700 mt-1 pt-1">
+                <span className="">
+                  Active Session #{userProgress.currentSession + 1}
+                </span>
+                <span className="">
+                  Latest activity on{" "}
+                  {new Date(userProgress.lastActiveDate).toLocaleDateString()}
+                </span>
               </div>
             </div>
-            <div className="text-xl font-bold text-primary-blue-700 mb-1">
-              {userProgress.totalScore}/900
-            </div>
-            <p className="text-xs text-primary-blue-600">Total earned</p>
           </Card>
-
-          {/* current session */}
-          <Card className="p-4 bg-primary-green-50 border border-primary-green-200/50 shadow-sm hover:shadow-md transition-all duration-300">
+          <Card className="p-4 bg-white border-primary-green-200/50 shadow-sm hover:shadow-md transition-all duration-300">
             <div className="flex items-center gap-3 mb-3">
               <div className="bg-primary-green-500 rounded-lg p-2 shrink-0">
-                <Target className="size-4 text-white" />
+                <BarChart3 className="size-4 text-white" />
               </div>
               <div className="min-w-0">
                 <h3 className="font-semibold text-primary-green-800 text-sm">
-                  Current
+                  Journey Progress
                 </h3>
-                <p className="text-primary-green-600 text-xs">Session</p>
+                <p className="text-xs text-primary-green-700">
+                  Get snippet of your Journey Status
+                </p>
               </div>
             </div>
-            <div className="text-xl font-bold text-primary-green-700 mb-1">
-              #{userProgress.currentSession}
-            </div>
-            <p className="text-xs text-primary-green-600">Active now</p>
-          </Card>
-
-          <Card className="p-4 bg-primary-blue-50 to-primary-green-50/80 border border-primary-blue-200/50 shadow-sm hover:shadow-md transition-all duration-300">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="bg-primary-blue-500 rounded-lg p-2 shrink-0">
-                <Calendar className="size-4 text-white" />
+            <div className="mb-2">
+              <div className="flex items-center justify-between text-xs text-primary-green-700 mb-1">
+                <span>Status</span>
+                <span className="font-bold">
+                  {Math.round(getProgressPercentage())}%
+                </span>
               </div>
-              <div className="min-w-0">
-                <h3 className="font-semibold text-primary-blue-800 text-sm">
-                  Last Active
-                </h3>
-                <p className="text-primary-blue-600 text-xs">Date</p>
+              <Progress
+                value={getProgressPercentage()}
+                className="h-2 bg-primary-green-100"
+              />
+              <div className="flex items-center justify-between text-xs text-primary-green-700 mt-1 pt-1">
+                <span className="">
+                  Active Session #{userProgress.currentSession + 1}
+                </span>
+                <span className="">
+                  Latest activity on{" "}
+                  {new Date(userProgress.lastActiveDate).toLocaleDateString()}
+                </span>
               </div>
             </div>
-            <div className="text-sm font-semibold text-primary-blue-700 mb-1">
-              {new Date(userProgress.lastActiveDate).toLocaleDateString()}
-            </div>
-            <p className="text-xs text-primary-blue-600">Recent activity</p>
           </Card>
         </div>
 
         {/* journey timeline */}
-        <div className="relative">
-          {/* Timeline Line - Hidden on mobile, visible on larger screens */}
-          <div className="absolute left-6 inset-y-0 w-0.5 bg-gradient-to-b from-primary-green-300 via-primary-blue-300 to-slate-300 rounded-full" />
+        <div className="relative mb-6 pb-6">
+          {/* Timeline Line */}
+          <div className="absolute left-5 inset-y-0 w-0.5 bg-gradient-to-b from-primary-green-300 via-primary-blue-300 to-slate-300 rounded-full" />
 
-          <div className="space-y-4">
+          <div className="space-y-2">
             {sessions.map((session, index) => {
               const IconComponent = (LucideIcons as any)[session.icon];
               const isLocked = session.status === "locked";
@@ -204,27 +188,24 @@ export const JourneyPage: React.FC = () => {
 
               return (
                 <div key={session.id} className="relative">
-                  {/* Mobile Layout */}
-
-                  {/* Desktop Layout */}
-                  <div className="flex items-start gap-6 group">
-                    {/* Desktop Step Circle */}
+                  <div className="flex items-start gap-4 group">
+                    {/* Step Circle */}
                     <div
-                      className={`relative z-10 flex items-center justify-center size-12 rounded-xl border-2 transition-all duration-300 shadow-lg shrink-0 ${
+                      className={`relative z-10 flex items-center justify-center size-10 rounded-lg border-2 transition-all duration-300 shadow-md shrink-0 ${
                         isCompleted
-                          ? "bg-primary-green-500  border-primary-green-400 shadow-primary-green-200/50"
+                          ? "bg-primary-green-500 border-primary-green-400 shadow-primary-green-200/50"
                           : isCurrent
                           ? "bg-primary-blue-500 border-primary-blue-400 shadow-primary-blue-200/50"
                           : "bg-white border-slate-300 shadow-slate-200/50"
                       }`}
                     >
                       {isCompleted ? (
-                        <CheckCircle className="size-6 text-white" />
+                        <CheckCircle className="size-5 text-white" />
                       ) : isCurrent ? (
-                        <IconComponent className="size-6 text-white" />
+                        <IconComponent className="size-5 text-white" />
                       ) : (
                         <IconComponent
-                          className={`size-6 ${
+                          className={`size-5 ${
                             isLocked ? "text-slate-400" : "text-slate-600"
                           }`}
                         />
@@ -232,11 +213,11 @@ export const JourneyPage: React.FC = () => {
 
                       {/* Pulse for current session */}
                       {isCurrent && (
-                        <div className="absolute inset-0 rounded-xl border-2 border-primary-blue-400 animate-ping opacity-50" />
+                        <div className="absolute inset-0 rounded-lg border-2 border-primary-blue-400 animate-ping opacity-50" />
                       )}
                     </div>
 
-                    {/* Desktop Session Card */}
+                    {/* Session Card */}
                     <div className="flex-1 min-w-0">
                       <Card
                         className={`relative overflow-hidden border transition-all duration-300 cursor-pointer ${
@@ -245,41 +226,41 @@ export const JourneyPage: React.FC = () => {
                             : "hover:shadow-md hover:scale-[1.01]"
                         } ${
                           isCompleted
-                            ? "bg-primary-green-50/80 border-primary-green-200/50 shadow-sm"
+                            ? "bg-white border-primary-green-200/50 shadow-sm"
                             : isCurrent
                             ? "bg-primary-blue-50/80 border-primary-blue-200/50 shadow-sm ring-1 ring-primary-blue-200/50"
                             : "bg-white/80 border-slate-200/50"
                         }`}
                         onClick={() => handleSessionClick(session.id)}
                       >
-                        <div className="p-3 sm:p-6">
-                          <div className="flex flex-col sm:items-start sm:justify-between gap-4 md:flex-row">
+                        <div className="p-3 sm:p-4">
+                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                             <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-3 mb-2">
+                              <div className="flex items-center gap-2 mb-1.5">
                                 <div
-                                  className={`rounded-lg size-8 flex items-center justify-center text-sm font-bold ${
+                                  className={`rounded-md px-2 py-1 flex items-center justify-center text-xs font-bold ${
                                     isCompleted
-                                      ? "bg-primary-green-100 text-primary-green-700"
+                                      ? "bg-primary-green-500 text-white"
                                       : isCurrent
-                                      ? "bg-primary-blue-100 text-primary-blue-700"
+                                      ? "bg-primary-blue-500 text-white"
                                       : "bg-slate-100 text-slate-600"
                                   }`}
                                 >
-                                  {session.id}
+                                  Session {session.id + 1}
                                 </div>
-                                <div className="flex flex-wrap items-center gap-2">
+                                <div className="flex items-center gap-1.5">
                                   {isCompleted && (
-                                    <Badge className="bg-primary-green-100 text-primary-green-700 border-primary-green-300 text-xs px-2 py-0.5 hover:bg-primary-green-50">
+                                    <Badge className="bg-primary-green-100 text-primary-green-700 border-primary-green-300 text-xs px-1.5 py-0.5">
                                       ✓ Completed
                                     </Badge>
                                   )}
                                   {isCurrent && (
-                                    <Badge className="bg-primary-blue-100 text-primary-blue-700 border-primary-blue-300 text-xs px-2 py-0.5">
+                                    <Badge className="bg-primary-blue-100 text-primary-blue-700 border-primary-blue-300 text-xs px-1.5 py-0.5">
                                       ▶ Current
                                     </Badge>
                                   )}
                                   {isLocked && (
-                                    <Badge className="bg-slate-100 text-slate-500 border-slate-300 text-xs px-2 py-0.5">
+                                    <Badge className="bg-slate-100 text-slate-500 border-slate-300 text-xs px-1.5 py-0.5">
                                       🔒 Locked
                                     </Badge>
                                   )}
@@ -287,7 +268,7 @@ export const JourneyPage: React.FC = () => {
                               </div>
 
                               <h3
-                                className={`text-lg font-bold mb-2 ${
+                                className={`text-base font-bold mb-1.5 ${
                                   isCompleted
                                     ? "text-primary-green-800"
                                     : isCurrent
@@ -299,88 +280,52 @@ export const JourneyPage: React.FC = () => {
                               </h3>
 
                               <p
-                                className={`text-sm mb-3 leading-relaxed ${
+                                className={`text-sm mb-2 leading-relaxed line-clamp-2 ${
                                   isLocked ? "text-slate-500" : "text-slate-600"
                                 }`}
                               >
                                 {session.description}
                               </p>
 
-                              {/* Desktop Topics */}
-                              <div className="flex flex-wrap gap-1.5 mb-3">
-                                {session.topics
-                                  .slice(0, 3)
-                                  .map((topic, topicIndex) => (
-                                    <span
-                                      key={topicIndex}
-                                      className={`px-2 py-1 rounded-md text-xs font-medium ${
-                                        isCompleted
-                                          ? "bg-primary-green-100 text-primary-green-700"
-                                          : isCurrent
-                                          ? "bg-primary-blue-100 text-primary-blue-700"
-                                          : "bg-slate-100 text-slate-600"
-                                      }`}
-                                    >
-                                      {topic}
-                                    </span>
-                                  ))}
-                                {session.topics.length > 3 && (
-                                  <span className="px-2 py-1 rounded-md text-xs font-medium bg-slate-100 text-slate-500">
-                                    +{session.topics.length - 3} more
+                              {/* Topics */}
+                              <div className="flex flex-wrap gap-1 mb-2">
+                                {session.topics.slice(0, 3).map((topic) => (
+                                  <span
+                                    key={topic}
+                                    className={`px-1.5 py-0.5 rounded text-xs font-medium ${
+                                      isCompleted
+                                        ? "bg-primary-green-100 text-primary-green-700"
+                                        : isCurrent
+                                        ? "bg-primary-blue-100 text-primary-blue-700"
+                                        : "bg-slate-100 text-slate-600"
+                                    }`}
+                                  >
+                                    {topic}
                                   </span>
-                                )}
-                              </div>
-
-                              {/* Desktop Session Stats */}
-                              <div className="flex flex-wrap items-center gap-3 text-xs">
-                                <div
-                                  className={`flex items-center gap-1.5 px-2 py-1 rounded-md ${
-                                    isLocked
-                                      ? "bg-slate-100 text-slate-500"
-                                      : "bg-white text-slate-600 border border-slate-200"
-                                  }`}
-                                >
-                                  {/* <Clock className="size-3" /> */}
-                                  {/* <span>{session.duration}</span> */}
-                                </div>
-
-                                {isCompleted && session.score && (
-                                  <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-primary-green-100 text-primary-green-700 border border-primary-green-200">
-                                    <Star className="size-3 fill-current" />
-                                    <span className="font-semibold">
-                                      {/* {session.score}/100 */}
-                                    </span>
-                                  </div>
-                                )}
-
-                                {isCompleted && session.completedAt && (
-                                  <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-slate-100 text-slate-600 border border-slate-200">
-                                    <Calendar className="size-3" />
-                                    {/* <span>
-                                      {new Date(
-                                        session.completedAt
-                                      ).toLocaleDateString()}
-                                    </span> */}
-                                  </div>
+                                ))}
+                                {session.topics.length > 3 && (
+                                  <span className="px-1.5 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-500">
+                                    +{session.topics.length - 3}
+                                  </span>
                                 )}
                               </div>
                             </div>
 
-                            {/* Desktop Action Button */}
+                            {/* Action Button */}
                             {!isLocked && (
                               <Button
                                 size="sm"
-                                className={`shrink-0 px-4 py-2 text-sm font-semibold transition-all duration-300 ${
+                                className={`shrink-0 px-3 py-1.5 text-xs font-semibold transition-all duration-300 ${
                                   isCompleted
                                     ? "bg-gradient-to-r from-primary-green-500 to-primary-blue-500 hover:from-primary-green-600 hover:to-primary-blue-600"
-                                    : "bg-primary-blue-500  hover:bg-primary-blue-600"
+                                    : "bg-primary-blue-500 hover:bg-primary-blue-600"
                                 } text-white border-0 shadow-sm hover:shadow-md`}
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   handleSessionClick(session.id);
                                 }}
                               >
-                                <span className="flex items-center gap-1.5">
+                                <span className="flex items-center gap-1">
                                   {isCompleted
                                     ? "Review"
                                     : isCurrent
@@ -401,8 +346,8 @@ export const JourneyPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Responsive Motivational Footer */}
-        {/* <Card className="mt-8 p-4 sm:p-6 bg-gradient-to-r from-primary-green-50/80 via-primary-blue-50/80 to-slate-50/80 border border-slate-200/50 shadow-sm">
+        {/* Responsive Footer for check-in session book */}
+        <Card className="my-8 p-4 sm:p-6 bg-gradient-to-r from-primary-green-50/80 via-primary-blue-50/80 to-slate-50/80 border border-slate-200/50 shadow-sm">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
             <div className="hidden sm:block bg-gradient-to-r from-primary-green-500 to-primary-blue-500 rounded-xl p-3 shadow-sm shrink-0">
               <Rocket className="size-6 text-white" />
@@ -425,7 +370,7 @@ export const JourneyPage: React.FC = () => {
               <p className="text-slate-600 text-xs font-medium">Complete</p>
             </div>
           </div>
-        </Card> */}
+        </Card>
       </div>
     </div>
   );

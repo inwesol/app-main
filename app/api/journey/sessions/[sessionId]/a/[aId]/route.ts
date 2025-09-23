@@ -47,7 +47,7 @@ export async function GET(
 
   // Validate sessionId
   const sessionIdNum = Number(sessionId);
-  if (isNaN(sessionIdNum)) {
+  if (Number.isNaN(sessionIdNum)) {
     return new NextResponse("Bad Request: Invalid session ID", {
       status: 400,
     });
@@ -355,7 +355,7 @@ export async function POST(
 
   // Validate sessionId
   const sessionIdNum = Number(sessionId);
-  if (isNaN(sessionIdNum)) {
+  if (Number.isNaN(sessionIdNum)) {
     return new NextResponse("Bad Request: Invalid session ID", {
       status: 400,
     });

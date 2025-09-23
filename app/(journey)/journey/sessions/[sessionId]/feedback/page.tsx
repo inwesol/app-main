@@ -1,5 +1,5 @@
-import { auth } from '@/app/(auth)/auth';
-import ClientSessionFeedback from './session-feedback.client';
+import { auth } from "@/app/(auth)/auth";
+import ClientSessionFeedback from "./feedback-client";
 
 export default async function SessionFeedback() {
   const session = await auth();

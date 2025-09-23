@@ -41,7 +41,10 @@ export default async function RootLayout({
       <head>
         <meta name="theme-color" content={LIGHT_THEME_COLOR} />
       </head>
-      <body className="antialiased min-h-screen bg-gradient-to-br from-blue-50 via-cyan-50 to-green-50">
+      <body
+        className="antialiased min-h-screen bg-gradient-to-br from-blue-50 via-cyan-50 to-green-50"
+        suppressHydrationWarning={true}
+      >
         <Toaster position="top-center" />
         {children}
       </body>

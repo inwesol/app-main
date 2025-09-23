@@ -3,7 +3,7 @@
 import * as React from "react";
 import type { User } from "next-auth";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import {
   PlusIcon,
   ChevronLeft,
@@ -43,7 +43,7 @@ const data = {
       title: "Dashboard",
       url: "/dashboard",
       icon: LayoutDashboard,
-      isActive: true,
+      isActive: false,
     },
     {
       title: "CoCo",
@@ -71,9 +71,26 @@ export function AppSidebar({
   ...props
 }: { user: User | undefined } & React.ComponentProps<typeof Sidebar>) {
   const router = useRouter();
-  const [activeItem, setActiveItem] = React.useState(data.navMain[0]);
+  const pathname = usePathname();
   const { setOpen, setOpenMobile, isMobile } = useSidebar();
   const [showSecondSidebar, setShowSecondSidebar] = React.useState(false);
+
+  // Function to get active item based on current path
+  const getActiveItem = () => {
+    return (
+      data.navMain.find((item) => {
+        if (item.url === "/") return pathname === "/";
+        return pathname.startsWith(item.url);
+      }) || data.navMain[0]
+    ); // fallback to first item
+  };
+
+  const [activeItem, setActiveItem] = React.useState(getActiveItem());
+
+  // Update activeItem when pathname changes
+  React.useEffect(() => {
+    setActiveItem(getActiveItem());
+  }, [pathname]);
 
   // Handler for new chat creation
   const handleNewChat = () => {
@@ -330,10 +347,12 @@ export function AppSidebar({
                           }}
                           onClick={() => handleNavItemClick(item)}
                           isActive={activeItem?.title === item.title}
-                          className="px-2 data-[state=open]:hover:bg-transparent data-[active=true]:bg-transparent hover:bg-[rgba(16,185,129,0.2)]"
+                          className="px-4 py-3 h-12 data-[state=open]:hover:bg-transparent data-[active=true]:bg-white hover:bg-[rgba(16,185,129,0.2)] rounded-lg"
                         >
-                          <item.icon className="text-black" />
-                          <span>{item.title}</span>
+                          <item.icon className="text-black size-6" />
+                          <span className="text-base font-medium">
+                            {item.title}
+                          </span>
                         </SidebarMenuButton>
                       </SidebarMenuItem>
                     ))}
@@ -341,7 +360,7 @@ export function AppSidebar({
                 </SidebarGroupContent>
               </SidebarGroup>
             </SidebarContent>
-            <SidebarFooter className="pb-2">
+            <SidebarFooter className="p-2">
               {user && <SidebarUserNav user={user} />}
             </SidebarFooter>
           </Sidebar>
