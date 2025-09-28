@@ -8,7 +8,6 @@ import React, {
   useRef,
 } from "react";
 import {
-  Brain,
   Target,
   Award,
   Loader2,
@@ -382,10 +381,7 @@ function PsychologicalWellbeing({ sessionId }: { sessionId: string }) {
 
   // Set breadcrumbs on component mount
   useEffect(() => {
-    setQuestionnaireBreadcrumbs(
-      sessionId,
-      "Psychological Well-being Assessment"
-    );
+    setQuestionnaireBreadcrumbs(sessionId, "Wellbeing Assessment-1");
   }, [sessionId, setQuestionnaireBreadcrumbs]);
 
   // Memoize defaultValues to prevent recreation on every render
@@ -411,10 +407,11 @@ function PsychologicalWellbeing({ sessionId }: { sessionId: string }) {
     if (hasFetchedData.current) return;
 
     const fetchSavedData = async () => {
+      const qId = "psychological-wellbeing";
       setIsLoading(true);
       try {
         const response = await fetch(
-          `/api/journey/sessions/${sessionId}/q/psychological-wellbeing`
+          `/api/journey/sessions/${sessionId}/q/${qId}`
         );
         if (response.status === 404) {
           form.reset(defaultValues);
@@ -441,8 +438,9 @@ function PsychologicalWellbeing({ sessionId }: { sessionId: string }) {
     console.log("psychologicalwellbeing data:", data);
     setIsSubmitting(true);
     try {
+      const qId = "psychological-wellbeing";
       const response = await fetch(
-        `/api/journey/sessions/${sessionId}/q/psychological-wellbeing`,
+        `/api/journey/sessions/${sessionId}/q/${qId}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -544,11 +542,11 @@ function PsychologicalWellbeing({ sessionId }: { sessionId: string }) {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-primary-green-50 via-white to-primary-blue-50 flex items-center justify-center p-4">
+      <div className="flex items-center justify-center min-h-screen p-4 bg-gradient-to-br from-primary-green-50 via-white to-primary-blue-50">
         <div className="text-center">
-          <div className="animate-spin rounded-full size-12 border-b-2 border-primary-blue-600 mx-auto mb-4" />
-          <p className="text-slate-600 text-sm sm:text-base">Loading...</p>
-          <p className="text-slate-600 text-xs sm:text-base mt-2">
+          <div className="mx-auto mb-4 border-b-2 rounded-full animate-spin size-12 border-primary-blue-600" />
+          <p className="text-sm text-slate-600 sm:text-base">Loading...</p>
+          <p className="mt-2 text-xs text-slate-600 sm:text-base">
             Please wait while we prepare your psychological wellbeing test...
           </p>
         </div>
@@ -556,29 +554,29 @@ function PsychologicalWellbeing({ sessionId }: { sessionId: string }) {
     );
   }
   return (
-    <div className="bg-gradient-to-br from-primary-blue-50 via-white to-primary-green-50 p-3 sm:p-6">
+    <div className="p-3 bg-gradient-to-br from-primary-blue-50 via-white to-primary-green-50 sm:p-6">
       <div className="max-w-5xl mx-auto mb-6 sm:mb-12">
         <JourneyBreadcrumbLayout>
           {/* Header Card */}
-          <div className="bg-white/90 backdrop-blur-sm border border-slate-200/60 rounded-3xl shadow-lg p-4 sm:p-6 mb-6 sm:mb-8">
-            <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4">
+          {/* <div className="p-4 mb-6 border shadow-lg bg-white/90 backdrop-blur-sm border-slate-200/60 rounded-3xl sm:p-6 sm:mb-8">
+            <div className="flex flex-col items-center gap-3 sm:flex-row sm:gap-4">
               <div className="shrink-0">
-                <div className="inline-flex items-center justify-center size-12 sm:size-16 bg-gradient-to-br from-primary-blue-500 to-primary-green-600 rounded-2xl shadow-lg">
-                  <Brain className="size-6 sm:size-8 text-white" />
+                <div className="inline-flex items-center justify-center shadow-lg size-12 sm:size-16 bg-gradient-to-br from-primary-blue-500 to-primary-green-600 rounded-2xl">
+                  <Brain className="text-white size-6 sm:size-8" />
                 </div>
               </div>
-              <div className="text-center sm:text-left flex-1">
-                <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-800 mb-1">
+              <div className="flex-1 text-center sm:text-left">
+                <h1 className="mb-1 text-xl font-bold sm:text-2xl lg:text-3xl text-slate-800">
                   Psychological Well-being Assessment
                 </h1>
-                <p className="text-slate-600 text-sm sm:text-base max-w-2xl">
+                <p className="max-w-2xl text-sm text-slate-600 sm:text-base">
                   Explore your psychological well-being across six key
                   dimensions. Rate how much you agree with each statement about
                   yourself.
                 </p>
               </div>
             </div>
-          </div>
+          </div> */}
 
           {/* Compact Page Navigation Dots */}
           <div className="flex flex-wrap gap-1.5 justify-center mb-4">
@@ -619,20 +617,20 @@ function PsychologicalWellbeing({ sessionId }: { sessionId: string }) {
 
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)}>
-              <Card className="bg-white/95 backdrop-blur-sm rounded-xl shadow-lg border-0">
+              <Card className="border-0 shadow-lg bg-white/95 backdrop-blur-sm rounded-xl">
                 <div className="p-4 sm:p-6">
                   {/* Page Header with Icon */}
                   {/* <div className="flex items-center gap-3 mb-6">
                   <div
                     className={`size-10 bg-gradient-to-br from-${currentPageData.color}-500 to-${currentPageData.color}-600 rounded-lg flex items-center justify-center shadow-md`}
                   >
-                    <currentPageData.icon className="size-5 text-white" />
+                    <currentPageData.icon className="text-white size-5" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-lg font-bold text-slate-800 mb-1">
+                    <h3 className="mb-1 text-lg font-bold text-slate-800">
                       {currentPageData.title}
                     </h3>
-                    <p className="text-slate-600 text-xs">
+                    <p className="text-xs text-slate-600">
                       {currentPageData.description}
                     </p>
                   </div>
@@ -647,13 +645,13 @@ function PsychologicalWellbeing({ sessionId }: { sessionId: string }) {
                         }
                         render={({ field }) => (
                           <FormItem>
-                            <div className="p-4 bg-gradient-to-br from-slate-50 to-slate-100 rounded-lg border border-slate-200">
+                            <div className="p-4 border rounded-lg bg-gradient-to-br from-slate-50 to-slate-100 border-slate-200">
                               <div className="mb-4">
                                 <div className="flex gap-2 mb-3">
                                   <span className="text-sm font-bold text-slate-500">
                                     Q{question.id}:
                                   </span>
-                                  <FormLabel className="text-base text-slate-800 leading-tight">
+                                  <FormLabel className="text-base leading-tight text-slate-800">
                                     <span className="font-semibold">
                                       {question.text}
                                     </span>
@@ -677,14 +675,14 @@ function PsychologicalWellbeing({ sessionId }: { sessionId: string }) {
                       />
                     ))}
 
-                    <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-slate-200">
+                    <div className="flex flex-col gap-3 pt-4 border-t sm:flex-row border-slate-200">
                       <Button
                         type="button"
                         onClick={() => prevPage()}
                         disabled={currentPage === 0}
-                        className="w-full sm:flex-1 h-10 border border-slate-300 hover:bg-slate-50 text-slate-700 font-medium rounded-lg disabled:opacity-50 disabled:cursor-not-allowed group transition-all duration-200 flex items-center justify-center gap-2 bg-white"
+                        className="flex items-center justify-center w-full h-10 gap-2 font-medium transition-all duration-200 bg-white border rounded-lg sm:flex-1 border-slate-300 hover:bg-slate-50 text-slate-700 disabled:opacity-50 disabled:cursor-not-allowed group"
                       >
-                        <ArrowLeft className="size-4 group-hover:-translate-x-1 transition-transform duration-200" />
+                        <ArrowLeft className="transition-transform duration-200 size-4 group-hover:-translate-x-1" />
                         Previous
                       </Button>
 
@@ -705,7 +703,7 @@ function PsychologicalWellbeing({ sessionId }: { sessionId: string }) {
                           ) : (
                             <>
                               Complete Assessment
-                              <Award className="size-4 group-hover:rotate-12 transition-transform duration-200" />
+                              <Award className="transition-transform duration-200 size-4 group-hover:rotate-12" />
                             </>
                           )}
                         </Button>
@@ -717,7 +715,7 @@ function PsychologicalWellbeing({ sessionId }: { sessionId: string }) {
                           className="w-full sm:flex-1 h-10 bg-gradient-to-r from-primary-blue-500 to-primary-blue-600 hover:from-primary-blue-600 hover:to-primary-blue-700 text-white font-medium rounded-lg shadow-md hover:shadow-lg hover:scale-[1.02] transition-all duration-300 group flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-md"
                         >
                           Next
-                          <ArrowRight className="size-4 group-hover:translate-x-1 transition-transform duration-200" />
+                          <ArrowRight className="transition-transform duration-200 size-4 group-hover:translate-x-1" />
                         </Button>
                       )}
                     </div>

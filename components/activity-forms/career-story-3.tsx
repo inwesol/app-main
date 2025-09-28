@@ -32,7 +32,7 @@ import {
   Loader2,
 } from "lucide-react";
 
-interface CareerStoryThreeData {
+interface CareerStory3Data {
   selfStatement: string;
   settingStatement: string;
   plotDescription: string;
@@ -88,13 +88,13 @@ const occupationOptions = [
   "Translator",
 ];
 
-export default function CareerStoryThree() {
+export default function CareerStory3() {
   const params = useParams();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
 
-  const [formData, setFormData] = useState<CareerStoryThreeData>({
+  const [formData, setFormData] = useState<CareerStory3Data>({
     selfStatement: "",
     settingStatement: "",
     plotDescription: "",
@@ -953,7 +953,7 @@ export default function CareerStoryThree() {
             disabled={loading}
             className="group relative px-10 py-6 bg-gradient-to-r from-primary-green-500 to-primary-blue-500 text-white rounded-2xl font-bold text-lg hover:from-primary-green-600 hover:to-primary-blue-600 transition-all duration-300 shadow-2xl hover:shadow-3xl hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-primary-green-400 to-primary-blue-400 rounded-2xl blur opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-primary-green-400 to-primary-blue-400 rounded-2xl blur opacity-30 group-hover:opacity-50 transition-opacity duration-300" />
             <div className="relative flex items-center gap-3">
               {loading ? (
                 <>

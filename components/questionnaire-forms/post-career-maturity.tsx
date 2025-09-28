@@ -14,19 +14,13 @@ import {
   Compass,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { useForm, Controller, FieldValues } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-} from "@/components/ui/form";
+import { Form, FormControl, FormItem, FormMessage } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
-import Header from "@/components/form-components/header";
-import ProgressBar from "@/components/form-components/progress-bar";
+import { JourneyBreadcrumbLayout } from "@/components/layouts/JourneyBreadcrumbLayout";
+import { useBreadcrumb } from "@/hooks/useBreadcrumb";
 import { useRouter } from "next/navigation";
 
 const ResponseSchema = z.enum(["agree", "disagree"]);
@@ -250,7 +244,8 @@ const questions = [
 
 const questionPages = [
   {
-    title: "Career Planning & Future Orientation",
+    // title: "Career Planning & Future Orientation",
+    title: "Section 1",
     description:
       "Questions about your approach to career planning and future thinking",
     questions: questions.slice(0, 6), // Questions 1-6
@@ -258,21 +253,24 @@ const questionPages = [
     color: "primary-blue",
   },
   {
-    title: "Decision Making & Support Systems",
+    // title: "Decision Making & Support Systems",
+    title: "Section 2",
     description: "Questions about how you make decisions and seek support",
     questions: questions.slice(6, 12), // Questions 7-12
     icon: Users,
     color: "primary-green",
   },
   {
-    title: "Self-Awareness & Preparation",
+    // title: "Self-Awareness & Preparation",
+    title: "Section 3",
     description: "Questions about self-understanding and career preparation",
     questions: questions.slice(12, 18), // Questions 13-18
     icon: Brain,
     color: "purple",
   },
   {
-    title: "Decision Complexity & Social Influence",
+    // title: "Decision Complexity & Social Influence",
+    title: "Section 4",
     description: "Questions about decision complexity and external influences",
     questions: questions.slice(18, 24), // Questions 19-24
     icon: HelpCircle,
@@ -313,6 +311,12 @@ export function PostCareerMaturity({ sessionId }: { sessionId: string }) {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
+  const { setQuestionnaireBreadcrumbs } = useBreadcrumb();
+
+  // Set breadcrumbs on component mount
+  useEffect(() => {
+    setQuestionnaireBreadcrumbs(sessionId, "Career Maturity Assessment-2");
+  }, [sessionId, setQuestionnaireBreadcrumbs]);
 
   const form = useForm<FormData>({
     resolver: zodResolver(PostCareerAssessmentFormSchema),
@@ -353,27 +357,42 @@ export function PostCareerMaturity({ sessionId }: { sessionId: string }) {
     [currentPage]
   );
 
+  const getPageCompletionStatus = useCallback(
+    (pageIndex: number) => {
+      const pageQuestions = questionPages[pageIndex].questions;
+      const answeredInPage = pageQuestions.filter(
+        (q) => watchedValues[q.id as keyof FormData] !== undefined
+      ).length;
+      return {
+        answered: answeredInPage,
+        total: pageQuestions.length,
+        isComplete: answeredInPage === pageQuestions.length,
+      };
+    },
+    [watchedValues]
+  );
+
   const goToPage = useCallback(
     (pageIndex: number, event?: React.MouseEvent) => {
       if (event) {
         event.preventDefault();
         event.stopPropagation();
       }
+
       const currentPageStatus = getPageCompletionStatus(currentPage);
       if (pageIndex <= currentPage || currentPageStatus.isComplete) {
         setCurrentPage(pageIndex);
       }
     },
-    [currentPage]
+    [currentPage, getPageCompletionStatus]
   );
 
   useEffect(() => {
     async function fetchData() {
+      const qId = "post-career-maturity";
       setIsLoading(true);
       try {
-        const res = await fetch(
-          `/api/journey/sessions/8/q/post-career-maturity`
-        );
+        const res = await fetch(`/api/journey/sessions/${sessionId}/q/${qId}`);
         if (res.ok) {
           const savedAnswers = await res.json();
           if (
@@ -401,9 +420,10 @@ export function PostCareerMaturity({ sessionId }: { sessionId: string }) {
   }, [reset, sessionId]);
 
   const onSubmit = async (data: FormData) => {
+    const qId = "post-career-maturity";
     setIsSubmitting(true);
     try {
-      const url = `/api/journey/sessions/8/q/post-career-maturity`;
+      const url = `/api/journey/sessions/${sessionId}/q/${qId}`;
       const response = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -422,22 +442,9 @@ export function PostCareerMaturity({ sessionId }: { sessionId: string }) {
     }
   };
 
-  const getPageCompletionStatus = (pageIndex: number) => {
-    const pageQuestions = questionPages[pageIndex].questions;
-    const answeredInPage = pageQuestions.filter(
-      (q) => watchedValues[q.id as keyof FormData] !== undefined
-    ).length;
-    return {
-      answered: answeredInPage,
-      total: pageQuestions.length,
-      isComplete: answeredInPage === pageQuestions.length,
-    };
-  };
-
-  const currentPageStatus = getPageCompletionStatus(currentPage);
-
   const canNavigateToPage = (pageIndex: number) => {
     if (pageIndex <= currentPage) return true;
+
     for (let i = 0; i < pageIndex; i++) {
       if (!getPageCompletionStatus(i).isComplete) {
         return false;
@@ -445,6 +452,8 @@ export function PostCareerMaturity({ sessionId }: { sessionId: string }) {
     }
     return true;
   };
+
+  const currentPageStatus = getPageCompletionStatus(currentPage);
 
   const currentPageData = questionPages[currentPage];
   const totalAnswered = Object.keys(watchedValues).filter(
@@ -454,10 +463,10 @@ export function PostCareerMaturity({ sessionId }: { sessionId: string }) {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-primary-green-50 via-white to-primary-blue-50 flex items-center justify-center p-4">
+      <div className="flex items-center justify-center min-h-screen p-4 bg-gradient-to-br from-primary-green-50 via-white to-primary-blue-50">
         <div className="text-center">
-          <div className="animate-spin rounded-full size-12 border-b-2 border-primary-blue-600 mx-auto mb-4"></div>
-          <p className="text-slate-600 text-sm sm:text-base">Loading...</p>
+          <div className="mx-auto mb-4 border-b-2 rounded-full animate-spin size-12 border-primary-blue-600" />
+          <p className="text-sm text-slate-600 sm:text-base">Loading...</p>
         </div>
       </div>
     );
@@ -465,19 +474,19 @@ export function PostCareerMaturity({ sessionId }: { sessionId: string }) {
 
   if (isCompleted) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 p-4 sm:py-8 flex items-center justify-center">
-        <Card className="max-w-lg mx-auto shadow-xl border-0 bg-white/95 backdrop-blur-sm">
-          <CardContent className="p-8 sm:p-12 text-center">
-            <div className="relative inline-flex items-center justify-center size-20 sm:size-24 bg-gradient-to-r from-primary-green-500 to-primary-green-600 rounded-3xl mb-6 sm:mb-8 shadow-lg">
-              <CheckCircle className="size-10 sm:size-12 text-white" />
-              <div className="absolute -top-2 -right-2 size-6 sm:size-8 bg-primary-blue-500 rounded-full flex items-center justify-center shadow-md">
-                <Sparkles className="size-3 sm:size-4 text-white" />
+      <div className="flex items-center justify-center min-h-screen p-4 bg-gradient-to-br from-blue-50 via-white to-green-50 sm:py-8">
+        <Card className="max-w-lg mx-auto border-0 shadow-xl bg-white/95 backdrop-blur-sm">
+          <CardContent className="p-8 text-center sm:p-12">
+            <div className="relative inline-flex items-center justify-center mb-6 shadow-lg size-20 sm:size-24 bg-gradient-to-r from-primary-green-500 to-primary-green-600 rounded-3xl sm:mb-8">
+              <CheckCircle className="text-white size-10 sm:size-12" />
+              <div className="absolute flex items-center justify-center rounded-full shadow-md -top-2 -right-2 size-6 sm:size-8 bg-primary-blue-500">
+                <Sparkles className="text-white size-3 sm:size-4" />
               </div>
             </div>
-            <h2 className="text-2xl sm:text-4xl font-bold bg-gradient-to-r from-primary-blue-700 to-primary-green-700 bg-clip-text text-transparent mb-4 sm:mb-6">
+            <h2 className="mb-4 text-2xl font-bold text-transparent sm:text-4xl bg-gradient-to-r from-primary-blue-700 to-primary-green-700 bg-clip-text sm:mb-6">
               Thank You!
             </h2>
-            <p className="text-slate-600 leading-relaxed text-base sm:text-lg">
+            <p className="text-base leading-relaxed text-slate-600 sm:text-lg">
               Your post-career maturity form has been submitted successfully.
               We&apos;ll review your information and be in touch soon to begin
               your transformative coaching journey.
@@ -489,44 +498,26 @@ export function PostCareerMaturity({ sessionId }: { sessionId: string }) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-blue-50 via-white to-primary-green-50 p-4 sm:py-8">
-      <div className="max-w-4xl mx-auto">
-        <Header
-          headerIcon={Compass}
-          headerText="Post-Career Maturity"
-          headerDescription="This assessment explores your attitudes and approaches toward career
-            decision-making after receiving coaching. Read each statement carefully and select whether
-            you agree or disagree with it."
-        />
+    <div className="p-3 bg-gradient-to-br from-primary-blue-50 via-white to-primary-green-50 sm:p-6">
+      <div className="max-w-4xl mx-auto mb-6 sm:mb-12">
+        <JourneyBreadcrumbLayout>
+          {/* Compact Page Navigation Dots */}
+          <div className="flex flex-wrap gap-1.5 justify-center mb-4">
+            {questionPages.map((page, index) => {
+              const status = getPageCompletionStatus(index);
+              const canNavigate = canNavigateToPage(index);
 
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-sm font-medium text-slate-600">
-              Page {currentPage + 1} of {questionPages.length}
-            </span>
-            <span className="text-sm font-medium text-slate-600">
-              {totalAnswered} of {questions.length} answered •{" "}
-              {Math.round((totalAnswered / questions.length) * 100)}% Complete
-            </span>
-          </div>
-          <ProgressBar progressPercentage={progressPercentage} />
-        </div>
-
-        <div className="flex flex-wrap gap-3 justify-center mb-8">
-          {questionPages.map((page, index) => {
-            const status = getPageCompletionStatus(index);
-            const canNavigate = canNavigateToPage(index);
-            return (
-              <button
-                key={index}
-                type="button"
-                onClick={(e) => goToPage(index, e)}
-                disabled={!canNavigate}
-                className={`
-                  p-2 rounded-lg font-semibold text-sm transition-all duration-300 hover:scale-105 flex items-center gap-2 size-8 justify-center sm:size-10
+              return (
+                <button
+                  key={page.title}
+                  type="button"
+                  onClick={(e) => goToPage(index, e)}
+                  disabled={!canNavigate}
+                  className={`
+                  size-10 rounded-md font-bold text-xs transition-all duration-300 hover:scale-105 flex justify-center items-center
                   ${
                     index === currentPage
-                      ? "bg-gradient-to-r from-primary-blue-500 to-primary-green-500 text-white shadow-lg"
+                      ? "bg-gradient-to-r from-primary-blue-500 to-primary-green-500 text-white shadow-md"
                       : status.isComplete
                       ? "bg-primary-green-100 text-primary-green-700 hover:bg-primary-green-200"
                       : status.answered > 0 && canNavigate
@@ -536,196 +527,201 @@ export function PostCareerMaturity({ sessionId }: { sessionId: string }) {
                       : "bg-slate-50 text-slate-300 cursor-not-allowed"
                   }
                 `}
-              >
-                {status.isComplete ? (
-                  <CheckCircle className="sm:size-5 size-4" />
-                ) : (
-                  index + 1
-                )}
-              </button>
-            );
-          })}
-        </div>
+                >
+                  {status.isComplete ? (
+                    <CheckCircle className="size-4" />
+                  ) : (
+                    index + 1
+                  )}
+                </button>
+              );
+            })}
+          </div>
 
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            // Prevent any accidental submissions
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-              }
-            }}
-          >
-            <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl border-0">
-              <div className="bg-gradient-to-r from-primary-blue-50 to-primary-green-50 rounded-t-2xl p-4 sm:p-6">
-                <div className="flex items-center gap-4">
-                  <div
-                    className={`size-10 sm:size-12 bg-gradient-to-br from-${currentPageData.color}-500 to-${currentPageData.color}-600 rounded-xl sm:2xl flex items-center justify-center shadow-lg`}
-                  >
-                    <currentPageData.icon className="size-5 sm:size-6 text-white" />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-lg sm:text-xl font-bold text-slate-800 mb-1">
-                      {currentPageData.title}
-                    </h3>
-                    <p className="text-slate-600 text-xs sm:text-sm">
-                      {currentPageData.description}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="p-4 sm:p-6">
-                <div className="space-y-8">
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              // Prevent any accidental submissions
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                }
+              }}
+            >
+              <div className="border-0 shadow-lg bg-white/95 backdrop-blur-sm rounded-xl">
+                <div className="p-4 sm:p-6">
                   <div className="space-y-6">
-                    {currentPageData.questions.map((question) => {
-                      const questionNumber =
-                        questions.findIndex((q) => q.id === question.id) + 1;
-                      return (
-                        <div
-                          key={question.id}
-                          className="p-6 bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl border border-slate-200"
-                        >
-                          <div className="flex items-start gap-4">
-                            <div className="flex-1">
-                              <div className="flex gap-2 mb-2">
-                                <span className="text-base sm:text-lg font-bold text-slate-500">
-                                  Q{questionNumber}
-                                </span>
-                                <h4 className="text-base sm:text-lg font-semibold text-slate-800 leading-relaxed mb-4">
-                                  &quot;{question.statement}&quot;
-                                </h4>
-                              </div>
-                              <Controller
-                                control={control}
-                                name={question.id as keyof FormData}
-                                render={({ field, fieldState }) => (
-                                  <FormItem>
-                                    <FormControl>
-                                      <div className="flex flex-col sm:flex-row gap-3 justify-end">
-                                        <Button
-                                          type="button"
-                                          disabled={formState.isSubmitting}
-                                          onClick={(e) => {
-                                            e.preventDefault();
-                                            e.stopPropagation();
-                                            field.onChange("agree");
-                                          }}
-                                          className={`
-                                            rounded-full font-semibold transition-all duration-300 border-2 flex items-center justify-center gap-2 sm:py-2 sm:px-8 py-1
+                    {/* Page Header with Icon */}
+                    <div className="flex items-center gap-3 mb-6">
+                      <div
+                        className={`size-10 bg-gradient-to-br from-${currentPageData.color}-500 to-${currentPageData.color}-600 rounded-lg flex items-center justify-center shadow-md`}
+                      >
+                        <currentPageData.icon className="text-white size-5" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="mb-1 text-lg font-bold text-slate-800">
+                          {currentPageData.title}
+                        </h3>
+                        {/* <p className="text-xs text-slate-600">
+                        {currentPageData.description}
+                      </p> */}
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      {currentPageData.questions.map((question) => {
+                        const questionNumber =
+                          questions.findIndex((q) => q.id === question.id) + 1;
+
+                        return (
+                          <div
+                            key={question.id}
+                            className="p-4 border rounded-lg bg-gradient-to-br from-slate-50 to-slate-100 border-slate-200"
+                          >
+                            <div className="flex items-start gap-3">
+                              <div className="flex-1">
+                                <div className="flex gap-2 mb-3">
+                                  <span className="text-sm font-bold text-slate-500">
+                                    Q{questionNumber}:
+                                  </span>
+                                  <h4 className="text-base font-semibold leading-tight text-slate-800">
+                                    {question.statement}
+                                  </h4>
+                                </div>
+
+                                <Controller
+                                  control={control}
+                                  name={question.id as keyof FormData}
+                                  render={({ field, fieldState }) => (
+                                    <FormItem>
+                                      <FormControl>
+                                        <div className="flex flex-col justify-end gap-2 sm:flex-row">
+                                          <Button
+                                            type="button"
+                                            disabled={formState.isSubmitting}
+                                            onClick={(e) => {
+                                              e.preventDefault();
+                                              e.stopPropagation();
+
+                                              field.onChange("agree");
+                                            }}
+                                            className={`
+                                            rounded-lg font-medium transition-all duration-300 border-2 flex items-center justify-center gap-2 py-2 px-6 text-sm
                                             ${
                                               field.value === "agree"
-                                                ? "bg-primary-green-500 text-white border-primary-green-500 shadow-lg scale-[1.02]"
+                                                ? "bg-primary-green-500 text-white border-primary-green-500 shadow-md scale-[1.02]"
                                                 : "bg-white text-slate-700 border-slate-300 hover:bg-primary-green-50 hover:border-primary-green-300"
                                             }
                                           `}
-                                        >
-                                          <CheckCircle className="size-5" />
-                                          Agree
-                                        </Button>
-                                        <Button
-                                          type="button"
-                                          disabled={formState.isSubmitting}
-                                          onClick={(e) => {
-                                            e.preventDefault();
-                                            e.stopPropagation();
-                                            field.onChange("disagree");
-                                          }}
-                                          className={`
-                                            rounded-full font-semibold transition-all duration-300 border-2 flex items-center justify-center gap-2 sm:py-2 sm:px-8 py-1
+                                          >
+                                            <CheckCircle className="size-4" />
+                                            Agree
+                                          </Button>
+
+                                          <Button
+                                            type="button"
+                                            disabled={formState.isSubmitting}
+                                            onClick={(e) => {
+                                              e.preventDefault();
+                                              e.stopPropagation();
+
+                                              field.onChange("disagree");
+                                            }}
+                                            className={`
+                                            rounded-lg font-medium transition-all duration-300 border-2 flex items-center justify-center gap-2 py-2 px-6 text-sm
                                             ${
                                               field.value === "disagree"
-                                                ? "bg-primary-green-500 text-white border-primary-green-500 shadow-lg scale-[1.02]"
+                                                ? "bg-primary-green-500 text-white border-primary-green-500 shadow-md scale-[1.02]"
                                                 : "bg-white text-slate-700 border-slate-300 hover:bg-primary-green-50 hover:border-primary-green-300"
                                             }
                                           `}
-                                        >
-                                          <CheckCircle className="size-5" />
-                                          Disagree
-                                        </Button>
-                                      </div>
-                                    </FormControl>
-                                    <FormMessage>
-                                      {fieldState.error?.message}
-                                    </FormMessage>
-                                  </FormItem>
-                                )}
-                              />
+                                          >
+                                            <CheckCircle className="size-4" />
+                                            Disagree
+                                          </Button>
+                                        </div>
+                                      </FormControl>
+                                      <FormMessage>
+                                        {fieldState.error?.message}
+                                      </FormMessage>
+                                    </FormItem>
+                                  )}
+                                />
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      );
-                    })}
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-slate-200">
-              <Button
-                type="button"
-                onClick={(e) => prevPage(e)}
-                disabled={currentPage === 0}
-                className="w-full sm:flex-1 h-12 border-2 border-slate-300 hover:bg-slate-50 text-slate-700 font-semibold rounded-xl disabled:opacity-50 disabled:cursor-not-allowed group transition-all duration-200 flex items-center justify-center gap-2 bg-white"
-              >
-                <ArrowLeft className="size-5 group-hover:-translate-x-1 transition-transform duration-200" />
-                Previous Page
-              </Button>
-
-              {currentPage === questionPages.length - 1 ? (
-                <Button
-                  type="submit"
-                  disabled={
-                    formState.isSubmitting || !currentPageStatus.isComplete
-                  }
-                  className="w-full sm:flex-1 h-12 bg-gradient-to-r from-primary-green-500 to-primary-green-600 hover:from-primary-green-600 hover:to-primary-green-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300 group flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-lg"
-                >
-                  {formState.isSubmitting ? (
-                    <>
-                      <svg
-                        className="animate-spin size-5 mr-2 text-white"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                      >
-                        <circle
-                          className="opacity-25"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                        ></circle>
-                        <path
-                          className="opacity-75"
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                        ></path>
-                      </svg>
-                      Submitting...
-                    </>
-                  ) : (
-                    <>
-                      Complete Assessment
-                      <Award className="size-5 group-hover:rotate-12 transition-transform duration-200" />
-                    </>
-                  )}
-                </Button>
-              ) : (
+              <div className="flex flex-col gap-3 pt-4 border-t sm:flex-row border-slate-200">
                 <Button
                   type="button"
-                  onClick={(e) => nextPage(e)}
-                  disabled={!currentPageStatus.isComplete}
-                  className="w-full sm:flex-1 h-12 bg-gradient-to-r from-primary-blue-500 to-primary-blue-600 hover:from-primary-blue-600 hover:to-primary-blue-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300 group flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-lg"
+                  onClick={(e) => prevPage(e)}
+                  disabled={currentPage === 0}
+                  className="flex items-center justify-center w-full h-10 gap-2 font-medium transition-all duration-200 bg-white border rounded-lg sm:flex-1 border-slate-300 hover:bg-slate-50 text-slate-700 disabled:opacity-50 disabled:cursor-not-allowed group"
                 >
-                  Next Page
-                  <ArrowRight className="size-5 group-hover:translate-x-1 transition-transform duration-200" />
+                  <ArrowLeft className="transition-transform duration-200 size-4 group-hover:-translate-x-1" />
+                  Previous
                 </Button>
-              )}
-            </div>
-          </form>
-        </Form>
+
+                {currentPage === questionPages.length - 1 ? (
+                  <Button
+                    type="submit"
+                    disabled={
+                      formState.isSubmitting || !currentPageStatus.isComplete
+                    }
+                    className="w-full sm:flex-1 h-10 bg-gradient-to-r from-primary-green-500 to-primary-green-600 hover:from-primary-green-600 hover:to-primary-green-700 text-white font-medium rounded-lg shadow-md hover:shadow-lg hover:scale-[1.02] transition-all duration-300 group flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-md"
+                  >
+                    {formState.isSubmitting ? (
+                      <>
+                        <svg
+                          className="mr-2 text-white animate-spin size-4"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          />
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                          />
+                        </svg>
+                        Submitting...
+                      </>
+                    ) : (
+                      <>
+                        Complete Assessment
+                        <Award className="transition-transform duration-200 size-4 group-hover:rotate-12" />
+                      </>
+                    )}
+                  </Button>
+                ) : (
+                  <Button
+                    type="button"
+                    onClick={(e) => nextPage(e)}
+                    disabled={!currentPageStatus.isComplete}
+                    className="w-full sm:flex-1 h-10 bg-gradient-to-r from-primary-blue-500 to-primary-blue-600 hover:from-primary-blue-600 hover:to-primary-blue-700 text-white font-medium rounded-lg shadow-md hover:shadow-lg hover:scale-[1.02] transition-all duration-300 group flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-md"
+                  >
+                    Next
+                    <ArrowRight className="transition-transform duration-200 size-4 group-hover:translate-x-1" />
+                  </Button>
+                )}
+              </div>
+            </form>
+          </Form>
+        </JourneyBreadcrumbLayout>
       </div>
     </div>
   );

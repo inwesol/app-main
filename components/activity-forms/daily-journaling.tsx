@@ -40,7 +40,7 @@ interface DailyJournalingData {
   tomorrowStep: string;
 }
 
-export const DailyJournaling: React.FC = () => {
+export default function DailyJournaling() {
   const params = useParams();
   const router = useRouter();
   const sessionId = params?.sessionId as string;
@@ -242,10 +242,14 @@ export const DailyJournaling: React.FC = () => {
         <Card className="bg-gradient-to-r from-slate-50/80 to-slate-100/80 border-slate-200/60 shadow-lg mb-8">
           <div className="flex items-center justify-center gap-4 p-2">
             <Calendar className="size-6 text-slate-600" />
-            <label className="text-lg font-semibold text-slate-700">
+            <label
+              htmlFor="journal-date"
+              className="text-lg font-semibold text-slate-700"
+            >
               Journal Date:
             </label>
             <input
+              id="journal-date"
               type="date"
               value={journalData.date}
               onChange={(e) =>
@@ -351,20 +355,23 @@ export const DailyJournaling: React.FC = () => {
               )}
 
               {/* Motivational Message */}
-              {getMotivationalMessage() && (
-                <div
-                  className={`bg-gradient-to-r ${
-                    getMotivationalMessage()!.color
-                  } rounded-xl p-4 border shadow-sm`}
-                >
-                  <div className="flex items-center gap-3">
-                    {getMotivationalMessage()!.icon}
-                    <p className="font-medium text-slate-700">
-                      {getMotivationalMessage()!.message}
-                    </p>
-                  </div>
-                </div>
-              )}
+              {(() => {
+                const message = getMotivationalMessage();
+                return (
+                  message && (
+                    <div
+                      className={`bg-gradient-to-r ${message.color} rounded-xl p-4 border shadow-sm`}
+                    >
+                      <div className="flex items-center gap-3">
+                        {message.icon}
+                        <p className="font-medium text-slate-700">
+                          {message.message}
+                        </p>
+                      </div>
+                    </div>
+                  )
+                );
+              })()}
             </div>
           </CardContent>
         </Card>
@@ -420,6 +427,7 @@ export const DailyJournaling: React.FC = () => {
                           className="flex-1 border-primary-blue-200 focus:border-primary-blue-500"
                         />
                         <button
+                          type="button"
                           onClick={() =>
                             deleteBulletPoint("challenges", challenge.id)
                           }
@@ -445,6 +453,7 @@ export const DailyJournaling: React.FC = () => {
                     </div>
                   ))}
                   <button
+                    type="button"
                     onClick={() => addBulletPoint("challenges")}
                     className="w-full py-3 border-2 border-dashed border-primary-blue-300/60 rounded-lg text-primary-blue-600 hover:border-primary-blue-400 hover:text-primary-blue-700 transition-colors hover:bg-primary-blue-50/30 flex items-center justify-center gap-2"
                   >
@@ -483,6 +492,7 @@ export const DailyJournaling: React.FC = () => {
                           className="flex-1 border-primary-blue-200 focus:border-primary-green-500"
                         />
                         <button
+                          type="button"
                           onClick={() =>
                             deleteBulletPoint("progress", progress.id)
                           }
@@ -508,6 +518,7 @@ export const DailyJournaling: React.FC = () => {
                     </div>
                   ))}
                   <button
+                    type="button"
                     onClick={() => addBulletPoint("progress")}
                     className="w-full py-3 border-2 border-dashed border-primary-blue-300/60 rounded-lg text-primary-blue-600 hover:border-primary-blue-400 hover:text-primary-blue-700 transition-colors hover:bg-primary-blue-50/30 flex items-center justify-center gap-2"
                   >
@@ -572,6 +583,7 @@ export const DailyJournaling: React.FC = () => {
                           className="flex-1 border-primary-green-200 focus:border-primary-green-500"
                         />
                         <button
+                          type="button"
                           onClick={() =>
                             deleteBulletPoint("gratitude", item.id)
                           }
@@ -598,6 +610,7 @@ export const DailyJournaling: React.FC = () => {
                   ))}
                   {journalData.gratitude.length < 3 && (
                     <button
+                      type="button"
                       onClick={() => addBulletPoint("gratitude")}
                       className="w-full py-3 border-2 border-dashed border-primary-green-300/60 rounded-lg text-primary-green-600 hover:border-primary-green-400 hover:text-primary-green-700 transition-colors hover:bg-primary-green-50/30 flex items-center justify-center gap-2"
                     >
@@ -637,6 +650,7 @@ export const DailyJournaling: React.FC = () => {
                           className="flex-1 border-primary-green-200 focus:border-primary-green-500"
                         />
                         <button
+                          type="button"
                           onClick={() =>
                             deleteBulletPoint("gratitudeHelp", item.id)
                           }
@@ -662,6 +676,7 @@ export const DailyJournaling: React.FC = () => {
                     </div>
                   ))}
                   <button
+                    type="button"
                     onClick={() => addBulletPoint("gratitudeHelp")}
                     className="w-full py-3 border-2 border-dashed border-primary-green-300/60 rounded-lg text-primary-green-600 hover:border-primary-green-400 hover:text-primary-green-700 transition-colors hover:bg-primary-green-50/30 flex items-center justify-center gap-2"
                   >
@@ -683,7 +698,7 @@ export const DailyJournaling: React.FC = () => {
         >
           <div className="bg-gradient-to-r from-blue-100/50 to-indigo-100/50 rounded-xl p-6 border border-blue-200/40">
             <h4 className="font-semibold text-blue-800 mb-4 text-lg flex items-center gap-2">
-              <div className="size-3 bg-blue-500 rounded-full"></div>
+              <div className="size-3 bg-blue-500 rounded-full" />
               What small step will I take tomorrow to continue my progress?
             </h4>
             <TextArea
@@ -730,11 +745,12 @@ export const DailyJournaling: React.FC = () => {
         {/* Enhanced Save Button */}
         <div className="text-center">
           <button
+            type="button"
             onClick={handleSave}
             disabled={isSaving}
             className="group relative px-10 py-4 bg-gradient-to-r from-primary-green-500 via-primary-blue-500 to-blue-500 text-white rounded-2xl font-bold text-lg hover:from-primary-green-600 hover:via-primary-blue-600 hover:to-blue-600 transition-all duration-300 shadow-2xl hover:shadow-3xl hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-primary-green-400 via-primary-blue-400 to-blue-400 rounded-2xl blur opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-primary-green-400 via-primary-blue-400 to-blue-400 rounded-2xl blur opacity-30 group-hover:opacity-50 transition-opacity duration-300" />
             <div className="relative flex items-center gap-3">
               {isSaving ? (
                 <>
@@ -754,38 +770,4 @@ export const DailyJournaling: React.FC = () => {
       </div>
     </div>
   );
-};
-{
-  /* Summary Card */
 }
-<Card className="bg-gradient-to-r from-primary-green-50/80 to-primary-blue-50/80 border-primary-green-200/60 shadow-xl mb-8">
-  <div className="text-center p-4">
-    <div className="inline-flex items-center gap-3 bg-gradient-to-r from-primary-green-200/60 to-primary-blue-200/60 px-4 py-2 rounded-full mb-4">
-      <Calendar className="size-5 text-primary-green-700" />
-      <span className="text-sm font-semibold text-primary-green-800">
-        Daily Reflection Complete
-      </span>
-    </div>
-    <h3 className="text-xl font-bold text-primary-green-800 mb-3">
-      Your Journey Continues
-    </h3>
-    <p className="text-primary-green-700 leading-relaxed max-w-2xl mx-auto">
-      You&apos;ve completed today&apos;s reflection. Remember that progress
-      isn&apos;t always linear, and every small step counts. Your commitment to
-      daily reflection is building the foundation for lasting change.
-    </p>
-  </div>
-</Card>;
-
-{
-  /* Enhanced Save Button */
-}
-<div className="text-center">
-  <button className="group relative px-10 py-4 bg-gradient-to-r from-primary-green-500 via-primary-blue-500 to-blue-500 text-white rounded-2xl font-bold text-lg hover:from-primary-green-600 hover:via-primary-blue-600 hover:to-blue-600 transition-all duration-300 shadow-2xl hover:shadow-3xl hover:-translate-y-1">
-    <div className="absolute inset-0 bg-gradient-to-r from-primary-green-400 via-primary-blue-400 to-blue-400 rounded-2xl blur opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
-    <div className="relative flex items-center gap-3">
-      <span>Save Today&apos;s Journal</span>
-      <ArrowRight className="size-5 group-hover:translate-x-1 transition-transform duration-200" />
-    </div>
-  </button>
-</div>;

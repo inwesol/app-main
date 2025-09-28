@@ -97,7 +97,7 @@ export function SessionDetail() {
   const getBreadcrumbs = (): BreadcrumbItem[] => {
     const breadcrumbs: BreadcrumbItem[] = [
       { label: "Home", href: "/" },
-      { label: "Career Journey", href: "/journey" },
+      { label: "Coaching", href: "/journey" },
     ];
 
     if (sessionData) {
@@ -125,12 +125,12 @@ export function SessionDetail() {
 
     return (
       <nav aria-label="Breadcrumb" className="mb-4 sm:mb-6">
-        <div className="bg-white rounded-lg border border-slate-200 px-3 py-2 sm:px-4 sm:py-3 shadow-sm">
+        <div className="px-3 py-2 bg-white border rounded-lg shadow-sm border-slate-200 sm:px-4 sm:py-3">
           <ol className="flex items-center space-x-1 sm:space-x-2">
             {breadcrumbs.map((crumb, index) => (
               <li key={crumb.label} className="flex items-center">
                 {index === 0 && (
-                  <Home className="size-4 text-slate-500 mr-1 sm:mr-2" />
+                  <Home className="mr-1 size-4 text-slate-500 sm:mr-2" />
                 )}
 
                 {crumb.isActive ? (
@@ -150,7 +150,7 @@ export function SessionDetail() {
                 )}
 
                 {index < breadcrumbs.length - 1 && (
-                  <ChevronRight className="size-4 text-slate-400 mx-1 sm:mx-2 shrink-0" />
+                  <ChevronRight className="mx-1 size-4 text-slate-400 sm:mx-2 shrink-0" />
                 )}
               </li>
             ))}
@@ -162,10 +162,10 @@ export function SessionDetail() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-primary-green-50 via-white to-primary-blue-50 flex items-center justify-center p-4">
+      <div className="flex items-center justify-center min-h-screen p-4 bg-gradient-to-br from-primary-green-50 via-white to-primary-blue-50">
         <div className="text-center">
-          <div className="animate-spin rounded-full size-12 border-b-2 border-primary-blue-600 mx-auto mb-4" />
-          <p className="text-slate-600 text-sm sm:text-base">
+          <div className="mx-auto mb-4 border-b-2 rounded-full animate-spin size-12 border-primary-blue-600" />
+          <p className="text-sm text-slate-600 sm:text-base">
             Loading session details...
           </p>
         </div>
@@ -175,20 +175,20 @@ export function SessionDetail() {
 
   if (!sessionData) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-primary-green-50 via-white to-primary-blue-50 flex items-center justify-center p-4">
-        <Card className="max-w-md mx-auto p-6 sm:p-8 text-center">
-          <h2 className="text-lg sm:text-xl font-bold text-slate-800 mb-2">
+      <div className="flex items-center justify-center min-h-screen p-4 bg-gradient-to-br from-primary-green-50 via-white to-primary-blue-50">
+        <Card className="max-w-md p-6 mx-auto text-center sm:p-8">
+          <h2 className="mb-2 text-lg font-bold sm:text-xl text-slate-800">
             Session Not Found
           </h2>
-          <p className="text-slate-600 mb-4 text-sm sm:text-base">
+          <p className="mb-4 text-sm text-slate-600 sm:text-base">
             The requested session could not be found.
           </p>
           <Button
             onClick={() => handleBreadcrumbClick("/journey")}
-            className="bg-primary-blue-600 hover:bg-primary-blue-700 w-full sm:w-auto"
+            className="w-full bg-primary-blue-600 hover:bg-primary-blue-700 sm:w-auto"
             size="sm"
           >
-            <ArrowLeft className="size-4 mr-2" />
+            <ArrowLeft className="mr-2 size-4" />
             Back to Journey
           </Button>
         </Card>
@@ -199,20 +199,20 @@ export function SessionDetail() {
   // Additional check for forms array
   if (!sessionData.forms) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-primary-green-50 via-white to-primary-blue-50 flex items-center justify-center p-4">
-        <Card className="max-w-md mx-auto p-6 sm:p-8 text-center">
-          <h2 className="text-lg sm:text-xl font-bold text-slate-800 mb-2">
+      <div className="flex items-center justify-center min-h-screen p-4 bg-gradient-to-br from-primary-green-50 via-white to-primary-blue-50">
+        <Card className="max-w-md p-6 mx-auto text-center sm:p-8">
+          <h2 className="mb-2 text-lg font-bold sm:text-xl text-slate-800">
             Session Data Incomplete
           </h2>
-          <p className="text-slate-600 mb-4 text-sm sm:text-base">
+          <p className="mb-4 text-sm text-slate-600 sm:text-base">
             This session doesn&apos;t have any forms configured.
           </p>
           <Button
             onClick={() => handleBreadcrumbClick("/journey")}
-            className="bg-primary-blue-600 hover:bg-primary-blue-700 w-full sm:w-auto"
+            className="w-full bg-primary-blue-600 hover:bg-primary-blue-700 sm:w-auto"
             size="sm"
           >
-            <ArrowLeft className="size-4 mr-2" />
+            <ArrowLeft className="mr-2 size-4" />
             Back to Journey
           </Button>
         </Card>
@@ -287,16 +287,16 @@ export function SessionDetail() {
           }`}
         />
 
-        <CardHeader className="pb-2 px-3 pt-3">
+        <CardHeader className="px-3 pt-3 pb-2">
           <div className="flex items-start gap-3">
             {/* Compact Icon */}
             <div
               className={`p-2 rounded-lg shadow-sm shrink-0 transition-transform duration-300 group-hover:scale-105 ${iconBg}`}
             >
               {isFormCompleted ? (
-                <CheckCircle className="size-4 text-white" />
+                <CheckCircle className="text-white size-4" />
               ) : (
-                <FormIcon className="size-4 text-white" />
+                <FormIcon className="text-white size-4" />
               )}
             </div>
 
@@ -374,7 +374,7 @@ export function SessionDetail() {
           </div>
         </CardHeader>
 
-        <CardContent className="pt-0 px-3 pb-3 flex-1 flex flex-col">
+        <CardContent className="flex flex-col flex-1 px-3 pt-0 pb-3">
           {/* Topics (if available) */}
           {form.topics && form.topics.length > 0 && (
             <div className="flex flex-wrap gap-1 mb-3">
@@ -440,11 +440,11 @@ export function SessionDetail() {
 
   return (
     <div className="relative">
-      <div className="max-w-6xl mx-auto p-3 sm:p-4 lg:px-8">
+      <div className="max-w-6xl p-3 mx-auto sm:p-4 lg:px-8">
         {/* Breadcrumb Navigation */}
         <BreadcrumbNavigation />
 
-        <div className="bg-white sm:rounded-xl rounded-lg p-3 sm:p-4 shadow-md border border-slate-200">
+        <div className="p-3 bg-white border rounded-lg shadow-md sm:rounded-xl sm:p-4 border-slate-200">
           {/* Session Header */}
           <div className="mb-6">
             <div
@@ -456,16 +456,16 @@ export function SessionDetail() {
             >
               {/* Decorative background pattern */}
               <div className="absolute inset-0 opacity-5">
-                <div className="absolute top-0 right-0 size-32 bg-gradient-to-br from-white to-transparent rounded-full -translate-y-16 translate-x-16" />
-                <div className="absolute bottom-0 left-0 size-24 bg-gradient-to-tr from-white to-transparent rounded-full translate-y-12 -translate-x-12" />
+                <div className="absolute top-0 right-0 translate-x-16 -translate-y-16 rounded-full size-32 bg-gradient-to-br from-white to-transparent" />
+                <div className="absolute bottom-0 left-0 -translate-x-12 translate-y-12 rounded-full size-24 bg-gradient-to-tr from-white to-transparent" />
               </div>
 
               <div className="relative">
                 {/* Header content with improved spacing */}
-                <div className="flex flex-col lg:flex-row lg:items-start gap-4">
+                <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
                   {/* Session info */}
                   <div className="flex-1 min-w-0">
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-3">
+                    <div className="flex flex-col gap-3 mb-3 sm:flex-row sm:items-center">
                       <div className="flex items-center gap-3">
                         {/* Session number with enhanced styling */}
                         <div
@@ -495,13 +495,13 @@ export function SessionDetail() {
                       <div className="flex gap-2">
                         {isCompleted && (
                           <Badge className="bg-primary-green-100 text-primary-green-800 border-primary-green-300 text-sm px-3 py-1.5 font-semibold shadow-sm">
-                            <CheckCircle className="size-4 mr-1" />
+                            <CheckCircle className="mr-1 size-4" />
                             Completed
                           </Badge>
                         )}
                         {isCurrent && (
                           <Badge className="bg-primary-blue-100 text-primary-blue-800 border-primary-blue-300 text-sm px-3 py-1.5 font-semibold shadow-sm">
-                            <div className="size-4 mr-1 rounded-full bg-primary-blue-500 animate-pulse" />
+                            <div className="mr-1 rounded-full size-4 bg-primary-blue-500 animate-pulse" />
                             Current
                           </Badge>
                         )}
@@ -509,7 +509,7 @@ export function SessionDetail() {
                     </div>
 
                     {/* Description with better typography */}
-                    <p className="text-base sm:text-lg text-slate-700 leading-relaxed max-w-4xl">
+                    <p className="max-w-4xl text-base leading-relaxed sm:text-lg text-slate-700">
                       {sessionData.description}
                     </p>
                   </div>
@@ -523,7 +523,7 @@ export function SessionDetail() {
                           : "bg-gradient-to-br from-primary-blue-400 to-cyan-500"
                       }`}
                     >
-                      <IconComponent className="size-8 text-white" />
+                      <IconComponent className="text-white size-8" />
                     </div>
                   )}
                 </div>
@@ -540,15 +540,15 @@ export function SessionDetail() {
                 </div>
                 <div>
                   <h2 className="text-lg font-bold text-slate-800">
-                    Activity Section
+                    Assessments & Activities
                   </h2>
                   <p className="text-sm text-slate-600">
-                    Complete these activities to progress through your journey
+                    Complete the below section to continue your journey
                   </p>
                 </div>
               </div>
 
-              <div className="grid gap-3 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
                 {activityForms.map((form) => (
                   <FormCard key={form.id} form={form} />
                 ))}
@@ -565,16 +565,16 @@ export function SessionDetail() {
                 </div>
                 <div>
                   <h2 className="text-lg font-bold text-slate-800">
-                    Discussion Section
+                    Next Steps
                   </h2>
                   <p className="text-sm text-slate-600">
-                    Schedule calls and provide feedback for your coaching
-                    sessions
+                    Book a one-on-one session, give feedback and receive your
+                    session summaries
                   </p>
                 </div>
               </div>
 
-              <div className="grid gap-3 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
                 {discussionForms.map((form) => (
                   <FormCard key={form.id} form={form} />
                 ))}
@@ -584,7 +584,7 @@ export function SessionDetail() {
 
           {/* No forms message */}
           {(!sessionData.forms || sessionData.forms.length === 0) && (
-            <div className="my-4 sm:my-5 text-center py-8">
+            <div className="py-8 my-4 text-center sm:my-5">
               <p className="text-slate-500">
                 No forms available for this session.
               </p>

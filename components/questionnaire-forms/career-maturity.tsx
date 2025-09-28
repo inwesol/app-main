@@ -316,7 +316,7 @@ export function CareerMaturity({ sessionId }: { sessionId: string }) {
 
   // Set breadcrumbs on component mount
   useEffect(() => {
-    setQuestionnaireBreadcrumbs(sessionId, "Career Maturity Assessment");
+    setQuestionnaireBreadcrumbs(sessionId, "Career Maturity Assessment-1");
   }, [sessionId, setQuestionnaireBreadcrumbs]);
 
   const form = useForm<FormData>({
@@ -392,9 +392,10 @@ export function CareerMaturity({ sessionId }: { sessionId: string }) {
 
   useEffect(() => {
     async function fetchData() {
+      const qId = "career-maturity";
       setIsLoading(true);
       try {
-        const res = await fetch("/api/journey/sessions/1/q/career-maturity");
+        const res = await fetch(`/api/journey/sessions/${sessionId}/q/${qId}`);
         if (res.ok) {
           const savedAnswers = await res.json();
           if (
@@ -425,8 +426,8 @@ export function CareerMaturity({ sessionId }: { sessionId: string }) {
     setIsSubmitting(true);
 
     try {
-      const sessionId = 1;
-      const url = `/api/journey/sessions/${sessionId}/q/career-maturity`;
+      const qId = "career-maturity";
+      const url = `/api/journey/sessions/${sessionId}/q/${qId}`;
       const response = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -466,10 +467,10 @@ export function CareerMaturity({ sessionId }: { sessionId: string }) {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-primary-green-50 via-white to-primary-blue-50 flex items-center justify-center p-4">
+      <div className="flex items-center justify-center min-h-screen p-4 bg-gradient-to-br from-primary-green-50 via-white to-primary-blue-50">
         <div className="text-center">
-          <div className="animate-spin rounded-full size-12 border-b-2 border-primary-blue-600 mx-auto mb-4" />
-          <p className="text-slate-600 text-sm sm:text-base">Loading...</p>
+          <div className="mx-auto mb-4 border-b-2 rounded-full animate-spin size-12 border-primary-blue-600" />
+          <p className="text-sm text-slate-600 sm:text-base">Loading...</p>
         </div>
       </div>
     );
@@ -477,19 +478,19 @@ export function CareerMaturity({ sessionId }: { sessionId: string }) {
 
   if (isCompleted) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 p-4 sm:py-8 flex items-center justify-center">
-        <Card className="max-w-lg mx-auto shadow-xl border-0 bg-white/95 backdrop-blur-sm">
-          <CardContent className="p-8 sm:p-12 text-center">
-            <div className="relative inline-flex items-center justify-center size-20 sm:size-24 bg-gradient-to-r from-primary-green-500 to-primary-green-600 rounded-3xl mb-6 sm:mb-8 shadow-lg">
-              <CheckCircle className="size-10 sm:size-12 text-white" />
-              <div className="absolute -top-2 -right-2 size-6 sm:size-8 bg-primary-blue-500 rounded-full flex items-center justify-center shadow-md">
-                <Sparkles className="size-3 sm:size-4 text-white" />
+      <div className="flex items-center justify-center min-h-screen p-4 bg-gradient-to-br from-blue-50 via-white to-green-50 sm:py-8">
+        <Card className="max-w-lg mx-auto border-0 shadow-xl bg-white/95 backdrop-blur-sm">
+          <CardContent className="p-8 text-center sm:p-12">
+            <div className="relative inline-flex items-center justify-center mb-6 shadow-lg size-20 sm:size-24 bg-gradient-to-r from-primary-green-500 to-primary-green-600 rounded-3xl sm:mb-8">
+              <CheckCircle className="text-white size-10 sm:size-12" />
+              <div className="absolute flex items-center justify-center rounded-full shadow-md -top-2 -right-2 size-6 sm:size-8 bg-primary-blue-500">
+                <Sparkles className="text-white size-3 sm:size-4" />
               </div>
             </div>
-            <h2 className="text-2xl sm:text-4xl font-bold bg-gradient-to-r from-primary-blue-700 to-primary-green-700 bg-clip-text text-transparent mb-4 sm:mb-6">
+            <h2 className="mb-4 text-2xl font-bold text-transparent sm:text-4xl bg-gradient-to-r from-primary-blue-700 to-primary-green-700 bg-clip-text sm:mb-6">
               Thank You!
             </h2>
-            <p className="text-slate-600 leading-relaxed text-base sm:text-lg">
+            <p className="text-base leading-relaxed text-slate-600 sm:text-lg">
               Your career maturity form has been submitted successfully.
               We&apos;ll review your information and be in touch soon to begin
               your transformative coaching journey.
@@ -501,29 +502,29 @@ export function CareerMaturity({ sessionId }: { sessionId: string }) {
   }
 
   return (
-    <div className="bg-gradient-to-br from-primary-blue-50 via-white to-primary-green-50 p-3 sm:p-6">
+    <div className="p-3 bg-gradient-to-br from-primary-blue-50 via-white to-primary-green-50 sm:p-6">
       <div className="max-w-4xl mx-auto mb-6 sm:mb-12">
         <JourneyBreadcrumbLayout>
           {/* Header Card */}
-          <div className="bg-white/90 backdrop-blur-sm border border-slate-200/60 rounded-3xl shadow-lg p-4 sm:p-6 mb-6 sm:mb-8">
-            <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4">
+          {/* <div className="p-4 mb-6 border shadow-lg bg-white/90 backdrop-blur-sm border-slate-200/60 rounded-3xl sm:p-6 sm:mb-8">
+            <div className="flex flex-col items-center gap-3 sm:flex-row sm:gap-4">
               <div className="shrink-0">
-                <div className="inline-flex items-center justify-center size-12 sm:size-16 bg-gradient-to-br from-primary-blue-500 to-primary-green-600 rounded-2xl shadow-lg">
-                  <Compass className="size-6 sm:size-8 text-white" />
+                <div className="inline-flex items-center justify-center shadow-lg size-12 sm:size-16 bg-gradient-to-br from-primary-blue-500 to-primary-green-600 rounded-2xl">
+                  <Compass className="text-white size-6 sm:size-8" />
                 </div>
               </div>
-              <div className="text-center sm:text-left flex-1">
-                <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-800 mb-1">
+              <div className="flex-1 text-center sm:text-left">
+                <h1 className="mb-1 text-xl font-bold sm:text-2xl lg:text-3xl text-slate-800">
                   Career Maturity Assessment
                 </h1>
-                <p className="text-slate-600 text-sm sm:text-base max-w-2xl">
+                <p className="max-w-2xl text-sm text-slate-600 sm:text-base">
                   This assessment explores your attitudes and approaches toward
                   career decision-making. Read each statement carefully and
                   select whether you agree or disagree with it.
                 </p>
               </div>
             </div>
-          </div>
+          </div> */}
 
           {/* Compact Page Navigation Dots */}
           <div className="flex flex-wrap gap-1.5 justify-center mb-4">
@@ -572,7 +573,7 @@ export function CareerMaturity({ sessionId }: { sessionId: string }) {
                 }
               }}
             >
-              <div className="bg-white/95 backdrop-blur-sm rounded-xl shadow-lg border-0">
+              <div className="border-0 shadow-lg bg-white/95 backdrop-blur-sm rounded-xl">
                 <div className="p-4 sm:p-6">
                   <div className="space-y-6">
                     {/* Page Header with Icon */}
@@ -580,13 +581,13 @@ export function CareerMaturity({ sessionId }: { sessionId: string }) {
                       <div
                         className={`size-10 bg-gradient-to-br from-${currentPageData.color}-500 to-${currentPageData.color}-600 rounded-lg flex items-center justify-center shadow-md`}
                       >
-                        <currentPageData.icon className="size-5 text-white" />
+                        <currentPageData.icon className="text-white size-5" />
                       </div>
                       <div className="flex-1">
-                        <h3 className="text-lg font-bold text-slate-800 mb-1">
+                        <h3 className="mb-1 text-lg font-bold text-slate-800">
                           {currentPageData.title}
                         </h3>
-                        {/* <p className="text-slate-600 text-xs">
+                        {/* <p className="text-xs text-slate-600">
                         {currentPageData.description}
                       </p> */}
                       </div>
@@ -600,7 +601,7 @@ export function CareerMaturity({ sessionId }: { sessionId: string }) {
                         return (
                           <div
                             key={question.id}
-                            className="p-4 bg-gradient-to-br from-slate-50 to-slate-100 rounded-lg border border-slate-200"
+                            className="p-4 border rounded-lg bg-gradient-to-br from-slate-50 to-slate-100 border-slate-200"
                           >
                             <div className="flex items-start gap-3">
                               <div className="flex-1">
@@ -608,7 +609,7 @@ export function CareerMaturity({ sessionId }: { sessionId: string }) {
                                   <span className="text-sm font-bold text-slate-500">
                                     Q{questionNumber}:
                                   </span>
-                                  <h4 className="text-base font-semibold text-slate-800 leading-tight">
+                                  <h4 className="text-base font-semibold leading-tight text-slate-800">
                                     {question.statement}
                                   </h4>
                                 </div>
@@ -619,7 +620,7 @@ export function CareerMaturity({ sessionId }: { sessionId: string }) {
                                   render={({ field, fieldState }) => (
                                     <FormItem>
                                       <FormControl>
-                                        <div className="flex flex-col sm:flex-row gap-2 justify-end">
+                                        <div className="flex flex-col justify-end gap-2 sm:flex-row">
                                           <Button
                                             type="button"
                                             disabled={formState.isSubmitting}
@@ -681,14 +682,14 @@ export function CareerMaturity({ sessionId }: { sessionId: string }) {
                 </div>
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-slate-200">
+              <div className="flex flex-col gap-3 pt-4 border-t sm:flex-row border-slate-200">
                 <Button
                   type="button"
                   onClick={(e) => prevPage(e)}
                   disabled={currentPage === 0}
-                  className="w-full sm:flex-1 h-10 border border-slate-300 hover:bg-slate-50 text-slate-700 font-medium rounded-lg disabled:opacity-50 disabled:cursor-not-allowed group transition-all duration-200 flex items-center justify-center gap-2 bg-white"
+                  className="flex items-center justify-center w-full h-10 gap-2 font-medium transition-all duration-200 bg-white border rounded-lg sm:flex-1 border-slate-300 hover:bg-slate-50 text-slate-700 disabled:opacity-50 disabled:cursor-not-allowed group"
                 >
-                  <ArrowLeft className="size-4 group-hover:-translate-x-1 transition-transform duration-200" />
+                  <ArrowLeft className="transition-transform duration-200 size-4 group-hover:-translate-x-1" />
                   Previous
                 </Button>
 
@@ -703,7 +704,7 @@ export function CareerMaturity({ sessionId }: { sessionId: string }) {
                     {formState.isSubmitting ? (
                       <>
                         <svg
-                          className="animate-spin size-4 mr-2 text-white"
+                          className="mr-2 text-white animate-spin size-4"
                           xmlns="http://www.w3.org/2000/svg"
                           fill="none"
                           viewBox="0 0 24 24"
@@ -727,7 +728,7 @@ export function CareerMaturity({ sessionId }: { sessionId: string }) {
                     ) : (
                       <>
                         Complete Assessment
-                        <Award className="size-4 group-hover:rotate-12 transition-transform duration-200" />
+                        <Award className="transition-transform duration-200 size-4 group-hover:rotate-12" />
                       </>
                     )}
                   </Button>
@@ -739,7 +740,7 @@ export function CareerMaturity({ sessionId }: { sessionId: string }) {
                     className="w-full sm:flex-1 h-10 bg-gradient-to-r from-primary-blue-500 to-primary-blue-600 hover:from-primary-blue-600 hover:to-primary-blue-700 text-white font-medium rounded-lg shadow-md hover:shadow-lg hover:scale-[1.02] transition-all duration-300 group flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-md"
                   >
                     Next
-                    <ArrowRight className="size-4 group-hover:translate-x-1 transition-transform duration-200" />
+                    <ArrowRight className="transition-transform duration-200 size-4 group-hover:translate-x-1" />
                   </Button>
                 )}
               </div>

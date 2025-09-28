@@ -1,26 +1,37 @@
-import { NextRequest, NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 import { auth } from "@/app/(auth)/auth";
 import {
-  upsertUserDemographics,
   completeUserSessionFormProgress,
   updateJourneyProgressAfterForm,
   getUserDemographics,
+  deleteUserDemographics,
+  softDeleteUserDemographics,
+  upsertUserDemographicsWithTransaction,
   getPreAssessment,
   upsertPreAssessment,
+  deletePreAssessment,
   upsertCareerMaturityAssessment,
   getCareerMaturityAssessment,
+  deleteCareerMaturityAssessment,
   getRiasecTest,
+  deleteRiasecTest,
   getPersonalityTest,
   upsertPersonalityTest,
+  deletePersonalityTest,
   getPsychologicalWellbeingTest,
   upsertPsychologicalWellbeingTest,
+  deletePsychologicalWellbeingTest,
   upsertRiasecTest,
   upsertPostCareerMaturityAssessment,
   getPostCareerMaturityAssessment,
+  deletePostCareerMaturityAssessment,
   getPostPsychologicalWellbeingTest,
   upsertPostPsychologicalWellbeingTest,
+  deletePostPsychologicalWellbeingTest,
   getPostCoachingAssessment,
   upsertPostCoachingAssessment,
+  deletePostCoachingAssessment,
 } from "@/lib/db/queries";
 import { demographicsDetailsSchema } from "@/lib/schemas/questionnaire-schemas/demographics-details-form-schema";
 
@@ -253,15 +264,60 @@ export async function GET(
   console.log("qId: ", qId, "sessionId: ", sessionId);
   switch (qId) {
     case "demographics-details": {
-      const session = await auth();
-      if (!session?.user?.id)
-        return new NextResponse("Unauthorized", { status: 401 });
+      try {
+        const session = await auth();
+        if (!session?.user?.id) {
+          return NextResponse.json(
+            { error: "Unauthorized", message: "Authentication required" },
+            { status: 401 }
+          );
+        }
 
-      const details = await getUserDemographics(session.user.id);
+        // Validate sessionId
+        const sessionIdNum = Number(sessionId);
+        if (Number.isNaN(sessionIdNum)) {
+          return NextResponse.json(
+            {
+              error: "Invalid session ID",
+              message: "Session ID must be a valid number",
+            },
+            { status: 400 }
+          );
+        }
 
-      if (!details) return new NextResponse("Not found", { status: 404 });
+        const details = await getUserDemographics(session.user.id);
 
-      return NextResponse.json(details);
+        if (!details) {
+          return NextResponse.json(
+            { error: "Not found", message: "Demographics data not found" },
+            { status: 404 }
+          );
+        }
+
+        // Transform data from database format to frontend format
+        const transformedData = {
+          fullName: details.full_name || "",
+          email: details.email || "",
+          age: details.age ? String(details.age) : "",
+          gender: details.gender || "",
+          profession: details.profession || "",
+          previousCoaching: details.previous_coaching || "",
+          education: details.education || "",
+          stressLevel: details.stress_level || 5,
+          motivation: details.motivation || "",
+        };
+
+        return NextResponse.json(transformedData);
+      } catch (error) {
+        console.error("Error in demographics-details GET:", error);
+        return NextResponse.json(
+          {
+            error: "Internal server error",
+            message: "Failed to retrieve demographics data",
+          },
+          { status: 500 }
+        );
+      }
     }
 
     case "pre-assessment":
@@ -366,7 +422,7 @@ export async function GET(
           });
         }
 
-        const data = await getRiasecTest(session.user.id);
+        const data = await getRiasecTest(session.user.id, sessionIdNum);
 
         if (!data) {
           return new NextResponse("Not Found", { status: 404 });
@@ -385,22 +441,30 @@ export async function GET(
       try {
         const session = await auth();
         if (!session?.user?.id) {
-          return new NextResponse("Unauthorized", { status: 401 });
+          return NextResponse.json(
+            { error: "Unauthorized", message: "Authentication required" },
+            { status: 401 }
+          );
         }
 
         const sessionIdNum = Number(sessionId);
         if (Number.isNaN(sessionIdNum)) {
-          return new NextResponse("Bad Request: Invalid session ID", {
-            status: 400,
-          });
+          return NextResponse.json(
+            {
+              error: "Invalid session ID",
+              message: "Session ID must be a valid number",
+            },
+            { status: 400 }
+          );
         }
 
-        const data = await getPersonalityTest(
-          session.user.id /*, sessionIdNum*/
-        );
+        const data = await getPersonalityTest(session.user.id, sessionIdNum);
 
         if (!data) {
-          return new NextResponse("Not Found", { status: 404 });
+          return NextResponse.json(
+            { error: "Not found", message: "Personality test data not found" },
+            { status: 404 }
+          );
         }
 
         return NextResponse.json({
@@ -410,7 +474,13 @@ export async function GET(
         });
       } catch (err) {
         console.error("Error fetching personality test:", err);
-        return new NextResponse("Internal Server Error", { status: 500 });
+        return NextResponse.json(
+          {
+            error: "Internal server error",
+            message: "Failed to fetch personality test data. Please try again.",
+          },
+          { status: 500 }
+        );
       }
     case "psychological-wellbeing":
       try {
@@ -427,7 +497,8 @@ export async function GET(
         }
 
         const data = await getPsychologicalWellbeingTest(
-          session.user.id /*, sessionIdNum*/
+          session.user.id,
+          sessionIdNum
         );
 
         if (!data) {
@@ -573,31 +644,74 @@ export async function POST(
   const { qId, sessionId } = await params;
   switch (qId) {
     case "demographics-details": {
-      const session = await auth();
-      if (!session?.user?.id)
-        return new NextResponse("Unauthorized", { status: 401 });
-      const formData = await req.json();
+      try {
+        const session = await auth();
+        if (!session?.user?.id) {
+          return NextResponse.json(
+            { error: "Unauthorized", message: "Authentication required" },
+            { status: 401 }
+          );
+        }
 
-      const validation = demographicsDetailsSchema.safeParse(formData);
-      if (!validation.success) {
+        // Validate sessionId
+        const sessionIdNum = Number(sessionId);
+        if (Number.isNaN(sessionIdNum)) {
+          return NextResponse.json(
+            {
+              error: "Invalid session ID",
+              message: "Session ID must be a valid number",
+            },
+            { status: 400 }
+          );
+        }
+
+        const formData = await req.json();
+
+        // Validate the form data with detailed error messages
+        const validation = demographicsDetailsSchema.safeParse(formData);
+        if (!validation.success) {
+          return NextResponse.json(
+            {
+              error: "Validation failed",
+              message: "Please check your input and try again",
+              details: validation.error.format(),
+            },
+            { status: 400 }
+          );
+        }
+
+        const validatedData = validation.data;
+
+        // Use transaction-based upsert for data integrity
+        await upsertUserDemographicsWithTransaction(
+          session.user.id,
+          validatedData
+        );
+
+        // Complete the form progress
+        await completeUserSessionFormProgress({
+          userId: session.user.id,
+          sessionId: sessionIdNum,
+          qId,
+        });
+
+        // Update journey progress
+        await updateJourneyProgressAfterForm(session.user.id, sessionIdNum);
+
+        return NextResponse.json({
+          success: true,
+          message: "Demographics data saved successfully",
+        });
+      } catch (error) {
+        console.error("Error in demographics-details POST:", error);
         return NextResponse.json(
-          { errors: validation.error.format() },
-          { status: 400 }
+          {
+            error: "Internal server error",
+            message: "Failed to save demographics data. Please try again.",
+          },
+          { status: 500 }
         );
       }
-      const data = validation.data;
-
-      await upsertUserDemographics(session.user.id, data);
-
-      // await upsertUserDemographics(session.user.id, formData);
-      await completeUserSessionFormProgress({
-        userId: session.user.id,
-        sessionId: Number(sessionId),
-        qId,
-      });
-      await updateJourneyProgressAfterForm(session.user.id, Number(sessionId));
-
-      return NextResponse.json({ success: true });
     }
     case "pre-assessment":
       try {
@@ -699,15 +813,22 @@ export async function POST(
       try {
         const session = await auth();
         if (!session?.user?.id) {
-          return new NextResponse("Unauthorized", { status: 401 });
+          return NextResponse.json(
+            { error: "Unauthorized", message: "Authentication required" },
+            { status: 401 }
+          );
         }
 
         const { sessionId } = await params;
         const sessionIdNum = Number(sessionId);
         if (Number.isNaN(sessionIdNum)) {
-          return new NextResponse("Bad Request: Invalid session ID", {
-            status: 400,
-          });
+          return NextResponse.json(
+            {
+              error: "Invalid session ID",
+              message: "Session ID must be a valid number",
+            },
+            { status: 400 }
+          );
         }
 
         const body = await req.json();
@@ -727,9 +848,13 @@ export async function POST(
           Array.isArray(answers) ||
           Object.values(answers).some((v) => typeof v !== "string")
         ) {
-          return new NextResponse("Bad Request: Invalid 'answers' format", {
-            status: 400,
-          });
+          return NextResponse.json(
+            {
+              error: "Invalid answers format",
+              message: "Answers must be an object with string values",
+            },
+            { status: 400 }
+          );
         }
 
         // Prepare accumulators for sums and counts per subscale
@@ -772,15 +897,15 @@ export async function POST(
           }
         }
 
-        // // Calculate average scores per subscale
-        // const subscaleScores: Record<string, number> = {};
-        // for (const subscale in subscaleSums) {
-        //   const count = subscaleCounts[subscale];
-        //   subscaleScores[subscale] =
-        //     count > 0 ? subscaleSums[subscale] / count : 0;
-        // }
+        // Calculate average scores per subscale
+        const subscaleScores: Record<string, number> = {};
+        for (const subscale in subscaleSums) {
+          const count = subscaleCounts[subscale];
+          subscaleScores[subscale] =
+            count > 0 ? subscaleSums[subscale] / count : 0;
+        }
 
-        // Optionally: overall score as average of subscales
+        // Calculate overall score as average of subscales
         const overallScore =
           (Object.values(subscaleSums).reduce((acc, score) => acc + score, 0) /
             220) *
@@ -789,10 +914,10 @@ export async function POST(
         // Save to database
         await upsertPersonalityTest(
           session.user.id,
-          // sessionIdNum, // uncomment if supported
+          sessionIdNum,
           overallScore,
           answers,
-          subscaleSums
+          subscaleScores
         );
         await completeUserSessionFormProgress({
           userId: session.user.id,
@@ -806,11 +931,17 @@ export async function POST(
         return NextResponse.json({
           success: true,
           overallScore,
-          subscaleSums,
+          subscaleScores,
         });
       } catch (error) {
         console.error("Error in personality test scoring:", error);
-        return new NextResponse("Internal Server Error", { status: 500 });
+        return NextResponse.json(
+          {
+            error: "Internal server error",
+            message: "Failed to save personality test data. Please try again.",
+          },
+          { status: 500 }
+        );
       }
     case "psychological-wellbeing":
       try {
@@ -879,6 +1010,7 @@ export async function POST(
 
         await upsertPsychologicalWellbeingTest(
           session.user.id,
+          sessionIdNum,
           overallScore,
           answers,
           subscaleSums
@@ -962,6 +1094,7 @@ export async function POST(
 
         await upsertRiasecTest(
           session.user.id,
+          sessionIdNum,
           selectedAnswers,
           categoryCounts,
           interestCode
@@ -1177,6 +1310,540 @@ export async function POST(
         console.error("Error inserting post-coaching assessment:", err);
         return new NextResponse("Internal Server Error", { status: 500 });
       }
+    default:
+      return NextResponse.json({ error: "Unknown formId" }, { status: 404 });
+  }
+}
+
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ sessionId: string; qId: string }> }
+) {
+  const { qId, sessionId } = await params;
+
+  switch (qId) {
+    case "demographics-details": {
+      try {
+        const session = await auth();
+        if (!session?.user?.id) {
+          return NextResponse.json(
+            { error: "Unauthorized", message: "Authentication required" },
+            { status: 401 }
+          );
+        }
+
+        // Validate sessionId
+        const sessionIdNum = Number(sessionId);
+        if (Number.isNaN(sessionIdNum)) {
+          return NextResponse.json(
+            {
+              error: "Invalid session ID",
+              message: "Session ID must be a valid number",
+            },
+            { status: 400 }
+          );
+        }
+
+        // Get query parameters for delete type
+        const { searchParams } = new URL(req.url);
+        const deleteType = searchParams.get("type") || "hard"; // 'soft' or 'hard'
+
+        let deleted = false;
+
+        if (deleteType === "hard") {
+          // Hard delete - permanently remove data
+          deleted = await deleteUserDemographics(session.user.id);
+        } else {
+          // Soft delete - clear data but keep record
+          deleted = await softDeleteUserDemographics(session.user.id);
+        }
+
+        if (!deleted) {
+          return NextResponse.json(
+            { error: "Not found", message: "Demographics data not found" },
+            { status: 404 }
+          );
+        }
+
+        // Reset form progress for this questionnaire
+        // Note: You might want to add a function to reset form progress
+        // await resetUserSessionFormProgress(session.user.id, sessionIdNum, qId);
+
+        return NextResponse.json({
+          success: true,
+          message: `Demographics data ${
+            deleteType === "hard" ? "permanently deleted" : "cleared"
+          } successfully`,
+        });
+      } catch (error) {
+        console.error("Error in demographics-details DELETE:", error);
+        return NextResponse.json(
+          {
+            error: "Internal server error",
+            message: "Failed to delete demographics data. Please try again.",
+          },
+          { status: 500 }
+        );
+      }
+    }
+
+    case "pre-assessment": {
+      try {
+        const session = await auth();
+        if (!session?.user?.id) {
+          return NextResponse.json(
+            { error: "Unauthorized", message: "Authentication required" },
+            { status: 401 }
+          );
+        }
+
+        // Validate sessionId
+        const sessionIdNum = Number(sessionId);
+        if (Number.isNaN(sessionIdNum)) {
+          return NextResponse.json(
+            {
+              error: "Invalid session ID",
+              message: "Session ID must be a valid number",
+            },
+            { status: 400 }
+          );
+        }
+
+        // Check if assessment exists before deleting
+        const existingData = await getPreAssessment(
+          session.user.id,
+          sessionIdNum
+        );
+        if (!existingData) {
+          return NextResponse.json(
+            { error: "Not found", message: "Pre-assessment data not found" },
+            { status: 404 }
+          );
+        }
+
+        // Delete the pre-assessment
+        await deletePreAssessment(session.user.id, sessionIdNum);
+
+        return NextResponse.json({
+          success: true,
+          message: "Pre-assessment data deleted successfully",
+        });
+      } catch (error) {
+        console.error("Error in pre-assessment DELETE:", error);
+        return NextResponse.json(
+          {
+            error: "Internal server error",
+            message: "Failed to delete pre-assessment data. Please try again.",
+          },
+          { status: 500 }
+        );
+      }
+    }
+
+    case "post-coaching": {
+      try {
+        const session = await auth();
+        if (!session?.user?.id) {
+          return NextResponse.json(
+            { error: "Unauthorized", message: "Authentication required" },
+            { status: 401 }
+          );
+        }
+
+        // Validate sessionId
+        const sessionIdNum = Number(sessionId);
+        if (Number.isNaN(sessionIdNum)) {
+          return NextResponse.json(
+            {
+              error: "Invalid session ID",
+              message: "Session ID must be a valid number",
+            },
+            { status: 400 }
+          );
+        }
+
+        // Check if assessment exists before deleting
+        const existingData = await getPostCoachingAssessment(
+          session.user.id,
+          sessionIdNum
+        );
+        if (!existingData) {
+          return NextResponse.json(
+            {
+              error: "Not found",
+              message: "Post-coaching assessment data not found",
+            },
+            { status: 404 }
+          );
+        }
+
+        // Delete the post-coaching assessment
+        await deletePostCoachingAssessment(session.user.id, sessionIdNum);
+
+        return NextResponse.json({
+          success: true,
+          message: "Post-coaching assessment data deleted successfully",
+        });
+      } catch (error) {
+        console.error("Error in post-coaching assessment DELETE:", error);
+        return NextResponse.json(
+          {
+            error: "Internal server error",
+            message:
+              "Failed to delete post-coaching assessment data. Please try again.",
+          },
+          { status: 500 }
+        );
+      }
+    }
+
+    case "career-maturity": {
+      try {
+        const session = await auth();
+        if (!session?.user?.id) {
+          return NextResponse.json(
+            { error: "Unauthorized", message: "Authentication required" },
+            { status: 401 }
+          );
+        }
+
+        // Validate sessionId
+        const sessionIdNum = Number(sessionId);
+        if (Number.isNaN(sessionIdNum)) {
+          return NextResponse.json(
+            {
+              error: "Invalid session ID",
+              message: "Session ID must be a valid number",
+            },
+            { status: 400 }
+          );
+        }
+
+        // Check if assessment exists before deleting
+        const existingData = await getCareerMaturityAssessment(
+          session.user.id,
+          sessionIdNum
+        );
+        if (!existingData) {
+          return NextResponse.json(
+            {
+              error: "Not found",
+              message: "Career maturity assessment data not found",
+            },
+            { status: 404 }
+          );
+        }
+
+        // Delete the career maturity assessment
+        await deleteCareerMaturityAssessment(session.user.id, sessionIdNum);
+
+        return NextResponse.json({
+          success: true,
+          message: "Career maturity assessment data deleted successfully",
+        });
+      } catch (error) {
+        console.error("Error in career-maturity assessment DELETE:", error);
+        return NextResponse.json(
+          {
+            error: "Internal server error",
+            message:
+              "Failed to delete career maturity assessment data. Please try again.",
+          },
+          { status: 500 }
+        );
+      }
+    }
+
+    case "post-career-maturity": {
+      try {
+        const session = await auth();
+        if (!session?.user?.id) {
+          return NextResponse.json(
+            { error: "Unauthorized", message: "Authentication required" },
+            { status: 401 }
+          );
+        }
+
+        // Validate sessionId
+        const sessionIdNum = Number(sessionId);
+        if (Number.isNaN(sessionIdNum)) {
+          return NextResponse.json(
+            {
+              error: "Invalid session ID",
+              message: "Session ID must be a valid number",
+            },
+            { status: 400 }
+          );
+        }
+
+        // Check if assessment exists before deleting
+        const existingData = await getPostCareerMaturityAssessment(
+          session.user.id,
+          sessionIdNum
+        );
+        if (!existingData) {
+          return NextResponse.json(
+            {
+              error: "Not found",
+              message: "Post career maturity assessment data not found",
+            },
+            { status: 404 }
+          );
+        }
+
+        // Delete the post career maturity assessment
+        await deletePostCareerMaturityAssessment(session.user.id, sessionIdNum);
+
+        return NextResponse.json({
+          success: true,
+          message: "Post career maturity assessment data deleted successfully",
+        });
+      } catch (error) {
+        console.error(
+          "Error in post-career-maturity assessment DELETE:",
+          error
+        );
+        return NextResponse.json(
+          {
+            error: "Internal server error",
+            message:
+              "Failed to delete post career maturity assessment data. Please try again.",
+          },
+          { status: 500 }
+        );
+      }
+    }
+
+    case "psychological-wellbeing": {
+      try {
+        const session = await auth();
+        if (!session?.user?.id) {
+          return NextResponse.json(
+            { error: "Unauthorized", message: "Authentication required" },
+            { status: 401 }
+          );
+        }
+
+        // Validate sessionId
+        const sessionIdNum = Number(sessionId);
+        if (Number.isNaN(sessionIdNum)) {
+          return NextResponse.json(
+            {
+              error: "Invalid session ID",
+              message: "Session ID must be a valid number",
+            },
+            { status: 400 }
+          );
+        }
+
+        // Check if assessment exists before deleting
+        const existingData = await getPsychologicalWellbeingTest(
+          session.user.id,
+          sessionIdNum
+        );
+        if (!existingData) {
+          return NextResponse.json(
+            {
+              error: "Not found",
+              message: "Psychological wellbeing assessment data not found",
+            },
+            { status: 404 }
+          );
+        }
+
+        // Delete the psychological wellbeing assessment
+        await deletePsychologicalWellbeingTest(session.user.id, sessionIdNum);
+
+        return NextResponse.json({
+          success: true,
+          message:
+            "Psychological wellbeing assessment data deleted successfully",
+        });
+      } catch (error) {
+        console.error("Error in psychological-wellbeing DELETE:", error);
+        return NextResponse.json(
+          {
+            error: "Internal server error",
+            message:
+              "Failed to delete psychological wellbeing assessment data. Please try again.",
+          },
+          { status: 500 }
+        );
+      }
+    }
+
+    case "post-psychological-wellbeing": {
+      try {
+        const session = await auth();
+        if (!session?.user?.id) {
+          return NextResponse.json(
+            { error: "Unauthorized", message: "Authentication required" },
+            { status: 401 }
+          );
+        }
+
+        // Validate sessionId
+        const sessionIdNum = Number(sessionId);
+        if (Number.isNaN(sessionIdNum)) {
+          return NextResponse.json(
+            {
+              error: "Invalid session ID",
+              message: "Session ID must be a valid number",
+            },
+            { status: 400 }
+          );
+        }
+
+        // Check if assessment exists before deleting
+        const existingData = await getPostPsychologicalWellbeingTest(
+          session.user.id,
+          sessionIdNum
+        );
+        if (!existingData) {
+          return NextResponse.json(
+            {
+              error: "Not found",
+              message: "Post psychological wellbeing assessment data not found",
+            },
+            { status: 404 }
+          );
+        }
+
+        // Delete the post psychological wellbeing assessment
+        await deletePostPsychologicalWellbeingTest(
+          session.user.id,
+          sessionIdNum
+        );
+
+        return NextResponse.json({
+          success: true,
+          message:
+            "Post psychological wellbeing assessment data deleted successfully",
+        });
+      } catch (error) {
+        console.error("Error in post-psychological-wellbeing DELETE:", error);
+        return NextResponse.json(
+          {
+            error: "Internal server error",
+            message:
+              "Failed to delete post psychological wellbeing assessment data. Please try again.",
+          },
+          { status: 500 }
+        );
+      }
+    }
+
+    case "riasec-test": {
+      try {
+        const session = await auth();
+        if (!session?.user?.id) {
+          return NextResponse.json(
+            { error: "Unauthorized", message: "Authentication required" },
+            { status: 401 }
+          );
+        }
+
+        // Validate sessionId
+        const sessionIdNum = Number(sessionId);
+        if (Number.isNaN(sessionIdNum)) {
+          return NextResponse.json(
+            {
+              error: "Invalid session ID",
+              message: "Session ID must be a valid number",
+            },
+            { status: 400 }
+          );
+        }
+
+        // Try to delete the RIASEC test directly
+        const deleted = await deleteRiasecTest(session.user.id, sessionIdNum);
+
+        if (!deleted) {
+          return NextResponse.json(
+            { error: "Not found", message: "RIASEC test data not found" },
+            { status: 404 }
+          );
+        }
+
+        return NextResponse.json({
+          success: true,
+          message: "RIASEC test data deleted successfully",
+        });
+      } catch (error) {
+        console.error("Error in riasec-test DELETE:", error);
+        return NextResponse.json(
+          {
+            error: "Internal server error",
+            message: "Failed to delete RIASEC test data. Please try again.",
+          },
+          { status: 500 }
+        );
+      }
+    }
+
+    case "personality-test": {
+      try {
+        const session = await auth();
+        if (!session?.user?.id) {
+          return NextResponse.json(
+            { error: "Unauthorized", message: "Authentication required" },
+            { status: 401 }
+          );
+        }
+
+        // Validate sessionId
+        const sessionIdNum = Number(sessionId);
+        if (Number.isNaN(sessionIdNum)) {
+          return NextResponse.json(
+            {
+              error: "Invalid session ID",
+              message: "Session ID must be a valid number",
+            },
+            { status: 400 }
+          );
+        }
+
+        // Check if personality test exists before deleting
+        const existingData = await getPersonalityTest(
+          session.user.id,
+          sessionIdNum
+        );
+        if (!existingData) {
+          return NextResponse.json(
+            { error: "Not found", message: "Personality test data not found" },
+            { status: 404 }
+          );
+        }
+
+        // Delete the personality test
+        const deleted = await deletePersonalityTest(
+          session.user.id,
+          sessionIdNum
+        );
+        if (!deleted) {
+          return NextResponse.json(
+            { error: "Not found", message: "Personality test data not found" },
+            { status: 404 }
+          );
+        }
+
+        return NextResponse.json({
+          success: true,
+          message: "Personality test data deleted successfully",
+        });
+      } catch (error) {
+        console.error("Error in personality-test DELETE:", error);
+        return NextResponse.json(
+          {
+            error: "Internal server error",
+            message:
+              "Failed to delete personality test data. Please try again.",
+          },
+          { status: 500 }
+        );
+      }
+    }
+
     default:
       return NextResponse.json({ error: "Unknown formId" }, { status: 404 });
   }

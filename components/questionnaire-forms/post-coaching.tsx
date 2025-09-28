@@ -26,6 +26,11 @@ import {
   Lightbulb,
   ArrowRight,
   ArrowLeft,
+  Users,
+  Star,
+  ThumbsUp,
+  BarChart,
+  ArrowUpRight,
 } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { JourneyBreadcrumbLayout } from "@/components/layouts/JourneyBreadcrumbLayout";
@@ -35,140 +40,203 @@ import { useRouter } from "next/navigation";
 const questions = [
   {
     title: "Career Goals Clarity",
-    text: "How clear are your current career goals?",
+    text: "How clear are your career goals after coaching?",
     icon: Target,
     color: "primary-blue",
     lowLabel: "Not at all clear",
     highLabel: "Completely clear",
     description:
-      "Rate how well-defined and specific your career objectives are",
+      "Rate how well-defined and specific your career objectives are now",
   },
   {
     title: "Achievement Confidence",
-    text: "How confident are you that you will achieve your career goals?",
+    text: "How confident are you that you will achieve your career goals after coaching?",
     icon: TrendingUp,
     color: "primary-green",
     lowLabel: "Not at all confident",
     highLabel: "Extremely confident",
     description:
-      "Assess your belief in your ability to reach your career aspirations",
+      "Assess your belief in your ability to reach your career aspirations post-coaching",
   },
   {
     title: "Obstacle Resilience",
-    text: "How confident are you in your ability to overcome obstacles in your career?",
+    text: "How confident are you in your ability to overcome obstacles in your career after coaching?",
     icon: Shield,
     color: "purple",
     lowLabel: "Not at all confident",
     highLabel: "Extremely confident",
-    description: "Rate your resilience and problem-solving confidence",
+    description:
+      "Rate your resilience and problem-solving confidence after coaching",
   },
   {
     title: "Stress Management",
-    text: "How would you rate your current level of stress related to work or personal life?",
+    text: "How would you rate your level of stress related to work or personal life after coaching?",
     icon: Brain,
     color: "orange",
     lowLabel: "Extremely high",
-    highLabel: "Extremely low",
-    description: "Assess your current stress levels and coping mechanisms",
+    highLabel: "Very low",
+    description:
+      "Assess your current stress levels and coping mechanisms post-coaching",
     reversed: true,
   },
   {
     title: "Self-Awareness",
-    text: "How well do you understand your own thought patterns and behaviors?",
+    text: "How well do you understand your own thought patterns and behaviors after coaching?",
     icon: Lightbulb,
     color: "primary-blue",
     lowLabel: "Not at all",
     highLabel: "Completely",
-    description: "Rate your level of self-awareness and introspection",
+    description:
+      "Rate your level of self-awareness and introspection after coaching",
   },
   {
     title: "Work-Life Balance",
-    text: "How satisfied are you with your current work-life balance?",
+    text: "How satisfied are you with your work-life balance after coaching?",
     icon: Balance,
     color: "primary-green",
     lowLabel: "Not at all satisfied",
     highLabel: "Extremely satisfied",
     description:
-      "Evaluate how well you balance professional and personal commitments",
+      "Evaluate how well you balance professional and personal commitments post-coaching",
   },
   {
     title: "Overall Well-being",
-    text: "How satisfied are you with your current job and overall well-being?",
+    text: "How satisfied are you with your job and overall well-being after coaching?",
     icon: Heart,
     color: "purple",
     lowLabel: "Not at all satisfied",
     highLabel: "Extremely satisfied",
     description:
-      "Rate your overall contentment with work and life satisfaction",
+      "Rate your overall contentment with work and life satisfaction after coaching",
   },
   {
     title: "Change Readiness",
-    text: "How ready are you to make changes in your professional or personal life?",
+    text: "How ready are you to make changes in your professional or personal life after coaching?",
     icon: Zap,
     color: "orange",
     lowLabel: "Not at all ready",
     highLabel: "Completely ready",
-    description: "Assess your motivation and readiness for transformation",
+    description:
+      "Assess your motivation and readiness for transformation post-coaching",
+  },
+  {
+    title: "Coaching Experience",
+    text: "How would you rate your overall experience with the coaching process?",
+    icon: Star,
+    color: "primary-blue",
+    lowLabel: "Very poor",
+    highLabel: "Excellent",
+    description: "Evaluate your overall experience with the coaching",
+  },
+  {
+    title: "Coach Relationship Effectiveness",
+    text: "How effective was the relationship between you and your coach?",
+    icon: Users,
+    color: "primary-green",
+    lowLabel: "Not at all effective",
+    highLabel: "Extremely effective",
+    description: "Rate the effectiveness of the coach-client relationship",
+  },
+  {
+    title: "Coach Support",
+    text: "Did you feel supported and understood by your coach?",
+    icon: ThumbsUp,
+    color: "purple",
+    lowLabel: "Not at all supported",
+    highLabel: "Completely supported",
+    description: "Assess how supported and understood you felt during coaching",
+  },
+  {
+    title: "Current Strength Usage",
+    text: "How much do you currently feel that you are using your strengths in your career?",
+    icon: BarChart,
+    color: "primary-blue",
+    lowLabel: "Not at all",
+    highLabel: "Completely",
+    description:
+      "Evaluate your current usage of strengths in your professional life",
+  },
+  {
+    title: "Improved Strength Usage",
+    text: "How much more do you feel that you are using your strengths in your career after coaching?",
+    icon: ArrowUpRight,
+    color: "primary-green",
+    lowLabel: "Not at all",
+    highLabel: "Completely",
+    description:
+      "Rate the improvement in utilizing your strengths due to coaching",
   },
 ];
 
-const preAssessmentSchema = z.object({
-  "How clear are your current career goals?": z.number().min(1).max(10),
-  "How confident are you that you will achieve your career goals?": z
-    .number()
-    .min(1)
-    .max(10),
-  "How confident are you in your ability to overcome obstacles in your career?":
+const postCoachingSchema = z.object({
+  "How clear are your career goals after coaching?": z.number().min(1).max(10),
+  "How confident are you that you will achieve your career goals after coaching?":
     z.number().min(1).max(10),
-  "How would you rate your current level of stress related to work or personal life?":
+  "How confident are you in your ability to overcome obstacles in your career after coaching?":
     z.number().min(1).max(10),
-  "How well do you understand your own thought patterns and behaviors?": z
+  "How would you rate your level of stress related to work or personal life after coaching?":
+    z.number().min(1).max(10),
+  "How well do you understand your own thought patterns and behaviors after coaching?":
+    z.number().min(1).max(10),
+  "How satisfied are you with your work-life balance after coaching?": z
     .number()
     .min(1)
     .max(10),
-  "How satisfied are you with your current work-life balance?": z
+  "How satisfied are you with your job and overall well-being after coaching?":
+    z.number().min(1).max(10),
+  "How ready are you to make changes in your professional or personal life after coaching?":
+    z.number().min(1).max(10),
+  "How would you rate your overall experience with the coaching process?": z
     .number()
     .min(1)
     .max(10),
-  "How satisfied are you with your current job and overall well-being?": z
+  "How effective was the relationship between you and your coach?": z
     .number()
     .min(1)
     .max(10),
-  "How ready are you to make changes in your professional or personal life?": z
+  "Did you feel supported and understood by your coach?": z
     .number()
     .min(1)
     .max(10),
+  "How much do you currently feel that you are using your strengths in your career?":
+    z.number().min(1).max(10),
+  "How much more do you feel that you are using your strengths in your career after coaching?":
+    z.number().min(1).max(10),
 });
 
-type PreAssessmentFormData = z.infer<typeof preAssessmentSchema>;
+type PostCoachingFormData = z.infer<typeof postCoachingSchema>;
 
-const defaultValues: PreAssessmentFormData = {
-  "How clear are your current career goals?": 5,
-  "How confident are you that you will achieve your career goals?": 5,
-  "How confident are you in your ability to overcome obstacles in your career?": 5,
-  "How would you rate your current level of stress related to work or personal life?": 5,
-  "How well do you understand your own thought patterns and behaviors?": 5,
-  "How satisfied are you with your current work-life balance?": 5,
-  "How satisfied are you with your current job and overall well-being?": 5,
-  "How ready are you to make changes in your professional or personal life?": 5,
+const defaultValues: PostCoachingFormData = {
+  "How clear are your career goals after coaching?": 5,
+  "How confident are you that you will achieve your career goals after coaching?": 5,
+  "How confident are you in your ability to overcome obstacles in your career after coaching?": 5,
+  "How would you rate your level of stress related to work or personal life after coaching?": 5,
+  "How well do you understand your own thought patterns and behaviors after coaching?": 5,
+  "How satisfied are you with your work-life balance after coaching?": 5,
+  "How satisfied are you with your job and overall well-being after coaching?": 5,
+  "How ready are you to make changes in your professional or personal life after coaching?": 5,
+  "How would you rate your overall experience with the coaching process?": 5,
+  "How effective was the relationship between you and your coach?": 5,
+  "Did you feel supported and understood by your coach?": 5,
+  "How much do you currently feel that you are using your strengths in your career?": 5,
+  "How much more do you feel that you are using your strengths in your career after coaching?": 5,
 };
 
-export function PreAssessment({ sessionId }: { sessionId: string }) {
+export function PostCoachingTest({ sessionId }: { sessionId: string }) {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [isCompleted, setIsCompleted] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
   const router = useRouter();
   const { setQuestionnaireBreadcrumbs } = useBreadcrumb();
 
   // Set breadcrumbs on component mount
   useEffect(() => {
-    setQuestionnaireBreadcrumbs(sessionId, "Base-line Assessment");
+    setQuestionnaireBreadcrumbs(sessionId, "Finish-line Assessment");
   }, [sessionId, setQuestionnaireBreadcrumbs]);
 
-  const form = useForm<PreAssessmentFormData>({
-    resolver: zodResolver(preAssessmentSchema),
+  const form = useForm<PostCoachingFormData>({
+    resolver: zodResolver(postCoachingSchema),
     defaultValues,
     mode: "onChange",
   });
@@ -176,7 +244,7 @@ export function PreAssessment({ sessionId }: { sessionId: string }) {
   // Load existing assessment data from backend on component mount
   useEffect(() => {
     const loadAssessmentData = async () => {
-      const qId = "pre-assessment";
+      const qId = "post-coaching";
       try {
         const response = await fetch(
           `/api/journey/sessions/${sessionId}/q/${qId}`
@@ -191,25 +259,9 @@ export function PreAssessment({ sessionId }: { sessionId: string }) {
             const formData = { ...defaultValues, ...savedData.answers };
             form.reset(formData);
           }
-        } else if (response.status === 404) {
-          // No data found - use default values
-          form.reset(defaultValues);
-        } else {
-          // Handle other error responses - read response body only once
-          let errorMessage = "An error occurred while loading data";
-          try {
-            const errorData = await response.json();
-            errorMessage = errorData.message || errorData.error || errorMessage;
-          } catch (parseError) {
-            // If JSON parsing fails, use status text
-            errorMessage = response.statusText || errorMessage;
-          }
-          // console.error("API Error:", errorMessage);
         }
       } catch (error) {
-        console.error("Network Error:", error);
-        // Reset form to defaults on network error
-        form.reset(defaultValues);
+        console.error("Failed to load assessment data:", error);
       } finally {
         setIsLoading(false);
       }
@@ -220,15 +272,15 @@ export function PreAssessment({ sessionId }: { sessionId: string }) {
 
   const getCurrentFieldValue = (): number => {
     const currentFieldName =
-      currentQuestionData.text as keyof PreAssessmentFormData;
+      currentQuestionData.text as keyof PostCoachingFormData;
     const currentValue = form.getValues(currentFieldName);
     return typeof currentValue === "number"
       ? currentValue
       : defaultValues[currentFieldName];
   };
 
-  const handleSubmitAssessment = async (data: PreAssessmentFormData) => {
-    const qId = "pre-assessment";
+  const handleSubmitAssessment = async (data: PostCoachingFormData) => {
+    const qId = "post-coaching";
     setIsSubmitting(true);
 
     try {
@@ -244,68 +296,13 @@ export function PreAssessment({ sessionId }: { sessionId: string }) {
       if (response.ok) {
         setIsCompleted(true);
       } else {
-        // Handle error response - read response body only once
-        let errorMessage = "Failed to submit assessment";
-        try {
-          const errorData = await response.json();
-          errorMessage = errorData.message || errorData.error || errorMessage;
-        } catch (parseError) {
-          // If JSON parsing fails, use status text
-          errorMessage = response.statusText || errorMessage;
-        }
-        throw new Error(errorMessage);
+        throw new Error("Failed to submit assessment");
       }
     } catch (error) {
       console.error("Submission error:", error);
-      // You could show a toast notification here with the error message
     } finally {
       setIsSubmitting(false);
       router.push(`/journey/sessions/${sessionId}`);
-    }
-  };
-
-  const handleDeleteAssessment = async () => {
-    const qId = "pre-assessment";
-    if (
-      !confirm(
-        "Are you sure you want to clear your assessment? This action cannot be undone."
-      )
-    ) {
-      return;
-    }
-
-    setIsDeleting(true);
-
-    try {
-      const response = await fetch(
-        `/api/journey/sessions/${sessionId}/q/${qId}`,
-        {
-          method: "DELETE",
-        }
-      );
-
-      if (response.ok) {
-        // Reset form to default values
-        form.reset(defaultValues);
-        setCurrentQuestion(0);
-        setIsCompleted(false);
-      } else {
-        // Handle error response - read response body only once
-        let errorMessage = "Failed to clear assessment";
-        try {
-          const errorData = await response.json();
-          errorMessage = errorData.message || errorData.error || errorMessage;
-        } catch (parseError) {
-          // If JSON parsing fails, use status text
-          errorMessage = response.statusText || errorMessage;
-        }
-        throw new Error(errorMessage);
-      }
-    } catch (error) {
-      console.error("Delete error:", error);
-      // You could show a toast notification here with the error message
-    } finally {
-      setIsDeleting(false);
     }
   };
 
@@ -337,7 +334,7 @@ export function PreAssessment({ sessionId }: { sessionId: string }) {
   const currentQuestionData = questions[currentQuestion];
   const progressPercentage = ((currentQuestion + 1) / questions.length) * 100;
   const currentFieldName =
-    currentQuestionData.text as keyof PreAssessmentFormData;
+    currentQuestionData.text as keyof PostCoachingFormData;
 
   // Loading state UI
   if (isLoading) {
@@ -363,7 +360,7 @@ export function PreAssessment({ sessionId }: { sessionId: string }) {
               Assessment Complete!
             </h2>
             <p className="text-slate-600">
-              Thank you for completing the pre-coaching assessment.
+              Thank you for completing the post-coaching assessment.
             </p>
           </CardHeader>
         </Card>
@@ -376,26 +373,6 @@ export function PreAssessment({ sessionId }: { sessionId: string }) {
     <div className="min-h-screen p-3 bg-gradient-to-br from-primary-blue-50 via-white to-primary-green-50 sm:p-6">
       <div className="max-w-3xl mx-auto">
         <JourneyBreadcrumbLayout>
-          {/* Header Card */}
-          {/* <div className="p-4 mb-6 border shadow-lg bg-white/90 backdrop-blur-sm border-slate-200/60 rounded-3xl sm:p-6 sm:mb-12">
-            <div className="flex flex-col items-center gap-3 sm:flex-row sm:gap-4">
-              <div className="shrink-0">
-                <div className="inline-flex items-center justify-center shadow-lg size-12 sm:size-16 bg-gradient-to-br from-primary-blue-500 to-primary-green-600 rounded-2xl">
-                  <BarChart3 className="text-white size-6 sm:size-8" />
-                </div>
-              </div>
-              <div className="flex-1 text-center sm:text-left">
-                <h1 className="mb-1 text-xl font-bold sm:text-2xl lg:text-3xl text-slate-800">
-                  Pre-Coaching Assessment
-                </h1>
-                <p className="max-w-2xl text-sm text-slate-600 sm:text-base">
-                  Answer honestly to help us understand your current state and
-                  readiness for coaching.
-                </p>
-              </div>
-            </div>
-          </div> */}
-
           {/* Compact Question Navigation Dots */}
           <div className="flex flex-wrap gap-1.5 justify-center mb-4">
             {questions.map((question, index) => (
@@ -449,9 +426,6 @@ export function PreAssessment({ sessionId }: { sessionId: string }) {
                                 {currentQuestionData.text}
                               </FormLabel>
                             </div>
-                            {/* <p className="text-xs text-slate-600">
-                            {currentQuestionData.description}
-                          </p> */}
                           </div>
                         </div>
 
@@ -464,12 +438,6 @@ export function PreAssessment({ sessionId }: { sessionId: string }) {
                                 <div className="text-2xl font-bold">
                                   {getCurrentFieldValue()}/10
                                 </div>
-                                {/* <div className="text-xs font-medium">
-                                {getValueText(
-                                  getCurrentFieldValue(),
-                                  currentQuestionData
-                                )}
-                              </div> */}
                               </div>
                             </div>
 
@@ -518,45 +486,6 @@ export function PreAssessment({ sessionId }: { sessionId: string }) {
                       </FormItem>
                     )}
                   />
-
-                  {/* Clear Assessment Button */}
-                  {/* <div className="flex justify-center pt-2">
-                    <Button
-                      type="button"
-                      onClick={handleDeleteAssessment}
-                      disabled={isDeleting || isSubmitting}
-                      variant="outline"
-                      className="h-8 px-4 text-xs transition-all duration-200 text-slate-600 hover:text-red-600 border-slate-300 hover:border-red-300 hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {isDeleting ? (
-                        <>
-                          <svg
-                            className="mr-2 animate-spin size-3"
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                          >
-                            <circle
-                              className="opacity-25"
-                              cx="12"
-                              cy="12"
-                              r="10"
-                              stroke="currentColor"
-                              strokeWidth="4"
-                            />
-                            <path
-                              className="opacity-75"
-                              fill="currentColor"
-                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                            />
-                          </svg>
-                          Clearing...
-                        </>
-                      ) : (
-                        "Clear Assessment"
-                      )}
-                    </Button>
-                  </div> */}
 
                   {/* Navigation Buttons */}
                   <div className="flex flex-col gap-3 pt-4 border-t sm:flex-row border-slate-200">

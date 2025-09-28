@@ -7,9 +7,13 @@ import RiasecTest from "@/components/questionnaire-forms/riasecTest";
 import { notFound } from "next/navigation";
 import { PostCareerMaturity } from "@/components/questionnaire-forms/post-career-maturity";
 import PostPsychologicalWellbeing from "@/components/questionnaire-forms/post-psychological-wellbeing";
-import { PostCoachingTest } from "@/app/postCoaching/post-coaching";
+import { PostCoachingTest } from "@/components/questionnaire-forms/post-coaching";
+// import { PostCoachingStrengthDifficulty } from "@/components/questionnaire-forms/post-coaching-strength-difficulty";
 interface PageProps {
-  params: Promise<{ qId: string; sessionId: string }>;
+  params: Promise<{
+    qId: string;
+    sessionId: string;
+  }>;
 }
 export default async function Page({ params }: PageProps) {
   const componentsMap = [
@@ -33,6 +37,11 @@ export default async function Page({ params }: PageProps) {
       Component: PsychologicalWellbeing,
       session: "1",
     },
+    // {
+    //   id: "pre-coaching-strength-difficulty",
+    //   Component: PreCoachingStrengthDifficulty,
+    //   session: "1",
+    // },
     {
       id: "riasec-test",
       Component: RiasecTest,
@@ -58,9 +67,16 @@ export default async function Page({ params }: PageProps) {
       Component: PostPsychologicalWellbeing,
       session: "8",
     },
+    // {
+    //   id: "post-coaching-strength-difficulty",
+    //   Component: PostCoachingStrengthDifficulty,
+    //   session: "8",
+    // },
   ];
-  console.log(await params);
+
   const { qId, sessionId } = await params;
+  // console.log("Questionnaire page accessed with params:", { sessionId, qId });
+
   const matchedComponent = componentsMap.find(
     (comp) => comp.id === qId && sessionId === comp.session
   );

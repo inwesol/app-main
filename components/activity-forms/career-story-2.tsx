@@ -16,8 +16,6 @@ import {
   ArrowRight,
   Book,
   Info,
-  Star,
-  Tv,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -141,7 +139,7 @@ const riasecOptions: RiasecOption[] = [
   },
 ];
 
-export default function CareerStoryTwo() {
+export default function CareerStory2() {
   const params = useParams();
   const router = useRouter();
   const sessionId = params?.sessionId as string;

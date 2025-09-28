@@ -73,7 +73,7 @@ interface CareerStory3Data {
   selectedOccupations: string[];
 }
 
-export const CareerStory4: React.FC<CareerStory4Props> = ({ sessionId }) => {
+export default function CareerStory4({ sessionId }: CareerStory4Props) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -557,7 +557,7 @@ export const CareerStory4: React.FC<CareerStory4Props> = ({ sessionId }) => {
                             {mockCareerStoryThreeData.selectedOccupations.map(
                               (occupation, index) => (
                                 <div
-                                  key={index}
+                                  key={occupation}
                                   className="bg-white/90 rounded-lg p-3 border border-primary-green-200/50 flex items-center gap-3"
                                 >
                                   <div className="size-6 bg-primary-green-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
@@ -695,20 +695,20 @@ export const CareerStory4: React.FC<CareerStory4Props> = ({ sessionId }) => {
                   </h4>
                   <ul className="space-y-2 text-slate-600">
                     <li className="flex items-start gap-2">
-                      <div className="size-1.5 bg-cyan-500 rounded-full mt-2 shrink-0"></div>
+                      <div className="size-1.5 bg-cyan-500 rounded-full mt-2 shrink-0" />
                       How your success formula will guide your decisions
                     </li>
                     <li className="flex items-start gap-2">
-                      <div className="size-1.5 bg-cyan-500 rounded-full mt-2 shrink-0"></div>
+                      <div className="size-1.5 bg-cyan-500 rounded-full mt-2 shrink-0" />
                       Specific actions you&apos;ll take based on your
                       self-advice
                     </li>
                     <li className="flex items-start gap-2">
-                      <div className="size-1.5 bg-cyan-500 rounded-full mt-2 shrink-0"></div>
+                      <div className="size-1.5 bg-cyan-500 rounded-full mt-2 shrink-0" />
                       How you&apos;ll overcome challenges mentioned in Story 1
                     </li>
                     <li className="flex items-start gap-2">
-                      <div className="size-1.5 bg-cyan-500 rounded-full mt-2 shrink-0"></div>
+                      <div className="size-1.5 bg-cyan-500 rounded-full mt-2 shrink-0" />
                       Your vision for success in this transition
                     </li>
                   </ul>
@@ -719,19 +719,19 @@ export const CareerStory4: React.FC<CareerStory4Props> = ({ sessionId }) => {
                   </h4>
                   <ul className="space-y-2 text-slate-600">
                     <li className="flex items-start gap-2">
-                      <div className="size-1.5 bg-cyan-500 rounded-full mt-2 shrink-0"></div>
+                      <div className="size-1.5 bg-cyan-500 rounded-full mt-2 shrink-0" />
                       Write in first person (&quot;I will...&quot;)
                     </li>
                     <li className="flex items-start gap-2">
-                      <div className="size-1.5 bg-cyan-500 rounded-full mt-2 shrink-0"></div>
+                      <div className="size-1.5 bg-cyan-500 rounded-full mt-2 shrink-0" />
                       Be specific about your plans and timeline
                     </li>
                     <li className="flex items-start gap-2">
-                      <div className="size-1.5 bg-cyan-500 rounded-full mt-2 shrink-0"></div>
+                      <div className="size-1.5 bg-cyan-500 rounded-full mt-2 shrink-0" />
                       Show confidence and determination
                     </li>
                     <li className="flex items-start gap-2">
-                      <div className="size-1.5 bg-cyan-500 rounded-full mt-2 shrink-0"></div>
+                      <div className="size-1.5 bg-cyan-500 rounded-full mt-2 shrink-0" />
                       Connect past insights to future actions
                     </li>
                   </ul>
@@ -749,7 +749,7 @@ export const CareerStory4: React.FC<CareerStory4Props> = ({ sessionId }) => {
                 {isSubmitting && (
                   <Loader2 className="size-5 animate-spin mr-2" />
                 )}
-                <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 via-cyan-400 to-primary-blue-400 rounded-2xl blur opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
+                <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 via-cyan-400 to-primary-blue-400 rounded-2xl blur opacity-30 group-hover:opacity-50 transition-opacity duration-300" />
                 <div className="relative flex items-center gap-3">
                   <span>
                     {isSubmitting
@@ -772,6 +772,4 @@ export const CareerStory4: React.FC<CareerStory4Props> = ({ sessionId }) => {
       </div>
     </div>
   );
-};
-
-export default CareerStory4;
+}

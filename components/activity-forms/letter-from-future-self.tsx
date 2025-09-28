@@ -26,10 +26,10 @@ interface LetterFromFutureSelfProps {
   activityId: string;
 }
 
-const LetterFromFutureSelf: React.FC<LetterFromFutureSelfProps> = ({
+export default function LetterFromFutureSelf({
   sessionId,
   activityId,
-}) => {
+}: LetterFromFutureSelfProps) {
   const router = useRouter();
   const [formData, setFormData] = useState({
     letter: "",
@@ -107,7 +107,7 @@ const LetterFromFutureSelf: React.FC<LetterFromFutureSelfProps> = ({
     return (
       <div className="min-h-screen bg-gradient-to-br from-primary-green-50 via-teal-50 to-primary-blue-50 flex items-center justify-center p-4">
         <div className="text-center">
-          <div className="animate-spin rounded-full size-12 border-b-2 border-primary-green-600 mx-auto"></div>
+          <div className="animate-spin rounded-full size-12 border-b-2 border-primary-green-600 mx-auto" />
           <p className="mt-4 text-slate-600">Loading...</p>
         </div>
       </div>
@@ -234,6 +234,4 @@ Future Me`}
       </div>
     </div>
   );
-};
-
-export default LetterFromFutureSelf;
+}

@@ -24,9 +24,9 @@ export const SESSION_TEMPLATES = [
       },
       {
         id: "schedule-call",
-        title: "Schedule Call",
+        title: "Book a Session",
         description:
-          "Book a personalized coaching session to discuss your progress and next steps",
+          "Book a personalized coaching session to meet your coach, discuss your concerns, and begin your journey",
         status: "not-completed",
         icon: "Video",
         route: "/journey/sessions/0/schedule",
@@ -34,8 +34,8 @@ export const SESSION_TEMPLATES = [
       },
       {
         id: "session-feedback",
-        title: "Session Feedback",
-        description: "Give us your feedback on the session",
+        title: "Share Feedback",
+        description: "Tell us what you thought about your session",
         prerequisites: ["schedule-call"],
         // prerequisites: ["demographics-details"],
         status: "not-completed",
@@ -45,9 +45,9 @@ export const SESSION_TEMPLATES = [
       },
       {
         id: "session-report",
-        title: "Session Report",
+        title: "Session Summary",
         description:
-          "A comprehensive summary of your session, highlighting key insights",
+          "Receive a comprehensive summary of your session, highlighting key insights",
         prerequisites: ["session-feedback"],
         // prerequisites: ["demographics-details"],
         status: "not-completed",
@@ -63,23 +63,22 @@ export const SESSION_TEMPLATES = [
     title: "Identity Discovery",
     description:
       "The coach will help you identify your values and set a clear goal.",
-    // duration: "30 min",
     icon: "Lightbulb",
     forms: [
       {
         id: "pre-assessment",
-        title: "Pre Coaching Assessment",
+        title: "Base-line Assessment",
         description:
-          "Assess your current clarity, confidence, and readiness for your career journey.",
+          "To understand your current levels of confidence, openness to change and clarity on goals",
         status: "not-completed",
         icon: "User",
         route: "/journey/sessions/1/q/pre-assessment",
       },
       {
         id: "career-maturity",
-        title: "Pre Coaching Career Maturity",
+        title: "Career Maturity Assessment-1",
         description:
-          "Reflect on your attitudes, beliefs, and confidence regarding career choices and planning.",
+          "To understand your readiness for decision-making, how you explore options and plan ahead",
         status: "not-completed",
         icon: "User",
         route: "/journey/sessions/1/q/career-maturity",
@@ -87,9 +86,9 @@ export const SESSION_TEMPLATES = [
       },
       {
         id: "psychological-wellbeing",
-        title: "Pre Coaching Wellbeing Assessment",
+        title: "Wellbeing Assessment-1",
         description:
-          "Evaluate aspects of your emotional health, resilience, and positive functioning. This assessment helps you recognize strengths and areas for growth in your mental wellbeing.",
+          "To understand your well-being in areas like relationships, growth, and sense of purpose",
         status: "not started",
         icon: "Activity",
         route: "/journey/sessions/1/q/psychological-wellbeing",
@@ -97,9 +96,9 @@ export const SESSION_TEMPLATES = [
       },
       {
         id: "pre-coaching-strength-difficulty",
-        title: "Pre Coaching Strength & Difficulty Assessment",
+        title: "Strengths & Difficulties Assessment-1",
         description:
-          "Evaluate aspects of your emotional health, resilience, and positive functioning. This assessment helps you recognize strengths and areas for growth in your mental wellbeing.",
+          "To understand your strengths and challenges in emotions, behavior, and relationships",
         status: "not started",
         icon: "Activity",
         route: "/journey/sessions/1/q/pre-coaching-strength-difficulty",
@@ -107,9 +106,9 @@ export const SESSION_TEMPLATES = [
       },
       {
         id: "career-story-1",
-        title: "My Story 1",
+        title: "My Story-1 Activity",
         description:
-          "Tell your unique story by describing your interests, inspirations, and envisioned career path.",
+          "To reflect on your life, your role models and values and learn more about yourself",
         status: "not-completed",
         icon: "User",
         route: "/journey/sessions/1/a/career-story-1",
@@ -117,9 +116,9 @@ export const SESSION_TEMPLATES = [
       },
       {
         id: "schedule-call",
-        title: "Schedule Call",
+        title: "Book a Session",
         description:
-          "Book a personalized coaching session to discuss your progress and next steps",
+          "Book a personalized coaching session to meet your coach, discuss your concerns, and begin your journey",
         status: "not-completed",
         icon: "Video",
         route: "/journey/sessions/1/schedule",
@@ -133,8 +132,8 @@ export const SESSION_TEMPLATES = [
       },
       {
         id: "session-feedback",
-        title: "Session Feedback",
-        description: "Give us your feedback on the session",
+        title: "Share Feedback",
+        description: "Tell us what you thought about your session",
         prerequisites: ["schedule-call"],
         // prerequisites: ["pre-assessment", "career-maturity", "career-story-1"],
         status: "not-completed",
@@ -143,9 +142,9 @@ export const SESSION_TEMPLATES = [
       },
       {
         id: "session-report",
-        title: "Session Report",
+        title: "Session Summary",
         description:
-          "A comprehensive summary of your session, highlighting key insights",
+          "Receive a comprehensive summary of your session, highlighting key insights",
         prerequisites: ["session-feedback"],
         // prerequisites: ["pre-assessment", "career-maturity", "career-story-1"],
         status: "not-completed",
@@ -154,30 +153,35 @@ export const SESSION_TEMPLATES = [
       },
     ],
     status: "locked",
-    topics: ["Pre Assessment", "Career Maturity", "Career Story 1"],
+    topics: [
+      "Base-line Assessment",
+      "Career Maturity Assessment-1",
+      "Wellbeing Assessment-1",
+      "Strengths & Difficulties Assessment-1",
+      "My Story-1 Activity",
+    ],
   },
   {
     id: 2,
     title: "Exploring Reality",
     description:
       "The coach will help you recognize the challenges blocking your goals.",
-    // duration: "40 min",
     icon: "Star",
     forms: [
       {
         id: "riasec-test",
-        title: "RIASEC Interest Profiler",
+        title: "Interest Assessment",
         description:
-          "Identify your dominant career interest themes using the RIASEC model and discover which career fields best match your preferences.",
+          "To understand your interests and help you explore suitable career paths",
         status: "not-completed",
         icon: "Compass",
         route: "/journey/sessions/2/q/riasec-test",
       },
       {
         id: "personality-test",
-        title: "Personality Profile",
+        title: "Personality Assessment",
         description:
-          "Learn about your core traits, work styles, and how your personality influences your career preferences and relationships.",
+          "To understand your personality and help you know yourself better",
         status: "not-completed",
         icon: "Smile",
         route: "/journey/sessions/2/q/personality-test",
@@ -185,9 +189,9 @@ export const SESSION_TEMPLATES = [
       },
       {
         id: "life-collage",
-        title: "My Life Collage",
+        title: "My Life Collage Activity",
         description:
-          "Create a visual and reflective collage to express what energizes you, your values, and your dreams—bringing your unique story to life.",
+          "To understand where you are in life, where you want to go, and the challenges you're facing",
         status: "not-completed",
         icon: "Image",
         route: "/journey/sessions/2/a/life-collage",
@@ -195,9 +199,9 @@ export const SESSION_TEMPLATES = [
       },
       {
         id: "schedule-call",
-        title: "Schedule Call",
+        title: "Book a Session",
         description:
-          "Book a personalized coaching session to discuss your progress and next steps",
+          "Book a personalized coaching session to meet your coach, discuss your concerns, and begin your journey",
         status: "not-completed",
         icon: "Video",
         route: "/journey/sessions/2/schedule",
@@ -206,8 +210,8 @@ export const SESSION_TEMPLATES = [
 
       {
         id: "session-feedback",
-        title: "Session Feedback",
-        description: "Give us your feedback on the session",
+        title: "Share Feedback",
+        description: "Tell us what you thought about your session",
         prerequisites: ["schedule-call"],
         // prerequisites: ["riasec-test", "personality-test", "life-collage"],
         status: "not-completed",
@@ -217,9 +221,9 @@ export const SESSION_TEMPLATES = [
 
       {
         id: "session-report",
-        title: "Session Report",
+        title: "Session Summary",
         description:
-          "A comprehensive summary of your session, highlighting key insights, reflections, and progress made during the journey.",
+          "Receive a comprehensive summary of your session, highlighting key insights",
         prerequisites: ["session-feedback"],
         // prerequisites: ["riasec-test", "personality-test", "life-collage"],
         status: "not-completed",
@@ -228,82 +232,84 @@ export const SESSION_TEMPLATES = [
       },
     ],
     status: "locked",
-    topics: ["RIASEC Profile", "Personality Profile", "Life Collage"],
+    topics: [
+      "Interest Assessment",
+      "Personality Assessment",
+      "Life Collage Activity",
+    ],
   },
   {
     id: 3,
     title: "Change in the View",
     description:
       "The coach will help you identify your strengths and enhance your clarity on utilizing them effectively.",
-    // duration: "35 min",
     icon: "HeartPulse",
     forms: [
       {
         id: "career-story-2",
-        title: "My Story 2",
+        title: "My Story-2 Activity",
         description:
-          "Continue your career story, reflecting on key transitions, challenges, and moments of inspiration. Articulate your evolving aspirations and how your wellbeing supports your journey.",
+          "To understand who you are, who you’re becoming, the settings you enjoy, and your interests",
         status: "not started",
         icon: "Book",
         route: "/journey/sessions/3/a/career-story-2",
       },
       {
         id: "schedule-call",
-        title: "Schedule Call",
+        title: "Book a Session",
         description:
-          "Book a personalized coaching session to discuss your progress and next steps",
+          "Book a personalized coaching session to meet your coach, discuss your concerns, and begin your journey",
         status: "not-completed",
         icon: "Video",
         route: "/journey/sessions/3/schedule",
-        prerequisites: ["psychological-wellbeing", "career-story-2"],
+        prerequisites: ["career-story-2"],
       },
       {
         id: "session-feedback",
-        title: "Session Feedback",
-        description: "Give us your feedback on the session",
+        title: "Share Feedback",
+        description: "Tell us what you thought about your session",
         prerequisites: ["schedule-call"],
-        // prerequisites: ["psychological-wellbeing", "career-story-2"],
+        // prerequisites: ["career-story-2"],
         status: "not-completed",
         icon: "FilePen",
         route: "/journey/sessions/3/feedback",
       },
       {
         id: "session-report",
-        title: "Session Report",
+        title: "Session Summary",
         description:
-          "A comprehensive summary of your session, highlighting key insights",
+          "Receive a comprehensive summary of your session, highlighting key insights",
         prerequisites: ["session-feedback"],
-        // prerequisites: ["psychological-wellbeing", "career-story-2"],
+        // prerequisites: ["career-story-2"],
         status: "not-completed",
         icon: "ClipboardList",
         route: "/journey/sessions/3/report",
       },
     ],
     status: "locked",
-    topics: ["Wellbeing", "Career Narrative"],
+    topics: ["My Story-2 Activity"],
   },
   {
     id: 4,
     title: "Visualizing Pathways-1",
     description:
       "The coach will guide you in exploring and listing your options.",
-    // duration: "20 min",
     icon: "Target",
     forms: [
       {
         id: "career-story-3",
-        title: "My Story 3",
+        title: "My Story-3 Activity",
         description:
-          "Continue your career story, reflecting on key transitions, challenges, and moments of inspiration. Articulate your evolving aspirations and how your wellbeing supports your journey.",
+          "To make a summary portrait of who you are, what you value, and what drives your decisions",
         status: "not-completed",
         icon: "Book",
         route: "/journey/sessions/4/a/career-story-3",
       },
       {
         id: "letter-from-future-self",
-        title: "Letter From Future Self",
+        title: "Letter From Future Activity",
         description:
-          "Continue your career story, reflecting on key transitions, challenges, and moments of inspiration. Articulate your evolving aspirations and how your wellbeing supports your journey.",
+          "To reflect on your goals by writing a letter from your future self to your current self",
         status: "not-completed",
         icon: "Book",
         route: "/journey/sessions/4/a/letter-from-future-self",
@@ -311,9 +317,9 @@ export const SESSION_TEMPLATES = [
       },
       {
         id: "schedule-call",
-        title: "Schedule Call",
+        title: "Book a Session",
         description:
-          "Book a personalized coaching session to discuss your progress and next steps",
+          "Book a personalized coaching session to meet your coach, discuss your concerns, and begin your journey",
         status: "not-completed",
         icon: "Video",
         route: "/journey/sessions/4/schedule",
@@ -321,8 +327,8 @@ export const SESSION_TEMPLATES = [
       },
       {
         id: "session-feedback",
-        title: "Session Feedback",
-        description: "Give us your feedback on the session",
+        title: "Share Feedback",
+        description: "Tell us what you thought about your session",
         prerequisites: ["schedule-call"],
         // prerequisites: ["career-story-3", "letter-from-future-self"],
         status: "not-completed",
@@ -331,9 +337,9 @@ export const SESSION_TEMPLATES = [
       },
       {
         id: "session-report",
-        title: "Session Report",
+        title: "Session Summary",
         description:
-          "A comprehensive summary of your session, highlighting key insights",
+          "Receive a comprehensive summary of your session, highlighting key insights",
         prerequisites: ["session-feedback"],
         // prerequisites: ["career-story-3", "letter-from-future-self"],
         status: "not-completed",
@@ -342,39 +348,37 @@ export const SESSION_TEMPLATES = [
       },
     ],
     status: "locked",
-    topics: ["SMART Goals", "Career Milestones", "Action Planning"],
+    topics: ["My Story-3 Activity", "Letter From Future Activity"],
   },
   {
     id: 5,
     title: "Visualizing Pathways-2",
     description:
       "The coach will support you in evaluating options based on what matters most to you.",
-    // duration: "35 min",
     icon: "Users",
     forms: [
       {
         id: "career-option-matrix",
-        title: "Career Option Matrix",
+        title: "Matrix Activity",
         description:
-          "Continue your career story, reflecting on key transitions, challenges, and moments of inspiration. Articulate your evolving aspirations and how your wellbeing supports your journey.",
+          "To guide you in evaluating your options based on what is most important and relevant for you",
         status: "not-completed",
         icon: "Book",
         route: "/journey/sessions/5/a/career-option-matrix",
       },
       {
         id: "career-story-4",
-        title: "My Story 4",
-        description:
-          "Continue your career story, reflecting on key transitions, challenges, and moments of inspiration. Articulate your evolving aspirations and how your wellbeing supports your journey.",
+        title: "My Story-4 Activity",
+        description: "To reflect on your story as well as the progress made",
         status: "not-completed",
         icon: "Book",
         route: "/journey/sessions/5/a/career-story-4",
       },
       {
         id: "schedule-call",
-        title: "Schedule Call",
+        title: "Book a Session",
         description:
-          "Book a personalized coaching session to discuss your progress and next steps",
+          "Book a personalized coaching session to meet your coach, discuss your concerns, and begin your journey",
         status: "not-completed",
         icon: "Video",
         route: "/journey/sessions/5/schedule",
@@ -382,8 +386,8 @@ export const SESSION_TEMPLATES = [
       },
       {
         id: "session-feedback",
-        title: "Session Feedback",
-        description: "Give us your feedback on the session",
+        title: "Share Feedback",
+        description: "Tell us what you thought about your session",
         prerequisites: ["schedule-call"],
         // prerequisites: ["career-story-4"],
         status: "not-completed",
@@ -392,9 +396,9 @@ export const SESSION_TEMPLATES = [
       },
       {
         id: "session-report",
-        title: "Session Report",
+        title: "Session Summary",
         description:
-          "A comprehensive summary of your session, highlighting key insights",
+          "Receive a comprehensive summary of your session, highlighting key insights",
         prerequisites: ["session-feedback"],
         // prerequisites: ["career-story-4"],
         status: "not-completed",
@@ -403,33 +407,28 @@ export const SESSION_TEMPLATES = [
       },
     ],
     status: "locked",
-    topics: [
-      "LinkedIn Optimization",
-      "Networking Events",
-      "Relationship Building",
-    ],
+    topics: ["Matrix Activity", "My Story-4 Activity"],
   },
   {
     id: 6,
     title: "Visualizing Pathways-3",
     description: "The coach will guide you to finalize the best path forward.",
-    // duration: "45 min",
     icon: "FileText",
     forms: [
       {
         id: "career-story-5",
-        title: "My Story 5",
+        title: "My Story-5 Activity",
         description:
-          "Continue your career story, reflecting on key transitions, challenges, and moments of inspiration. Articulate your evolving aspirations and how your wellbeing supports your journey.",
+          "A Storyboard to create a roadmap of the steps to reach your goal",
         status: "not started",
         icon: "Book",
         route: "/journey/sessions/6/a/career-story-5",
       },
       {
         id: "schedule-call",
-        title: "Schedule Call",
+        title: "Book a Session",
         description:
-          "Book a personalized coaching session to discuss your progress and next steps",
+          "Book a personalized coaching session to meet your coach, discuss your concerns, and begin your journey",
         status: "not-completed",
         icon: "Video",
         route: "/journey/sessions/6/schedule",
@@ -437,8 +436,8 @@ export const SESSION_TEMPLATES = [
       },
       {
         id: "session-feedback",
-        title: "Session Feedback",
-        description: "Give us your feedback on the session",
+        title: "Share Feedback",
+        description: "Tell us what you thought about your session",
         prerequisites: ["schedule-call"],
         // prerequisites: ["career-story-5"],
         status: "not-completed",
@@ -447,9 +446,9 @@ export const SESSION_TEMPLATES = [
       },
       {
         id: "session-report",
-        title: "Session Report",
+        title: "Session Summary",
         description:
-          "A comprehensive summary of your session, highlighting key insights",
+          "Receive a comprehensive summary of your session, highlighting key insights",
         prerequisites: ["session-feedback"],
         // prerequisites: ["career-story-5"],
         status: "not-completed",
@@ -458,30 +457,29 @@ export const SESSION_TEMPLATES = [
       },
     ],
     status: "locked",
-    topics: ["Resume Writing", "Portfolio Creation", "Personal Branding"],
+    topics: ["My Story-5 Activity"],
   },
   {
     id: 7,
     title: "Actioning Change",
     description:
       "The coach will guide you to create a step-by-step action plan towards your goal, prepare for challenges, and build strategies.",
-    // duration: "50 min",
     icon: "MessageSquare",
     forms: [
       {
         id: "career-story-6",
-        title: "My Story 5 [Final]",
+        title: "My Story-5 Activity [Final]",
         description:
-          "Continue your career story, reflecting on key transitions, challenges, and moments of inspiration. Articulate your evolving aspirations and how your wellbeing supports your journey.",
+          "To finalize the Storyboard with the roadmap of your next steps to reach your goal",
         status: "not started",
         icon: "Book",
         route: "/journey/sessions/7/a/career-story-6",
       },
       {
         id: "schedule-call",
-        title: "Schedule Call",
+        title: "Book a Session",
         description:
-          "Book a personalized coaching session to discuss your progress and next steps",
+          "Book a personalized coaching session to meet your coach, discuss your concerns, and begin your journey",
         status: "not-completed",
         icon: "Video",
         route: "/journey/sessions/7/schedule",
@@ -489,8 +487,8 @@ export const SESSION_TEMPLATES = [
       },
       {
         id: "session-feedback",
-        title: "Session Feedback",
-        description: "Give us your feedback on the session",
+        title: "Share Feedback",
+        description: "Tell us what you thought about your session",
         prerequisites: ["schedule-call"],
         // prerequisites: ["career-story-6"],
         status: "not-completed",
@@ -499,9 +497,9 @@ export const SESSION_TEMPLATES = [
       },
       {
         id: "session-report",
-        title: "Session Report",
+        title: "Session Summary",
         description:
-          "A comprehensive summary of your session, highlighting key insights",
+          "Receive a comprehensive summary of your session, highlighting key insights",
         prerequisites: ["session-feedback"],
         // prerequisites: ["career-story-6"],
         status: "not-completed",
@@ -510,34 +508,29 @@ export const SESSION_TEMPLATES = [
       },
     ],
     status: "locked",
-    topics: [
-      "Interview Techniques",
-      "Behavioral Questions",
-      "Salary Negotiation",
-    ],
+    topics: ["My Story-5 Activity [Final]"],
   },
   {
     id: 8,
     title: "Check-in for Sustenance",
     description:
       "The coach will check in with you to review progress, identify gaps, and provide support.",
-    // duration: "30 min",
     icon: "Search",
     forms: [
       {
         id: "daily-journaling",
-        title: "Daily Journaling",
+        title: "Daily Journal",
         description:
-          "Continue your career story, reflecting on key transitions, challenges, and moments of inspiration. Articulate your evolving aspirations and how your wellbeing supports your journey.",
+          "To reflect on your daily progress, identify challenges, and practice gratitude",
         status: "not-completed",
         icon: "Book",
         route: "/journey/sessions/8/a/daily-journaling",
       },
       {
         id: "post-coaching",
-        title: "Post Coaching Assessment",
+        title: "Finish-line Assessment",
         description:
-          "Evaluate aspects of your emotional health, resilience, and positive functioning. This assessment helps you recognize strengths and areas for growth in your mental wellbeing.",
+          "To understand your confidence and clarity on goals as well as your wellbeing as you complete the Self-Discovery Journey",
         status: "not-completed",
         icon: "Activity",
         route: "/journey/sessions/8/q/post-coaching",
@@ -545,9 +538,9 @@ export const SESSION_TEMPLATES = [
       },
       {
         id: "post-career-maturity",
-        title: "Post Coaching Career Maturity",
+        title: "Career Maturity Assessment-2",
         description:
-          "Reflect on your attitudes, beliefs, and confidence regarding career choices and planning.",
+          "To understand your readiness for decision-making, how you explore options and plan ahead",
         status: "not-completed",
         icon: "User",
         route: "/journey/sessions/8/q/post-career-maturity",
@@ -555,9 +548,9 @@ export const SESSION_TEMPLATES = [
       },
       {
         id: "post-psychological-wellbeing",
-        title: "Post Coaching Wellbeing Assessment",
+        title: "Wellbeing Assessment-2",
         description:
-          "Evaluate aspects of your emotional health, resilience, and positive functioning. This assessment helps you recognize strengths and areas for growth in your mental wellbeing.",
+          "To understand your well-being in areas like relationships, growth, and sense of purpose",
         status: "not-completed",
         icon: "Activity",
         route: "/journey/sessions/8/q/post-psychological-wellbeing",
@@ -565,9 +558,9 @@ export const SESSION_TEMPLATES = [
       },
       {
         id: "post-strength-difficulty",
-        title: "Post Coaching Strength & Difficulty Assessment",
+        title: "Strengths & Difficulties Assessment-2",
         description:
-          "Evaluate aspects of your emotional health, resilience, and positive functioning. This assessment helps you recognize strengths and areas for growth in your mental wellbeing.",
+          "To understand your strengths and challenges in emotions, behavior, and relationships",
         status: "not-completed",
         icon: "Activity",
         route: "/journey/sessions/8/q/post-strength-difficulty",
@@ -575,9 +568,9 @@ export const SESSION_TEMPLATES = [
       },
       {
         id: "schedule-call",
-        title: "Schedule Call",
+        title: "Book a Session",
         description:
-          "Book a personalized coaching session to discuss your progress and next steps",
+          "Book a personalized coaching session to meet your coach, discuss your concerns, and begin your journey",
         status: "not-completed",
         icon: "Video",
         route: "/journey/sessions/8/schedule",
@@ -585,37 +578,31 @@ export const SESSION_TEMPLATES = [
       },
       {
         id: "session-feedback",
-        title: "Session Feedback",
-        description: "Give us your feedback on the session",
+        title: "Share Feedback",
+        description: "Tell us what you thought about your session",
         prerequisites: ["schedule-call"],
-        // prerequisites: [
-        //   "daily-journaling",
-        //   "post-coaching",
-        //   "post-career-maturity",
-        //   "post-psychological-wellbeing",
-        // ],
         status: "not-completed",
         icon: "FilePen",
         route: "/journey/sessions/8/feedback",
       },
       {
         id: "session-report",
-        title: "Session Report",
+        title: "Session Summary",
         description:
-          "A comprehensive summary of your session, highlighting key insights",
+          "Receive a comprehensive summary of your session, highlighting key insights",
         prerequisites: ["session-feedback"],
-        // prerequisites: [
-        //   "daily-journaling",
-        //   "post-coaching",
-        //   "post-career-maturity",
-        //   "post-psychological-wellbeing",
-        // ],
         status: "not-completed",
         icon: "ClipboardList",
         route: "/journey/sessions/8/report",
       },
     ],
     status: "locked",
-    topics: ["Job Boards", "Application Strategy", "Follow-up Techniques"],
+    topics: [
+      "Daily Journal",
+      "Finish-line Assessment",
+      "Career Maturity Assessment-2",
+      "Wellbeing Assessment-2",
+      "Strengths & Difficulties Assessment-2",
+    ],
   },
 ];

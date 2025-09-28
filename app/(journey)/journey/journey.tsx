@@ -289,7 +289,7 @@ export const JourneyPage: React.FC = () => {
 
                               {/* Topics */}
                               <div className="flex flex-wrap gap-1 mb-2">
-                                {session.topics.slice(0, 3).map((topic) => (
+                                {session.topics.slice(0, 5).map((topic) => (
                                   <span
                                     key={topic}
                                     className={`px-1.5 py-0.5 rounded text-xs font-medium ${
@@ -303,9 +303,9 @@ export const JourneyPage: React.FC = () => {
                                     {topic}
                                   </span>
                                 ))}
-                                {session.topics.length > 3 && (
+                                {session.topics.length > 5 && (
                                   <span className="px-1.5 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-500">
-                                    +{session.topics.length - 3}
+                                    +{session.topics.length - 5}
                                   </span>
                                 )}
                               </div>

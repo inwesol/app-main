@@ -7,12 +7,12 @@ export const demographicsDetailsSchema = z.object({
     .max(100, "Full name must be less than 100 characters"),
   email: z.string().email("Please enter a valid email address"),
   age: z
-    .string()
-    .min(1, "Age is required")
+    .union([z.string(), z.number()])
     .refine((val) => {
-      const num = parseInt(val);
-      return !isNaN(num) && num >= 1 && num <= 100;
-    }, "Please enter a valid age between 1 and 100"),
+      const num = typeof val === "string" ? Number.parseInt(val, 10) : val;
+      return !Number.isNaN(num) && num >= 1 && num <= 100;
+    }, "Please enter a valid age between 1 and 100")
+    .transform((val) => (typeof val === "string" ? val : val.toString())),
   gender: z.enum(["male", "female", "prefer-not-to-say", "others"], {
     required_error: "Please select your gender",
   }),
@@ -39,7 +39,7 @@ export const demographicsDetailsSchema = z.object({
   motivation: z
     .string()
     .min(20, "Please provide at least 20 characters describing your motivation")
-    .max(1000, "Please keep motivation under 1000 characters"),
+    .max(500, "Please keep motivation under 500 characters"),
 });
 
 export type DemographicsDetailsFormData = z.infer<

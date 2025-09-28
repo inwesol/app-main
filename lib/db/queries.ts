@@ -15,7 +15,7 @@ import {
 } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
-import crypto from "crypto";
+import crypto from "node:crypto";
 import {
   user,
   emailVerificationTokens,
@@ -54,20 +54,20 @@ import {
   type DailyJournalEntry,
   type NewDailyJournalEntry,
 } from "./schema";
-import { ArtifactKind } from "@/components/artifact";
+import type { ArtifactKind } from "@/components/artifact";
 import { SESSION_TEMPLATES } from "@/lib/constants";
 import { careerStoryTwo } from "@/lib/db/schema";
 
 import type { DailyJournalingData } from "@/lib/schemas/activity-schemas/daily-journaling-schema";
 import type { CareerStoryTwoData } from "@/lib/schemas/activity-schemas/career-story-two-schema";
 import type { CareerStoryThreeData } from "@/lib/schemas/activity-schemas/career-story-three-schema";
-import { CareerOptionsMatrixData } from "../schemas/activity-schemas/career-option-matrix-schema";
-import { CareerStoryFour } from "@/lib/schemas/activity-schemas/career-story-four-schema";
-import { CareerStoryOneData } from "@/lib/schemas/activity-schemas/career-story-one-schema";
+import type { CareerOptionsMatrixData } from "@/lib/schemas/activity-schemas/career-option-matrix-schema";
+import type { CareerStoryFour } from "@/lib/schemas/activity-schemas/career-story-four-schema";
+import type { CareerStoryOneData } from "@/lib/schemas/activity-schemas/career-story-one-schema";
 import type { LifeCollageFormData } from "@/lib/schemas/activity-schemas/life-collage-schema";
 
 // Database connection
-const client = postgres(process.env.POSTGRES_URL!);
+const client = postgres(process.env.POSTGRES_URL as string);
 const db = drizzle(client);
 
 // User Management Functions
@@ -998,10 +998,12 @@ export async function getSessionDetailForUser(
 }
 export async function upsertUserDemographics(userId: string, data: any) {
   // Convert age to integer if present (from string in form)
-  const age = data.age !== undefined ? parseInt(data.age, 10) : null;
+  const age = data.age !== undefined ? Number.parseInt(data.age, 10) : null;
   // Convert stress level if needed
   const stressLevel =
-    data.stressLevel !== undefined ? parseInt(data.stressLevel, 10) : null;
+    data.stressLevel !== undefined
+      ? Number.parseInt(data.stressLevel, 10)
+      : null;
   await db
     .insert(demographics_details_form)
     .values({
@@ -1084,7 +1086,8 @@ export async function updateJourneyProgressAfterForm(
     .from(journey_progress)
     .where(eq(journey_progress.user_id, userId));
   if (jp) {
-    let completedSessions: number[] = jp.completed_sessions ?? [];
+    const completedSessions: number[] =
+      (jp.completed_sessions as number[]) ?? [];
     if (!completedSessions.includes(sessionId)) {
       completedSessions.push(sessionId);
     }
@@ -1116,6 +1119,93 @@ export async function getUserDemographics(userId: string) {
   return details || null;
 }
 
+export async function deleteUserDemographics(userId: string): Promise<boolean> {
+  try {
+    const result = await db
+      .delete(demographics_details_form)
+      .where(eq(demographics_details_form.user_id, userId))
+      .returning({ id: demographics_details_form.id });
+
+    return result.length > 0;
+  } catch (error) {
+    console.error("Error deleting user demographics:", error);
+    throw error;
+  }
+}
+
+export async function softDeleteUserDemographics(
+  userId: string
+): Promise<boolean> {
+  try {
+    const result = await db
+      .update(demographics_details_form)
+      .set({
+        full_name: null,
+        email: null,
+        age: null,
+        gender: null,
+        profession: null,
+        previous_coaching: null,
+        education: null,
+        stress_level: null,
+        motivation: null,
+        updated_at: new Date(),
+      })
+      .where(eq(demographics_details_form.user_id, userId))
+      .returning({ id: demographics_details_form.id });
+
+    return result.length > 0;
+  } catch (error) {
+    console.error("Error soft deleting user demographics:", error);
+    throw error;
+  }
+}
+
+export async function upsertUserDemographicsWithTransaction(
+  userId: string,
+  data: any
+) {
+  // Convert age to integer if present (from string in form)
+  const age = data.age !== undefined ? Number.parseInt(data.age, 10) : null;
+  // Convert stress level if needed
+  const stressLevel =
+    data.stressLevel !== undefined
+      ? Number.parseInt(data.stressLevel, 10)
+      : null;
+
+  await db
+    .insert(demographics_details_form)
+    .values({
+      user_id: userId,
+      full_name: data.fullName,
+      email: data.email,
+      age,
+      gender: data.gender,
+      profession: data.profession,
+      previous_coaching: data.previousCoaching,
+      education: data.education,
+      stress_level: stressLevel,
+      motivation: data.motivation,
+      created_at: new Date(),
+      updated_at: new Date(),
+    })
+    .onConflictDoUpdate({
+      target: [demographics_details_form.user_id],
+      set: {
+        full_name: data.fullName,
+        email: data.email,
+        age,
+        gender: data.gender,
+        profession: data.profession,
+        previous_coaching: data.previousCoaching,
+        education: data.education,
+        stress_level: stressLevel,
+        motivation: data.motivation,
+        updated_at: new Date(),
+      },
+    });
+}
+
 export async function upsertCareerMaturityAssessment(
   userId: string,
   sessionId: number,
@@ -1127,7 +1217,7 @@ export async function upsertCareerMaturityAssessment(
     .insert(career_maturity_assessment)
     .values({
       user_id: userId,
-      // session_id: sessionId,
+      session_id: sessionId,
       answers: answersJson,
       created_at: new Date(),
       updated_at: new Date(),
@@ -1135,7 +1225,7 @@ export async function upsertCareerMaturityAssessment(
     .onConflictDoUpdate({
       target: [
         career_maturity_assessment.user_id,
-        // career_maturity_assessment.session_id,
+        career_maturity_assessment.session_id,
       ],
       set: {
         answers: answersJson,
@@ -1153,8 +1243,8 @@ export async function getCareerMaturityAssessment(
     .from(career_maturity_assessment)
     .where(
       and(
-        eq(career_maturity_assessment.user_id, userId)
-        // eq(career_maturity_assessment.session_id, sessionId)
+        eq(career_maturity_assessment.user_id, userId),
+        eq(career_maturity_assessment.session_id, sessionId)
       )
     );
 
@@ -1166,19 +1256,34 @@ export async function getCareerMaturityAssessment(
     return null;
   }
 }
+
+export async function deleteCareerMaturityAssessment(
+  userId: string,
+  sessionId: number
+) {
+  await db
+    .delete(career_maturity_assessment)
+    .where(
+      and(
+        eq(career_maturity_assessment.user_id, userId),
+        eq(career_maturity_assessment.session_id, sessionId)
+      )
+    );
+}
+
 export async function getPreAssessment(
   userId: string,
   sessionId: number
 ): Promise<{
-  answers: Record<string, "agree" | "disagree">;
+  answers: Record<string, number>;
 } | null> {
   const [row] = await db
     .select()
     .from(pre_assessment)
     .where(
       and(
-        eq(pre_assessment.user_id, userId)
-        // eq(pre_assessment.session_id, sessionId)
+        eq(pre_assessment.user_id, userId),
+        eq(pre_assessment.session_id, sessionId)
       )
     );
 
@@ -1194,23 +1299,20 @@ export async function getPreAssessment(
 }
 export async function upsertPreAssessment(
   userId: string,
-  sessionId: number, // (Uncomment as needed)
+  sessionId: number,
   answers: Record<string, number>
 ) {
   await db
     .insert(pre_assessment)
     .values({
       user_id: userId,
-      // session_id: sessionId, // Uncomment if you include session_id in your schema
+      session_id: sessionId,
       answers: JSON.stringify(answers),
       created_at: new Date(),
       updated_at: new Date(),
     })
     .onConflictDoUpdate({
-      target: [
-        pre_assessment.user_id,
-        // pre_assessment.session_id, // Uncomment if unique constraint includes session_id
-      ],
+      target: [pre_assessment.user_id, pre_assessment.session_id],
       set: {
         answers: JSON.stringify(answers),
         updated_at: new Date(),
@@ -1218,18 +1320,34 @@ export async function upsertPreAssessment(
     });
 }
 
+export async function deletePreAssessment(userId: string, sessionId: number) {
+  await db
+    .delete(pre_assessment)
+    .where(
+      and(
+        eq(pre_assessment.user_id, userId),
+        eq(pre_assessment.session_id, sessionId)
+      )
+    );
+}
+
 export async function getRiasecTest(
-  userId: string
-  // sessionId?: number  // optional if you use sessions
+  userId: string,
+  sessionId: number
 ): Promise<{
   selectedAnswers: string[];
   interestCode: string;
-  categoryCounts: {};
+  categoryCounts: Record<string, number>;
 } | null> {
   const [row] = await db
     .select()
     .from(riasec_test)
-    .where(eq(riasec_test.user_id, userId));
+    .where(
+      and(
+        eq(riasec_test.user_id, userId),
+        eq(riasec_test.session_id, sessionId)
+      )
+    );
   if (!row) return null;
 
   try {
@@ -1244,6 +1362,7 @@ export async function getRiasecTest(
 }
 export async function upsertRiasecTest(
   userId: string,
+  sessionId: number,
   selectedAnswers: string[],
   categoryCounts: Record<string, number>,
   interestCode: string
@@ -1252,6 +1371,7 @@ export async function upsertRiasecTest(
     .insert(riasec_test)
     .values({
       user_id: userId,
+      session_id: sessionId,
       selected_answers: JSON.stringify(selectedAnswers),
       category_counts: categoryCounts,
       interest_code: interestCode,
@@ -1259,7 +1379,7 @@ export async function upsertRiasecTest(
       updated_at: new Date(),
     })
     .onConflictDoUpdate({
-      target: [riasec_test.user_id],
+      target: [riasec_test.user_id, riasec_test.session_id],
       set: {
         selected_answers: JSON.stringify(selectedAnswers),
         category_counts: categoryCounts,
@@ -1269,22 +1389,59 @@ export async function upsertRiasecTest(
     });
 }
 
+export async function deleteRiasecTest(
+  userId: string,
+  sessionId: number
+): Promise<boolean> {
+  try {
+    // First, check if the record exists
+    const existingRecord = await db
+      .select()
+      .from(riasec_test)
+      .where(
+        and(
+          eq(riasec_test.user_id, userId),
+          eq(riasec_test.session_id, sessionId)
+        )
+      );
+
+    if (existingRecord.length === 0) {
+      return false;
+    }
+
+    await db
+      .delete(riasec_test)
+      .where(
+        and(
+          eq(riasec_test.user_id, userId),
+          eq(riasec_test.session_id, sessionId)
+        )
+      );
+
+    return true;
+  } catch (error) {
+    console.error("Error deleting RIASEC test:", error);
+    return false;
+  }
+}
+
 export async function getPsychologicalWellbeingTest(
-  userId: string
-  // sessionId?: number,
+  userId: string,
+  sessionId: number
 ): Promise<{
   answers: Record<string, string>;
   score: string;
   subscaleScores: Record<string, number>;
 } | null> {
-  const [row] = await db.select().from(psychological_wellbeing_test).where(
-    // Use if sessionId is active
-    // and(
-    //   eq(personality_test.user_id, userId),
-    //   eq(personality_test.session_id, sessionId)
-    // )
-    eq(psychological_wellbeing_test.user_id, userId)
-  );
+  const [row] = await db
+    .select()
+    .from(psychological_wellbeing_test)
+    .where(
+      and(
+        eq(psychological_wellbeing_test.user_id, userId),
+        eq(psychological_wellbeing_test.session_id, sessionId)
+      )
+    );
 
   if (!row) return null;
 
@@ -1312,7 +1469,7 @@ export async function getPsychologicalWellbeingTest(
 //       user_id: userId,
 //       // session_id: sessionId,
 //       answers: JSON.stringify(answers),
-//       score,
+//       score: score.toString(),
 //       created_at: new Date(),
 //       updated_at: new Date(),
 //     })
@@ -1320,7 +1477,7 @@ export async function getPsychologicalWellbeingTest(
 //       target: [psychological_wellbeing_test.user_id], // or [personality_test.user_id, personality_test.session_id]
 //       set: {
 //         answers: JSON.stringify(answers),
-//         score,
+//         score: score.toString(),
 //         updated_at: new Date(),
 //       },
 //     });
@@ -1328,6 +1485,7 @@ export async function getPsychologicalWellbeingTest(
 
 export async function upsertPsychologicalWellbeingTest(
   userId: string,
+  sessionId: number,
   score: number,
   answers: Record<string, string>,
   subscaleScores: Record<string, number> // JSON object for subscales
@@ -1336,26 +1494,51 @@ export async function upsertPsychologicalWellbeingTest(
     .insert(psychological_wellbeing_test)
     .values({
       user_id: userId,
+      session_id: sessionId,
       answers: JSON.stringify(answers),
-      score,
+      score: score.toString(),
       subscale_scores: subscaleScores,
       created_at: new Date(),
       updated_at: new Date(),
     })
     .onConflictDoUpdate({
-      target: [psychological_wellbeing_test.user_id], // or user_id + session_id if applicable
+      target: [
+        psychological_wellbeing_test.user_id,
+        psychological_wellbeing_test.session_id,
+      ],
       set: {
         answers: JSON.stringify(answers),
-        score,
+        score: score.toString(),
         subscale_scores: subscaleScores,
         updated_at: new Date(),
       },
     });
 }
 
+export async function deletePsychologicalWellbeingTest(
+  userId: string,
+  sessionId: number
+): Promise<boolean> {
+  try {
+    const result = await db
+      .delete(psychological_wellbeing_test)
+      .where(
+        and(
+          eq(psychological_wellbeing_test.user_id, userId),
+          eq(psychological_wellbeing_test.session_id, sessionId)
+        )
+      );
+
+    return result.length > 0;
+  } catch (error) {
+    console.error("Error deleting psychological wellbeing test:", error);
+    return false;
+  }
+}
+
 export async function getPersonalityTest(
-  userId: string
-  // sessionId?: number,
+  userId: string,
+  sessionId: number
 ): Promise<{
   answers: Record<string, string>;
   score: string;
@@ -1364,7 +1547,12 @@ export async function getPersonalityTest(
   const [row] = await db
     .select()
     .from(personality_test)
-    .where(eq(personality_test.user_id, userId));
+    .where(
+      and(
+        eq(personality_test.user_id, userId),
+        eq(personality_test.session_id, sessionId)
+      )
+    );
 
   if (!row) return null;
 
@@ -1392,7 +1580,7 @@ export async function getPersonalityTest(
 //       user_id: userId,
 //       // session_id: sessionId,
 //       answers: JSON.stringify(answers),
-//       score,
+//       score: score.toString(),
 //       created_at: new Date(),
 //       updated_at: new Date(),
 //     })
@@ -1400,7 +1588,7 @@ export async function getPersonalityTest(
 //       target: [personality_test.user_id], // or [personality_test.user_id, personality_test.session_id]
 //       set: {
 //         answers: JSON.stringify(answers),
-//         score,
+//         score: score.toString(),
 //         updated_at: new Date(),
 //       },
 //     });
@@ -1408,7 +1596,7 @@ export async function getPersonalityTest(
 
 export async function upsertPersonalityTest(
   userId: string,
-  // sessionId: number, // uncomment if you track sessions
+  sessionId: number,
   score: number,
   answers: Record<string, string>,
   subscaleScores: Record<string, number>
@@ -1417,22 +1605,59 @@ export async function upsertPersonalityTest(
     .insert(personality_test)
     .values({
       user_id: userId,
-      // session_id: sessionId,
+      session_id: sessionId,
       answers: JSON.stringify(answers),
-      score,
+      score: score.toString(),
       subscale_scores: subscaleScores,
       created_at: new Date(),
       updated_at: new Date(),
     })
     .onConflictDoUpdate({
-      target: [personality_test.user_id], // or include session_id if used
+      target: [personality_test.user_id, personality_test.session_id],
       set: {
         answers: JSON.stringify(answers),
-        score,
+        score: score.toString(),
         subscale_scores: subscaleScores,
         updated_at: new Date(),
       },
     });
+}
+
+export async function deletePersonalityTest(
+  userId: string,
+  sessionId: number
+): Promise<boolean> {
+  try {
+    // First, check if the record exists
+    const existingRecord = await db
+      .select()
+      .from(personality_test)
+      .where(
+        and(
+          eq(personality_test.user_id, userId),
+          eq(personality_test.session_id, sessionId)
+        )
+      );
+
+    if (existingRecord.length === 0) {
+      return false;
+    }
+
+    // Perform the delete
+    await db
+      .delete(personality_test)
+      .where(
+        and(
+          eq(personality_test.user_id, userId),
+          eq(personality_test.session_id, sessionId)
+        )
+      );
+
+    return true;
+  } catch (error) {
+    console.error("Error deleting personality test:", error);
+    return false;
+  }
 }
 
 // Career Story Board Functions
@@ -1621,7 +1846,7 @@ export async function getCareerStoryTwo(
       significantWords: data.significantWords,
       selfStatement: data.selfStatement,
       mediaActivities: data.mediaActivities,
-      selectedRiasec: data.selectedRiasec,
+      selectedRiasec: data.selectedRiasec as string[],
       settingStatement: data.settingStatement,
     };
   } catch (error) {
@@ -1656,7 +1881,7 @@ export async function upsertCareerStoryTwo(
       significantWords: data.significantWords,
       selfStatement: data.selfStatement,
       mediaActivities: data.mediaActivities,
-      selectedRiasec: data.selectedRiasec,
+      selectedRiasec: data.selectedRiasec as string[],
       settingStatement: data.settingStatement,
       updatedAt: new Date(),
     };
@@ -1715,7 +1940,7 @@ export async function getCareerStoryThree(
       placesWhereStatement: data.placesWhereStatement,
       soThatStatement: data.soThatStatement,
       mottoStatement: data.mottoStatement,
-      selectedOccupations: data.selectedOccupations,
+      selectedOccupations: data.selectedOccupations as string[],
     };
   } catch (error) {
     console.error("Error fetching career story three:", error);
@@ -1742,7 +1967,7 @@ export async function upsertCareerStoryThree(
         placesWhereStatement: data.placesWhereStatement,
         soThatStatement: data.soThatStatement,
         mottoStatement: data.mottoStatement,
-        selectedOccupations: data.selectedOccupations,
+        selectedOccupations: data.selectedOccupations as string[],
         createdAt: new Date(),
         updatedAt: new Date(),
       })
@@ -1757,7 +1982,7 @@ export async function upsertCareerStoryThree(
           placesWhereStatement: data.placesWhereStatement,
           soThatStatement: data.soThatStatement,
           mottoStatement: data.mottoStatement,
-          selectedOccupations: data.selectedOccupations,
+          selectedOccupations: data.selectedOccupations as string[],
           updatedAt: new Date(),
         },
       });
@@ -1773,12 +1998,16 @@ export async function getLetterFromFutureSelf(
   userId: string,
   sessionId: number
 ) {
-  const result = await db.query.letterFromFutureSelfTable.findFirst({
-    where: and(
-      eq(letterFromFutureSelfTable.userId, userId),
-      eq(letterFromFutureSelfTable.sessionId, sessionId)
-    ),
-  });
+  const [result] = await db
+    .select()
+    .from(letterFromFutureSelfTable)
+    .where(
+      and(
+        eq(letterFromFutureSelfTable.userId, userId),
+        eq(letterFromFutureSelfTable.sessionId, sessionId)
+      )
+    )
+    .limit(1);
 
   return result;
 }
@@ -1962,12 +2191,16 @@ export async function getCareerStoryOne(
   sessionId: number
 ): Promise<CareerStoryOneData | null> {
   try {
-    const result = await db.query.careerStoryOneTable.findFirst({
-      where: and(
-        eq(careerStoryOneTable.userId, userId),
-        eq(careerStoryOneTable.sessionId, sessionId)
-      ),
-    });
+    const [result] = await db
+      .select()
+      .from(careerStoryOneTable)
+      .where(
+        and(
+          eq(careerStoryOneTable.userId, userId),
+          eq(careerStoryOneTable.sessionId, sessionId)
+        )
+      )
+      .limit(1);
 
     if (!result) {
       return null;
@@ -2094,10 +2327,14 @@ export async function upsertPostCareerMaturityAssessment(
     .insert(postCareerMaturityTable)
     .values({
       user_id: userId,
+      session_id: sessionId,
       answers: answers,
     })
     .onConflictDoUpdate({
-      target: [postCareerMaturityTable.user_id],
+      target: [
+        postCareerMaturityTable.user_id,
+        postCareerMaturityTable.session_id,
+      ],
       set: {
         answers: answers,
         updated_at: sql`CURRENT_TIMESTAMP`,
@@ -2112,12 +2349,31 @@ export async function getPostCareerMaturityAssessment(
   const result = await db
     .select()
     .from(postCareerMaturityTable)
-    .where(eq(postCareerMaturityTable.user_id, userId))
+    .where(
+      and(
+        eq(postCareerMaturityTable.user_id, userId),
+        eq(postCareerMaturityTable.session_id, sessionId)
+      )
+    )
     .limit(1);
 
   if (!result[0]) return null;
 
   return result[0]; // No need to parse for jsonb
+}
+
+export async function deletePostCareerMaturityAssessment(
+  userId: string,
+  sessionId: number
+) {
+  await db
+    .delete(postCareerMaturityTable)
+    .where(
+      and(
+        eq(postCareerMaturityTable.user_id, userId),
+        eq(postCareerMaturityTable.session_id, sessionId)
+      )
+    );
 }
 
 // Add these functions to your queries.ts file
@@ -2167,7 +2423,7 @@ export async function upsertPostPsychologicalWellbeingTest(
       user_id: userId,
       session_id: sessionId,
       answers: JSON.stringify(answers),
-      score,
+      score: score.toString(),
       subscale_scores: subscaleScores,
       created_at: new Date(),
       updated_at: new Date(),
@@ -2179,11 +2435,32 @@ export async function upsertPostPsychologicalWellbeingTest(
       ],
       set: {
         answers: JSON.stringify(answers),
-        score,
+        score: score.toString(),
         subscale_scores: subscaleScores,
         updated_at: new Date(),
       },
     });
+}
+
+export async function deletePostPsychologicalWellbeingTest(
+  userId: string,
+  sessionId: number
+): Promise<boolean> {
+  try {
+    const result = await db
+      .delete(post_psychological_wellbeing_test)
+      .where(
+        and(
+          eq(post_psychological_wellbeing_test.user_id, userId),
+          eq(post_psychological_wellbeing_test.session_id, sessionId)
+        )
+      );
+
+    return result.length > 0;
+  } catch (error) {
+    console.error("Error deleting post psychological wellbeing test:", error);
+    return false;
+  }
 }
 
 export async function getPostCoachingAssessment(
@@ -2243,6 +2520,20 @@ export async function upsertPostCoachingAssessment(
   }
 }
 
+export async function deletePostCoachingAssessment(
+  userId: string,
+  sessionId: number
+) {
+  await db
+    .delete(postCoachingAssessments)
+    .where(
+      and(
+        eq(postCoachingAssessments.userId, userId),
+        eq(postCoachingAssessments.sessionId, sessionId)
+      )
+    );
+}
+
 // Daily Journal Entries Functions
 
 export async function createJournalEntry(
@@ -2279,9 +2570,9 @@ export async function createJournalEntry(
 
 export async function getJournalEntries(
   userId: string,
-  limit: number = 50,
-  offset: number = 0
-): Promise<DailyJournalEntry[]> {
+  limit = 50,
+  offset = 0
+) {
   try {
     const entries = await db
       .select()
@@ -2370,8 +2661,8 @@ export async function deleteJournalEntry(entryId: string): Promise<boolean> {
 export async function searchJournalEntries(
   userId: string,
   searchTerm: string,
-  limit: number = 50
-): Promise<DailyJournalEntry[]> {
+  limit = 50
+) {
   try {
     const entries = await db
       .select()
@@ -2403,7 +2694,7 @@ export async function upsertJournalEntry(
   title: string | null,
   content: string,
   entryDate: string
-): Promise<DailyJournalEntry> {
+) {
   try {
     const wordCount = content
       .trim()

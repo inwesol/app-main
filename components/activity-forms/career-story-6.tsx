@@ -16,9 +16,8 @@ import {
   Loader2,
 } from "lucide-react";
 import Header from "@/components/form-components/header";
-import { useRouter } from "next/navigation";
 import { toast } from "@/components/toast";
-
+import { useRouter } from "next/navigation";
 interface StickyNote {
   id: string;
   content: string;
@@ -27,7 +26,7 @@ interface StickyNote {
   createdAt: Date;
 }
 
-interface CareerStoryFiveProps {
+interface CareerStory6Props {
   className?: string;
   sessionId: number; // Add sessionId prop
 }
@@ -105,10 +104,10 @@ const DEFAULT_STICKY_NOTES: StickyNote[] = [
   },
 ];
 
-export function CareerStoryFive({
+export default function CareerStory6({
   className = "",
   sessionId,
-}: CareerStoryFiveProps) {
+}: CareerStory6Props) {
   const [stickyNotes, setStickyNotes] = useState<StickyNote[]>([]);
   const [editingNote, setEditingNote] = useState<string | null>(null);
   const [editContent, setEditContent] = useState("");
@@ -118,7 +117,7 @@ export function CareerStoryFive({
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const canvasRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLButtonElement>(null);
   const router = useRouter();
   // Load data on component mount
   useEffect(() => {
@@ -128,7 +127,7 @@ export function CareerStoryFive({
   const loadStoryBoard = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/journey/sessions/6/a/career-story-5`);
+      const response = await fetch(`/api/journey/sessions/7/a/career-story-5`);
 
       if (response.ok) {
         const data = await response.json();
@@ -164,7 +163,7 @@ export function CareerStoryFive({
   const saveStoryBoard = async () => {
     try {
       setSaving(true);
-      const response = await fetch(`/api/journey/sessions/6/a/career-story-5`, {
+      const response = await fetch(`/api/journey/sessions/7/a/career-story-5`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -370,6 +369,7 @@ export function CareerStoryFive({
                   </span>
                   <div className="relative z-50">
                     <button
+                      type="button"
                       onClick={(e) => {
                         e.stopPropagation();
                         setShowColorPicker(!showColorPicker);
@@ -382,6 +382,7 @@ export function CareerStoryFive({
                           {STICKY_COLORS.map((color) => (
                             <button
                               key={color.name}
+                              type="button"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 setSelectedColor(color);
@@ -461,13 +462,15 @@ export function CareerStoryFive({
             </CardTitle>
           </CardHeader>
           <CardContent className="p-8">
-            <div
+            <button
               ref={canvasRef}
-              className="relative min-h-[700px] bg-gradient-to-br from-primary-blue-25/30 to-primary-green-25/30 rounded-2xl border-2 border-dashed border-primary-blue-200/50 overflow-hidden select-none"
+              type="button"
+              className="relative min-h-[700px] bg-gradient-to-br from-primary-blue-25/30 to-primary-green-25/30 rounded-2xl border-2 border-dashed border-primary-blue-200/50 overflow-hidden select-none w-full"
               onMouseMove={handleMouseMove}
               onMouseUp={handleMouseUp}
               onMouseLeave={handleMouseUp}
               onClick={handleCanvasClick}
+              aria-label="Story board canvas - drag and drop area for sticky notes"
             >
               {/* Background Pattern */}
               <div className="absolute inset-0 opacity-5 pointer-events-none">
@@ -487,8 +490,9 @@ export function CareerStoryFive({
                 const isDragging = draggedNote === note.id;
 
                 return (
-                  <div
+                  <button
                     key={note.id}
+                    type="button"
                     className={`absolute size-48 ${note.color} ${
                       colorClasses.border
                     } border-2 rounded-2xl shadow-xl ${
@@ -520,6 +524,7 @@ export function CareerStoryFive({
                         />
                         <div className="flex justify-end gap-2 mt-3">
                           <button
+                            type="button"
                             onClick={(e) => {
                               e.stopPropagation();
                               saveEdit();
@@ -529,6 +534,7 @@ export function CareerStoryFive({
                             <Save className="size-4" />
                           </button>
                           <button
+                            type="button"
                             onClick={(e) => {
                               e.stopPropagation();
                               cancelEdit();
@@ -550,6 +556,7 @@ export function CareerStoryFive({
                         </div>
                         <div className="absolute top-3 right-3 opacity-0 group-hover/note:opacity-100 transition-all duration-300 flex gap-2">
                           <button
+                            type="button"
                             onClick={(e) => {
                               e.stopPropagation();
                               startEditing(note);
@@ -560,6 +567,7 @@ export function CareerStoryFive({
                             <Edit3 className="size-3" />
                           </button>
                           <button
+                            type="button"
                             onClick={(e) => {
                               e.stopPropagation();
                               deleteStickyNote(note.id);
@@ -572,7 +580,7 @@ export function CareerStoryFive({
                         </div>
                       </>
                     )}
-                  </div>
+                  </button>
                 );
               })}
 
@@ -593,7 +601,7 @@ export function CareerStoryFive({
                   </div>
                 </div>
               )}
-            </div>
+            </button>
           </CardContent>
         </Card>
 
@@ -672,24 +680,24 @@ export function CareerStoryFive({
         </Card>
 
         {/* Final Save Progress Button */}
-        <div className="flex justify-center gap-4 mt-8">
+        {/* Action Buttons */}
+        <div className="flex justify-center items-center gap-4 mt-8">
           <Button
             onClick={() => router.push(`/journey/sessions/${sessionId}`)}
             className="group relative px-8 py-6 bg-gradient-to-r from-slate-500 to-slate-600 text-white rounded-2xl font-bold text-lg hover:from-slate-600 hover:to-slate-700 transition-all duration-300 shadow-2xl hover:shadow-3xl hover:-translate-y-1"
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-slate-400 to-slate-500 rounded-2xl blur opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-slate-400 to-slate-500 rounded-2xl blur opacity-30 group-hover:opacity-50 transition-opacity duration-300" />
             <div className="relative flex items-center gap-3">
               <span>Write Another Letter</span>
               <ArrowRight className="size-5 group-hover:translate-x-1 transition-transform duration-200" />
             </div>
           </Button>
-
           <Button
             onClick={saveStoryBoard}
             disabled={saving}
             className="group relative px-10 py-6 bg-gradient-to-r from-primary-green-500 to-primary-blue-500 text-white rounded-2xl font-bold text-lg hover:from-primary-green-600 hover:to-primary-blue-600 transition-all duration-300 shadow-2xl hover:shadow-3xl hover:-translate-y-1"
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-primary-green-400 to-primary-blue-400 rounded-2xl blur opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-primary-green-400 to-primary-blue-400 rounded-2xl blur opacity-30 group-hover:opacity-50 transition-opacity duration-300" />
             <div className="relative flex items-center gap-3">
               {saving ? (
                 <>

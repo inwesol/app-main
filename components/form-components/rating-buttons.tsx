@@ -18,24 +18,15 @@ interface RatingButtonsProps {
   value?: AllowedAnswer;
   onChange: (val: AllowedAnswer) => void;
   disabled?: boolean;
-  lowLabel: string;
-  highLabel: string;
 }
 
 export default function RatingButtons({
   value,
   onChange,
   disabled,
-  lowLabel,
-  highLabel,
 }: RatingButtonsProps) {
   return (
     <div className="space-y-4">
-      <div className="flex justify-between text-xs md:text-sm text-slate-600 font-medium">
-        <span>{lowLabel}</span>
-        <span>{highLabel}</span>
-      </div>
-
       <div className="flex flex-col md:flex-row gap-2 md:gap-3">
         {allowedAnswers.map((option) => (
           <Button

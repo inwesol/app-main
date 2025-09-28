@@ -186,7 +186,7 @@ import {
   uniqueIndex,
   jsonb,
 } from "drizzle-orm/pg-core";
-import { z } from "zod";
+// import { z } from "zod";
 
 export const user = pgTable("User", {
   id: uuid("id").primaryKey().notNull().defaultRandom(),
@@ -420,7 +420,7 @@ export const career_maturity_assessment = pgTable(
 
     user_id: uuid("user_id").notNull(),
 
-    // session_id: integer("session_id").notNull(),
+    session_id: integer("session_id").notNull().default(1),
 
     answers: varchar("answers", { length: 4000 }).notNull(),
 
@@ -430,29 +430,22 @@ export const career_maturity_assessment = pgTable(
   },
 
   (table) => ({
-    userUnique: unique().on(table.user_id),
+    userSessionUnique: unique().on(table.user_id, table.session_id),
   })
 );
 
 export const pre_assessment = pgTable(
   "pre_assessment",
-
   {
     id: uuid("id").primaryKey().notNull().defaultRandom(),
-
     user_id: uuid("user_id").notNull(),
-
-    // session_id: integer("session_id").notNull(),
-
+    session_id: integer("session_id").notNull().default(1),
     answers: varchar("answers", { length: 4000 }).notNull(),
-    // score: integer("score").notNull(),
     created_at: timestamp("created_at").defaultNow().notNull(),
-
     updated_at: timestamp("updated_at").defaultNow().notNull(),
   },
-
   (table) => ({
-    userUnique: unique().on(table.user_id),
+    userSessionUnique: unique().on(table.user_id, table.session_id),
   })
 );
 
@@ -462,6 +455,8 @@ export const riasec_test = pgTable(
     id: uuid("id").primaryKey().notNull().defaultRandom(),
 
     user_id: uuid("user_id").notNull(),
+
+    session_id: integer("session_id").notNull().default(2),
 
     // Store the raw array of selected answers as JSON text
     selected_answers: varchar("selected_answers", { length: 4000 }).notNull(),
@@ -478,7 +473,7 @@ export const riasec_test = pgTable(
     updated_at: timestamp("updated_at").defaultNow().notNull(),
   },
   (table) => ({
-    userUnique: unique().on(table.user_id),
+    userSessionUnique: unique().on(table.user_id, table.session_id),
   })
 );
 
@@ -488,6 +483,8 @@ export const personality_test = pgTable(
     id: uuid("id").primaryKey().notNull().defaultRandom(),
 
     user_id: uuid("user_id").notNull(),
+
+    session_id: integer("session_id").notNull().default(2),
 
     answers: varchar("answers", { length: 4000 }).notNull(), // JSON stringified answers
 
@@ -503,7 +500,7 @@ export const personality_test = pgTable(
     updated_at: timestamp("updated_at").defaultNow().notNull(),
   },
   (table) => ({
-    userUnique: unique().on(table.user_id), // unique by user_id, or add session_id if required
+    userSessionUnique: unique().on(table.user_id, table.session_id), // unique by user_id and session_id
   })
 );
 
@@ -514,8 +511,7 @@ export const psychological_wellbeing_test = pgTable(
 
     user_id: uuid("user_id").notNull(),
 
-    // Uncomment if tracking session:
-    // session_id: integer("session_id").notNull(),
+    session_id: integer("session_id").notNull().default(1),
 
     answers: varchar("answers", { length: 4000 }).notNull(), // JSON string of answers
 
@@ -531,7 +527,7 @@ export const psychological_wellbeing_test = pgTable(
     updated_at: timestamp("updated_at").defaultNow().notNull(),
   },
   (table) => ({
-    userUnique: unique().on(table.user_id), // unique constraint on user_id (or user_id + session_id)
+    userSessionUnique: unique().on(table.user_id, table.session_id), // unique constraint on user_id + session_id
   })
 );
 
@@ -759,12 +755,13 @@ export const postCareerMaturityTable = pgTable(
     user_id: uuid("user_id")
       .notNull()
       .references(() => user.id),
+    session_id: integer("session_id").notNull().default(1),
     answers: jsonb("answers").notNull(),
     created_at: timestamp("created_at").defaultNow().notNull(),
     updated_at: timestamp("updated_at").defaultNow().notNull(),
   },
   (table) => ({
-    userSessionUnique: unique().on(table.user_id),
+    userSessionUnique: unique().on(table.user_id, table.session_id),
   })
 );
 
@@ -797,11 +794,11 @@ export const postCoachingAssessments = pgTable(
   "post_coaching_assessments",
   {
     id: uuid("id").primaryKey().notNull().defaultRandom(),
-    userId: varchar("user_id", { length: 255 }).notNull(),
-    sessionId: integer("session_id").notNull(),
+    userId: uuid("user_id").notNull(),
+    sessionId: integer("session_id").notNull().default(8),
     answers: jsonb("answers").notNull(),
-    createdAt: timestamp("created_at").defaultNow(),
-    updatedAt: timestamp("updated_at").defaultNow(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },
   (table) => ({
     uniqueUserSession: unique("unique_user_session_post_coaching").on(

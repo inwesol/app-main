@@ -16,8 +16,9 @@ import {
   Loader2,
 } from "lucide-react";
 import Header from "@/components/form-components/header";
-import { toast } from "@/components/toast";
 import { useRouter } from "next/navigation";
+import { toast } from "@/components/toast";
+
 interface StickyNote {
   id: string;
   content: string;
@@ -26,7 +27,7 @@ interface StickyNote {
   createdAt: Date;
 }
 
-interface CareerStorySixProps {
+interface CareerStory5Props {
   className?: string;
   sessionId: number; // Add sessionId prop
 }
@@ -104,10 +105,10 @@ const DEFAULT_STICKY_NOTES: StickyNote[] = [
   },
 ];
 
-export function CareerStorySix({
+export default function CareerStory5({
   className = "",
   sessionId,
-}: CareerStorySixProps) {
+}: CareerStory5Props) {
   const [stickyNotes, setStickyNotes] = useState<StickyNote[]>([]);
   const [editingNote, setEditingNote] = useState<string | null>(null);
   const [editContent, setEditContent] = useState("");
@@ -127,7 +128,7 @@ export function CareerStorySix({
   const loadStoryBoard = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/journey/sessions/7/a/career-story-5`);
+      const response = await fetch(`/api/journey/sessions/6/a/career-story-5`);
 
       if (response.ok) {
         const data = await response.json();
@@ -163,7 +164,7 @@ export function CareerStorySix({
   const saveStoryBoard = async () => {
     try {
       setSaving(true);
-      const response = await fetch(`/api/journey/sessions/7/a/career-story-5`, {
+      const response = await fetch(`/api/journey/sessions/6/a/career-story-5`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -369,6 +370,7 @@ export function CareerStorySix({
                   </span>
                   <div className="relative z-50">
                     <button
+                      type="button"
                       onClick={(e) => {
                         e.stopPropagation();
                         setShowColorPicker(!showColorPicker);
@@ -381,6 +383,7 @@ export function CareerStorySix({
                           {STICKY_COLORS.map((color) => (
                             <button
                               key={color.name}
+                              type="button"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 setSelectedColor(color);
@@ -519,6 +522,7 @@ export function CareerStorySix({
                         />
                         <div className="flex justify-end gap-2 mt-3">
                           <button
+                            type="button"
                             onClick={(e) => {
                               e.stopPropagation();
                               saveEdit();
@@ -528,6 +532,7 @@ export function CareerStorySix({
                             <Save className="size-4" />
                           </button>
                           <button
+                            type="button"
                             onClick={(e) => {
                               e.stopPropagation();
                               cancelEdit();
@@ -549,6 +554,7 @@ export function CareerStorySix({
                         </div>
                         <div className="absolute top-3 right-3 opacity-0 group-hover/note:opacity-100 transition-all duration-300 flex gap-2">
                           <button
+                            type="button"
                             onClick={(e) => {
                               e.stopPropagation();
                               startEditing(note);
@@ -559,6 +565,7 @@ export function CareerStorySix({
                             <Edit3 className="size-3" />
                           </button>
                           <button
+                            type="button"
                             onClick={(e) => {
                               e.stopPropagation();
                               deleteStickyNote(note.id);
@@ -671,24 +678,24 @@ export function CareerStorySix({
         </Card>
 
         {/* Final Save Progress Button */}
-        {/* Action Buttons */}
-        <div className="flex justify-center items-center gap-4 mt-8">
+        <div className="flex justify-center gap-4 mt-8">
           <Button
             onClick={() => router.push(`/journey/sessions/${sessionId}`)}
             className="group relative px-8 py-6 bg-gradient-to-r from-slate-500 to-slate-600 text-white rounded-2xl font-bold text-lg hover:from-slate-600 hover:to-slate-700 transition-all duration-300 shadow-2xl hover:shadow-3xl hover:-translate-y-1"
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-slate-400 to-slate-500 rounded-2xl blur opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-slate-400 to-slate-500 rounded-2xl blur opacity-30 group-hover:opacity-50 transition-opacity duration-300" />
             <div className="relative flex items-center gap-3">
               <span>Write Another Letter</span>
               <ArrowRight className="size-5 group-hover:translate-x-1 transition-transform duration-200" />
             </div>
           </Button>
+
           <Button
             onClick={saveStoryBoard}
             disabled={saving}
             className="group relative px-10 py-6 bg-gradient-to-r from-primary-green-500 to-primary-blue-500 text-white rounded-2xl font-bold text-lg hover:from-primary-green-600 hover:to-primary-blue-600 transition-all duration-300 shadow-2xl hover:shadow-3xl hover:-translate-y-1"
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-primary-green-400 to-primary-blue-400 rounded-2xl blur opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-primary-green-400 to-primary-blue-400 rounded-2xl blur opacity-30 group-hover:opacity-50 transition-opacity duration-300" />
             <div className="relative flex items-center gap-3">
               {saving ? (
                 <>

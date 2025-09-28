@@ -12,19 +12,16 @@ import {
   FileText,
   BarChart3,
   Award,
-  Info,
-  Clock,
-  CheckSquare,
   Loader2,
 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
-import Header from "@/components/form-components/header";
 import * as z from "zod";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
+import { JourneyBreadcrumbLayout } from "@/components/layouts/JourneyBreadcrumbLayout";
+import { useBreadcrumb } from "@/hooks/useBreadcrumb";
 
 interface Question {
   id: number;
@@ -158,6 +155,7 @@ export default function RiasecTest({ sessionId }: { sessionId: string }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
+  const { setQuestionnaireBreadcrumbs } = useBreadcrumb();
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -166,11 +164,19 @@ export default function RiasecTest({ sessionId }: { sessionId: string }) {
     },
   });
 
+  // Set breadcrumbs on component mount
+  useEffect(() => {
+    setQuestionnaireBreadcrumbs(sessionId, "Interest Assessment");
+  }, [sessionId, setQuestionnaireBreadcrumbs]);
+
   useEffect(() => {
     async function fetchSavedAnswers() {
+      const qId = "riasec-test";
       setIsLoading(true);
       try {
-        const response = await fetch("/api/journey/sessions/2/q/riasec-test");
+        const response = await fetch(
+          `/api/journey/sessions/${sessionId}/q/${qId}`
+        );
 
         if (response.status === 404) {
           // No saved answers found: reset to default empty array, hide results
@@ -209,7 +215,7 @@ export default function RiasecTest({ sessionId }: { sessionId: string }) {
     }
 
     fetchSavedAnswers();
-  }, [form]);
+  }, [form, sessionId]);
 
   const watchedAnswers = form.watch("selectedAnswers");
   const totalSelected = watchedAnswers.length;
@@ -220,14 +226,18 @@ export default function RiasecTest({ sessionId }: { sessionId: string }) {
   };
 
   const onSubmit = async (data: FormData) => {
+    const qId = "riasec-test";
     setIsSubmitting(true);
     try {
       // Send to backend
-      const response = await fetch("/api/journey/sessions/2/q/riasec-test", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
+      const response = await fetch(
+        `/api/journey/sessions/${sessionId}/q/${qId}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        }
+      );
       if (!response.ok) throw new Error("Submission failed");
       setShowResults(true);
     } catch (error) {
@@ -240,10 +250,10 @@ export default function RiasecTest({ sessionId }: { sessionId: string }) {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-primary-green-50 via-white to-primary-blue-50 flex items-center justify-center p-4">
+      <div className="flex items-center justify-center min-h-screen p-4 bg-gradient-to-br from-primary-green-50 via-white to-primary-blue-50">
         <div className="text-center">
-          <div className="animate-spin rounded-full size-12 border-b-2 border-primary-blue-600 mx-auto mb-4"></div>
-          <p className="text-slate-600 text-sm sm:text-base">Loading...</p>
+          <div className="mx-auto mb-4 border-b-2 rounded-full animate-spin size-12 border-primary-blue-600" />
+          <p className="text-sm text-slate-600 sm:text-base">Loading...</p>
         </div>
       </div>
     );
@@ -283,257 +293,202 @@ export default function RiasecTest({ sessionId }: { sessionId: string }) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-blue-50 via-white to-primary-green-50 p-4 sm:py-8">
-      <div className="max-w-4xl mx-auto">
-        <Header
-          headerIcon={BarChart3}
-          headerText="RIASEC Career Interest Assessment"
-          headerDescription="Discover your career personality and explore potential career paths that align with your interests and strengths."
-        />
-
-        <div className="grid md:grid-cols-3 gap-4 sm:gap-6 mb-8 sm:mb-12">
-          <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-4 sm:p-6 shadow-lg border border-slate-200 hover:shadow-xl transition-all duration-300">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="size-12 bg-gradient-to-r from-primary-blue-500 to-primary-green-500 rounded-xl flex items-center justify-center shadow-lg">
-                <Info className="size-6 text-white" />
+    <div className="p-3 bg-gradient-to-br from-primary-blue-50 via-white to-primary-green-50 sm:p-6">
+      <div className="max-w-6xl mx-auto">
+        <JourneyBreadcrumbLayout>
+          {/* Header Card - Matching pre-assessment style */}
+          {/* <div className="p-4 mb-6 border shadow-lg bg-white/90 backdrop-blur-sm border-slate-200/60 rounded-3xl sm:p-6 sm:mb-12">
+            <div className="flex flex-col items-center gap-3 sm:flex-row sm:gap-4">
+              <div className="shrink-0">
+                <div className="inline-flex items-center justify-center shadow-lg size-12 sm:size-16 bg-gradient-to-br from-primary-blue-500 to-primary-green-600 rounded-2xl">
+                  <BarChart3 className="text-white size-6 sm:size-8" />
+                </div>
               </div>
-              <h3 className="text-lg font-bold text-slate-800">
-                What is RIASEC?
-              </h3>
-            </div>
-            <p className="text-slate-600 leading-relaxed text-sm">
-              RIASEC is a career assessment model that categorizes interests
-              into six personality types:
-              <span className="font-semibold">
-                {" "}
-                Realistic, Investigative, Artistic, Social, Enterprising, and
-                Conventional.
-              </span>
-            </p>
-          </div>
-
-          <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-4 sm:p-6 shadow-lg border border-slate-200 hover:shadow-xl transition-all duration-300">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="size-12 bg-gradient-to-r from-primary-blue-500 to-primary-green-500 rounded-xl flex items-center justify-center shadow-lg">
-                <CheckSquare className="size-6 text-white" />
+              <div className="flex-1 text-center sm:text-left">
+                <h1 className="mb-1 text-xl font-bold sm:text-2xl lg:text-3xl text-slate-800">
+                  RIASEC Career Interest Assessment
+                </h1>
+                <p className="max-w-2xl text-sm text-slate-600 sm:text-base">
+                  Discover your career personality and explore potential career
+                  paths that align with your interests and strengths.
+                </p>
               </div>
-              <h3 className="text-lg font-bold text-slate-800">
-                How to Take It
-              </h3>
             </div>
-            <p className="text-slate-600 leading-relaxed text-sm">
-              Read each statement carefully and{" "}
-              <span className="font-semibold">
-                select the ones that describe you
-              </span>
-              . There are no right or wrong answers - choose based on your
-              genuine interests and preferences.
-            </p>
-          </div>
+          </div> */}
 
-          <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-4 sm:p-6 shadow-lg border border-slate-200 hover:shadow-xl transition-all duration-300">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="size-12 bg-gradient-to-r from-primary-blue-500 to-primary-green-500 rounded-xl flex items-center justify-center shadow-lg">
-                <Clock className="size-6 text-white" />
-              </div>
-              <h3 className="text-lg font-bold text-slate-800">
-                Time & Results
-              </h3>
-            </div>
-            <p className="text-slate-600 leading-relaxed text-sm">
-              Takes about <span className="font-semibold">5-10 minutes</span> to
-              complete. Your results will show your strongest interest areas and
-              suggest compatible career paths.
-            </p>
-          </div>
-        </div>
-
-        <div className="bg-gradient-to-r from-primary-blue-50 to-primary-green-50 rounded-2xl p-6 sm:p-8 mb-8 border-2 border-slate-200 shadow-lg">
-          <div className="flex flex-col gap-4">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="size-12 bg-gradient-to-r from-primary-blue-500 to-primary-green-500 rounded-xl flex items-center justify-center shadow-lg">
-                <BarChart3 className="size-6 text-white" />
+          {/* Instructions Card */}
+          <div className="p-4 mb-6 border shadow-sm bg-gradient-to-r from-primary-blue-50 to-primary-green-50 rounded-2xl sm:p-6 border-slate-200/60">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="flex items-center justify-center rounded-lg shadow-md size-10 bg-gradient-to-r from-primary-blue-500 to-primary-green-500">
+                <BarChart3 className="text-white size-5" />
               </div>
               <h3 className="text-lg font-bold text-slate-800">Instructions</h3>
             </div>
-            <div className="flex-1">
-              <div className="grid sm:grid-cols-2 gap-4 text-slate-700">
-                <div className="space-y-3">
-                  <div className="flex items-start gap-3">
-                    <div className="size-6 bg-primary-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold shrink-0 mt-0.5">
-                      1
-                    </div>
-                    <p className="text-sm leading-relaxed">
-                      <span className="font-semibold">Read each statement</span>{" "}
-                      carefully and think about whether it describes your
-                      interests or preferences.
-                    </p>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className="size-6 bg-primary-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold shrink-0 mt-0.5">
-                      2
-                    </div>
-                    <p className="text-sm leading-relaxed">
-                      <span className="font-semibold">Click to select</span>{" "}
-                      statements that resonate with you. You can select as many
-                      or as few as you like.
-                    </p>
-                  </div>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 text-slate-700">
+              <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center text-sm font-bold text-white rounded-full size-6 bg-primary-blue-500 shrink-0">
+                  1
                 </div>
-                <div className="space-y-3">
-                  <div className="flex items-start gap-3">
-                    <div className="size-6 bg-primary-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold shrink-0 mt-0.5">
-                      3
-                    </div>
-                    <p className="text-sm leading-relaxed">
-                      <span className="font-semibold">Be honest</span> - choose
-                      based on what you genuinely enjoy, not what you think you
-                      should like.
-                    </p>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className="size-6 bg-primary-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold shrink-0 mt-0.5">
-                      4
-                    </div>
-                    <p className="text-sm leading-relaxed">
-                      <span className="font-semibold">View your results</span>{" "}
-                      to see your interest profile and explore career
-                      suggestions.
-                    </p>
-                  </div>
+                <p className="text-sm leading-relaxed">
+                  <span className="font-semibold">Read</span> each statement
+                  carefully
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center text-sm font-bold text-white rounded-full size-6 bg-primary-blue-500 shrink-0">
+                  2
                 </div>
+                <p className="text-sm leading-relaxed">
+                  <span className="font-semibold">Click</span> to select what
+                  resonates
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center text-sm font-bold text-white rounded-full size-6 bg-primary-blue-500 shrink-0">
+                  3
+                </div>
+                <p className="text-sm leading-relaxed">
+                  <span className="font-semibold">Be honest</span> about your
+                  interests
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center text-sm font-bold text-white rounded-full size-6 bg-primary-blue-500 shrink-0">
+                  4
+                </div>
+                <p className="text-sm leading-relaxed">
+                  <span className="font-semibold">View results</span> and
+                  explore careers
+                </p>
               </div>
             </div>
           </div>
-        </div>
 
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <div className="mb-6 sm:mb-8">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-sm font-medium text-slate-600">
-                  {totalSelected} of {questions.length} statements selected
-                </span>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              {/* Reset Button Only */}
+              <div className="flex justify-end">
                 <Button
                   type="button"
                   variant="outline"
                   onClick={handleClearAll}
-                  className="px-4 py-2 text-sm rounded-lg hover:scale-105"
+                  className="px-4 py-2 text-sm transition-all duration-200 rounded-lg hover:scale-105"
                   aria-label="Clear all selections"
                 >
-                  <RotateCcw className="size-4" />
+                  <RotateCcw className="mr-2 size-4" />
                   Reset All
                 </Button>
               </div>
-            </div>
 
-            <div className="grid gap-4 mb-6 sm:mb-8 lg:grid-cols-2">
-              {questions.map((question) => {
-                const selectedAnswers = form.watch("selectedAnswers");
-                const isSelected = selectedAnswers.includes(question.text);
-                const CategoryIcon = categoryInfo[question.category].icon;
+              {/* Questions Grid - 3 columns */}
+              <div className="grid gap-3 mb-6 sm:grid-cols-2 lg:grid-cols-3">
+                {questions.map((question) => {
+                  const selectedAnswers = form.watch("selectedAnswers");
+                  const isSelected = selectedAnswers.includes(question.text);
+                  const CategoryIcon = categoryInfo[question.category].icon;
 
-                const handleToggle = () => {
-                  const currentValue = selectedAnswers;
-                  if (isSelected) {
-                    form.setValue(
-                      "selectedAnswers",
-                      currentValue.filter(
-                        (answer: string) => answer !== question.text
-                      )
-                    );
-                  } else {
-                    form.setValue("selectedAnswers", [
-                      ...currentValue,
-                      question.text,
-                    ]);
-                  }
-                };
+                  const handleToggle = () => {
+                    const currentValue = selectedAnswers;
+                    if (isSelected) {
+                      form.setValue(
+                        "selectedAnswers",
+                        currentValue.filter(
+                          (answer: string) => answer !== question.text
+                        )
+                      );
+                    } else {
+                      form.setValue("selectedAnswers", [
+                        ...currentValue,
+                        question.text,
+                      ]);
+                    }
+                  };
 
-                return (
-                  <div
-                    key={question.id}
-                    className={`group relative overflow-hidden rounded-2xl shadow-lg transition-all duration-300 cursor-pointer hover:scale-[1.02] hover:shadow-xl border-2 ${
-                      isSelected
-                        ? "border-primary-blue-300"
-                        : "border-slate-200"
-                    }`}
-                    onClick={handleToggle}
-                    role="checkbox"
-                    aria-checked={isSelected}
-                    tabIndex={0}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === " ") {
-                        e.preventDefault();
-                        handleToggle();
-                      }
-                    }}
-                  >
-                    <div className="relative p-4 sm:p-6 flex items-center space-x-4 bg-white">
-                      <div
-                        className={`shrink-0 size-12 sm:size-14 rounded-xl flex items-center justify-center transition-all duration-300 shadow-lg ${
-                          isSelected
-                            ? "bg-primary-blue-500 text-white"
-                            : "bg-slate-100 group-hover:bg-slate-200 text-slate-600"
-                        }`}
-                      >
-                        <CategoryIcon className="size-5 sm:size-6" />
-                      </div>
-
-                      <div className="flex-1 min-w-0">
-                        <p
-                          className={`text-sm sm:text-base font-semibold transition-colors duration-300 leading-relaxed ${
+                  return (
+                    <div
+                      key={question.id}
+                      className={`group relative overflow-hidden rounded-lg shadow-sm transition-all duration-200 cursor-pointer hover:scale-[1.01] hover:shadow-md border ${
+                        isSelected
+                          ? "border-primary-blue-300 bg-primary-blue-50/50"
+                          : "border-slate-200 bg-white hover:border-slate-300"
+                      }`}
+                      onClick={handleToggle}
+                      role="checkbox"
+                      aria-checked={isSelected}
+                      tabIndex={0}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          handleToggle();
+                        }
+                      }}
+                    >
+                      <div className="relative flex items-start p-3 space-x-3">
+                        <div
+                          className={`shrink-0 size-8 rounded-lg flex items-center justify-center transition-all duration-200 ${
                             isSelected
-                              ? "text-slate-800"
-                              : "text-slate-700 group-hover:text-slate-900"
+                              ? "bg-primary-blue-500 text-white shadow-md"
+                              : "bg-slate-100 group-hover:bg-slate-200 text-slate-600"
                           }`}
                         >
-                          {question.text}
-                        </p>
-                      </div>
+                          <CategoryIcon className="size-4" />
+                        </div>
 
-                      <div className="shrink-0">
-                        {isSelected ? (
-                          <CheckCircle2 className="size-4 sm:size-5 text-primary-green-500" />
-                        ) : (
-                          <Circle className="size-4 sm:size-5 text-slate-400" />
-                        )}
+                        <div className="flex-1 min-w-0">
+                          <p
+                            className={`text-xs sm:text-sm font-medium transition-colors duration-200 leading-relaxed ${
+                              isSelected
+                                ? "text-slate-800"
+                                : "text-slate-700 group-hover:text-slate-900"
+                            }`}
+                          >
+                            {question.text}
+                          </p>
+                        </div>
+
+                        <div className="shrink-0 mt-0.5">
+                          {isSelected ? (
+                            <CheckCircle2 className="size-3 text-primary-green-500" />
+                          ) : (
+                            <Circle className="size-3 text-slate-400" />
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
 
-            <div className="flex justify-center pt-6 border-t border-slate-200 mt-6">
-              <Button
-                type="submit"
-                disabled={isSubmitting || watchedAnswers.length === 0}
-                className="px-8 py-4 sm:px-10 sm:py-6 bg-gradient-to-r from-primary-green-500 to-primary-green-600 hover:from-primary-green-600 hover:to-primary-green-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300 flex items-center gap-2 sm:text-base disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-              >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="size-5 sm:size-6 animate-spin" />
-                    Processing...
-                  </>
-                ) : (
-                  <>
-                    <Award className="size-5 sm:size-6" />
-                    Complete Assessment
-                  </>
-                )}
-              </Button>
-            </div>
-          </form>
-        </Form>
+              {/* Submit Button */}
+              <div className="flex justify-center pt-4 border-t border-slate-200/60">
+                <Button
+                  type="submit"
+                  disabled={isSubmitting || watchedAnswers.length === 0}
+                  className="px-6 py-3 sm:px-8 sm:py-4 bg-gradient-to-r from-primary-green-500 to-primary-green-600 hover:from-primary-green-600 hover:to-primary-green-700 text-white font-semibold rounded-lg shadow-md hover:shadow-lg hover:scale-[1.02] transition-all duration-200 flex items-center gap-2 text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="size-4 sm:size-5 animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      <Award className="size-4 sm:size-5" />
+                      Complete Assessment
+                    </>
+                  )}
+                </Button>
+              </div>
+            </form>
+          </Form>
 
-        <div className="text-center text-slate-600 bg-white/60 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-white/20 mt-6 sm:mt-8">
-          <p className="text-sm sm:text-base leading-relaxed">
+          {/* Muted footer text without div wrapper */}
+          <p className="mt-6 text-xs italic font-light text-center text-slate-500">
             The RIASEC model was developed by psychologist John Holland to help
             people understand their career interests and find suitable work
-            environments that match their personality.
+            environments.
           </p>
-        </div>
+        </JourneyBreadcrumbLayout>
       </div>
     </div>
   );

@@ -10,7 +10,6 @@ import {
   Target,
   HelpCircle,
   Sparkles,
-  TrendingUp,
   Save,
   Loader2,
 } from "lucide-react";
@@ -43,9 +42,9 @@ interface CareerOptionsMatrixProps {
   sessionId: string;
 }
 
-export const CareerOptionsMatrix: React.FC<CareerOptionsMatrixProps> = ({
+export default function CareerOptionsMatrix({
   sessionId,
-}) => {
+}: CareerOptionsMatrixProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const router = useRouter();
@@ -455,7 +454,7 @@ export const CareerOptionsMatrix: React.FC<CareerOptionsMatrixProps> = ({
                 <div
                   className="bg-gradient-to-r from-emerald-500 to-primary-green-500 h-3 rounded-full transition-all duration-700 shadow-sm"
                   style={{ width: `${getCompletionPercentage()}%` }}
-                ></div>
+                />
               </div>
             </div>
             <p className="text-xs text-emerald-600">
@@ -500,7 +499,7 @@ export const CareerOptionsMatrix: React.FC<CareerOptionsMatrixProps> = ({
             </Button>
             <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 bg-emerald-800 text-white text-xs px-3 py-1 rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-lg">
               Add Career Option
-              <div className="absolute -top-1 left-1/2 -translate-x-1/2 size-2 bg-emerald-800 rotate-45"></div>
+              <div className="absolute -top-1 left-1/2 -translate-x-1/2 size-2 bg-emerald-800 rotate-45" />
             </div>
           </div>
 
@@ -515,7 +514,7 @@ export const CareerOptionsMatrix: React.FC<CareerOptionsMatrixProps> = ({
             </Button>
             <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-primary-blue-800 text-white text-xs px-3 py-1 rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-lg">
               Add Criteria
-              <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 size-2 bg-primary-blue-800 rotate-45"></div>
+              <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 size-2 bg-primary-blue-800 rotate-45" />
             </div>
           </div>
 
@@ -609,6 +608,7 @@ export const CareerOptionsMatrix: React.FC<CareerOptionsMatrixProps> = ({
                               <div className="flex items-center gap-1">
                                 {[1, 2, 3, 4, 5].map((weight) => (
                                   <button
+                                    type="button"
                                     key={weight}
                                     onClick={() =>
                                       updateRowWeight(row.id, weight)
@@ -660,6 +660,7 @@ export const CareerOptionsMatrix: React.FC<CareerOptionsMatrixProps> = ({
                                 <div className="flex gap-1 justify-center">
                                   {[1, 2, 3, 4, 5].map((score) => (
                                     <button
+                                      type="button"
                                       key={score}
                                       onClick={() =>
                                         updateCellValue(
@@ -879,7 +880,7 @@ export const CareerOptionsMatrix: React.FC<CareerOptionsMatrixProps> = ({
                 },
               ].map((tip, index) => (
                 <div
-                  key={index}
+                  key={tip.icon}
                   className="flex items-start gap-3 p-3 bg-white/80 rounded-lg shadow-sm backdrop-blur-sm"
                 >
                   <span className="text-xl shrink-0">{tip.icon}</span>
@@ -899,6 +900,4 @@ export const CareerOptionsMatrix: React.FC<CareerOptionsMatrixProps> = ({
       </div>
     </div>
   );
-};
-
-export default CareerOptionsMatrix;
+}
