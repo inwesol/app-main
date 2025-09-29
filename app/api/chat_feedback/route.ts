@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { chat_feedback } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";

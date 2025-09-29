@@ -371,6 +371,7 @@ export const journey_progress = pgTable("journey_progress", {
   completed_sessions: json("completed_sessions").notNull(), // array of numbers
   total_score: integer("total_score").notNull(),
   last_active_date: varchar("last_active_date", { length: 32 }).notNull(), // or timestamp
+  enable_by_coach: jsonb("enable_by_coach").default({}), // JSONB for coach-enabled features
   created_at: timestamp("created_at").defaultNow().notNull(),
   updated_at: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -386,6 +387,7 @@ export const user_session_form_progress = pgTable(
     status: varchar("status", { length: 32 }).notNull(), // completed | in-progress | not-started
     score: integer("score"),
     completed_at: varchar("completed_at", { length: 32 }), // ISO string
+    insights: jsonb("insights").default({}), // JSONB for storing user insights like values
     updated_at: timestamp("updated_at").defaultNow().notNull(),
   }
 );
@@ -717,6 +719,9 @@ export const careerStoryOneTable = pgTable(
         }>
       >()
       .notNull(),
+    mediaPreferences: text("media_preferences").notNull().default(""),
+    favoriteStory: text("favorite_story").notNull().default(""),
+    favoriteSaying: text("favorite_saying").notNull().default(""),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },

@@ -16,6 +16,11 @@ export const careerStoryOneSchema = z.object({
       })
     )
     .min(1, "Please add at least one hero"),
+  mediaPreferences: z.string().min(1, "Please share your media preferences"),
+  favoriteStory: z.string().min(20, "Please describe your favorite story"),
+  favoriteSaying: z
+    .string()
+    .min(1, "Please share your favorite saying or motto"),
 });
 
 export type CareerStoryOneData = z.infer<typeof careerStoryOneSchema>;

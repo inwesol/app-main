@@ -903,6 +903,7 @@ export async function getUserJourneyProgress(userId: string) {
     completedSessions: progress.completed_sessions, // JSON array
     totalScore: progress.total_score,
     lastActiveDate: progress.last_active_date,
+    enableByCoach: progress.enable_by_coach, // JSONB for coach-enabled features
   };
 }
 
@@ -939,6 +940,7 @@ export async function createUserJourneyProgress({
     completedSessions: created.completed_sessions,
     totalScore: created.total_score,
     lastActiveDate: created.last_active_date,
+    enableByCoach: created.enable_by_coach,
   };
 }
 // for session details page
@@ -2214,6 +2216,9 @@ export async function getCareerStoryOne(
         title: string;
         description: string;
       }>,
+      mediaPreferences: result.mediaPreferences,
+      favoriteStory: result.favoriteStory,
+      favoriteSaying: result.favoriteSaying,
     };
   } catch (error) {
     console.error("Error getting career story one:", error);
@@ -2235,6 +2240,9 @@ export async function upsertCareerStoryOne(
         transitionEssay: data.transitionEssay,
         occupations: data.occupations,
         heroes: data.heroes,
+        mediaPreferences: data.mediaPreferences,
+        favoriteStory: data.favoriteStory,
+        favoriteSaying: data.favoriteSaying,
         updatedAt: new Date(),
       })
       .onConflictDoUpdate({
@@ -2243,6 +2251,9 @@ export async function upsertCareerStoryOne(
           transitionEssay: data.transitionEssay,
           occupations: data.occupations,
           heroes: data.heroes,
+          mediaPreferences: data.mediaPreferences,
+          favoriteStory: data.favoriteStory,
+          favoriteSaying: data.favoriteSaying,
           updatedAt: new Date(),
         },
       });
@@ -2726,6 +2737,179 @@ export async function upsertJournalEntry(
     return entry;
   } catch (error) {
     console.error("Error upserting journal entry:", error);
+    throw error;
+  }
+}
+
+// DELETE functions for all activity tables
+
+export async function deleteCareerStoryOne(
+  userId: string,
+  sessionId: number
+): Promise<void> {
+  try {
+    await db
+      .delete(careerStoryOneTable)
+      .where(
+        and(
+          eq(careerStoryOneTable.userId, userId),
+          eq(careerStoryOneTable.sessionId, sessionId)
+        )
+      );
+  } catch (error) {
+    console.error("Error deleting career story one:", error);
+    throw error;
+  }
+}
+
+export async function deleteCareerStoryTwo(
+  userId: string,
+  sessionId: number
+): Promise<void> {
+  try {
+    await db
+      .delete(careerStoryTwo)
+      .where(
+        and(
+          eq(careerStoryTwo.userId, userId),
+          eq(careerStoryTwo.sessionId, sessionId)
+        )
+      );
+  } catch (error) {
+    console.error("Error deleting career story two:", error);
+    throw error;
+  }
+}
+
+export async function deleteCareerStoryThree(
+  userId: string,
+  sessionId: number
+): Promise<void> {
+  try {
+    await db
+      .delete(careerStoryThree)
+      .where(
+        and(
+          eq(careerStoryThree.userId, userId),
+          eq(careerStoryThree.sessionId, sessionId)
+        )
+      );
+  } catch (error) {
+    console.error("Error deleting career story three:", error);
+    throw error;
+  }
+}
+
+export async function deleteCareerStoryFour(
+  userId: string,
+  sessionId: number
+): Promise<void> {
+  try {
+    await db
+      .delete(careerStoryFours)
+      .where(
+        and(
+          eq(careerStoryFours.userId, userId),
+          eq(careerStoryFours.sessionId, sessionId)
+        )
+      );
+  } catch (error) {
+    console.error("Error deleting career story four:", error);
+    throw error;
+  }
+}
+
+export async function deleteCareerStoryBoard(
+  userId: string,
+  sessionId: number
+): Promise<void> {
+  try {
+    await db
+      .delete(career_story_boards)
+      .where(
+        and(
+          eq(career_story_boards.user_id, userId),
+          eq(career_story_boards.session_id, sessionId)
+        )
+      );
+  } catch (error) {
+    console.error("Error deleting career story board:", error);
+    throw error;
+  }
+}
+
+export async function deleteDailyJournaling(
+  userId: string,
+  sessionId: number
+): Promise<void> {
+  try {
+    await db
+      .delete(dailyJournalingTable)
+      .where(
+        and(
+          eq(dailyJournalingTable.userId, userId),
+          eq(dailyJournalingTable.sessionId, sessionId)
+        )
+      );
+  } catch (error) {
+    console.error("Error deleting daily journaling:", error);
+    throw error;
+  }
+}
+
+export async function deleteLetterFromFutureSelf(
+  userId: string,
+  sessionId: number
+): Promise<void> {
+  try {
+    await db
+      .delete(letterFromFutureSelfTable)
+      .where(
+        and(
+          eq(letterFromFutureSelfTable.userId, userId),
+          eq(letterFromFutureSelfTable.sessionId, sessionId)
+        )
+      );
+  } catch (error) {
+    console.error("Error deleting letter from future self:", error);
+    throw error;
+  }
+}
+
+export async function deleteCareerOptionsMatrix(
+  userId: string,
+  sessionId: number
+): Promise<void> {
+  try {
+    await db
+      .delete(careerOptionsMatrix)
+      .where(
+        and(
+          eq(careerOptionsMatrix.userId, userId),
+          eq(careerOptionsMatrix.sessionId, sessionId)
+        )
+      );
+  } catch (error) {
+    console.error("Error deleting career options matrix:", error);
+    throw error;
+  }
+}
+
+export async function deleteMyLifeCollage(
+  userId: string,
+  sessionId: number
+): Promise<void> {
+  try {
+    await db
+      .delete(myLifeCollageTable)
+      .where(
+        and(
+          eq(myLifeCollageTable.userId, userId),
+          eq(myLifeCollageTable.sessionId, sessionId)
+        )
+      );
+  } catch (error) {
+    console.error("Error deleting my life collage:", error);
     throw error;
   }
 }

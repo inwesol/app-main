@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { auth } from "@/app/(auth)/auth";
 import {
   getUserJourneyProgress,
@@ -25,5 +25,6 @@ export async function GET(request: NextRequest) {
       lastActiveDate: new Date().toISOString(),
     });
   }
+
   return NextResponse.json(progress);
 }

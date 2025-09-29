@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { auth } from "@/app/(auth)/auth";
 import {
   getCareerStoryBoard,
@@ -690,6 +690,207 @@ export async function POST(
       return NextResponse.json(
         { error: "Unknown activityId" }
         // { status: 404 }
+      );
+  }
+}
+
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ sessionId: string; aId: string }> }
+) {
+  const { aId, sessionId } = await params;
+
+  const session = await auth();
+  if (!session?.user?.id) {
+    return new NextResponse("Unauthorized", { status: 401 });
+  }
+
+  console.log(
+    "DELETE activity API called - aId:",
+    aId,
+    "sessionId:",
+    sessionId
+  );
+
+  // Validate sessionId
+  const sessionIdNum = Number(sessionId);
+  if (Number.isNaN(sessionIdNum)) {
+    return new NextResponse("Bad Request: Invalid session ID", {
+      status: 400,
+    });
+  }
+
+  switch (aId) {
+    case "career-story-1":
+      try {
+        console.log("Career Story 1 DELETE - Session ID:", sessionId);
+        console.log("Career Story 1 DELETE - User ID:", session.user.id);
+
+        // Import the delete function (we'll need to create this)
+        const { deleteCareerStoryOne } = await import("@/lib/db/queries");
+
+        await deleteCareerStoryOne(session.user.id, sessionIdNum);
+
+        return NextResponse.json({
+          success: true,
+          message: "Career story 1 data deleted successfully",
+        });
+      } catch (err) {
+        console.error("Error deleting career story 1:", err);
+        return new NextResponse("Internal Server Error", { status: 500 });
+      }
+
+    case "career-story-2":
+      try {
+        console.log("Career Story 2 DELETE - Session ID:", sessionId);
+        console.log("Career Story 2 DELETE - User ID:", session.user.id);
+
+        const { deleteCareerStoryTwo } = await import("@/lib/db/queries");
+
+        await deleteCareerStoryTwo(session.user.id, sessionIdNum);
+
+        return NextResponse.json({
+          success: true,
+          message: "Career story 2 data deleted successfully",
+        });
+      } catch (err) {
+        console.error("Error deleting career story 2:", err);
+        return new NextResponse("Internal Server Error", { status: 500 });
+      }
+
+    case "career-story-3":
+      try {
+        console.log("Career Story 3 DELETE - Session ID:", sessionId);
+        console.log("Career Story 3 DELETE - User ID:", session.user.id);
+
+        const { deleteCareerStoryThree } = await import("@/lib/db/queries");
+
+        await deleteCareerStoryThree(session.user.id, sessionIdNum);
+
+        return NextResponse.json({
+          success: true,
+          message: "Career story 3 data deleted successfully",
+        });
+      } catch (err) {
+        console.error("Error deleting career story 3:", err);
+        return new NextResponse("Internal Server Error", { status: 500 });
+      }
+
+    case "career-story-4":
+      try {
+        console.log("Career Story 4 DELETE - Session ID:", sessionId);
+        console.log("Career Story 4 DELETE - User ID:", session.user.id);
+
+        const { deleteCareerStoryFour } = await import("@/lib/db/queries");
+
+        await deleteCareerStoryFour(session.user.id, sessionIdNum);
+
+        return NextResponse.json({
+          success: true,
+          message: "Career story 4 data deleted successfully",
+        });
+      } catch (err) {
+        console.error("Error deleting career story 4:", err);
+        return new NextResponse("Internal Server Error", { status: 500 });
+      }
+
+    case "career-story-5":
+      try {
+        console.log("Career Story Board DELETE - Session ID:", sessionId);
+        console.log("Career Story Board DELETE - User ID:", session.user.id);
+
+        const { deleteCareerStoryBoard } = await import("@/lib/db/queries");
+
+        await deleteCareerStoryBoard(session.user.id, sessionIdNum);
+
+        return NextResponse.json({
+          success: true,
+          message: "Career story board data deleted successfully",
+        });
+      } catch (err) {
+        console.error("Error deleting career story board:", err);
+        return new NextResponse("Internal Server Error", { status: 500 });
+      }
+
+    case "daily-journaling":
+      try {
+        console.log("Daily Journaling DELETE - Session ID:", sessionId);
+        console.log("Daily Journaling DELETE - User ID:", session.user.id);
+
+        const { deleteDailyJournaling } = await import("@/lib/db/queries");
+
+        await deleteDailyJournaling(session.user.id, sessionIdNum);
+
+        return NextResponse.json({
+          success: true,
+          message: "Daily journaling data deleted successfully",
+        });
+      } catch (err) {
+        console.error("Error deleting daily journaling:", err);
+        return new NextResponse("Internal Server Error", { status: 500 });
+      }
+
+    case "letter-from-future-self":
+      try {
+        console.log("Letter from Future Self DELETE - Session ID:", sessionId);
+        console.log(
+          "Letter from Future Self DELETE - User ID:",
+          session.user.id
+        );
+
+        const { deleteLetterFromFutureSelf } = await import("@/lib/db/queries");
+
+        await deleteLetterFromFutureSelf(session.user.id, sessionIdNum);
+
+        return NextResponse.json({
+          success: true,
+          message: "Letter from future self data deleted successfully",
+        });
+      } catch (err) {
+        console.error("Error deleting letter from future self:", err);
+        return new NextResponse("Internal Server Error", { status: 500 });
+      }
+
+    case "career-options-matrix":
+      try {
+        console.log("Career Options Matrix DELETE - Session ID:", sessionId);
+        console.log("Career Options Matrix DELETE - User ID:", session.user.id);
+
+        const { deleteCareerOptionsMatrix } = await import("@/lib/db/queries");
+
+        await deleteCareerOptionsMatrix(session.user.id, sessionIdNum);
+
+        return NextResponse.json({
+          success: true,
+          message: "Career options matrix data deleted successfully",
+        });
+      } catch (err) {
+        console.error("Error deleting career options matrix:", err);
+        return new NextResponse("Internal Server Error", { status: 500 });
+      }
+
+    case "my-life-collage":
+      try {
+        console.log("My Life Collage DELETE - Session ID:", sessionId);
+        console.log("My Life Collage DELETE - User ID:", session.user.id);
+
+        const { deleteMyLifeCollage } = await import("@/lib/db/queries");
+
+        await deleteMyLifeCollage(session.user.id, sessionIdNum);
+
+        return NextResponse.json({
+          success: true,
+          message: "My life collage data deleted successfully",
+        });
+      } catch (err) {
+        console.error("Error deleting my life collage:", err);
+        return new NextResponse("Internal Server Error", { status: 500 });
+      }
+
+    default:
+      return NextResponse.json(
+        { error: "Unknown activityId" },
+        { status: 404 }
       );
   }
 }
