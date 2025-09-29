@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import {
   Send,
   Clock,
@@ -21,16 +21,12 @@ import { Button } from "@/components/ui/button";
 import { TextArea } from "@/components/activity-components/text-area";
 import Header from "@/components/form-components/header";
 
-interface LetterFromFutureSelfProps {
-  sessionId: number;
-  activityId: string;
-}
-
-export default function LetterFromFutureSelf({
-  sessionId,
-  activityId,
-}: LetterFromFutureSelfProps) {
+export default function LetterFromFutureSelf() {
+  const params = useParams();
   const router = useRouter();
+  const sessionId = params?.sessionId as string;
+  const activityId = params?.activityId as string;
+
   const [formData, setFormData] = useState({
     letter: "",
   });
@@ -105,9 +101,9 @@ export default function LetterFromFutureSelf({
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-primary-green-50 via-teal-50 to-primary-blue-50 flex items-center justify-center p-4">
+      <div className="flex items-center justify-center min-h-screen p-4 bg-gradient-to-br from-primary-green-50 via-teal-50 to-primary-blue-50">
         <div className="text-center">
-          <div className="animate-spin rounded-full size-12 border-b-2 border-primary-green-600 mx-auto" />
+          <div className="mx-auto border-b-2 rounded-full animate-spin size-12 border-primary-green-600" />
           <p className="mt-4 text-slate-600">Loading...</p>
         </div>
       </div>
@@ -116,34 +112,34 @@ export default function LetterFromFutureSelf({
 
   if (isSubmitted) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-primary-green-50 via-teal-50 to-primary-blue-50 flex items-center justify-center p-4">
-        <Card className="w-full max-w-2xl border-primary-green-200 bg-white/90 backdrop-blur-sm shadow-xl">
-          <CardHeader className="text-center pb-6">
-            <div className="mx-auto mb-4 size-16 bg-gradient-to-br from-primary-green-500 to-teal-600 rounded-full flex items-center justify-center">
-              <Sparkles className="size-8 text-white" />
+      <div className="flex items-center justify-center min-h-screen p-4 bg-gradient-to-br from-primary-green-50 via-teal-50 to-primary-blue-50">
+        <Card className="w-full max-w-2xl shadow-xl border-primary-green-200 bg-white/90 backdrop-blur-sm">
+          <CardHeader className="pb-6 text-center">
+            <div className="flex items-center justify-center mx-auto mb-4 rounded-full size-16 bg-gradient-to-br from-primary-green-500 to-teal-600">
+              <Sparkles className="text-white size-8" />
             </div>
-            <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary-green-600 to-teal-600 bg-clip-text text-transparent">
+            <CardTitle className="text-3xl font-bold text-transparent bg-gradient-to-r from-primary-green-600 to-teal-600 bg-clip-text">
               Letter Received!
             </CardTitle>
-            <CardDescription className="text-lg text-slate-600 mt-2">
+            <CardDescription className="mt-2 text-lg text-slate-600">
               Your future self has sent you a message of wisdom and
               encouragement
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="bg-gradient-to-r from-primary-green-50 to-teal-50 p-6 rounded-lg border border-primary-green-200">
-              <h3 className="font-semibold text-primary-green-800 mb-3 flex items-center gap-2">
+            <div className="p-6 border rounded-lg bg-gradient-to-r from-primary-green-50 to-teal-50 border-primary-green-200">
+              <h3 className="flex items-center gap-2 mb-3 font-semibold text-primary-green-800">
                 <Heart className="size-5 text-primary-green-600" />
                 Your Letter from the Future
               </h3>
-              <div className="whitespace-pre-wrap text-slate-700 leading-relaxed font-medium">
+              <div className="font-medium leading-relaxed whitespace-pre-wrap text-slate-700">
                 {formData.letter}
               </div>
             </div>
             <div className="flex justify-center">
               <Button
                 onClick={handleWriteAnother}
-                className="bg-gradient-to-r from-primary-green-500 to-teal-600 hover:from-primary-green-600 hover:to-teal-700 text-white font-medium px-8 py-3 rounded-lg shadow-md transition-all duration-300 hover:scale-105"
+                className="px-8 py-3 font-medium text-white transition-all duration-300 rounded-lg shadow-md bg-gradient-to-r from-primary-green-500 to-teal-600 hover:from-primary-green-600 hover:to-teal-700 hover:scale-105"
               >
                 Write Another Letter
               </Button>
@@ -155,7 +151,7 @@ export default function LetterFromFutureSelf({
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-primary-blue-50 to primary-green-50 p-4 sm:py-8">
+    <div className="min-h-screen p-4 bg-gradient-to-br from-primary-primary-blue-50 to primary-green-50 sm:py-8">
       <div className="max-w-4xl mx-auto">
         {/* header */}
         <Header
@@ -165,8 +161,8 @@ export default function LetterFromFutureSelf({
             achieved your goals and grown through challenges. What would your
             future self advise you? What would they prioritize?"
         />
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <div className="bg-gradient-to-br from-primary-green-50 to-primary-green-100 p-4 rounded-lg border border-primary-green-200">
+        <div className="grid grid-cols-1 gap-4 mb-6 md:grid-cols-3">
+          <div className="p-4 border rounded-lg bg-gradient-to-br from-primary-green-50 to-primary-green-100 border-primary-green-200">
             <div className="flex items-center gap-2 mb-2">
               <Clock className="size-5 text-primary-green-600" />
               <h3 className="font-semibold text-primary-green-800">
@@ -178,9 +174,9 @@ export default function LetterFromFutureSelf({
             </p>
           </div>
 
-          <div className="bg-gradient-to-br from-teal-50 to-teal-100 p-4 rounded-lg border border-teal-200">
+          <div className="p-4 border border-teal-200 rounded-lg bg-gradient-to-br from-teal-50 to-teal-100">
             <div className="flex items-center gap-2 mb-2">
-              <Lightbulb className="size-5 text-teal-600" />
+              <Lightbulb className="text-teal-600 size-5" />
               <h3 className="font-semibold text-teal-800">Share Wisdom</h3>
             </div>
             <p className="text-sm text-teal-700">
@@ -188,7 +184,7 @@ export default function LetterFromFutureSelf({
             </p>
           </div>
 
-          <div className="bg-gradient-to-br from-primary-blue-50 to-primary-blue-100 p-4 rounded-lg border border-primary-blue-200">
+          <div className="p-4 border rounded-lg bg-gradient-to-br from-primary-blue-50 to-primary-blue-100 border-primary-blue-200">
             <div className="flex items-center gap-2 mb-2">
               <Heart className="size-5 text-primary-blue-600" />
               <h3 className="font-semibent text-primary-blue-800">
@@ -215,7 +211,7 @@ Future Me`}
             className={`min-h-[300px] resize-none transition-all duration-300 bg-white/50 backdrop-blur-sm text-slate-700 leading-relaxed`}
           />
 
-          <div className="absolute bottom-3 right-3 text-xs text-slate-500 bg-white/80 px-2 py-1 rounded-md">
+          <div className="absolute px-2 py-1 text-xs rounded-md bottom-3 right-3 text-slate-500 bg-white/80">
             {charCount} characters
           </div>
         </div>
@@ -224,11 +220,11 @@ Future Me`}
           <Button
             onClick={handleSubmit}
             disabled={!formData.letter.trim() || isSaving}
-            className="bg-gradient-to-r from-primary-green-500 to-teal-600 hover:from-primary-green-600 hover:to-teal-700 disabled:from-slate-300 disabled:to-slate-400 text-white font-medium px-8 py-3 rounded-lg shadow-md transition-all duration-300 hover:scale-105 disabled:scale-100 disabled:cursor-not-allowed"
+            className="px-8 py-3 font-medium text-white transition-all duration-300 rounded-lg shadow-md bg-gradient-to-r from-primary-green-500 to-teal-600 hover:from-primary-green-600 hover:to-teal-700 disabled:from-slate-300 disabled:to-slate-400 hover:scale-105 disabled:scale-100 disabled:cursor-not-allowed"
           >
-            <Send className="size-5 mr-2" />
+            <Send className="mr-2 size-5" />
             {isSaving ? "Sending..." : "Send Letter from Future Self"}
-            <ArrowRight className="size-5 ml-2" />
+            <ArrowRight className="ml-2 size-5" />
           </Button>
         </div>
       </div>

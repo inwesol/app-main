@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import {
   ArrowRight,
   Book,
@@ -51,10 +51,6 @@ const careerStory4Schema = z.object({
 
 type CareerStory4FormData = z.infer<typeof careerStory4Schema>;
 
-interface CareerStory4Props {
-  sessionId: string;
-}
-
 interface CareerStory1Data {
   transitionEssay: string;
   occupations: string;
@@ -73,8 +69,10 @@ interface CareerStory3Data {
   selectedOccupations: string[];
 }
 
-export default function CareerStory4({ sessionId }: CareerStory4Props) {
+export default function CareerStory4() {
+  const params = useParams();
   const router = useRouter();
+  const sessionId = params?.sessionId as string;
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -225,11 +223,11 @@ export default function CareerStory4({ sessionId }: CareerStory4Props) {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-cyan-50 to-primary-blue-50 p-4 sm:py-8 flex items-center justify-center">
+      <div className="flex items-center justify-center min-h-screen p-4 bg-gradient-to-br from-emerald-50 via-cyan-50 to-primary-blue-50 sm:py-8">
         <Card className="max-w-md mx-auto">
-          <div className="text-center py-8 px-6">
-            <Loader2 className="size-8 text-primary-green-600 mx-auto mb-4 animate-spin" />
-            <h2 className="text-xl font-semibold text-slate-700 mb-2">
+          <div className="px-6 py-8 text-center">
+            <Loader2 className="mx-auto mb-4 size-8 text-primary-green-600 animate-spin" />
+            <h2 className="mb-2 text-xl font-semibold text-slate-700">
               Loading Career Story 4
             </h2>
             <p className="text-slate-500">
@@ -243,14 +241,14 @@ export default function CareerStory4({ sessionId }: CareerStory4Props) {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-cyan-50 to-primary-blue-50 p-4 sm:py-8 flex items-center justify-center">
+      <div className="flex items-center justify-center min-h-screen p-4 bg-gradient-to-br from-emerald-50 via-cyan-50 to-primary-blue-50 sm:py-8">
         <Card className="max-w-md mx-auto border-red-200">
-          <div className="text-center py-8 px-6">
-            <AlertCircle className="size-8 text-red-600 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-red-700 mb-2">
+          <div className="px-6 py-8 text-center">
+            <AlertCircle className="mx-auto mb-4 text-red-600 size-8" />
+            <h2 className="mb-2 text-xl font-semibold text-red-700">
               Error Loading Data
             </h2>
-            <p className="text-red-600 mb-4">{error}</p>
+            <p className="mb-4 text-red-600">{error}</p>
             <Button
               onClick={() => {
                 setError(null);
@@ -258,7 +256,7 @@ export default function CareerStory4({ sessionId }: CareerStory4Props) {
                 window.location.reload();
               }}
               variant="outline"
-              className="border-red-200 text-red-700 hover:bg-red-50"
+              className="text-red-700 border-red-200 hover:bg-red-50"
             >
               Try Again
             </Button>
@@ -270,19 +268,19 @@ export default function CareerStory4({ sessionId }: CareerStory4Props) {
 
   if (isSubmitted) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-cyan-50 to-primary-blue-50 p-4 sm:py-8 flex items-center justify-center">
-        <Card className="max-w-2xl mx-auto bg-gradient-to-r from-primary-green-50 to-emerald-50 border-primary-green-200 shadow-xl">
-          <div className="text-center py-12 px-6">
+      <div className="flex items-center justify-center min-h-screen p-4 bg-gradient-to-br from-emerald-50 via-cyan-50 to-primary-blue-50 sm:py-8">
+        <Card className="max-w-2xl mx-auto shadow-xl bg-gradient-to-r from-primary-green-50 to-emerald-50 border-primary-green-200">
+          <div className="px-6 py-12 text-center">
             <div className="mb-6">
-              <CheckCircle className="size-16 text-primary-green-600 mx-auto mb-4" />
-              <h2 className="text-3xl font-bold text-primary-green-800 mb-2">
+              <CheckCircle className="mx-auto mb-4 size-16 text-primary-green-600" />
+              <h2 className="mb-2 text-3xl font-bold text-primary-green-800">
                 Story Rewritten!
               </h2>
-              <p className="text-primary-green-700 text-lg">
+              <p className="text-lg text-primary-green-700">
                 Your Career Story 4 has been saved successfully.
               </p>
             </div>
-            <div className="space-y-3 text-sm text-primary-green-600 mb-8">
+            <div className="mb-8 space-y-3 text-sm text-primary-green-600">
               <p>✓ Transition story rewritten with success formula</p>
               <p>✓ Self-advice integrated into your narrative</p>
               <p>✓ Future direction clearly articulated</p>
@@ -293,7 +291,7 @@ export default function CareerStory4({ sessionId }: CareerStory4Props) {
               onClick={handleWriteAnotherStory}
             >
               Write Another Story
-              <ArrowRight className="size-4 ml-2" />
+              <ArrowRight className="ml-2 size-4" />
             </Button>
           </div>
         </Card>
@@ -302,7 +300,7 @@ export default function CareerStory4({ sessionId }: CareerStory4Props) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-green-50 to-primary-blue-50 p-4 sm:py-8">
+    <div className="min-h-screen p-4 bg-gradient-to-br from-primary-green-50 to-primary-blue-50 sm:py-8">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <Header
@@ -312,17 +310,17 @@ export default function CareerStory4({ sessionId }: CareerStory4Props) {
         />
 
         {/* Reference Cards */}
-        <div className="mb-8 grid md:grid-cols-2 gap-6">
+        <div className="grid gap-6 mb-8 md:grid-cols-2">
           {/* Career Story 1 Reference */}
           <Card className="bg-gradient-to-br from-primary-blue-50/50 to-cyan-50/50 border-primary-blue-100/60">
             <CardHeader>
               <div>
-                <div className="flex justify-between items-center">
-                  <div className="flex gap-3 items-center">
-                    <div className="p-2 bg-primary-blue-100 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-primary-blue-100">
                       <Book className="sm:size-5 text-primary-blue-600 size-4" />
                     </div>
-                    <CardTitle className="text-primary-blue-600 text-lg sm:text-xl">
+                    <CardTitle className="text-lg text-primary-blue-600 sm:text-xl">
                       Career Story 1 Reference
                     </CardTitle>
                   </div>
@@ -333,7 +331,7 @@ export default function CareerStory4({ sessionId }: CareerStory4Props) {
                       </SheetTrigger>
                       <SheetContent className="min-w-[340px] sm:min-w-[600px] overflow-y-scroll bg-gradient-to-r from-primary-blue-100 to-white">
                         <SheetHeader>
-                          <SheetTitle className="text-primary-blue-600 text-xl font-bold">
+                          <SheetTitle className="text-xl font-bold text-primary-blue-600">
                             Career Story 1 - Your Original Transition Essay
                           </SheetTitle>
                           <SheetDescription>
@@ -345,15 +343,15 @@ export default function CareerStory4({ sessionId }: CareerStory4Props) {
                         {/* Original Transition Essay */}
                         <div className="mt-6">
                           <div className="flex items-center gap-3 mb-4">
-                            <h4 className="font-medium text-slate-600 text-sm">
+                            <h4 className="text-sm font-medium text-slate-600">
                               Your Original Transition Essay
                             </h4>
                           </div>
-                          <div className="bg-white/90 rounded-xl p-4 border border-primary-blue-200/60 shadow-md">
-                            <h5 className="text-primary-blue-600 font-semibold mb-2">
+                          <div className="p-4 border shadow-md bg-white/90 rounded-xl border-primary-blue-200/60">
+                            <h5 className="mb-2 font-semibold text-primary-blue-600">
                               Transition Challenge
                             </h5>
-                            <p className="text-sm text-slate-600 leading-relaxed">
+                            <p className="text-sm leading-relaxed text-slate-600">
                               {mockCareerStoryOneData.transitionEssay}
                             </p>
                           </div>
@@ -362,15 +360,15 @@ export default function CareerStory4({ sessionId }: CareerStory4Props) {
                         {/* Occupations */}
                         <div className="mt-6">
                           <div className="flex items-center gap-3 mb-4">
-                            <h4 className="font-medium text-slate-600 text-sm">
+                            <h4 className="text-sm font-medium text-slate-600">
                               Occupations You Listed
                             </h4>
                           </div>
-                          <div className="bg-white/90 rounded-xl p-4 border border-primary-blue-200/60 shadow-md">
-                            <h5 className="text-primary-blue-600 font-semibold mb-2">
+                          <div className="p-4 border shadow-md bg-white/90 rounded-xl border-primary-blue-200/60">
+                            <h5 className="mb-2 font-semibold text-primary-blue-600">
                               Career Interests
                             </h5>
-                            <p className="text-sm text-slate-600 leading-relaxed">
+                            <p className="text-sm leading-relaxed text-slate-600">
                               {mockCareerStoryOneData.occupations}
                             </p>
                           </div>
@@ -379,7 +377,7 @@ export default function CareerStory4({ sessionId }: CareerStory4Props) {
                         {/* Heroes */}
                         <div className="mt-6">
                           <div className="flex items-center gap-3 mb-4">
-                            <h4 className="font-medium text-slate-600 text-sm">
+                            <h4 className="text-sm font-medium text-slate-600">
                               Your Heroes & Role Models
                             </h4>
                           </div>
@@ -388,19 +386,19 @@ export default function CareerStory4({ sessionId }: CareerStory4Props) {
                               (hero, index) => (
                                 <div
                                   key={hero.id}
-                                  className="bg-white/90 rounded-xl p-4 border border-primary-blue-200/60 shadow-md"
+                                  className="p-4 border shadow-md bg-white/90 rounded-xl border-primary-blue-200/60"
                                 >
                                   <div className="flex items-start gap-4">
-                                    <div className="shrink-0 size-6 bg-primary-blue-600 rounded-full flex items-center justify-center shadow-md">
+                                    <div className="flex items-center justify-center rounded-full shadow-md shrink-0 size-6 bg-primary-blue-600">
                                       <span className="text-xs font-bold text-white">
                                         {index + 1}
                                       </span>
                                     </div>
                                     <div className="flex-1">
-                                      <h5 className="text-primary-blue-600 font-semibold">
+                                      <h5 className="font-semibold text-primary-blue-600">
                                         {hero.title}
                                       </h5>
-                                      <p className="text-sm text-slate-600 leading-relaxed">
+                                      <p className="text-sm leading-relaxed text-slate-600">
                                         {hero.description}
                                       </p>
                                     </div>
@@ -414,24 +412,24 @@ export default function CareerStory4({ sessionId }: CareerStory4Props) {
                         {/* Favorite Story & Saying */}
                         <div className="mt-6">
                           <div className="flex items-center gap-3 mb-4">
-                            <h4 className="font-medium text-slate-600 text-sm">
+                            <h4 className="text-sm font-medium text-slate-600">
                               Your Favorite Story & Saying
                             </h4>
                           </div>
                           <div className="space-y-4">
-                            <div className="bg-white/90 rounded-xl p-4 border border-primary-blue-200/60 shadow-md">
-                              <h5 className="text-primary-blue-600 font-semibold mb-2">
+                            <div className="p-4 border shadow-md bg-white/90 rounded-xl border-primary-blue-200/60">
+                              <h5 className="mb-2 font-semibold text-primary-blue-600">
                                 Favorite Story
                               </h5>
-                              <p className="text-sm text-slate-600 leading-relaxed">
+                              <p className="text-sm leading-relaxed text-slate-600">
                                 {mockCareerStoryOneData.favoriteStory}
                               </p>
                             </div>
-                            <div className="bg-white/90 rounded-xl p-4 border border-primary-blue-200/60 shadow-md">
-                              <h5 className="text-primary-blue-600 font-semibold mb-2">
+                            <div className="p-4 border shadow-md bg-white/90 rounded-xl border-primary-blue-200/60">
+                              <h5 className="mb-2 font-semibold text-primary-blue-600">
                                 Favorite Saying
                               </h5>
-                              <p className="text-sm text-slate-600 leading-relaxed">
+                              <p className="text-sm leading-relaxed text-slate-600">
                                 {mockCareerStoryOneData.favoriteSaying}
                               </p>
                             </div>
@@ -442,7 +440,7 @@ export default function CareerStory4({ sessionId }: CareerStory4Props) {
                   </div>
                 </div>
                 <div>
-                  <p className="text-sm text-slate-600 leading-relaxed mt-2">
+                  <p className="mt-2 text-sm leading-relaxed text-slate-600">
                     Review your original transition essay and career aspirations
                     from Career Story 1.
                   </p>
@@ -450,11 +448,11 @@ export default function CareerStory4({ sessionId }: CareerStory4Props) {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="bg-gradient-to-r from-primary-blue-100/50 to-cyan-100/50 rounded-xl p-4 border border-primary-blue-200/40">
-                <h4 className="font-semibold text-primary-blue-600 mb-2">
+              <div className="p-4 border bg-gradient-to-r from-primary-blue-100/50 to-cyan-100/50 rounded-xl border-primary-blue-200/40">
+                <h4 className="mb-2 font-semibold text-primary-blue-600">
                   Original Challenge
                 </h4>
-                <p className="text-sm text-primary-blue-700 leading-relaxed">
+                <p className="text-sm leading-relaxed text-primary-blue-700">
                   Click the info icon to review your original transition essay
                   and the challenges you identified.
                 </p>
@@ -466,12 +464,12 @@ export default function CareerStory4({ sessionId }: CareerStory4Props) {
           <Card className="bg-gradient-to-br from-primary-green-50/50 to-emerald-50/50 border-primary-green-100/60">
             <CardHeader>
               <div>
-                <div className="flex justify-between items-center">
-                  <div className="flex gap-3 items-center">
-                    <div className="p-2 bg-primary-green-100 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-primary-green-100">
                       <Sparkles className="sm:size-5 text-primary-green-600 size-4" />
                     </div>
-                    <CardTitle className="text-primary-green-600 text-lg sm:text-xl">
+                    <CardTitle className="text-lg text-primary-green-600 sm:text-xl">
                       Career Story 3 Reference
                     </CardTitle>
                   </div>
@@ -482,7 +480,7 @@ export default function CareerStory4({ sessionId }: CareerStory4Props) {
                       </SheetTrigger>
                       <SheetContent className="min-w-[340px] sm:min-w-[600px] overflow-y-scroll bg-gradient-to-r from-primary-green-100 to-white">
                         <SheetHeader>
-                          <SheetTitle className="text-primary-green-600 text-xl font-bold">
+                          <SheetTitle className="text-xl font-bold text-primary-green-600">
                             Career Story 3 - Your Success Formula & Advice
                           </SheetTitle>
                           <SheetDescription>
@@ -494,35 +492,35 @@ export default function CareerStory4({ sessionId }: CareerStory4Props) {
                         {/* Excellence Formula */}
                         <div className="mt-6">
                           <div className="flex items-center gap-3 mb-4">
-                            <h4 className="font-medium text-slate-600 text-sm">
+                            <h4 className="text-sm font-medium text-slate-600">
                               Your Excellence Formula
                             </h4>
                           </div>
                           <div className="space-y-4">
-                            <div className="bg-white/90 rounded-xl p-4 border border-primary-green-200/60 shadow-md">
-                              <h5 className="text-primary-green-600 font-semibold mb-2">
+                            <div className="p-4 border shadow-md bg-white/90 rounded-xl border-primary-green-200/60">
+                              <h5 className="mb-2 font-semibold text-primary-green-600">
                                 &quot;I will be most happy and successful when I
                                 am able to be...&quot;
                               </h5>
-                              <p className="text-sm text-slate-600 leading-relaxed">
+                              <p className="text-sm leading-relaxed text-slate-600">
                                 {mockCareerStoryThreeData.ableToBeStatement}
                               </p>
                             </div>
-                            <div className="bg-white/90 rounded-xl p-4 border border-primary-green-200/60 shadow-md">
-                              <h5 className="text-primary-green-600 font-semibold mb-2">
+                            <div className="p-4 border shadow-md bg-white/90 rounded-xl border-primary-green-200/60">
+                              <h5 className="mb-2 font-semibold text-primary-green-600">
                                 &quot;I will be most happy and successful in
                                 places where people...&quot;
                               </h5>
-                              <p className="text-sm text-slate-600 leading-relaxed">
+                              <p className="text-sm leading-relaxed text-slate-600">
                                 {mockCareerStoryThreeData.placesWhereStatement}
                               </p>
                             </div>
-                            <div className="bg-white/90 rounded-xl p-4 border border-primary-green-200/60 shadow-md">
-                              <h5 className="text-primary-green-600 font-semibold mb-2">
+                            <div className="p-4 border shadow-md bg-white/90 rounded-xl border-primary-green-200/60">
+                              <h5 className="mb-2 font-semibold text-primary-green-600">
                                 &quot;I will be most happy and successful so
                                 that I can...&quot;
                               </h5>
-                              <p className="text-sm text-slate-600 leading-relaxed">
+                              <p className="text-sm leading-relaxed text-slate-600">
                                 {mockCareerStoryThreeData.soThatStatement}
                               </p>
                             </div>
@@ -532,15 +530,15 @@ export default function CareerStory4({ sessionId }: CareerStory4Props) {
                         {/* Personal Motto */}
                         <div className="mt-6">
                           <div className="flex items-center gap-3 mb-4">
-                            <h4 className="font-medium text-slate-600 text-sm">
+                            <h4 className="text-sm font-medium text-slate-600">
                               Your Personal Career Motto
                             </h4>
                           </div>
-                          <div className="bg-white/90 rounded-xl p-4 border border-primary-green-200/60 shadow-md">
-                            <h5 className="text-primary-green-600 font-semibold mb-2">
+                          <div className="p-4 border shadow-md bg-white/90 rounded-xl border-primary-green-200/60">
+                            <h5 className="mb-2 font-semibold text-primary-green-600">
                               Your Best Advice to Yourself
                             </h5>
-                            <p className="text-sm text-slate-600 leading-relaxed">
+                            <p className="text-sm leading-relaxed text-slate-600">
                               {mockCareerStoryThreeData.mottoStatement}
                             </p>
                           </div>
@@ -549,7 +547,7 @@ export default function CareerStory4({ sessionId }: CareerStory4Props) {
                         {/* Selected Occupations */}
                         <div className="mt-6">
                           <div className="flex items-center gap-3 mb-4">
-                            <h4 className="font-medium text-slate-600 text-sm">
+                            <h4 className="text-sm font-medium text-slate-600">
                               Occupations You&apos;re Considering
                             </h4>
                           </div>
@@ -558,9 +556,9 @@ export default function CareerStory4({ sessionId }: CareerStory4Props) {
                               (occupation, index) => (
                                 <div
                                   key={occupation}
-                                  className="bg-white/90 rounded-lg p-3 border border-primary-green-200/50 flex items-center gap-3"
+                                  className="flex items-center gap-3 p-3 border rounded-lg bg-white/90 border-primary-green-200/50"
                                 >
-                                  <div className="size-6 bg-primary-green-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
+                                  <div className="flex items-center justify-center text-xs font-bold text-white rounded-full size-6 bg-primary-green-500">
                                     {index + 1}
                                   </div>
                                   <span className="text-sm font-medium text-slate-700">
@@ -576,7 +574,7 @@ export default function CareerStory4({ sessionId }: CareerStory4Props) {
                   </div>
                 </div>
                 <div>
-                  <p className="text-sm text-slate-600 leading-relaxed mt-2">
+                  <p className="mt-2 text-sm leading-relaxed text-slate-600">
                     Review your success formula and personal motto from Career
                     Story 3.
                   </p>
@@ -584,11 +582,11 @@ export default function CareerStory4({ sessionId }: CareerStory4Props) {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="bg-gradient-to-r from-primary-green-100/50 to-emerald-100/50 rounded-xl p-4 border border-primary-green-200/40">
-                <h4 className="font-semibold text-primary-green-600 mb-2">
+              <div className="p-4 border bg-gradient-to-r from-primary-green-100/50 to-emerald-100/50 rounded-xl border-primary-green-200/40">
+                <h4 className="mb-2 font-semibold text-primary-green-600">
                   Success Formula & Advice
                 </h4>
-                <p className="text-sm text-primary-green-700 leading-relaxed">
+                <p className="text-sm leading-relaxed text-primary-green-700">
                   Click the info icon to review your excellence formula and
                   personal career motto.
                 </p>
@@ -606,28 +604,28 @@ export default function CareerStory4({ sessionId }: CareerStory4Props) {
               icon={<RefreshCw className="size-6 text-primary-green-600" />}
               className="shadow-xl"
             >
-              <div className="bg-gradient-to-r from-primary-green-100/50 to-primary-blue-100/50 rounded-xl p-6 border border-primary-green-200/40 mb-6">
-                <h4 className="font-semibold text-primary-green-800 mb-4 flex items-center gap-2">
+              <div className="p-6 mb-6 border bg-gradient-to-r from-primary-green-100/50 to-primary-blue-100/50 rounded-xl border-primary-green-200/40">
+                <h4 className="flex items-center gap-2 mb-4 font-semibold text-primary-green-800">
                   <RefreshCw className="size-5" />
                   Story Transformation Guide
                 </h4>
-                <div className="grid md:grid-cols-3 gap-4 text-sm text-emerald-700">
-                  <div className="bg-white/60 rounded-lg p-3 border border-emerald-200/40">
-                    <p className="font-semibold mb-2">1. Review Your Past</p>
+                <div className="grid gap-4 text-sm md:grid-cols-3 text-emerald-700">
+                  <div className="p-3 border rounded-lg bg-white/60 border-emerald-200/40">
+                    <p className="mb-2 font-semibold">1. Review Your Past</p>
                     <p className="text-xs text-slate-600">
                       Look at your original transition essay and career
                       aspirations from Story 1
                     </p>
                   </div>
-                  <div className="bg-white/60 rounded-lg p-3 border border-emerald-200/40">
-                    <p className="font-semibold mb-2">2. Apply Your Formula</p>
+                  <div className="p-3 border rounded-lg bg-white/60 border-emerald-200/40">
+                    <p className="mb-2 font-semibold">2. Apply Your Formula</p>
                     <p className="text-xs text-slate-600">
                       Use your success formula and self-advice from Story 3 as
                       your guide
                     </p>
                   </div>
-                  <div className="bg-white/60 rounded-lg p-3 border border-emerald-200/40">
-                    <p className="font-semibold mb-2">3. Rewrite Your Future</p>
+                  <div className="p-3 border rounded-lg bg-white/60 border-emerald-200/40">
+                    <p className="mb-2 font-semibold">3. Rewrite Your Future</p>
                     <p className="text-xs text-slate-600">
                       Create a new narrative that shows how you&apos;ll make
                       this transition successfully
@@ -641,10 +639,10 @@ export default function CareerStory4({ sessionId }: CareerStory4Props) {
                 name="rewrittenStory"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-lg font-semibold text-slate-700 flex items-center gap-2">
+                    <FormLabel className="flex items-center gap-2 text-lg font-semibold text-slate-700">
                       Your Rewritten Story *
                     </FormLabel>
-                    <FormDescription className="text-slate-600 leading-relaxed">
+                    <FormDescription className="leading-relaxed text-slate-600">
                       Rewrite your transition story incorporating your success
                       formula and self-advice. Show how you will navigate this
                       change with confidence and purpose. Minimum 50 words,
@@ -662,7 +660,7 @@ export default function CareerStory4({ sessionId }: CareerStory4Props) {
                               : "border-emerald-300/60 focus:border-emerald-500"
                           } bg-white/80 backdrop-blur-sm shadow-sm`}
                         />
-                        <div className="absolute bottom-3 right-3 text-xs text-slate-500 bg-white/80 px-2 py-1 rounded">
+                        <div className="absolute px-2 py-1 text-xs rounded bottom-3 right-3 text-slate-500 bg-white/80">
                           {getWordCount(field.value)} words |{" "}
                           {getCharacterCount(field.value)}/2000
                         </div>
@@ -679,18 +677,18 @@ export default function CareerStory4({ sessionId }: CareerStory4Props) {
             </QuestionSection>
 
             {/* Writing Tips */}
-            <div className="bg-gradient-to-r from-cyan-100/50 to-primary-blue-100/50 rounded-xl p-6 border border-cyan-200/60 shadow-lg">
+            <div className="p-6 border shadow-lg bg-gradient-to-r from-cyan-100/50 to-primary-blue-100/50 rounded-xl border-cyan-200/60">
               <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 bg-cyan-200 rounded-lg">
+                <div className="p-2 rounded-lg bg-cyan-200">
                   <Sparkles className="size-5 text-cyan-700" />
                 </div>
                 <h3 className="text-lg font-semibold text-cyan-800">
                   Writing Tips
                 </h3>
               </div>
-              <div className="grid md:grid-cols-2 gap-4 text-sm text-slate-700">
-                <div className="bg-white/60 rounded-lg p-4 border border-cyan-200/40">
-                  <h4 className="font-semibold text-cyan-700 mb-3">
+              <div className="grid gap-4 text-sm md:grid-cols-2 text-slate-700">
+                <div className="p-4 border rounded-lg bg-white/60 border-cyan-200/40">
+                  <h4 className="mb-3 font-semibold text-cyan-700">
                     Include in Your Story:
                   </h4>
                   <ul className="space-y-2 text-slate-600">
@@ -713,8 +711,8 @@ export default function CareerStory4({ sessionId }: CareerStory4Props) {
                     </li>
                   </ul>
                 </div>
-                <div className="bg-white/60 rounded-lg p-4 border border-cyan-200/40">
-                  <h4 className="font-semibold text-cyan-700 mb-3">
+                <div className="p-4 border rounded-lg bg-white/60 border-cyan-200/40">
+                  <h4 className="mb-3 font-semibold text-cyan-700">
                     Writing Approach:
                   </h4>
                   <ul className="space-y-2 text-slate-600">
@@ -744,12 +742,12 @@ export default function CareerStory4({ sessionId }: CareerStory4Props) {
               <Button
                 type="submit"
                 disabled={isSubmitting || !isValid}
-                className="group relative px-10 py-4 bg-gradient-to-r from-emerald-500 via-cyan-500 to-primary-blue-500 text-white rounded-2xl font-bold text-lg hover:from-emerald-600 hover:via-cyan-600 hover:to-primary-blue-600 transition-all duration-300 shadow-2xl hover:shadow-3xl hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                className="relative px-10 py-4 text-lg font-bold text-white transition-all duration-300 shadow-2xl group bg-gradient-to-r from-emerald-500 via-cyan-500 to-primary-blue-500 rounded-2xl hover:from-emerald-600 hover:via-cyan-600 hover:to-primary-blue-600 hover:shadow-3xl hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
               >
                 {isSubmitting && (
-                  <Loader2 className="size-5 animate-spin mr-2" />
+                  <Loader2 className="mr-2 size-5 animate-spin" />
                 )}
-                <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 via-cyan-400 to-primary-blue-400 rounded-2xl blur opacity-30 group-hover:opacity-50 transition-opacity duration-300" />
+                <div className="absolute inset-0 transition-opacity duration-300 bg-gradient-to-r from-emerald-400 via-cyan-400 to-primary-blue-400 rounded-2xl blur opacity-30 group-hover:opacity-50" />
                 <div className="relative flex items-center gap-3">
                   <span>
                     {isSubmitting
@@ -757,11 +755,11 @@ export default function CareerStory4({ sessionId }: CareerStory4Props) {
                       : "Save Rewritten Story"}
                   </span>
                   {!isSubmitting && (
-                    <ArrowRight className="size-5 group-hover:translate-x-1 transition-transform duration-200" />
+                    <ArrowRight className="transition-transform duration-200 size-5 group-hover:translate-x-1" />
                   )}
                 </div>
               </Button>
-              <p className="text-sm text-slate-500 mt-3">
+              <p className="mt-3 text-sm text-slate-500">
                 {isSubmitting
                   ? "Please wait while we save your rewritten story..."
                   : "Your story transformation will be saved securely"}

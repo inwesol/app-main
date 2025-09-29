@@ -91,6 +91,8 @@ const occupationOptions = [
 export default function CareerStory3() {
   const params = useParams();
   const router = useRouter();
+  const sessionId = params?.sessionId as string;
+
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
 
@@ -161,9 +163,10 @@ export default function CareerStory3() {
   // Load existing data on component mount
   useEffect(() => {
     const loadData = async () => {
+      const aId = "career-story-3";
       try {
         const response = await fetch(
-          `/api/journey/sessions/${params.sessionId}/a/career-story-3`
+          `/api/journey/sessions/${sessionId}/a/${aId}`
         );
 
         if (response.ok) {
@@ -177,12 +180,12 @@ export default function CareerStory3() {
       }
     };
 
-    if (params.sessionId) {
+    if (sessionId) {
       loadData();
     } else {
       setInitialLoading(false);
     }
-  }, [params.sessionId]);
+  }, [sessionId]);
 
   // Helper function to get RIASEC option details
   const getRiasecDetails = (code: string) => {
@@ -283,7 +286,7 @@ export default function CareerStory3() {
       }
 
       const response = await fetch(
-        `/api/journey/sessions/${params.sessionId}/a/career-story-3`,
+        `/api/journey/sessions/${sessionId}/a/career-story-3`,
         {
           method: "POST",
           headers: {
@@ -305,7 +308,7 @@ export default function CareerStory3() {
 
       // Navigate to session page
       setTimeout(() => {
-        router.push(`/journey/sessions/${params.sessionId}`);
+        router.push(`/journey/sessions/${sessionId}`);
       }, 1000); // Small delay to show the success toast
     } catch (error) {
       console.error("Error saving data:", error);
@@ -321,17 +324,17 @@ export default function CareerStory3() {
 
   if (initialLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-primary-blue-50 to-primary-green-50 flex items-center justify-center">
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-primary-blue-50 to-primary-green-50">
         <div className="flex items-center gap-3">
           <Loader2 className="size-6 animate-spin text-primary-blue-500" />
-          <span className="text-primary-blue-600 font-medium">Loading...</span>
+          <span className="font-medium text-primary-blue-600">Loading...</span>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-blue-50 to primary-green-50 p-4 sm:py-8">
+    <div className="min-h-screen p-4 bg-gradient-to-br from-primary-blue-50 to primary-green-50 sm:py-8">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <Header
@@ -345,12 +348,12 @@ export default function CareerStory3() {
           <Card className="mb-6 bg-gradient-to-br from-primary-green-50/50 to-primary-blue-50/50 border-primary-green-100/60">
             <CardHeader>
               <div>
-                <div className="flex justify-between items-center">
-                  <div className="flex gap-3 items-center">
-                    <div className="p-2 bg-primary-green-100 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-primary-green-100">
                       <User className="sm:size-5 text-primary-green-600 size-4" />
                     </div>
-                    <CardTitle className="text-primary-green-600 text-lg sm:text-xl">
+                    <CardTitle className="text-lg text-primary-green-600 sm:text-xl">
                       Self
                     </CardTitle>
                   </div>
@@ -361,7 +364,7 @@ export default function CareerStory3() {
                       </SheetTrigger>
                       <SheetContent className="min-w-[340px] sm:min-w-[600px] overflow-y-scroll bg-gradient-to-r from-primary-green-100 to-white">
                         <SheetHeader>
-                          <SheetTitle className="text-primary-green-600 text-xl font-bold">
+                          <SheetTitle className="text-xl font-bold text-primary-green-600">
                             Career Story 2 - Self Analysis
                           </SheetTitle>
                           <SheetDescription>
@@ -373,15 +376,15 @@ export default function CareerStory3() {
                         {/* Self Statement from Story 2 */}
                         <div className="mt-6">
                           <div className="flex items-center gap-3 mb-4">
-                            <h4 className="font-medium text-slate-600 text-sm">
+                            <h4 className="text-sm font-medium text-slate-600">
                               Your Self Statement from Career Story 2
                             </h4>
                           </div>
-                          <div className="bg-white/90 rounded-xl p-4 border border-primary-green-200/60 shadow-md">
-                            <h5 className="text-primary-green-600 font-semibold mb-2">
+                          <div className="p-4 border shadow-md bg-white/90 rounded-xl border-primary-green-200/60">
+                            <h5 className="mb-2 font-semibold text-primary-green-600">
                               &quot;I AM / I AM BECOMING...&quot;
                             </h5>
-                            <p className="text-sm text-slate-600 leading-relaxed">
+                            <p className="text-sm leading-relaxed text-slate-600">
                               {mockCareerStoryTwoData.selfStatement}
                             </p>
                           </div>
@@ -390,37 +393,37 @@ export default function CareerStory3() {
                         {/* Hero Analysis Summary */}
                         <div className="mt-6">
                           <div className="flex items-center gap-3 mb-4">
-                            <h4 className="font-medium text-slate-600 text-sm">
+                            <h4 className="text-sm font-medium text-slate-600">
                               Hero Analysis Summary
                             </h4>
                           </div>
                           <div className="space-y-3">
-                            <div className="bg-white/90 rounded-lg p-3 border border-primary-green-200/50">
-                              <h6 className="font-bold text-primary-green-600 mb-1 text-sm">
+                            <div className="p-3 border rounded-lg bg-white/90 border-primary-green-200/50">
+                              <h6 className="mb-1 text-sm font-bold text-primary-green-600">
                                 First Adjectives:
                               </h6>
                               <p className="text-sm text-slate-600">
                                 {mockCareerStoryTwoData.firstAdjectives}
                               </p>
                             </div>
-                            <div className="bg-white/90 rounded-lg p-3 border border-primary-green-200/50">
-                              <h6 className="font-bold text-primary-green-600 mb-1 text-sm">
+                            <div className="p-3 border rounded-lg bg-white/90 border-primary-green-200/50">
+                              <h6 className="mb-1 text-sm font-bold text-primary-green-600">
                                 Repeated Words:
                               </h6>
                               <p className="text-sm text-slate-600">
                                 {mockCareerStoryTwoData.repeatedWords}
                               </p>
                             </div>
-                            <div className="bg-white/90 rounded-lg p-3 border border-primary-green-200/50">
-                              <h6 className="font-bold text-primary-green-600 mb-1 text-sm">
+                            <div className="p-3 border rounded-lg bg-white/90 border-primary-green-200/50">
+                              <h6 className="mb-1 text-sm font-bold text-primary-green-600">
                                 Common Traits:
                               </h6>
                               <p className="text-sm text-slate-600">
                                 {mockCareerStoryTwoData.commonTraits}
                               </p>
                             </div>
-                            <div className="bg-white/90 rounded-lg p-3 border border-primary-green-200/50">
-                              <h6 className="font-bold text-primary-green-600 mb-1 text-sm">
+                            <div className="p-3 border rounded-lg bg-white/90 border-primary-green-200/50">
+                              <h6 className="mb-1 text-sm font-bold text-primary-green-600">
                                 Significant Words:
                               </h6>
                               <p className="text-sm text-slate-600">
@@ -434,7 +437,7 @@ export default function CareerStory3() {
                   </div>
                 </div>
                 <div>
-                  <p className="text-sm text-slate-600 leading-relaxed mt-2">
+                  <p className="mt-2 text-sm leading-relaxed text-slate-600">
                     Reflect on your core identity and the person you are
                     becoming. Use your previous self-analysis as reference.
                   </p>
@@ -442,11 +445,11 @@ export default function CareerStory3() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="bg-gradient-to-r from-primary-green-100/50 to-primary-blue-100/50 rounded-xl p-4 border border-primary-green-200/40 mb-4">
-                <h4 className="font-semibold text-primary-green-600 mb-2 flex items-center gap-2">
+              <div className="p-4 mb-4 border bg-gradient-to-r from-primary-green-100/50 to-primary-blue-100/50 rounded-xl border-primary-green-200/40">
+                <h4 className="flex items-center gap-2 mb-2 font-semibold text-primary-green-600">
                   Complete this statement about yourself:
                 </h4>
-                <p className="text-sm text-primary-green-700 leading-relaxed">
+                <p className="text-sm leading-relaxed text-primary-green-700">
                   I AM / I AM BECOMING...
                 </p>
               </div>
@@ -467,12 +470,12 @@ export default function CareerStory3() {
           <Card className="mb-6 bg-gradient-to-br from-primary-blue-50/50 to-cyan-50/50 border-primary-blue-100/60">
             <CardHeader>
               <div>
-                <div className="flex justify-between items-center">
-                  <div className="flex gap-3 items-center">
-                    <div className="p-2 bg-primary-blue-100 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-primary-blue-100">
                       <MapPin className="sm:size-5 text-primary-blue-600 size-4" />
                     </div>
-                    <CardTitle className="text-primary-blue-600 text-lg sm:text-xl">
+                    <CardTitle className="text-lg text-primary-blue-600 sm:text-xl">
                       Setting
                     </CardTitle>
                   </div>
@@ -483,7 +486,7 @@ export default function CareerStory3() {
                       </SheetTrigger>
                       <SheetContent className="min-w-[340px] sm:min-w-[600px] overflow-y-scroll bg-gradient-to-r from-primary-blue-100 to-white">
                         <SheetHeader>
-                          <SheetTitle className="text-primary-blue-600 text-xl font-bold">
+                          <SheetTitle className="text-xl font-bold text-primary-blue-600">
                             Career Story 2 - Setting Analysis
                           </SheetTitle>
                           <SheetDescription>
@@ -495,15 +498,15 @@ export default function CareerStory3() {
                         {/* Setting Statement from Story 2 */}
                         <div className="mt-6">
                           <div className="flex items-center gap-3 mb-4">
-                            <h4 className="font-medium text-slate-600 text-sm">
+                            <h4 className="text-sm font-medium text-slate-600">
                               Your Setting Statement from Career Story 2
                             </h4>
                           </div>
-                          <div className="bg-white/90 rounded-xl p-4 border border-primary-blue-200/60 shadow-md">
-                            <h5 className="text-primary-blue-600 font-semibold mb-2">
+                          <div className="p-4 border shadow-md bg-white/90 rounded-xl border-primary-blue-200/60">
+                            <h5 className="mb-2 font-semibold text-primary-blue-600">
                               &quot;I LIKE BEING IN PLACES WHERE...&quot;
                             </h5>
-                            <p className="text-sm text-slate-600 leading-relaxed">
+                            <p className="text-sm leading-relaxed text-slate-600">
                               {mockCareerStoryTwoData.settingStatement}
                             </p>
                           </div>
@@ -512,15 +515,15 @@ export default function CareerStory3() {
                         {/* Media Activities */}
                         <div className="mt-6">
                           <div className="flex items-center gap-3 mb-4">
-                            <h4 className="font-medium text-slate-600 text-sm">
+                            <h4 className="text-sm font-medium text-slate-600">
                               Your Media Activities Analysis
                             </h4>
                           </div>
-                          <div className="bg-white/90 rounded-xl p-4 border border-primary-blue-200/60 shadow-md">
-                            <h5 className="text-primary-blue-600 font-semibold mb-2">
+                          <div className="p-4 border shadow-md bg-white/90 rounded-xl border-primary-blue-200/60">
+                            <h5 className="mb-2 font-semibold text-primary-blue-600">
                               Media Activities & Settings
                             </h5>
-                            <p className="text-sm text-slate-600 leading-relaxed">
+                            <p className="text-sm leading-relaxed text-slate-600">
                               {mockCareerStoryTwoData.mediaActivities}
                             </p>
                           </div>
@@ -529,7 +532,7 @@ export default function CareerStory3() {
                         {/* RIASEC Selection */}
                         <div className="mt-6">
                           <div className="flex items-center gap-3 mb-4">
-                            <h4 className="font-medium text-slate-600 text-sm">
+                            <h4 className="text-sm font-medium text-slate-600">
                               Your Selected RIASEC Work Settings
                             </h4>
                           </div>
@@ -539,10 +542,10 @@ export default function CareerStory3() {
                                 const riasecOption = getRiasecDetails(code);
                                 return (
                                   <div
-                                    key={index}
-                                    className="bg-white/90 rounded-lg p-3 border border-primary-blue-200/50 flex items-center gap-3"
+                                    key={code}
+                                    className="flex items-center gap-3 p-3 border rounded-lg bg-white/90 border-primary-blue-200/50"
                                   >
-                                    <div className="size-6 bg-primary-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
+                                    <div className="flex items-center justify-center text-xs font-bold text-white rounded-full size-6 bg-primary-blue-500">
                                       {code}
                                     </div>
                                     <span className="text-sm font-medium text-slate-700">
@@ -559,7 +562,7 @@ export default function CareerStory3() {
                   </div>
                 </div>
                 <div>
-                  <p className="text-sm text-slate-600 leading-relaxed mt-2">
+                  <p className="mt-2 text-sm leading-relaxed text-slate-600">
                     Describe your preferred work environment and the types of
                     activities you enjoy. Reference your previous setting
                     analysis.
@@ -568,11 +571,11 @@ export default function CareerStory3() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="bg-gradient-to-r from-primary-blue-100/50 to-cyan-100/50 rounded-xl p-4 border border-primary-blue-200/40 mb-4">
-                <h4 className="font-semibold text-primary-blue-600 mb-2 flex items-center gap-2">
+              <div className="p-4 mb-4 border bg-gradient-to-r from-primary-blue-100/50 to-cyan-100/50 rounded-xl border-primary-blue-200/40">
+                <h4 className="flex items-center gap-2 mb-2 font-semibold text-primary-blue-600">
                   Complete this statement about your preferred settings:
                 </h4>
-                <p className="text-sm text-primary-blue-700 leading-relaxed">
+                <p className="text-sm leading-relaxed text-primary-blue-700">
                   I LIKE BEING IN PLACES WHERE PEOPLE DO ACTIVITIES SUCH AS...
                 </p>
               </div>
@@ -593,12 +596,12 @@ export default function CareerStory3() {
           <Card className="mb-6 bg-gradient-to-br from-emerald-50/50 to-primary-green-50/50 border-emerald-100/60">
             <CardHeader>
               <div>
-                <div className="flex justify-between items-center">
-                  <div className="flex gap-3 items-center">
-                    <div className="p-2 bg-emerald-100 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-emerald-100">
                       <BookOpen className="sm:size-5 text-emerald-600 size-4" />
                     </div>
-                    <CardTitle className="text-emerald-600 text-lg sm:text-xl">
+                    <CardTitle className="text-lg text-emerald-600 sm:text-xl">
                       Script
                     </CardTitle>
                   </div>
@@ -609,7 +612,7 @@ export default function CareerStory3() {
                       </SheetTrigger>
                       <SheetContent className="min-w-[340px] sm:min-w-[600px] overflow-y-scroll bg-gradient-to-r from-emerald-100 to-white">
                         <SheetHeader>
-                          <SheetTitle className="text-emerald-600 text-xl font-bold">
+                          <SheetTitle className="text-xl font-bold text-emerald-600">
                             Career Story 1 - Favorite Story & Saying
                           </SheetTitle>
                           <SheetDescription>
@@ -621,15 +624,15 @@ export default function CareerStory3() {
                         {/* Favorite Story */}
                         <div className="mt-6">
                           <div className="flex items-center gap-3 mb-4">
-                            <h4 className="font-medium text-slate-600 text-sm">
+                            <h4 className="text-sm font-medium text-slate-600">
                               Your Favorite Story from Career Story 1
                             </h4>
                           </div>
-                          <div className="bg-white/90 rounded-xl p-4 border border-emerald-200/60 shadow-md">
-                            <h5 className="text-emerald-600 font-semibold mb-2">
+                          <div className="p-4 border shadow-md bg-white/90 rounded-xl border-emerald-200/60">
+                            <h5 className="mb-2 font-semibold text-emerald-600">
                               Favorite Book/Movie
                             </h5>
-                            <p className="text-sm text-slate-600 leading-relaxed">
+                            <p className="text-sm leading-relaxed text-slate-600">
                               {mockCareerStoryOneData.favoriteStory}
                             </p>
                           </div>
@@ -638,15 +641,15 @@ export default function CareerStory3() {
                         {/* Favorite Saying */}
                         <div className="mt-6">
                           <div className="flex items-center gap-3 mb-4">
-                            <h4 className="font-medium text-slate-600 text-sm">
+                            <h4 className="text-sm font-medium text-slate-600">
                               Your Favorite Saying from Career Story 1
                             </h4>
                           </div>
-                          <div className="bg-white/90 rounded-xl p-4 border border-emerald-200/60 shadow-md">
-                            <h5 className="text-emerald-600 font-semibold mb-2">
+                          <div className="p-4 border shadow-md bg-white/90 rounded-xl border-emerald-200/60">
+                            <h5 className="mb-2 font-semibold text-emerald-600">
                               Favorite Quote/Saying
                             </h5>
-                            <p className="text-sm text-slate-600 leading-relaxed">
+                            <p className="text-sm leading-relaxed text-slate-600">
                               {mockCareerStoryOneData.favoriteSaying}
                             </p>
                           </div>
@@ -656,7 +659,7 @@ export default function CareerStory3() {
                   </div>
                 </div>
                 <div>
-                  <p className="text-sm text-slate-600 leading-relaxed mt-2">
+                  <p className="mt-2 text-sm leading-relaxed text-slate-600">
                     Analyze your favorite story to understand what motivates and
                     inspires you. Reference your favorite story from Career
                     Story 1.
@@ -665,12 +668,12 @@ export default function CareerStory3() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="bg-gradient-to-r from-emerald-100/50 to-primary-green-100/50 rounded-xl p-4 border border-emerald-200/40 mb-4">
-                <h4 className="font-semibold text-emerald-600 mb-2 flex items-center gap-2">
+              <div className="p-4 mb-4 border bg-gradient-to-r from-emerald-100/50 to-primary-green-100/50 rounded-xl border-emerald-200/40">
+                <h4 className="flex items-center gap-2 mb-2 font-semibold text-emerald-600">
                   <BookOpen className="size-4" />
                   Analyze Your Favorite Story
                 </h4>
-                <p className="text-sm text-emerald-700 leading-relaxed">
+                <p className="text-sm leading-relaxed text-emerald-700">
                   Describe the plot of your favorite book or movie:
                 </p>
               </div>
@@ -684,12 +687,12 @@ export default function CareerStory3() {
                 className="mb-4"
               />
 
-              <div className="bg-gradient-to-r from-emerald-100/50 to-primary-green-100/50 rounded-xl p-4 border border-emerald-200/40 mb-4">
-                <h4 className="font-semibold text-emerald-600 mb-2 flex items-center gap-2">
+              <div className="p-4 mb-4 border bg-gradient-to-r from-emerald-100/50 to-primary-green-100/50 rounded-xl border-emerald-200/40">
+                <h4 className="flex items-center gap-2 mb-2 font-semibold text-emerald-600">
                   <Target className="size-4" />
                   What This Means for Your Work
                 </h4>
-                <p className="text-sm text-emerald-700 leading-relaxed">
+                <p className="text-sm leading-relaxed text-emerald-700">
                   THEREFORE, IN THESE PLACES, I WANT TO...
                 </p>
               </div>
@@ -715,12 +718,12 @@ export default function CareerStory3() {
             }
           >
             {/* able to be */}
-            <div className="bg-gradient-to-r from-primary-green-100/50 to-primary-blue-100/50 rounded-xl p-4 border border-primary-green-200/40 mb-4">
-              <h4 className="font-semibold text-primary-green-600 mb-2 flex items-center gap-2">
+            <div className="p-4 mb-4 border bg-gradient-to-r from-primary-green-100/50 to-primary-blue-100/50 rounded-xl border-primary-green-200/40">
+              <h4 className="flex items-center gap-2 mb-2 font-semibold text-primary-green-600">
                 <Star className="size-4" />
                 Personal Qualities
               </h4>
-              <p className="text-sm text-primary-green-700 leading-relaxed">
+              <p className="text-sm leading-relaxed text-primary-green-700">
                 I will be most happy and successful when I am able to be:
               </p>
             </div>
@@ -737,12 +740,12 @@ export default function CareerStory3() {
             />
 
             {/* in places where people */}
-            <div className="bg-gradient-to-r from-primary-green-100/50 to-primary-blue-100/50 rounded-xl p-4 border border-primary-green-200/40 mb-4">
-              <h4 className="font-semibold text-primary-green-600 mb-2 flex items-center gap-2">
+            <div className="p-4 mb-4 border bg-gradient-to-r from-primary-green-100/50 to-primary-blue-100/50 rounded-xl border-primary-green-200/40">
+              <h4 className="flex items-center gap-2 mb-2 font-semibold text-primary-green-600">
                 <MapPin className="size-4" />
                 Work Environment
               </h4>
-              <p className="text-sm text-primary-green-700 leading-relaxed">
+              <p className="text-sm leading-relaxed text-primary-green-700">
                 I will be most happy and successful in places where people:
               </p>
             </div>
@@ -759,12 +762,12 @@ export default function CareerStory3() {
             />
 
             {/* so that i can */}
-            <div className="bg-gradient-to-r from-primary-green-100/50 to-primary-blue-100/50 rounded-xl p-4 border border-primary-green-200/40 mb-4">
-              <h4 className="font-semibold text-primary-green-600 mb-2 flex items-center gap-2">
+            <div className="p-4 mb-4 border bg-gradient-to-r from-primary-green-100/50 to-primary-blue-100/50 rounded-xl border-primary-green-200/40">
+              <h4 className="flex items-center gap-2 mb-2 font-semibold text-primary-green-600">
                 <Target className="size-4" />
                 Purpose & Impact
               </h4>
-              <p className="text-sm text-primary-green-700 leading-relaxed">
+              <p className="text-sm leading-relaxed text-primary-green-700">
                 I will be most happy and successful so that I can:
               </p>
             </div>
@@ -787,11 +790,11 @@ export default function CareerStory3() {
               <MessageSquare className="sm:size-5 text-primary-green-600 size-4" />
             }
           >
-            <div className="bg-gradient-to-r from-primary-green-100/50 to-primary-blue-100/50 rounded-xl p-4 border border-primary-green-200/40 mb-4">
-              <h4 className="font-semibold text-primary-green-600 mb-2 flex items-center gap-2">
+            <div className="p-4 mb-4 border bg-gradient-to-r from-primary-green-100/50 to-primary-blue-100/50 rounded-xl border-primary-green-200/40">
+              <h4 className="flex items-center gap-2 mb-2 font-semibold text-primary-green-600">
                 MY PERSONAL CAREER MOTTO
               </h4>
-              <p className="text-sm text-primary-green-700 leading-relaxed">
+              <p className="text-sm leading-relaxed text-primary-green-700">
                 My motto contains my best advice to myself for dealing with my
                 career concerns. To apply my success formula now, the best
                 advice I can give myself is (write your motto here):
@@ -813,12 +816,12 @@ export default function CareerStory3() {
           <Card className="mb-6 bg-gradient-to-br from-teal-50/50 to-primary-green-50/50 border-teal-100/60">
             <CardHeader>
               <div>
-                <div className="flex justify-between items-center">
-                  <div className="flex gap-3 items-center">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
                     <div className="p-2 bg-teal-100 rounded-lg">
-                      <Search className="sm:size-5 text-teal-600 size-4" />
+                      <Search className="text-teal-600 sm:size-5 size-4" />
                     </div>
-                    <CardTitle className="text-teal-600 text-lg sm:text-xl">
+                    <CardTitle className="text-lg text-teal-600 sm:text-xl">
                       Occupations I Am Now Considering
                     </CardTitle>
                   </div>
@@ -829,7 +832,7 @@ export default function CareerStory3() {
                       </SheetTrigger>
                       <SheetContent className="min-w-[340px] sm:min-w-[600px] overflow-y-scroll bg-gradient-to-r from-teal-100 to-white">
                         <SheetHeader>
-                          <SheetTitle className="text-teal-600 text-xl font-bold">
+                          <SheetTitle className="text-xl font-bold text-teal-600">
                             Career Story 1 - Occupations Listed
                           </SheetTitle>
                           <SheetDescription>
@@ -841,15 +844,15 @@ export default function CareerStory3() {
                         {/* Occupations from Story 1 */}
                         <div className="mt-6">
                           <div className="flex items-center gap-3 mb-4">
-                            <h4 className="font-medium text-slate-600 text-sm">
+                            <h4 className="text-sm font-medium text-slate-600">
                               Occupations You Listed in Career Story 1
                             </h4>
                           </div>
-                          <div className="bg-white/90 rounded-xl p-4 border border-teal-200/60 shadow-md">
-                            <h5 className="text-teal-600 font-semibold mb-2">
+                          <div className="p-4 border shadow-md bg-white/90 rounded-xl border-teal-200/60">
+                            <h5 className="mb-2 font-semibold text-teal-600">
                               Your Original Occupation List
                             </h5>
-                            <p className="text-sm text-slate-600 leading-relaxed">
+                            <p className="text-sm leading-relaxed text-slate-600">
                               {mockCareerStoryOneData.occupations}
                             </p>
                           </div>
@@ -857,12 +860,12 @@ export default function CareerStory3() {
 
                         {/* Instruction */}
                         <div className="mt-6">
-                          <div className="bg-teal-50/80 rounded-xl p-4 border border-teal-200/60">
-                            <h5 className="text-teal-600 font-semibold mb-2 flex items-center gap-2">
+                          <div className="p-4 border bg-teal-50/80 rounded-xl border-teal-200/60">
+                            <h5 className="flex items-center gap-2 mb-2 font-semibold text-teal-600">
                               <Lightbulb className="size-4" />
                               Selection Guidance
                             </h5>
-                            <p className="text-sm text-teal-700 leading-relaxed">
+                            <p className="text-sm leading-relaxed text-teal-700">
                               Based on your career story analysis (Self,
                               Setting, Script, and Excellence Formula), review
                               these occupations and identify those that now
@@ -876,7 +879,7 @@ export default function CareerStory3() {
                   </div>
                 </div>
                 <div>
-                  <p className="text-sm text-slate-600 leading-relaxed mt-2">
+                  <p className="mt-2 text-sm leading-relaxed text-slate-600">
                     Based on your career story analysis, look over the
                     occupations you listed in Career Story 1 and identify those
                     that you now see as potential choices.
@@ -886,16 +889,17 @@ export default function CareerStory3() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <p className="text-sm text-slate-600 mb-4">
+                <p className="mb-4 text-sm text-slate-600">
                   Select the occupations you are now considering based on your
                   career story analysis:
                 </p>
 
-                <div className="grid gap-3 max-h-64 overflow-y-auto border border-slate-200 rounded-lg p-4 bg-white/50">
+                <div className="grid gap-3 p-4 overflow-y-auto border rounded-lg max-h-64 border-slate-200 bg-white/50">
                   {occupationOptions.map((occupation) => (
-                    <div
+                    <button
                       key={occupation}
-                      className={`border-2 rounded-lg p-3 cursor-pointer transition-all duration-200 ${
+                      type="button"
+                      className={`w-full text-left border-2 rounded-lg p-3 transition-all duration-200 ${
                         formData.selectedOccupations.includes(occupation)
                           ? "border-teal-500 bg-teal-50 shadow-md"
                           : "border-slate-200 hover:border-teal-300 hover:bg-teal-25"
@@ -912,19 +916,19 @@ export default function CareerStory3() {
                         >
                           {formData.selectedOccupations.includes(
                             occupation
-                          ) && <div className="size-2 bg-white rounded-full" />}
+                          ) && <div className="bg-white rounded-full size-2" />}
                         </div>
                         <span className="font-medium text-slate-800">
                           {occupation}
                         </span>
                       </div>
-                    </div>
+                    </button>
                   ))}
                 </div>
 
                 {formData.selectedOccupations.length > 0 && (
-                  <div className="mt-4 p-4 bg-teal-50 rounded-lg border border-teal-200">
-                    <p className="text-sm font-medium text-teal-800 mb-2">
+                  <div className="p-4 mt-4 border border-teal-200 rounded-lg bg-teal-50">
+                    <p className="mb-2 text-sm font-medium text-teal-800">
                       Selected Occupations (
                       {formData.selectedOccupations.length}
                       ):
@@ -933,7 +937,7 @@ export default function CareerStory3() {
                       {formData.selectedOccupations.map((occupation) => (
                         <span
                           key={occupation}
-                          className="px-3 py-1 bg-teal-500 text-white text-sm rounded-full"
+                          className="px-3 py-1 text-sm text-white bg-teal-500 rounded-full"
                         >
                           {occupation}
                         </span>
@@ -947,13 +951,13 @@ export default function CareerStory3() {
         </div>
 
         {/* Save Button */}
-        <div className="text-center mt-8">
+        <div className="mt-8 text-center">
           <Button
             onClick={handleSave}
             disabled={loading}
-            className="group relative px-10 py-6 bg-gradient-to-r from-primary-green-500 to-primary-blue-500 text-white rounded-2xl font-bold text-lg hover:from-primary-green-600 hover:to-primary-blue-600 transition-all duration-300 shadow-2xl hover:shadow-3xl hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="relative px-10 py-6 text-lg font-bold text-white transition-all duration-300 shadow-2xl group bg-gradient-to-r from-primary-green-500 to-primary-blue-500 rounded-2xl hover:from-primary-green-600 hover:to-primary-blue-600 hover:shadow-3xl hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-primary-green-400 to-primary-blue-400 rounded-2xl blur opacity-30 group-hover:opacity-50 transition-opacity duration-300" />
+            <div className="absolute inset-0 transition-opacity duration-300 bg-gradient-to-r from-primary-green-400 to-primary-blue-400 rounded-2xl blur opacity-30 group-hover:opacity-50" />
             <div className="relative flex items-center gap-3">
               {loading ? (
                 <>
@@ -963,7 +967,7 @@ export default function CareerStory3() {
               ) : (
                 <>
                   <span>Save Progress</span>
-                  <ArrowRight className="size-5 group-hover:translate-x-1 transition-transform duration-200" />
+                  <ArrowRight className="transition-transform duration-200 size-5 group-hover:translate-x-1" />
                 </>
               )}
             </div>

@@ -7,6 +7,7 @@ interface TextAreaProps {
   placeholder?: string;
   rows?: number;
   className?: string;
+  id?: string;
 }
 
 export const TextArea: React.FC<TextAreaProps> = ({
@@ -15,9 +16,11 @@ export const TextArea: React.FC<TextAreaProps> = ({
   placeholder = "",
   rows = 4,
   className,
+  id,
 }) => {
   return (
     <textarea
+      id={id}
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}

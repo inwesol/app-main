@@ -16,7 +16,7 @@ import {
   Loader2,
 } from "lucide-react";
 import Header from "@/components/form-components/header";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { toast } from "@/components/toast";
 
 interface StickyNote {
@@ -29,7 +29,6 @@ interface StickyNote {
 
 interface CareerStory5Props {
   className?: string;
-  sessionId: number; // Add sessionId prop
 }
 
 const STICKY_COLORS = [
@@ -105,10 +104,9 @@ const DEFAULT_STICKY_NOTES: StickyNote[] = [
   },
 ];
 
-export default function CareerStory5({
-  className = "",
-  sessionId,
-}: CareerStory5Props) {
+export default function CareerStory5({ className = "" }: CareerStory5Props) {
+  const params = useParams();
+  const sessionId = params.sessionId as string;
   const [stickyNotes, setStickyNotes] = useState<StickyNote[]>([]);
   const [editingNote, setEditingNote] = useState<string | null>(null);
   const [editContent, setEditContent] = useState("");
@@ -323,8 +321,8 @@ export default function CareerStory5({
         className={`min-h-screen bg-gradient-to-br from-primary-blue-25 via-white to-primary-green-25 p-4 sm:py-8 ${className} flex items-center justify-center`}
       >
         <div className="text-center">
-          <Loader2 className="size-12 animate-spin text-primary-blue-500 mx-auto mb-4" />
-          <p className="text-primary-blue-700 font-medium">
+          <Loader2 className="mx-auto mb-4 size-12 animate-spin text-primary-blue-500" />
+          <p className="font-medium text-primary-blue-700">
             Loading your story board...
           </p>
         </div>
@@ -336,7 +334,7 @@ export default function CareerStory5({
     <div
       className={`min-h-screen bg-gradient-to-br from-primary-blue-25 via-white to-primary-green-25 p-4 sm:py-8 ${className}`}
     >
-      <div className="max-w-7xl mx-auto relative">
+      <div className="relative mx-auto max-w-7xl">
         {/* Header */}
         <Header
           headerIcon={Sparkles}
@@ -345,17 +343,17 @@ export default function CareerStory5({
         />
 
         {/* Controls */}
-        <Card className="mb-8 bg-white/90 backdrop-blur-xl border border-slate-300 shadow-2xl shadow-primary-blue-100/20 rounded-3xl overflow-hidden relative ">
-          <CardHeader className="bg-gradient-to-r from-primary-blue-50/80 to-primary-green-50/80 border-b border-primary-blue-100/30">
+        <Card className="relative mb-8 overflow-hidden border shadow-2xl bg-white/90 backdrop-blur-xl border-slate-300 shadow-primary-blue-100/20 rounded-3xl ">
+          <CardHeader className="border-b bg-gradient-to-r from-primary-blue-50/80 to-primary-green-50/80 border-primary-blue-100/30">
             <CardTitle className="flex items-center gap-4 text-primary-blue-800">
-              <div className="p-3 bg-gradient-to-br from-primary-blue-500 to-primary-green-500 rounded-2xl shadow-lg">
-                <Palette className="size-6 text-white" />
+              <div className="p-3 shadow-lg bg-gradient-to-br from-primary-blue-500 to-primary-green-500 rounded-2xl">
+                <Palette className="text-white size-6" />
               </div>
               <div>
-                <h3 className="text-xl font-bold bg-gradient-to-r from-primary-blue-700 to-primary-green-700 bg-clip-text text-transparent">
+                <h3 className="text-xl font-bold text-transparent bg-gradient-to-r from-primary-blue-700 to-primary-green-700 bg-clip-text">
                   Story Board Controls
                 </h3>
-                <p className="text-sm text-primary-blue-600/80 font-medium mt-1">
+                <p className="mt-1 text-sm font-medium text-primary-blue-600/80">
                   Customize your creative workspace
                 </p>
               </div>
@@ -407,7 +405,7 @@ export default function CareerStory5({
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3 bg-gradient-to-r from-primary-blue-50 to-primary-green-50 rounded-2xl px-4 py-2 border border-primary-blue-200/50">
+                <div className="flex items-center gap-3 px-4 py-2 border bg-gradient-to-r from-primary-blue-50 to-primary-green-50 rounded-2xl border-primary-blue-200/50">
                   <Sticky className="size-5 text-primary-blue-600" />
                   <span className="text-sm font-semibold text-primary-blue-700">
                     {stickyNotes.length} sticky notes
@@ -419,7 +417,7 @@ export default function CareerStory5({
                 <Button
                   onClick={saveStoryBoard}
                   disabled={saving}
-                  className="group bg-gradient-to-r from-primary-green-500 to-primary-blue-500 hover:from-primary-green-600 hover:to-primary-blue-600 text-white rounded-2xl px-4 py-2 font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                  className="px-4 py-2 font-semibold text-white transition-all duration-300 shadow-lg group bg-gradient-to-r from-primary-green-500 to-primary-blue-500 hover:from-primary-green-600 hover:to-primary-blue-600 rounded-2xl hover:shadow-xl hover:scale-105"
                 >
                   <div className="flex items-center gap-2">
                     {saving ? (
@@ -433,10 +431,10 @@ export default function CareerStory5({
 
                 <Button
                   onClick={addStickyNote}
-                  className="group bg-gradient-to-r from-primary-blue-500 to-primary-green-500 hover:from-primary-blue-600 hover:to-primary-green-600 text-white rounded-2xl px-6 py-3 font-semibold shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 hover:-translate-y-1"
+                  className="px-6 py-3 font-semibold text-white transition-all duration-300 shadow-xl group bg-gradient-to-r from-primary-blue-500 to-primary-green-500 hover:from-primary-blue-600 hover:to-primary-green-600 rounded-2xl hover:shadow-2xl hover:scale-105 hover:-translate-y-1"
                 >
                   <div className="flex items-center gap-2">
-                    <Plus className="size-5 group-hover:rotate-90 transition-transform duration-300" />
+                    <Plus className="transition-transform duration-300 size-5 group-hover:rotate-90" />
                     <span>Add Sticky Note</span>
                   </div>
                 </Button>
@@ -446,17 +444,17 @@ export default function CareerStory5({
         </Card>
 
         {/* Story Board Canvas */}
-        <Card className="bg-white/90 backdrop-blur-xl border border-slate-300 shadow-2xl shadow-primary-blue-100/20 rounded-3xl overflow-hidden relative ">
-          <CardHeader className="bg-gradient-to-r from-primary-blue-50/80 to-primary-green-50/80 border-b border-primary-blue-100/30">
+        <Card className="relative overflow-hidden border shadow-2xl bg-white/90 backdrop-blur-xl border-slate-300 shadow-primary-blue-100/20 rounded-3xl ">
+          <CardHeader className="border-b bg-gradient-to-r from-primary-blue-50/80 to-primary-green-50/80 border-primary-blue-100/30">
             <CardTitle className="flex items-center gap-4 text-primary-blue-800">
-              <div className="p-3 bg-gradient-to-br from-primary-blue-500 to-primary-green-500 rounded-2xl shadow-lg">
-                <Grid3X3 className="size-6 text-white" />
+              <div className="p-3 shadow-lg bg-gradient-to-br from-primary-blue-500 to-primary-green-500 rounded-2xl">
+                <Grid3X3 className="text-white size-6" />
               </div>
               <div>
-                <h3 className="text-xl font-bold bg-gradient-to-r from-primary-blue-700 to-primary-green-700 bg-clip-text text-transparent">
+                <h3 className="text-xl font-bold text-transparent bg-gradient-to-r from-primary-blue-700 to-primary-green-700 bg-clip-text">
                   Story Board Canvas
                 </h3>
-                <p className="text-sm text-primary-blue-600/80 font-medium mt-1">
+                <p className="mt-1 text-sm font-medium text-primary-blue-600/80">
                   Drag and arrange your story elements freely
                 </p>
               </div>
@@ -465,6 +463,7 @@ export default function CareerStory5({
           <CardContent className="p-8">
             <div
               ref={canvasRef}
+              role="application"
               className="relative min-h-[700px] bg-gradient-to-br from-primary-blue-25/30 to-primary-green-25/30 rounded-2xl border-2 border-dashed border-primary-blue-200/50 overflow-hidden select-none"
               onMouseMove={handleMouseMove}
               onMouseUp={handleMouseUp}
@@ -472,7 +471,7 @@ export default function CareerStory5({
               onClick={handleCanvasClick}
             >
               {/* Background Pattern */}
-              <div className="absolute inset-0 opacity-5 pointer-events-none">
+              <div className="absolute inset-0 pointer-events-none opacity-5">
                 <div
                   className="absolute inset-0"
                   style={{
@@ -489,8 +488,9 @@ export default function CareerStory5({
                 const isDragging = draggedNote === note.id;
 
                 return (
-                  <div
+                  <button
                     key={note.id}
+                    type="button"
                     className={`absolute size-48 ${note.color} ${
                       colorClasses.border
                     } border-2 rounded-2xl shadow-xl ${
@@ -510,7 +510,7 @@ export default function CareerStory5({
                     onMouseDown={(e) => handleMouseDown(e, note.id)}
                   >
                     {isEditing ? (
-                      <div className="size-full p-4 flex flex-col">
+                      <div className="flex flex-col p-4 size-full">
                         <textarea
                           value={editContent}
                           onChange={(e) => setEditContent(e.target.value)}
@@ -527,7 +527,7 @@ export default function CareerStory5({
                               e.stopPropagation();
                               saveEdit();
                             }}
-                            className="p-2 bg-green-500 text-white rounded-xl hover:bg-green-600 transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-110"
+                            className="p-2 text-white transition-all duration-200 bg-green-500 shadow-lg rounded-xl hover:bg-green-600 hover:shadow-xl hover:scale-110"
                           >
                             <Save className="size-4" />
                           </button>
@@ -537,7 +537,7 @@ export default function CareerStory5({
                               e.stopPropagation();
                               cancelEdit();
                             }}
-                            className="p-2 bg-red-500 text-white rounded-xl hover:bg-red-600 transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-110"
+                            className="p-2 text-white transition-all duration-200 bg-red-500 shadow-lg rounded-xl hover:bg-red-600 hover:shadow-xl hover:scale-110"
                           >
                             <X className="size-4" />
                           </button>
@@ -545,14 +545,14 @@ export default function CareerStory5({
                       </div>
                     ) : (
                       <>
-                        <div className="size-full p-4 overflow-hidden pointer-events-none">
+                        <div className="p-4 overflow-hidden pointer-events-none size-full">
                           <p
                             className={`text-sm ${colorClasses.text} leading-relaxed font-medium break-words`}
                           >
                             {note.content || "Click to edit..."}
                           </p>
                         </div>
-                        <div className="absolute top-3 right-3 opacity-0 group-hover/note:opacity-100 transition-all duration-300 flex gap-2">
+                        <div className="absolute flex gap-2 transition-all duration-300 opacity-0 top-3 right-3 group-hover/note:opacity-100">
                           <button
                             type="button"
                             onClick={(e) => {
@@ -560,7 +560,7 @@ export default function CareerStory5({
                               startEditing(note);
                             }}
                             onMouseDown={(e) => e.stopPropagation()}
-                            className="p-2 bg-primary-blue-500 text-white rounded-xl hover:bg-primary-blue-600 transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-110"
+                            className="p-2 text-white transition-all duration-200 shadow-lg bg-primary-blue-500 rounded-xl hover:bg-primary-blue-600 hover:shadow-xl hover:scale-110"
                           >
                             <Edit3 className="size-3" />
                           </button>
@@ -571,14 +571,14 @@ export default function CareerStory5({
                               deleteStickyNote(note.id);
                             }}
                             onMouseDown={(e) => e.stopPropagation()}
-                            className="p-2 bg-red-500 text-white rounded-xl hover:bg-red-600 transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-110"
+                            className="p-2 text-white transition-all duration-200 bg-red-500 shadow-lg rounded-xl hover:bg-red-600 hover:shadow-xl hover:scale-110"
                           >
                             <Trash2 className="size-3" />
                           </button>
                         </div>
                       </>
                     )}
-                  </div>
+                  </button>
                 );
               })}
 
@@ -586,13 +586,13 @@ export default function CareerStory5({
               {stickyNotes.length === 0 && (
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                   <div className="text-center">
-                    <div className="p-6 bg-gradient-to-br from-primary-blue-100 to-primary-green-100 rounded-3xl shadow-xl mb-4 inline-block">
+                    <div className="inline-block p-6 mb-4 shadow-xl bg-gradient-to-br from-primary-blue-100 to-primary-green-100 rounded-3xl">
                       <Sticky className="size-12 text-primary-blue-600" />
                     </div>
-                    <h3 className="text-xl font-bold text-primary-blue-700 mb-2">
+                    <h3 className="mb-2 text-xl font-bold text-primary-blue-700">
                       Start Your Story Board
                     </h3>
-                    <p className="text-primary-blue-600/80 font-medium">
+                    <p className="font-medium text-primary-blue-600/80">
                       Click &quot;Add Sticky Note&quot; to begin organizing your
                       ideas
                     </p>
@@ -604,69 +604,69 @@ export default function CareerStory5({
         </Card>
 
         {/* Instructions */}
-        <Card className="mt-8 bg-white/90 backdrop-blur-xl border border-slate-300 shadow-2xl shadow-primary-blue-100/20 rounded-3xl overflow-hidden">
+        <Card className="mt-8 overflow-hidden border shadow-2xl bg-white/90 backdrop-blur-xl border-slate-300 shadow-primary-blue-100/20 rounded-3xl">
           <CardContent className="p-8">
             <div className="text-center">
               <div className="flex items-center justify-center gap-3 mb-6">
-                <div className="p-3 bg-gradient-to-br from-primary-blue-500 to-primary-green-500 rounded-2xl shadow-lg">
-                  <Sparkles className="size-6 text-white" />
+                <div className="p-3 shadow-lg bg-gradient-to-br from-primary-blue-500 to-primary-green-500 rounded-2xl">
+                  <Sparkles className="text-white size-6" />
                 </div>
-                <h3 className="text-2xl font-bold bg-gradient-to-r from-primary-blue-700 to-primary-green-700 bg-clip-text text-transparent">
+                <h3 className="text-2xl font-bold text-transparent bg-gradient-to-r from-primary-blue-700 to-primary-green-700 bg-clip-text">
                   How to Use Story Boarding
                 </h3>
               </div>
-              <div className="grid md:grid-cols-2 gap-6 text-sm">
-                <div className="flex items-start gap-4 p-4 bg-gradient-to-br from-primary-blue-25 to-primary-blue-50 rounded-2xl border border-primary-blue-100/50">
-                  <div className="p-2 bg-primary-blue-500 rounded-xl shadow-lg">
-                    <Plus className="size-5 text-white" />
+              <div className="grid gap-6 text-sm md:grid-cols-2">
+                <div className="flex items-start gap-4 p-4 border bg-gradient-to-br from-primary-blue-25 to-primary-blue-50 rounded-2xl border-primary-blue-100/50">
+                  <div className="p-2 shadow-lg bg-primary-blue-500 rounded-xl">
+                    <Plus className="text-white size-5" />
                   </div>
                   <div className="text-left">
-                    <p className="font-bold text-primary-blue-800 mb-2">
+                    <p className="mb-2 font-bold text-primary-blue-800">
                       Add Sticky Notes
                     </p>
-                    <p className="text-primary-blue-700 leading-relaxed">
+                    <p className="leading-relaxed text-primary-blue-700">
                       Click &quot;Add Sticky Note&quot; to create new story
                       elements anywhere on the canvas
                     </p>
                   </div>
                 </div>
-                <div className="flex items-start gap-4 p-4 bg-gradient-to-br from-primary-green-25 to-primary-green-50 rounded-2xl border border-primary-green-100/50">
-                  <div className="p-2 bg-primary-green-500 rounded-xl shadow-lg">
-                    <Edit3 className="size-5 text-white" />
+                <div className="flex items-start gap-4 p-4 border bg-gradient-to-br from-primary-green-25 to-primary-green-50 rounded-2xl border-primary-green-100/50">
+                  <div className="p-2 shadow-lg bg-primary-green-500 rounded-xl">
+                    <Edit3 className="text-white size-5" />
                   </div>
                   <div className="text-left">
-                    <p className="font-bold text-primary-green-800 mb-2">
+                    <p className="mb-2 font-bold text-primary-green-800">
                       Edit Content
                     </p>
-                    <p className="text-primary-green-700 leading-relaxed">
+                    <p className="leading-relaxed text-primary-green-700">
                       Click the edit button on any sticky note to modify its
                       content
                     </p>
                   </div>
                 </div>
-                <div className="flex items-start gap-4 p-4 bg-gradient-to-br from-primary-blue-25 to-primary-blue-50 rounded-2xl border border-primary-blue-100/50">
-                  <div className="p-2 bg-primary-blue-500 rounded-xl shadow-lg">
-                    <Palette className="size-5 text-white" />
+                <div className="flex items-start gap-4 p-4 border bg-gradient-to-br from-primary-blue-25 to-primary-blue-50 rounded-2xl border-primary-blue-100/50">
+                  <div className="p-2 shadow-lg bg-primary-blue-500 rounded-xl">
+                    <Palette className="text-white size-5" />
                   </div>
                   <div className="text-left">
-                    <p className="font-bold text-primary-blue-800 mb-2">
+                    <p className="mb-2 font-bold text-primary-blue-800">
                       Choose Colors
                     </p>
-                    <p className="text-primary-blue-700 leading-relaxed">
+                    <p className="leading-relaxed text-primary-blue-700">
                       Select different colors for your sticky notes to organize
                       by themes
                     </p>
                   </div>
                 </div>
-                <div className="flex items-start gap-4 p-4 bg-gradient-to-br from-primary-green-25 to-primary-green-50 rounded-2xl border border-primary-green-100/50">
-                  <div className="p-2 bg-primary-green-500 rounded-xl shadow-lg">
-                    <Grid3X3 className="size-5 text-white" />
+                <div className="flex items-start gap-4 p-4 border bg-gradient-to-br from-primary-green-25 to-primary-green-50 rounded-2xl border-primary-green-100/50">
+                  <div className="p-2 shadow-lg bg-primary-green-500 rounded-xl">
+                    <Grid3X3 className="text-white size-5" />
                   </div>
                   <div className="text-left">
-                    <p className="font-bold text-primary-green-800 mb-2">
+                    <p className="mb-2 font-bold text-primary-green-800">
                       Drag & Arrange
                     </p>
-                    <p className="text-primary-green-700 leading-relaxed">
+                    <p className="leading-relaxed text-primary-green-700">
                       Drag sticky notes around the canvas to organize your story
                       elements
                     </p>
@@ -681,21 +681,21 @@ export default function CareerStory5({
         <div className="flex justify-center gap-4 mt-8">
           <Button
             onClick={() => router.push(`/journey/sessions/${sessionId}`)}
-            className="group relative px-8 py-6 bg-gradient-to-r from-slate-500 to-slate-600 text-white rounded-2xl font-bold text-lg hover:from-slate-600 hover:to-slate-700 transition-all duration-300 shadow-2xl hover:shadow-3xl hover:-translate-y-1"
+            className="relative px-8 py-6 text-lg font-bold text-white transition-all duration-300 shadow-2xl group bg-gradient-to-r from-slate-500 to-slate-600 rounded-2xl hover:from-slate-600 hover:to-slate-700 hover:shadow-3xl hover:-translate-y-1"
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-slate-400 to-slate-500 rounded-2xl blur opacity-30 group-hover:opacity-50 transition-opacity duration-300" />
+            <div className="absolute inset-0 transition-opacity duration-300 bg-gradient-to-r from-slate-400 to-slate-500 rounded-2xl blur opacity-30 group-hover:opacity-50" />
             <div className="relative flex items-center gap-3">
               <span>Write Another Letter</span>
-              <ArrowRight className="size-5 group-hover:translate-x-1 transition-transform duration-200" />
+              <ArrowRight className="transition-transform duration-200 size-5 group-hover:translate-x-1" />
             </div>
           </Button>
 
           <Button
             onClick={saveStoryBoard}
             disabled={saving}
-            className="group relative px-10 py-6 bg-gradient-to-r from-primary-green-500 to-primary-blue-500 text-white rounded-2xl font-bold text-lg hover:from-primary-green-600 hover:to-primary-blue-600 transition-all duration-300 shadow-2xl hover:shadow-3xl hover:-translate-y-1"
+            className="relative px-10 py-6 text-lg font-bold text-white transition-all duration-300 shadow-2xl group bg-gradient-to-r from-primary-green-500 to-primary-blue-500 rounded-2xl hover:from-primary-green-600 hover:to-primary-blue-600 hover:shadow-3xl hover:-translate-y-1"
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-primary-green-400 to-primary-blue-400 rounded-2xl blur opacity-30 group-hover:opacity-50 transition-opacity duration-300" />
+            <div className="absolute inset-0 transition-opacity duration-300 bg-gradient-to-r from-primary-green-400 to-primary-blue-400 rounded-2xl blur opacity-30 group-hover:opacity-50" />
             <div className="relative flex items-center gap-3">
               {saving ? (
                 <>
@@ -705,7 +705,7 @@ export default function CareerStory5({
               ) : (
                 <>
                   <span>Save Progress</span>
-                  <ArrowRight className="size-5 group-hover:translate-x-1 transition-transform duration-200" />
+                  <ArrowRight className="transition-transform duration-200 size-5 group-hover:translate-x-1" />
                 </>
               )}
             </div>

@@ -7,6 +7,7 @@ interface InputFieldProps {
   placeholder?: string;
   className?: string;
   type?: string;
+  id?: string;
 }
 
 export const InputField: React.FC<InputFieldProps> = ({
@@ -15,9 +16,11 @@ export const InputField: React.FC<InputFieldProps> = ({
   placeholder = "",
   className,
   type = "text",
+  id,
 }) => {
   return (
     <input
+      id={id}
       type={type}
       value={value}
       onChange={(e) => onChange(e.target.value)}

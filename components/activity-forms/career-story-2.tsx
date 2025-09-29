@@ -245,7 +245,7 @@ export default function CareerStory2() {
     ];
 
     const missingFields = requiredFields.filter(
-      (field) => !formData[field].trim()
+      (field) => !(formData[field] as string).trim()
     );
 
     if (missingFields.length > 0) {
@@ -290,9 +290,9 @@ export default function CareerStory2() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-primary-blue-50 to-primary-green-50 flex items-center justify-center">
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-primary-blue-50 to-primary-green-50">
         <div className="text-center">
-          <div className="animate-spin rounded-full size-12 border-b-2 border-primary-blue-500 mx-auto mb-4"></div>
+          <div className="mx-auto mb-4 border-b-2 rounded-full animate-spin size-12 border-primary-blue-500" />
           <p className="text-slate-600">Loading your career story...</p>
         </div>
       </div>
@@ -300,7 +300,7 @@ export default function CareerStory2() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-blue-50 to primary-green-50 p-4 sm:py-8">
+    <div className="min-h-screen p-4 bg-gradient-to-br from-primary-blue-50 to primary-green-50 sm:py-8">
       <div className="max-w-4xl mx-auto">
         {/* header */}
         <Header
@@ -312,10 +312,10 @@ export default function CareerStory2() {
 
         {/* SELF Section */}
         <div className="mb-8">
-          <div className="bg-gradient-to-r from-primary-green-100/80 to-primary-blue-100/80 rounded-xl p-6 mb-6 border border-primary-green-200/60 shadow-xl backdrop-blur-sm">
+          <div className="p-6 mb-6 border shadow-xl bg-gradient-to-r from-primary-green-100/80 to-primary-blue-100/80 rounded-xl border-primary-green-200/60 backdrop-blur-sm">
             <div>
-              <div className="flex gap-3 items-center">
-                <div className="p-2 bg-primary-green-200 rounded-lg">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-primary-green-200">
                   <User className="sm:size-5 size-4 text-primary-green-700" />
                 </div>
                 <h2 className="text-xl font-bold text-primary-green-800">
@@ -323,7 +323,7 @@ export default function CareerStory2() {
                 </h2>
               </div>
               <div>
-                <p className="text-primary-green-700 text-sm mt-1">
+                <p className="mt-1 text-sm text-primary-green-700">
                   Look at the words you used to describe your heroes or heroines
                   (Role Models) in Career Story - 1 activity.
                 </p>
@@ -335,12 +335,12 @@ export default function CareerStory2() {
           <Card className="mb-6 bg-gradient-to-br from-primary-green-50/50 to-primary-blue-50/50 border-primary-green-100/60">
             <CardHeader>
               <div>
-                <div className="flex justify-between items-center">
-                  <div className="flex gap-3 items-center">
-                    <div className="p-2 bg-primary-green-100 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-primary-green-100">
                       <Lightbulb className="sm:size-5 text-primary-green-600 size-4" />
                     </div>
-                    <CardTitle className="text-primary-green-600 text-lg sm:text-xl">
+                    <CardTitle className="text-lg text-primary-green-600 sm:text-xl">
                       Hero Analysis
                     </CardTitle>
                   </div>
@@ -351,7 +351,7 @@ export default function CareerStory2() {
                       </SheetTrigger>
                       <SheetContent className="min-w-[340px] sm:min-w-[600px] overflow-y-scroll bg-gradient-to-r from-primary-green-100 to-white">
                         <SheetHeader>
-                          <SheetTitle className="text-primary-green-600 text-xl font-bold">
+                          <SheetTitle className="text-xl font-bold text-primary-green-600">
                             Career Story Exploration - 1
                           </SheetTitle>
                           <SheetDescription>
@@ -361,7 +361,7 @@ export default function CareerStory2() {
                         {mockCareerStoryData.heroes.length > 0 && (
                           <div>
                             <div className="flex items-center gap-3 mb-4">
-                              <h4 className="font-medium text-slate-600 text-sm">
+                              <h4 className="text-sm font-medium text-slate-600">
                                 Childhood Heroes & Role Models
                               </h4>
                             </div>
@@ -372,16 +372,16 @@ export default function CareerStory2() {
                                   className="bg-white/90 rounded-xl p-4 border border-primary-green-200/60 shadow-md transition-all duration-300 hover:bg-white hover:border-primary-green-300/80 hover:shadow-lg hover:scale-[1.01]"
                                 >
                                   <div className="flex items-start gap-4">
-                                    <div className="shrink-0 size-6 bg-primary-green-600 rounded-full flex items-center justify-center shadow-md transition-all duration-300 hover:shadow-lg">
+                                    <div className="flex items-center justify-center transition-all duration-300 rounded-full shadow-md shrink-0 size-6 bg-primary-green-600 hover:shadow-lg">
                                       <span className="text-xs font-bold text-white">
                                         {index + 1}
                                       </span>
                                     </div>
                                     <div className="flex-1">
-                                      <h5 className="text-primary-green-600 font-semibold">
+                                      <h5 className="font-semibold text-primary-green-600">
                                         {hero.title}
                                       </h5>
-                                      <p className="text-sm text-slate-600 leading-relaxed ">
+                                      <p className="text-sm leading-relaxed text-slate-600 ">
                                         {hero.description}
                                       </p>
                                     </div>
@@ -396,22 +396,25 @@ export default function CareerStory2() {
                   </div>
                 </div>
                 <div>
-                  <p className="text-sm text-slate-600 leading-relaxed mt-2">
+                  <p className="mt-2 text-sm leading-relaxed text-slate-600">
                     Analyze the descriptive words you used for your role models
                     to understand your core values and aspirations.
                   </p>
                 </div>
-                <div></div>
               </div>
             </CardHeader>
             <CardContent>
               <div className="space-y-6">
                 <div>
-                  <label className="block text-sm font-medium text-slate-600 mb-2">
+                  <label
+                    htmlFor="firstAdjectives"
+                    className="block mb-2 text-sm font-medium text-slate-600"
+                  >
                     Write down the first adjective you used to describe each one
                     of them:
                   </label>
                   <InputField
+                    id="firstAdjectives"
                     value={formData.firstAdjectives}
                     onChange={(value) =>
                       setFormData((prev) => ({
@@ -424,11 +427,15 @@ export default function CareerStory2() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-600 mb-2">
+                  <label
+                    htmlFor="repeatedWords"
+                    className="block mb-2 text-sm font-medium text-slate-600"
+                  >
                     Write down any words or similar words that you used more
                     than once to describe them:
                   </label>
                   <InputField
+                    id="repeatedWords"
                     value={formData.repeatedWords}
                     onChange={(value) =>
                       setFormData((prev) => ({ ...prev, repeatedWords: value }))
@@ -438,11 +445,15 @@ export default function CareerStory2() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-600 mb-2">
+                  <label
+                    htmlFor="commonTraits"
+                    className="block mb-2 text-sm font-medium text-slate-600"
+                  >
                     Write down two or more things your heroes or heroines have
                     in common:
                   </label>
                   <TextArea
+                    id="commonTraits"
                     value={formData.commonTraits}
                     onChange={(value) =>
                       setFormData((prev) => ({ ...prev, commonTraits: value }))
@@ -453,11 +464,15 @@ export default function CareerStory2() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-600 mb-2">
+                  <label
+                    htmlFor="significantWords"
+                    className="block mb-2 text-sm font-medium text-slate-600"
+                  >
                     List any other significant words or phrases you used to
                     describe them:
                   </label>
                   <TextArea
+                    id="significantWords"
                     value={formData.significantWords}
                     onChange={(value) =>
                       setFormData((prev) => ({
@@ -482,16 +497,20 @@ export default function CareerStory2() {
             }
           >
             <div>
-              <label className="block text-sm font-medium text-slate-600 mb-2">
+              <label
+                htmlFor="selfStatement"
+                className="block mb-2 text-sm font-medium text-slate-600"
+              >
                 Using the words you wrote down above, tell in two to four
                 sentences who you are and who you are becoming:
               </label>
-              <div className="bg-gradient-to-r from-primary-green-50 to-primary-blue-50 rounded-lg p-4 border border-primary-green-200 mb-3">
-                <p className="text-sm font-medium text-primary-green-800 mb-2">
+              <div className="p-4 mb-3 border rounded-lg bg-gradient-to-r from-primary-green-50 to-primary-blue-50 border-primary-green-200">
+                <p className="mb-2 text-sm font-medium text-primary-green-800">
                   I AM / I AM BECOMING A PERSON WHO IS...
                 </p>
               </div>
               <TextArea
+                id="selfStatement"
                 value={formData.selfStatement}
                 onChange={(value) =>
                   setFormData((prev) => ({ ...prev, selfStatement: value }))
@@ -505,10 +524,10 @@ export default function CareerStory2() {
 
         {/* SETTING Section */}
         <div className="mb-8">
-          <div className="bg-gradient-to-r from-primary-blue-100/80 to-blue-100/80 rounded-xl p-6 mb-6 border border-primary-blue-200/60 shadow-xl backdrop-blur-sm">
+          <div className="p-6 mb-6 border shadow-xl bg-gradient-to-r from-primary-blue-100/80 to-blue-100/80 rounded-xl border-primary-blue-200/60 backdrop-blur-sm">
             <div>
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-primary-blue-200 rounded-lg">
+                <div className="p-2 rounded-lg bg-primary-blue-200">
                   <MapPin className="sm:size-5 size-4 text-primary-blue-700" />
                 </div>
                 <h2 className="text-2xl font-bold text-primary-blue-800">
@@ -521,12 +540,12 @@ export default function CareerStory2() {
           <Card className="mb-6 bg-blue-50/50 border-primary-blue-100/60">
             <CardHeader>
               <div>
-                <div className="flex justify-between items-center">
-                  <div className="flex gap-3 items-center">
-                    <div className="p-2 bg-primary-blue-100 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-primary-blue-100">
                       <Lightbulb className="sm:size-5 text-primary-blue-600 size-4" />
                     </div>
-                    <CardTitle className="text-primary-blue-600 text-lg sm:text-xl">
+                    <CardTitle className="text-lg text-primary-blue-600 sm:text-xl">
                       Media & Entertainment Analysis
                     </CardTitle>
                   </div>
@@ -537,37 +556,37 @@ export default function CareerStory2() {
                       </SheetTrigger>
                       <SheetContent className="min-w-[340px] sm:min-w-[600px] overflow-y-scroll bg-gradient-to-r from-primary-blue-100 to-white">
                         <SheetHeader>
-                          <SheetTitle className="text-primary-blue-600 text-xl font-bold">
+                          <SheetTitle className="text-xl font-bold text-primary-blue-600">
                             Career Story Exploration - 1
                           </SheetTitle>
-                          <SheetDescription></SheetDescription>
+                          <SheetDescription />
                         </SheetHeader>
                         {/* Media & Entertainment */}
                         {(mockCareerStoryData.magazines ||
                           mockCareerStoryData.magazineWhy) && (
                           <div>
                             <div className="flex items-center gap-3 mb-4">
-                              <h4 className="font-medium text-slate-600 text-sm">
+                              <h4 className="text-sm font-medium text-slate-600">
                                 Media & Entertainment
                               </h4>
                             </div>
                             <div className="space-y-4">
                               {mockCareerStoryData.magazines && (
-                                <div className="bg-white/60 rounded-lg p-3 border border-purple-200/50">
-                                  <h5 className="font-bold text-primary-blue-600 mb-2">
+                                <div className="p-3 border rounded-lg bg-white/60 border-purple-200/50">
+                                  <h5 className="mb-2 font-bold text-primary-blue-600">
                                     What you watch/read:
                                   </h5>
-                                  <p className="text-sm text-slate-600 font-medium">
+                                  <p className="text-sm font-medium text-slate-600">
                                     {mockCareerStoryData.magazines}
                                   </p>
                                 </div>
                               )}
                               {mockCareerStoryData.magazineWhy && (
-                                <div className="bg-white/60 rounded-lg p-3 border border-purple-200/50">
-                                  <h5 className="font-bold text-primary-blue-600 mb-2 transition-colors duration-300">
+                                <div className="p-3 border rounded-lg bg-white/60 border-purple-200/50">
+                                  <h5 className="mb-2 font-bold transition-colors duration-300 text-primary-blue-600">
                                     Media Activities & Setting Preferences
                                   </h5>
-                                  <p className="text-sm text-slate-600 font-medium transition-colors duration-300">
+                                  <p className="text-sm font-medium transition-colors duration-300 text-slate-600">
                                     {mockCareerStoryData.magazineWhy}
                                   </p>
                                 </div>
@@ -580,24 +599,27 @@ export default function CareerStory2() {
                   </div>
                 </div>
                 <div>
-                  <p className="text-sm text-slate-600 leading-relaxed mt-2">
+                  <p className="mt-2 text-sm leading-relaxed text-slate-600">
                     Review your magazine or TV show choices from Career Story -
                     1 activity. Look closely at the words you used to describe
                     them.
                   </p>
                 </div>
-                <div></div>
               </div>
             </CardHeader>
             <CardContent>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+                <label
+                  htmlFor="mediaActivities"
+                  className="block mb-2 text-sm font-medium text-slate-700"
+                >
                   What kinds of activities are going on in these magazines or
                   shows? What kinds of people are seen in them? Tell what is
                   happening and what the people are doing in your magazines or
                   TV shows:
                 </label>
                 <TextArea
+                  id="mediaActivities"
                   value={formData.mediaActivities}
                   onChange={(value) =>
                     setFormData((prev) => ({ ...prev, mediaActivities: value }))
@@ -614,16 +636,16 @@ export default function CareerStory2() {
           <Card className="mb-6 bg-blue-50/50 border-primary-blue-100/60">
             <CardHeader>
               <div>
-                <div className="flex gap-3 items-center">
-                  <div className="p-2 bg-primary-blue-100 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-primary-blue-100">
                     <CheckSquare className="sm:size-5 text-primary-blue-600 size-4" />
                   </div>
-                  <CardTitle className="text-primary-blue-600 text-lg sm:text-xl">
+                  <CardTitle className="text-lg text-primary-blue-600 sm:text-xl">
                     RIASEC Work Settings
                   </CardTitle>
                 </div>
                 <div>
-                  <p className="text-sm text-slate-600 leading-relaxed mt-2">
+                  <p className="mt-2 text-sm leading-relaxed text-slate-600">
                     Magazines and TV shows can be grouped by the work settings
                     they represent. Find the one or two work settings most like
                     your favorite magazines or TV shows.
@@ -633,16 +655,17 @@ export default function CareerStory2() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <p className="text-sm text-slate-600 mb-4">
+                <p className="mb-4 text-sm text-slate-600">
                   Select the work setting(s) that best match your favorite
                   magazines or TV shows:
                 </p>
 
                 <div className="grid gap-4">
                   {riasecOptions.map((option) => (
-                    <div
+                    <button
                       key={option.code}
-                      className={`border-2 rounded-lg p-4 cursor-pointer transition-all duration-200 ${
+                      type="button"
+                      className={`w-full text-left border-2 rounded-lg p-4 transition-all duration-200 ${
                         formData.selectedRiasec.includes(option.code)
                           ? "border-primary-blue-500 bg-primary-blue-50 shadow-md"
                           : "border-slate-200 hover:border-primary-blue-300 hover:bg-primary-blue-25"
@@ -660,17 +683,17 @@ export default function CareerStory2() {
                           {option.code}
                         </div>
                         <div className="flex-1">
-                          <h4 className="font-semibold text-slate-800 mb-1">
+                          <h4 className="mb-1 font-semibold text-slate-800">
                             {option.title}
                           </h4>
-                          <p className="text-sm text-slate-600 mb-2">
+                          <p className="mb-2 text-sm text-slate-600">
                             {option.description}
                           </p>
                           <div className="flex flex-wrap gap-1">
                             {option.keywords.map((keyword) => (
                               <span
                                 key={keyword}
-                                className="px-2 py-1 bg-slate-100 text-slate-600 text-xs rounded-full"
+                                className="px-2 py-1 text-xs rounded-full bg-slate-100 text-slate-600"
                               >
                                 {keyword}
                               </span>
@@ -678,13 +701,13 @@ export default function CareerStory2() {
                           </div>
                         </div>
                       </div>
-                    </div>
+                    </button>
                   ))}
                 </div>
 
                 {formData.selectedRiasec.length > 0 && (
-                  <div className="mt-4 p-4 bg-primary-blue-50 rounded-lg border border-primary-blue-200">
-                    <p className="text-sm font-medium text-primary-blue-800 mb-2">
+                  <div className="p-4 mt-4 border rounded-lg bg-primary-blue-50 border-primary-blue-200">
+                    <p className="mb-2 text-sm font-medium text-primary-blue-800">
                       Selected Work Settings:
                     </p>
                     <div className="flex flex-wrap gap-2">
@@ -695,7 +718,7 @@ export default function CareerStory2() {
                         return (
                           <span
                             key={code}
-                            className="px-3 py-1 bg-primary-blue-500 text-white text-sm rounded-full"
+                            className="px-3 py-1 text-sm text-white rounded-full bg-primary-blue-500"
                           >
                             {code} - {option?.title}
                           </span>
@@ -712,16 +735,16 @@ export default function CareerStory2() {
           <Card className="mb-6 bg-blue-50/50 border-primary-blue-100/60">
             <CardHeader>
               <div>
-                <div className="flex gap-3 items-center">
-                  <div className="p-2 bg-primary-blue-100 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-primary-blue-100">
                     <Target className="sm:size-5 text-primary-blue-600 size-4" />
                   </div>
-                  <CardTitle className="text-primary-blue-600 text-lg sm:text-xl">
+                  <CardTitle className="text-lg text-primary-blue-600 sm:text-xl">
                     Your Preferred Work Setting
                   </CardTitle>
                 </div>
                 <div>
-                  <p className="text-sm text-slate-600 leading-relaxed mt-2">
+                  <p className="mt-2 text-sm leading-relaxed text-slate-600">
                     This is where you like to be, your career interests. These
                     are the kinds of places in which you want to work, the
                     people with whom you want to be, the problems you want to
@@ -732,16 +755,20 @@ export default function CareerStory2() {
             </CardHeader>
             <CardContent>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+                <label
+                  htmlFor="settingStatement"
+                  className="block mb-2 text-sm font-medium text-slate-700"
+                >
                   Using the words you wrote down in your summary above, tell in
                   2-4 sentences where you like to be:
                 </label>
-                <div className="bg-gradient-to-r from-primary-blue-50 to-blue-50 rounded-lg p-4 border border-primary-blue-200 mb-3">
-                  <p className="text-sm font-medium text-primary-blue-800 mb-2">
+                <div className="p-4 mb-3 border rounded-lg bg-gradient-to-r from-primary-blue-50 to-blue-50 border-primary-blue-200">
+                  <p className="mb-2 text-sm font-medium text-primary-blue-800">
                     I LIKE BEING IN PLACES WHERE...
                   </p>
                 </div>
                 <TextArea
+                  id="settingStatement"
                   value={formData.settingStatement}
                   onChange={(value) =>
                     setFormData((prev) => ({
@@ -763,19 +790,19 @@ export default function CareerStory2() {
           <Button
             onClick={handleSave}
             disabled={isSaving}
-            className="group relative px-10 py-6 bg-gradient-to-r from-primary-green-500 to-primary-blue-500 text-white rounded-2xl font-bold text-lg hover:from-primary-green-600 hover:to-primary-blue-600 transition-all duration-300 shadow-2xl hover:shadow-3xl hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="relative px-10 py-6 text-lg font-bold text-white transition-all duration-300 shadow-2xl group bg-gradient-to-r from-primary-green-500 to-primary-blue-500 rounded-2xl hover:from-primary-green-600 hover:to-primary-blue-600 hover:shadow-3xl hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-primary-green-400 to-primary-blue-400 rounded-2xl blur opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
+            <div className="absolute inset-0 transition-opacity duration-300 bg-gradient-to-r from-primary-green-400 to-primary-blue-400 rounded-2xl blur opacity-30 group-hover:opacity-50" />
             <div className="relative flex items-center gap-3">
               {isSaving ? (
                 <>
-                  <div className="animate-spin rounded-full size-5 border-b-2 border-white"></div>
+                  <div className="border-b-2 border-white rounded-full animate-spin size-5" />
                   <span>Saving...</span>
                 </>
               ) : (
                 <>
                   <span>Save Progress</span>
-                  <ArrowRight className="size-5 group-hover:translate-x-1 transition-transform duration-200" />
+                  <ArrowRight className="transition-transform duration-200 size-5 group-hover:translate-x-1" />
                 </>
               )}
             </div>

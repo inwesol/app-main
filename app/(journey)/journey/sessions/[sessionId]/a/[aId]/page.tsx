@@ -88,20 +88,5 @@ export default async function ActivityPage({ params }: ActivityPageProps) {
   // Handle different component prop requirements
   const sessionIdNum = Number.parseInt(sessionId);
 
-  // Check if component expects props
-  if (
-    ComponentToRender.name === "CareerStory5" ||
-    ComponentToRender.name === "CareerStory6" ||
-    ComponentToRender.name === "LetterFromFutureSelf"
-  ) {
-    return <ComponentToRender sessionId={sessionIdNum} activityId={aId} />;
-  } else if (
-    ComponentToRender.name === "CareerStory4" ||
-    ComponentToRender.name === "CareerOptionsMatrix"
-  ) {
-    return <ComponentToRender sessionId={sessionId} activityId={aId} />;
-  } else {
-    // Components that use useParams() internally don't need props
-    return <ComponentToRender />;
-  }
+  return <ComponentToRender />;
 }

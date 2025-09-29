@@ -18,7 +18,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import Header from "@/components/form-components/header";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 
 interface MatrixCell {
   rowId: string;
@@ -38,15 +38,11 @@ interface MatrixColumn {
   name: string;
 }
 
-interface CareerOptionsMatrixProps {
-  sessionId: string;
-}
-
-export default function CareerOptionsMatrix({
-  sessionId,
-}: CareerOptionsMatrixProps) {
+export default function CareerOptionsMatrix() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const params = useParams();
+  const sessionId = params?.sessionId as string;
   const router = useRouter();
 
   // default rows (criteria)
@@ -73,10 +69,11 @@ export default function CareerOptionsMatrix({
   }, [sessionId]);
 
   const loadData = async () => {
+    const aId = "career-options-matrix";
     try {
       setIsLoading(true);
       const response = await fetch(
-        `/api/journey/sessions/${sessionId}/a/career-options-matrix`
+        `/api/journey/sessions/${sessionId}/a/${aId}`
       );
 
       if (response.ok) {
@@ -102,6 +99,7 @@ export default function CareerOptionsMatrix({
   };
 
   const saveData = async () => {
+    const aId = "career-options-matrix";
     try {
       setIsSaving(true);
 
@@ -112,7 +110,7 @@ export default function CareerOptionsMatrix({
       };
 
       const response = await fetch(
-        `/api/journey/sessions/${sessionId}/a/career-options-matrix`,
+        `/api/journey/sessions/${sessionId}/a/${aId}`,
         {
           method: "POST",
           headers: {
@@ -347,7 +345,7 @@ export default function CareerOptionsMatrix({
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-primary-green-50 via-primary-blue-50 to-cyan-50 flex items-center justify-center">
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-primary-green-50 via-primary-blue-50 to-cyan-50">
         <div className="flex items-center gap-3 text-slate-600">
           <Loader2 className="size-6 animate-spin" />
           <span>Loading your matrix...</span>
@@ -357,8 +355,8 @@ export default function CareerOptionsMatrix({
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-green-50 via-primary-blue-50 to-cyan-50 relative ">
-      <div className="relative z-10 max-w-7xl mx-auto p-6">
+    <div className="relative min-h-screen bg-gradient-to-br from-primary-green-50 via-primary-blue-50 to-cyan-50 ">
+      <div className="relative z-10 p-6 mx-auto max-w-7xl">
         <Header
           headerIcon={Grid}
           headerText="Career Options Matrix"
@@ -366,20 +364,20 @@ export default function CareerOptionsMatrix({
         />
 
         {/* Save Button */}
-        <div className="fixed top-6 right-6 z-50">
+        <div className="fixed z-50 top-6 right-6">
           <Button
             onClick={saveData}
             disabled={isSaving}
-            className="bg-gradient-to-r from-primary-green-500 to-emerald-500 hover:from-primary-green-600 hover:to-emerald-600 text-white shadow-xl rounded-2xl px-6 py-3 transition-all duration-300 hover:scale-105 hover:shadow-2xl"
+            className="px-6 py-3 text-white transition-all duration-300 shadow-xl bg-gradient-to-r from-primary-green-500 to-emerald-500 hover:from-primary-green-600 hover:to-emerald-600 rounded-2xl hover:scale-105 hover:shadow-2xl"
           >
             {isSaving ? (
               <>
-                <Loader2 className="size-4 mr-2 animate-spin" />
+                <Loader2 className="mr-2 size-4 animate-spin" />
                 Saving...
               </>
             ) : (
               <>
-                <Save className="size-4 mr-2" />
+                <Save className="mr-2 size-4" />
                 Save Matrix
               </>
             )}
@@ -388,18 +386,18 @@ export default function CareerOptionsMatrix({
 
         {/* instructions Card */}
         {/* how to use  */}
-        <div className="bg-gradient-to-r from-primary-blue-50 to-primary-green-50 rounded-2xl p-6 sm:p-8 mb-8 border-2 border-slate-200 shadow-lg">
+        <div className="p-6 mb-8 border-2 shadow-lg bg-gradient-to-r from-primary-blue-50 to-primary-green-50 rounded-2xl sm:p-8 border-slate-200">
           <div className="flex flex-col gap-4">
             <div className="flex items-center gap-4 mb-4">
-              <div className="size-12 bg-gradient-to-r from-primary-blue-500 to-primary-green-500 rounded-xl flex items-center justify-center shadow-lg">
-                <Info className="size-6 text-white" />
+              <div className="flex items-center justify-center shadow-lg size-12 bg-gradient-to-r from-primary-blue-500 to-primary-green-500 rounded-xl">
+                <Info className="text-white size-6" />
               </div>
               <h3 className="text-lg font-bold text-slate-800">
                 How to use this matrix
               </h3>
             </div>
             <div className="flex-1">
-              <div className="grid sm:grid-cols-2 gap-4 text-slate-700">
+              <div className="grid gap-4 sm:grid-cols-2 text-slate-700">
                 <div className="space-y-3">
                   <div className="flex items-center gap-3">
                     <div className="size-6 bg-primary-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold shrink-0 mt-0.5">
@@ -437,22 +435,22 @@ export default function CareerOptionsMatrix({
         </div>
 
         {/* Soothing Progress & Stats */}
-        <div className="grid md:grid-cols-3 gap-6 mb-8">
+        <div className="grid gap-6 mb-8 md:grid-cols-3">
           <Card className="p-6 bg-gradient-to-br from-emerald-50/80 to-primary-green-50/80 border-emerald-200/60 backdrop-blur-sm">
             <div className="flex items-center gap-3 mb-3">
               <Calculator className="size-5 text-emerald-500" />
               <h3 className="font-bold text-emerald-800">Completion</h3>
             </div>
             <div className="mb-2">
-              <div className="flex items-center justify-between text-sm text-emerald-700 mb-1">
+              <div className="flex items-center justify-between mb-1 text-sm text-emerald-700">
                 <span>Matrix Progress</span>
                 <span className="font-bold">
                   {Math.round(getCompletionPercentage())}%
                 </span>
               </div>
-              <div className="w-full bg-emerald-200/50 rounded-full h-3">
+              <div className="w-full h-3 rounded-full bg-emerald-200/50">
                 <div
-                  className="bg-gradient-to-r from-emerald-500 to-primary-green-500 h-3 rounded-full transition-all duration-700 shadow-sm"
+                  className="h-3 transition-all duration-700 rounded-full shadow-sm bg-gradient-to-r from-emerald-500 to-primary-green-500"
                   style={{ width: `${getCompletionPercentage()}%` }}
                 />
               </div>
@@ -465,10 +463,10 @@ export default function CareerOptionsMatrix({
 
           <Card className="p-6 bg-gradient-to-br from-primary-blue-50/80 to-cyan-50/80 border-primary-blue-200/60 backdrop-blur-sm">
             <div className="flex items-center gap-3 mb-3">
-              <Target className="size-5  text-primary-blue-500" />
+              <Target className="size-5 text-primary-blue-500" />
               <h3 className="font-bold text-primary-blue-800">Criteria</h3>
             </div>
-            <div className="text-2xl font-bold text-primary-blue-700 mb-1">
+            <div className="mb-1 text-2xl font-bold text-primary-blue-700">
               {rows.length}
             </div>
             <p className="text-sm text-primary-blue-600">Evaluation criteria</p>
@@ -479,7 +477,7 @@ export default function CareerOptionsMatrix({
               <Sparkles className="size-5 text-primary-green-500" />
               <h3 className="font-bold text-teal-800">Options</h3>
             </div>
-            <div className="text-2xl font-bold text-teal-700 mb-1">
+            <div className="mb-1 text-2xl font-bold text-teal-700">
               {columns.length}
             </div>
             <p className="text-sm text-teal-600">Career options</p>
@@ -489,50 +487,50 @@ export default function CareerOptionsMatrix({
         {/* matrix container with floating buttons */}
         <div className="relative mb-8">
           {/* add column button */}
-          <div className="absolute -top-6 -right-6 z-30 group">
+          <div className="absolute z-30 -top-6 -right-6 group">
             <Button
               onClick={addColumn}
-              className="bg-gradient-to-r from-emerald-500 to-primary-green-500 hover:from-emerald-600 hover:to-primary-green-600 text-white shadow-xl rounded-2xl size-14 p-0 transition-all duration-300 hover:scale-110 hover:shadow-2xl hover:shadow-emerald-200/50"
+              className="p-0 text-white transition-all duration-300 shadow-xl bg-gradient-to-r from-emerald-500 to-primary-green-500 hover:from-emerald-600 hover:to-primary-green-600 rounded-2xl size-14 hover:scale-110 hover:shadow-2xl hover:shadow-emerald-200/50"
               title="Add new career option column"
             >
-              <Plus className="size-6 group-hover:rotate-90 transition-transform duration-300" />
+              <Plus className="transition-transform duration-300 size-6 group-hover:rotate-90" />
             </Button>
-            <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 bg-emerald-800 text-white text-xs px-3 py-1 rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-lg">
+            <div className="absolute px-3 py-1 text-xs text-white transition-all duration-300 -translate-x-1/2 rounded-lg shadow-lg opacity-0 -bottom-10 left-1/2 bg-emerald-800 whitespace-nowrap group-hover:opacity-100">
               Add Career Option
-              <div className="absolute -top-1 left-1/2 -translate-x-1/2 size-2 bg-emerald-800 rotate-45" />
+              <div className="absolute rotate-45 -translate-x-1/2 -top-1 left-1/2 size-2 bg-emerald-800" />
             </div>
           </div>
 
           {/* add row button */}
-          <div className="absolute -bottom-6 -left-6 z-30 group">
+          <div className="absolute z-30 -bottom-6 -left-6 group">
             <Button
               onClick={addRow}
-              className="bg-gradient-to-r from-primary-blue-500 to-cyan-500 hover:from-primary-blue-600 hover:to-cyan-600 text-white shadow-xl rounded-2xl size-14 p-0 transition-all duration-300 hover:scale-110 hover:shadow-2xl hover:shadow-primary-blue-200/50"
+              className="p-0 text-white transition-all duration-300 shadow-xl bg-gradient-to-r from-primary-blue-500 to-cyan-500 hover:from-primary-blue-600 hover:to-cyan-600 rounded-2xl size-14 hover:scale-110 hover:shadow-2xl hover:shadow-primary-blue-200/50"
               title="Add new criteria row"
             >
-              <Plus className="size-6 group-hover:rotate-90 transition-transform duration-300" />
+              <Plus className="transition-transform duration-300 size-6 group-hover:rotate-90" />
             </Button>
-            <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-primary-blue-800 text-white text-xs px-3 py-1 rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-lg">
+            <div className="absolute px-3 py-1 text-xs text-white transition-all duration-300 -translate-x-1/2 rounded-lg shadow-lg opacity-0 -top-10 left-1/2 bg-primary-blue-800 whitespace-nowrap group-hover:opacity-100">
               Add Criteria
-              <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 size-2 bg-primary-blue-800 rotate-45" />
+              <div className="absolute rotate-45 -translate-x-1/2 -bottom-1 left-1/2 size-2 bg-primary-blue-800" />
             </div>
           </div>
 
           {/* matrix Table */}
-          <Card className="overflow-hidden shadow-xl border-0 bg-white/90 backdrop-blur-sm">
+          <Card className="overflow-hidden border-0 shadow-xl bg-white/90 backdrop-blur-sm">
             <div className="overflow-x-auto ">
               <table className="w-full min-w-max">
                 {/* table Header */}
                 <thead>
-                  <tr className="bg-gradient-to-r from-slate-700 via-slate-600 to-slate-700 border-b-4 border-slate-500">
+                  <tr className="border-b-4 bg-gradient-to-r from-slate-700 via-slate-600 to-slate-700 border-slate-500">
                     <th className=" bg-gradient-to-r from-slate-700 via-slate-600 to-slate-700 p-4 text-left font-bold text-white border-r-4 border-slate-500 min-w-[280px] z-10">
                       <div className="flex items-center gap-2">
-                        <div className="bg-white/20 rounded-full p-2 backdrop-blur-sm">
-                          <Target className="size-4 text-white" />
+                        <div className="p-2 rounded-full bg-white/20 backdrop-blur-sm">
+                          <Target className="text-white size-4" />
                         </div>
                         <div>
                           <div className="text-base">Evaluation Criteria</div>
-                          <div className="flex items-center gap-1 text-xs text-slate-300 mt-1">
+                          <div className="flex items-center gap-1 mt-1 text-xs text-slate-300">
                             <Star className="size-2" />
                             <span>Importance Weight</span>
                           </div>
@@ -546,7 +544,7 @@ export default function CareerOptionsMatrix({
                       >
                         <div className="flex flex-col items-center gap-2">
                           <div className="flex items-center gap-2">
-                            <div className="bg-gradient-to-r from-primary-green-400 to-emerald-400 text-white rounded-full size-6 flex items-center justify-center text-xs font-bold shadow-lg shrink-0">
+                            <div className="flex items-center justify-center text-xs font-bold text-white rounded-full shadow-lg bg-gradient-to-r from-primary-green-400 to-emerald-400 size-6 shrink-0">
                               {index + 1}
                             </div>
                             <Input
@@ -554,7 +552,7 @@ export default function CareerOptionsMatrix({
                               onChange={(e) =>
                                 updateColumnName(column.id, e.target.value)
                               }
-                              className="text-center border-2 border-dashed border-slate-400 bg-white/10 backdrop-blur-sm font-semibold text-white placeholder:text-slate-300 transition-all duration-300 focus-visible:ring-0 text-sm"
+                              className="text-sm font-semibold text-center text-white transition-all duration-300 border-2 border-dashed border-slate-400 bg-white/10 backdrop-blur-sm placeholder:text-slate-300 focus-visible:ring-0"
                               placeholder="Career Option"
                             />
                           </div>
@@ -562,7 +560,7 @@ export default function CareerOptionsMatrix({
                             variant="ghost"
                             size="sm"
                             onClick={() => deleteColumn(column.id)}
-                            className="opacity-0 group-hover:opacity-100 transition-all duration-300 text-red-400 hover:bg-red-500/20 hover:text-red-300 absolute top-1 right-1 rounded-full size-6 p-0"
+                            className="absolute p-0 text-red-400 transition-all duration-300 rounded-full opacity-0 group-hover:opacity-100 hover:bg-red-500/20 hover:text-red-300 top-1 right-1 size-6"
                             title="Delete this career option"
                           >
                             <X className="size-3" />
@@ -583,12 +581,12 @@ export default function CareerOptionsMatrix({
                       }`}
                     >
                       {/* Beautiful Row Header */}
-                      <td className="bg-inherit p-4 border-r-4 border-slate-200 z-10">
+                      <td className="z-10 p-4 border-r-4 bg-inherit border-slate-200">
                         <div className="flex items-center justify-between gap-2">
-                          <div className="flex flex-col gap-1 items-center">
+                          <div className="flex flex-col items-center gap-1">
                             {/* grouping number and input in the same div*/}
-                            <div className="flex gap-2 items-center">
-                              <div className="bg-gradient-to-r from-slate-600 to-slate-700 text-white rounded-full size-6 flex items-center justify-center text-xs font-bold shadow-lg shrink-0">
+                            <div className="flex items-center gap-2">
+                              <div className="flex items-center justify-center text-xs font-bold text-white rounded-full shadow-lg bg-gradient-to-r from-slate-600 to-slate-700 size-6 shrink-0">
                                 {rowIndex + 1}
                               </div>
                               <Input
@@ -596,13 +594,13 @@ export default function CareerOptionsMatrix({
                                 onChange={(e) =>
                                   updateRowName(row.id, e.target.value)
                                 }
-                                className="border-2 border-dashed border-slate-300 bg-transparent font-semibold text-slate-800 transition-all duration-300 text-sm"
+                                className="text-sm font-semibold transition-all duration-300 bg-transparent border-2 border-dashed border-slate-300 text-slate-800"
                                 placeholder="Criteria Name"
                               />
                             </div>
                             {/* weight Selector */}
                             <div className="flex items-center gap-1">
-                              <span className="text-xs text-slate-600 font-medium">
+                              <span className="text-xs font-medium text-slate-600">
                                 Weight:
                               </span>
                               <div className="flex items-center gap-1">
@@ -620,7 +618,7 @@ export default function CareerOptionsMatrix({
                                     }`}
                                     title={`Set importance to ${weight}/5`}
                                   >
-                                    <Star className="size-3 fill-current" />
+                                    <Star className="fill-current size-3" />
                                   </button>
                                 ))}
                               </div>
@@ -636,7 +634,7 @@ export default function CareerOptionsMatrix({
                               variant="ghost"
                               size="sm"
                               onClick={() => deleteRow(row.id)}
-                              className="opacity-0 group-hover:opacity-100 transition-all duration-300 text-red-600 hover:bg-red-100 hover:text-red-700 rounded-full size-6 p-0"
+                              className="p-0 text-red-600 transition-all duration-300 rounded-full opacity-0 group-hover:opacity-100 hover:bg-red-100 hover:text-red-700 size-6"
                               title="Delete this criteria"
                             >
                               <X className="size-3" />
@@ -652,12 +650,12 @@ export default function CareerOptionsMatrix({
                         return (
                           <td
                             key={column.id}
-                            className="p-3 text-center border-r-2 border-slate-100 relative"
+                            className="relative p-3 text-center border-r-2 border-slate-100"
                           >
                             <div className="flex flex-col items-center gap-2">
                               {/* score Buttons */}
                               <div className="flex flex-col gap-1 ">
-                                <div className="flex gap-1 justify-center">
+                                <div className="flex justify-center gap-1">
                                   {[1, 2, 3, 4, 5].map((score) => (
                                     <button
                                       type="button"
@@ -717,10 +715,10 @@ export default function CareerOptionsMatrix({
                   ))}
 
                   {/* Beautiful Results Row */}
-                  <tr className="bg-gradient-to-r from-primary-green-600 via-teal-600 to-primary-blue-600 border-t-4 border-slate-200">
-                    <td className=" bg-gradient-to-r from-primary-green-600 via-teal-600 to-primary-blue-600 p-4 border-r-4 border-slate-200 z-10 font-bold text-white">
+                  <tr className="border-t-4 bg-gradient-to-r from-primary-green-600 via-teal-600 to-primary-blue-600 border-slate-200">
+                    <td className="z-10 p-4 font-bold text-white border-r-4  bg-gradient-to-r from-primary-green-600 via-teal-600 to-primary-blue-600 border-slate-200">
                       <div className="flex items-center gap-2">
-                        <div className="bg-white/20 rounded-full p-2 backdrop-blur-sm">
+                        <div className="p-2 rounded-full bg-white/20 backdrop-blur-sm">
                           <Calculator className="size-4" />
                         </div>
                         <div>
@@ -747,7 +745,7 @@ export default function CareerOptionsMatrix({
                             >
                               {score > 0 ? score.toFixed(2) : "—"}
                             </div>
-                            <div className="text-xs text-primary-green-100 text-center">
+                            <div className="text-xs text-center text-primary-green-100">
                               {score > 0 ? (
                                 <div className="flex flex-col items-center gap-0.5">
                                   <span>out of 5.0</span>
@@ -771,12 +769,12 @@ export default function CareerOptionsMatrix({
         </div>
 
         {/* Beautiful Legend and Tips */}
-        <div className="grid md:grid-cols-2 gap-8">
+        <div className="grid gap-8 md:grid-cols-2">
           {/* Beautiful Scoring Legend */}
-          <Card className="p-8 bg-gradient-to-br from-emerald-50/80 to-primary-green-50/80 border-emerald-200/60 shadow-xl backdrop-blur-sm">
-            <h3 className="font-bold text-emerald-800 mb-6 flex items-center gap-3 text-xl">
-              <div className="bg-gradient-to-r from-emerald-500 to-primary-green-500 rounded-full p-2">
-                <Star className="size-5 text-white" />
+          <Card className="p-8 shadow-xl bg-gradient-to-br from-emerald-50/80 to-primary-green-50/80 border-emerald-200/60 backdrop-blur-sm">
+            <h3 className="flex items-center gap-3 mb-6 text-xl font-bold text-emerald-800">
+              <div className="p-2 rounded-full bg-gradient-to-r from-emerald-500 to-primary-green-500">
+                <Star className="text-white size-5" />
               </div>
               Scoring Guide
             </h3>
@@ -820,7 +818,7 @@ export default function CareerOptionsMatrix({
               ].map((item) => (
                 <div
                   key={item.score}
-                  className="flex items-center gap-4 p-3 bg-white/80 rounded-lg shadow-sm backdrop-blur-sm"
+                  className="flex items-center gap-4 p-3 rounded-lg shadow-sm bg-white/80 backdrop-blur-sm"
                 >
                   <span
                     className={`bg-gradient-to-r ${item.gradient} text-white rounded-xl size-10 flex items-center justify-center font-bold shadow-lg`}
@@ -839,10 +837,10 @@ export default function CareerOptionsMatrix({
           </Card>
 
           {/* Beautiful Tips */}
-          <Card className="p-8 bg-gradient-to-br from-primary-blue-50/80 to-cyan-50/80 border-primary-blue-200/60 shadow-xl backdrop-blur-sm">
-            <h3 className="font-bold text-primary-blue-800 mb-6 flex items-center gap-3 text-xl">
-              <div className="bg-gradient-to-r from-primary-blue-500 to-cyan-500 rounded-full p-2">
-                <HelpCircle className="size-5 text-white" />
+          <Card className="p-8 shadow-xl bg-gradient-to-br from-primary-blue-50/80 to-cyan-50/80 border-primary-blue-200/60 backdrop-blur-sm">
+            <h3 className="flex items-center gap-3 mb-6 text-xl font-bold text-primary-blue-800">
+              <div className="p-2 rounded-full bg-gradient-to-r from-primary-blue-500 to-cyan-500">
+                <HelpCircle className="text-white size-5" />
               </div>
               Pro Tips
             </h3>
@@ -881,11 +879,11 @@ export default function CareerOptionsMatrix({
               ].map((tip, index) => (
                 <div
                   key={tip.icon}
-                  className="flex items-start gap-3 p-3 bg-white/80 rounded-lg shadow-sm backdrop-blur-sm"
+                  className="flex items-start gap-3 p-3 rounded-lg shadow-sm bg-white/80 backdrop-blur-sm"
                 >
                   <span className="text-xl shrink-0">{tip.icon}</span>
                   <div>
-                    <div className="font-semibold text-primary-blue-800 mb-1">
+                    <div className="mb-1 font-semibold text-primary-blue-800">
                       {tip.title}
                     </div>
                     <div className="text-sm text-primary-blue-700">
