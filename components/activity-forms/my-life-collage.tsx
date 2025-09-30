@@ -18,7 +18,7 @@ import { toast } from "sonner";
 import {
   lifeCollageSchema,
   type LifeCollageFormData,
-} from "@/lib/schemas/activity-schemas/life-collage-schema";
+} from "@/lib/form-validation-schemas/activity-schemas/life-collage-schema";
 import { CollageCanvas } from "@/components/activity-components/collage-canvas";
 import { JourneyBreadcrumbLayout } from "@/components/layouts/JourneyBreadcrumbLayout";
 import { useBreadcrumb } from "@/hooks/useBreadcrumb";

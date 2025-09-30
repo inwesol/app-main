@@ -266,7 +266,7 @@ export default function CareerStory1() {
 
   // Set breadcrumbs on component mount
   useEffect(() => {
-    setQuestionnaireBreadcrumbs(sessionId, "Career Story 1");
+    setQuestionnaireBreadcrumbs(sessionId, "My Story-1 Activity");
   }, [sessionId, setQuestionnaireBreadcrumbs]);
 
   const form = useForm<CareerStoryOneData>({

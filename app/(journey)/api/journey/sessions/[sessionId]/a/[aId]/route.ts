@@ -22,15 +22,15 @@ import {
   completeUserSessionFormProgress,
   updateJourneyProgressAfterForm,
 } from "@/lib/db/queries";
-import { careerStoryBoardSchema } from "@/lib/schemas/activity-schemas/career-story-board-schema";
-import { careerStoryOneSchema } from "@/lib/schemas/activity-schemas/career-story-one-schema";
-import { careerStoryTwoSchema } from "@/lib/schemas/activity-schemas/career-story-two-schema";
-import { careerStoryThreeSchema } from "@/lib/schemas/activity-schemas/career-story-three-schema";
-import { careerStoryFourSchema } from "@/lib/schemas/activity-schemas/career-story-four-schema";
-import { dailyJournalingSchema } from "@/lib/schemas/activity-schemas/daily-journaling-schema";
-import { letterFromFutureSelfSchema } from "@/lib/schemas/activity-schemas/letter-from-future-self-schema";
-import { careerOptionsMatrixSchema } from "@/lib/schemas/activity-schemas/career-option-matrix-schema";
-import { lifeCollageSchema } from "@/lib/schemas/activity-schemas/life-collage-schema";
+import { careerStoryBoardSchema } from "@/lib/form-validation-schemas/activity-schemas/career-story-board-schema";
+import { careerStoryOneSchema } from "@/lib/form-validation-schemas/activity-schemas/career-story-one-schema";
+import { careerStoryTwoSchema } from "@/lib/form-validation-schemas/activity-schemas/career-story-two-schema";
+import { careerStoryThreeSchema } from "@/lib/form-validation-schemas/activity-schemas/career-story-three-schema";
+import { careerStoryFourSchema } from "@/lib/form-validation-schemas/activity-schemas/career-story-four-schema";
+import { dailyJournalingSchema } from "@/lib/form-validation-schemas/activity-schemas/daily-journaling-schema";
+import { letterFromFutureSelfSchema } from "@/lib/form-validation-schemas/activity-schemas/letter-from-future-self-schema";
+import { careerOptionsMatrixSchema } from "@/lib/form-validation-schemas/activity-schemas/career-option-matrix-schema";
+import { lifeCollageSchema } from "@/lib/form-validation-schemas/activity-schemas/life-collage-schema";
 
 export async function GET(
   req: NextRequest,

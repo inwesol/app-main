@@ -50,7 +50,7 @@ import {
 import {
   demographicsDetailsSchema,
   type DemographicsDetailsFormData,
-} from "@/lib/schemas/questionnaire-schemas/demographics-details-form-schema";
+} from "@/lib/form-validation-schemas/questionnaire-schemas/demographics-details-form-schema";
 import { useRouter } from "next/navigation";
 import { JourneyBreadcrumbLayout } from "@/components/layouts/JourneyBreadcrumbLayout";
 import { useBreadcrumb } from "@/hooks/useBreadcrumb";

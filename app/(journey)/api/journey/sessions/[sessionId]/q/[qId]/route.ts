@@ -33,7 +33,7 @@ import {
   upsertPostCoachingAssessment,
   deletePostCoachingAssessment,
 } from "@/lib/db/queries";
-import { demographicsDetailsSchema } from "@/lib/schemas/questionnaire-schemas/demographics-details-form-schema";
+import { demographicsDetailsSchema } from "@/lib/form-validation-schemas/questionnaire-schemas/demographics-details-form-schema";
 
 function personalityTestScore() {
   const answerTextToValue: Record<string, number> = {

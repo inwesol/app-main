@@ -58,13 +58,13 @@ import type { ArtifactKind } from "@/components/artifact";
 import { SESSION_TEMPLATES } from "@/lib/constants";
 import { careerStoryTwo } from "@/lib/db/schema";
 
-import type { DailyJournalingData } from "@/lib/schemas/activity-schemas/daily-journaling-schema";
-import type { CareerStoryTwoData } from "@/lib/schemas/activity-schemas/career-story-two-schema";
-import type { CareerStoryThreeData } from "@/lib/schemas/activity-schemas/career-story-three-schema";
-import type { CareerOptionsMatrixData } from "@/lib/schemas/activity-schemas/career-option-matrix-schema";
-import type { CareerStoryFour } from "@/lib/schemas/activity-schemas/career-story-four-schema";
-import type { CareerStoryOneData } from "@/lib/schemas/activity-schemas/career-story-one-schema";
-import type { LifeCollageFormData } from "@/lib/schemas/activity-schemas/life-collage-schema";
+import type { DailyJournalingData } from "@/lib/form-validation-schemas/activity-schemas/daily-journaling-schema";
+import type { CareerStoryTwoData } from "@/lib/form-validation-schemas/activity-schemas/career-story-two-schema";
+import type { CareerStoryThreeData } from "@/lib/form-validation-schemas/activity-schemas/career-story-three-schema";
+import type { CareerOptionsMatrixData } from "@/lib/form-validation-schemas/activity-schemas/career-option-matrix-schema";
+import type { CareerStoryFour } from "@/lib/form-validation-schemas/activity-schemas/career-story-four-schema";
+import type { CareerStoryOneData } from "@/lib/form-validation-schemas/activity-schemas/career-story-one-schema";
+import type { LifeCollageFormData } from "@/lib/form-validation-schemas/activity-schemas/life-collage-schema";
 
 // Database connection
 const client = postgres(process.env.POSTGRES_URL as string);
