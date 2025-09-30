@@ -91,6 +91,7 @@ const FeedbackCard = ({ onFeedback, onDismiss }: FeedbackCardProps) => {
             How would you rate your experience?
           </h3>
           <button
+            type="button"
             onClick={onDismiss}
             className="text-gray-400 hover:text-gray-600 text-xl font-bold"
             disabled={isSubmitting}
@@ -112,7 +113,10 @@ const FeedbackCard = ({ onFeedback, onDismiss }: FeedbackCardProps) => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="comment"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
               Additional feedback (optional)
             </label>
             <textarea
@@ -126,6 +130,7 @@ const FeedbackCard = ({ onFeedback, onDismiss }: FeedbackCardProps) => {
 
           <div className="flex gap-2 justify-end">
             <button
+              type="button"
               onClick={onDismiss}
               className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
               disabled={isSubmitting}
@@ -133,6 +138,7 @@ const FeedbackCard = ({ onFeedback, onDismiss }: FeedbackCardProps) => {
               Skip
             </button>
             <button
+              type="button"
               onClick={handleSubmit}
               disabled={rating === 0 || isSubmitting}
               className="px-4 py-2 bg-green-400 hover:bg-green-400 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-md transition-colors"

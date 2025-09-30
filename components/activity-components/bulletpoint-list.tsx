@@ -1,5 +1,5 @@
 import React from "react";
-import { Circle, Plus, Trash, X } from "lucide-react";
+import { Plus, Trash } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface BulletPointItem {
@@ -56,6 +56,7 @@ export const BulletPointList: React.FC<BulletPointListProps> = ({
             {/* Delete Button */}
             {onDeleteItem && (
               <button
+                type="button"
                 onClick={() => onDeleteItem(item.id)}
                 className={cn(
                   "w-8 h-8 rounded-full",
@@ -89,6 +90,7 @@ export const BulletPointList: React.FC<BulletPointListProps> = ({
 
       {items.length < maxItems && (
         <button
+          type="button"
           onClick={onAddItem}
           className={cn(
             "w-full py-3 border-2 border-dashed border-primary-green-300/60 rounded-lg",

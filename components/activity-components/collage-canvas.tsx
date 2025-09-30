@@ -2,16 +2,9 @@
 "use client";
 
 import React, { useState, useRef, useCallback } from "react";
-import {
-  Upload,
-  X,
-  Image as ImageIcon,
-  Type,
-  Palette,
-  Loader2,
-} from "lucide-react";
+import Image from "next/image";
+import { Upload, X, Image as ImageIcon, Type, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -242,8 +235,8 @@ export const CollageCanvas: React.FC<CollageCanvasProps> = ({
       {/* Canvas */}
       <div
         ref={canvasRef}
-        className="relative bg-white border-2 border-dashed border-gray-300 rounded-lg overflow-hidden"
-        style={{ minHeight: "400px", height: "600px" }}
+        role="application"
+        className="relative bg-white border-2 border-dashed border-gray-300 rounded-lg overflow-hidden min-h-[400px] h-[600px] cursor-crosshair"
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
@@ -257,6 +250,8 @@ export const CollageCanvas: React.FC<CollageCanvasProps> = ({
         {elements.map((element) => (
           <div
             key={element.id}
+            role="button"
+            tabIndex={0}
             className={cn(
               "absolute cursor-move select-none",
               selectedElement === element.id &&
@@ -274,14 +269,17 @@ export const CollageCanvas: React.FC<CollageCanvasProps> = ({
             onClick={() => selectElement(element.id)}
           >
             {element.type === "image" ? (
-              <img
+              <Image
                 src={element.content}
                 alt="Collage element"
-                className="size-full object-cover rounded shadow-sm"
+                fill
+                className="object-cover rounded shadow-sm"
                 draggable={false}
               />
             ) : element.type === "text" ? (
               <div
+                role="textbox"
+                tabIndex={0}
                 className="size-full flex items-center justify-center bg-transparent border-2 border-transparent hover:border-gray-300 rounded px-2"
                 style={{
                   fontSize: element.style?.fontSize || 16,

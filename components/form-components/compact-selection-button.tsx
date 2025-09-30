@@ -37,6 +37,8 @@ export const CompactSelectionButton = ({
 
   return (
     <div
+      role="button"
+      tabIndex={0}
       onClick={() => onChange(value)}
       className={`
         relative flex items-center p-3 sm:p-4 rounded-xl border-2 cursor-pointer transition-all duration-300 hover:scale-[1.02]

@@ -3,10 +3,10 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Call } from './sidebar-call-item';
-import { PhoneIcon, VideoIcon } from './icons';
+} from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import type { Call } from "./sidebar-call-item";
+import { PhoneIcon, VideoIcon } from "./icons";
 
 interface CallDialogProps {
   call: Call | null;
@@ -22,7 +22,11 @@ export function CallDialog({ call, open, onOpenChange }: CallDialogProps) {
       <DialogContent className="max-w-3xl max-h-[80vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <div className="flex items-center gap-2">
-            {call.callType === 'video' ? <VideoIcon size={20} /> : <PhoneIcon size={20} />}
+            {call.callType === "video" ? (
+              <VideoIcon size={20} />
+            ) : (
+              <PhoneIcon size={20} />
+            )}
             <DialogTitle className="text-xl">{call.title}</DialogTitle>
           </div>
           <div className="flex items-center gap-2 text-sm text-muted-foreground mt-2">
@@ -30,7 +34,11 @@ export function CallDialog({ call, open, onOpenChange }: CallDialogProps) {
             <span>•</span>
             <span>{call.duration} min</span>
             <span>•</span>
-            <span className={`${call.callStatus === 'missed' ? 'text-destructive' : ''}`}>
+            <span
+              className={`${
+                call.callStatus === "missed" ? "text-destructive" : ""
+              }`}
+            >
               {call.callStatus}
             </span>
           </div>
@@ -61,8 +69,8 @@ export function CallDialog({ call, open, onOpenChange }: CallDialogProps) {
 
             <TabsContent value="transcription" className="mt-0">
               <div className="space-y-4">
-                {call.transcription.map((item, index) => (
-                  <div key={index} className="flex gap-4">
+                {call.transcription.map((item) => (
+                  <div key={item.timestamp} className="flex gap-4">
                     <div className="w-20 shrink-0 text-xs text-muted-foreground">
                       {new Date(item.timestamp).toLocaleTimeString()}
                     </div>
@@ -79,4 +87,4 @@ export function CallDialog({ call, open, onOpenChange }: CallDialogProps) {
       </DialogContent>
     </Dialog>
   );
-} 
+}
