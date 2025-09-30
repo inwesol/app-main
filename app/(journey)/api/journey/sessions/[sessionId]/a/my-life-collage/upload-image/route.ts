@@ -1,6 +1,6 @@
 // app/api/journey/sessions/[sessionId]/a/my-life-collage/upload-image/route.ts
-import { NextRequest, NextResponse } from "next/server";
-import { CollageImageUploadService } from "@/lib/utils/collage-image-upload";
+import { type NextRequest, NextResponse } from "next/server";
+import { uploadImage, deleteImage } from "@/lib/utils/collage-image-upload";
 import { auth } from "@/app/(auth)/auth";
 import { db } from "@/lib/db";
 import { user } from "@/lib/db/schema";
@@ -63,11 +63,7 @@ export async function POST(
     }
 
     // Upload the image
-    const uploadResult = await CollageImageUploadService.uploadImage(
-      file,
-      userEmail,
-      imageType
-    );
+    const uploadResult = await uploadImage(file, userEmail, imageType);
 
     return NextResponse.json({
       success: true,
@@ -115,7 +111,7 @@ export async function DELETE(
     }
 
     // Delete the image
-    await CollageImageUploadService.deleteImage(imageUrl);
+    await deleteImage(imageUrl);
 
     return NextResponse.json({
       success: true,
