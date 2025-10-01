@@ -37,7 +37,8 @@ import {
   riasec_test,
   personality_test,
   psychological_wellbeing_test,
-  career_story_boards,
+  career_story_five,
+  career_story_six,
   dailyJournalingTable,
   careerStoryThree,
   letterFromFutureSelfTable,
@@ -1655,61 +1656,120 @@ export async function deletePersonalityTest(
   }
 }
 
-// Career Story Board Functions
-export async function getCareerStoryBoard(userId: string, sessionId: number) {
+// Career Story Five Functions - Multiple Storyboards Support
+export async function getCareerStoryFive(userId: string, sessionId: number) {
   try {
     const [result] = await db
       .select()
-      .from(career_story_boards)
+      .from(career_story_five)
       .where(
         and(
-          eq(career_story_boards.user_id, userId),
-          eq(career_story_boards.session_id, sessionId)
+          eq(career_story_five.user_id, userId),
+          eq(career_story_five.session_id, sessionId)
         )
       )
       .limit(1);
 
     if (!result) return null;
 
-    // Parse the JSON sticky_notes back to object
+    // For jsonb columns, the data is already parsed as JSON object
     return {
       ...result,
-      stickyNotes: result.sticky_notes,
+      storyboards: result.storyboards, // Already a JSON object, no parsing needed
     };
   } catch (error) {
-    console.error("Error fetching career story board:", error);
+    console.error("Error fetching career story five:", error);
     throw error;
   }
 }
 
-export async function upsertCareerStoryBoard(
+export async function upsertCareerStoryFive(
   userId: string,
   sessionId: number,
-  data: { stickyNotes: any[] }
+  data: { storyboards: any[] }
 ) {
   try {
-    const stickyNotesJson = JSON.stringify(data.stickyNotes);
-
+    // Store directly as JSON object for jsonb column
     await db
-      .insert(career_story_boards)
+      .insert(career_story_five)
       .values({
         user_id: userId,
         session_id: sessionId,
-        sticky_notes: stickyNotesJson,
+        storyboards: data.storyboards, // Store as JSON object, not string
         created_at: new Date(),
         updated_at: new Date(),
       })
       .onConflictDoUpdate({
-        target: [career_story_boards.user_id, career_story_boards.session_id],
+        target: [career_story_five.user_id, career_story_five.session_id],
         set: {
-          sticky_notes: stickyNotesJson,
+          storyboards: data.storyboards, // Store as JSON object, not string
           updated_at: new Date(),
         },
       });
 
-    console.log("Career story board saved successfully");
+    console.log("Career story five saved successfully");
   } catch (error) {
-    console.error("Error upserting career story board:", error);
+    console.error("Error upserting career story five:", error);
+    throw error;
+  }
+}
+
+export async function getCareerStorySix(userId: string, sessionId: number) {
+  try {
+    const [result] = await db
+      .select()
+      .from(career_story_six)
+      .where(
+        and(
+          eq(career_story_six.user_id, userId),
+          eq(career_story_six.session_id, sessionId)
+        )
+      )
+      .limit(1);
+
+    if (!result) return null;
+
+    return {
+      ...result,
+      storyboard_data: result.storyboard_data,
+    };
+  } catch (error) {
+    console.error("Error fetching career story six:", error);
+    throw error;
+  }
+}
+
+export async function upsertCareerStorySix(
+  userId: string,
+  sessionId: number,
+  data: {
+    selected_storyboard_id?: string;
+    storyboard_data?: any;
+  }
+) {
+  try {
+    await db
+      .insert(career_story_six)
+      .values({
+        user_id: userId,
+        session_id: sessionId,
+        selected_storyboard_id: data.selected_storyboard_id,
+        storyboard_data: data.storyboard_data,
+        created_at: new Date(),
+        updated_at: new Date(),
+      })
+      .onConflictDoUpdate({
+        target: [career_story_six.user_id, career_story_six.session_id],
+        set: {
+          selected_storyboard_id: data.selected_storyboard_id,
+          storyboard_data: data.storyboard_data,
+          updated_at: new Date(),
+        },
+      });
+
+    console.log("Career story six saved successfully");
+  } catch (error) {
+    console.error("Error upserting career story six:", error);
     throw error;
   }
 }
@@ -2813,21 +2873,21 @@ export async function deleteCareerStoryFour(
   }
 }
 
-export async function deleteCareerStoryBoard(
+export async function deleteCareerStoryFive(
   userId: string,
   sessionId: number
 ): Promise<void> {
   try {
     await db
-      .delete(career_story_boards)
+      .delete(career_story_five)
       .where(
         and(
-          eq(career_story_boards.user_id, userId),
-          eq(career_story_boards.session_id, sessionId)
+          eq(career_story_five.user_id, userId),
+          eq(career_story_five.session_id, sessionId)
         )
       );
   } catch (error) {
-    console.error("Error deleting career story board:", error);
+    console.error("Error deleting career story five:", error);
     throw error;
   }
 }

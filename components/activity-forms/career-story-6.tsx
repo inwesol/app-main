@@ -1,28 +1,37 @@
 "use client";
-import React, { useState, useRef, useCallback, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+  useMemo,
+} from "react";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Plus,
-  Edit3,
-  Trash2,
-  Save,
   X,
-  Sticker as Sticky,
   Grid3X3,
-  Palette,
-  Sparkles,
-  ArrowRight,
   Loader2,
+  ArrowRight,
+  ChevronDown,
 } from "lucide-react";
-import Header from "@/components/form-components/header";
+import { useParams } from "next/navigation";
 import { toast } from "@/components/toast";
-import { useParams, useRouter } from "next/navigation";
-interface StickyNote {
+import { JourneyBreadcrumbLayout } from "@/components/layouts/JourneyBreadcrumbLayout";
+import { useBreadcrumb } from "@/hooks/useBreadcrumb";
+
+interface StoryCell {
   id: string;
   content: string;
-  color: string;
-  position: { x: number; y: number };
+  createdAt: Date;
+}
+
+interface Storyboard {
+  id: string;
+  name: string;
+  cells: StoryCell[];
   createdAt: Date;
 }
 
@@ -30,151 +39,174 @@ interface CareerStory6Props {
   className?: string;
 }
 
-const STICKY_COLORS = [
-  {
-    name: "Soft Yellow",
-    value: "bg-yellow-100",
-    border: "border-yellow-200",
-    text: "text-yellow-800",
-    shadow: "shadow-yellow-200/50",
-  },
-  {
-    name: "Gentle Pink",
-    value: "bg-pink-100",
-    border: "border-pink-200",
-    text: "text-pink-800",
-    shadow: "shadow-pink-200/50",
-  },
-  {
-    name: "Sky Blue",
-    value: "bg-blue-100",
-    border: "border-blue-200",
-    text: "text-blue-800",
-    shadow: "shadow-blue-200/50",
-  },
-  {
-    name: "Mint Green",
-    value: "bg-green-100",
-    border: "border-green-200",
-    text: "text-green-800",
-    shadow: "shadow-green-200/50",
-  },
-  {
-    name: "Lavender",
-    value: "bg-purple-100",
-    border: "border-purple-200",
-    text: "text-purple-800",
-    shadow: "shadow-purple-200/50",
-  },
-  {
-    name: "Peach",
-    value: "bg-orange-100",
-    border: "border-orange-200",
-    text: "text-orange-800",
-    shadow: "shadow-orange-200/50",
-  },
-];
-
-// Default sticky notes with dummy content
-const DEFAULT_STICKY_NOTES: StickyNote[] = [
-  {
-    id: "default-1",
-    content:
-      "My core values include integrity, creativity, and helping others achieve their potential.",
-    color: "bg-yellow-100",
-    position: { x: 50, y: 100 },
-    createdAt: new Date(),
-  },
-  {
-    id: "default-2",
-    content:
-      "I thrive in collaborative environments where innovation and teamwork are valued.",
-    color: "bg-green-100",
-    position: { x: 300, y: 150 },
-    createdAt: new Date(),
-  },
-  {
-    id: "default-3",
-    content:
-      "My ideal career combines analytical thinking with meaningful human connections.",
-    color: "bg-blue-100",
-    position: { x: 550, y: 120 },
-    createdAt: new Date(),
-  },
-];
-
 export default function CareerStory6({ className = "" }: CareerStory6Props) {
   const params = useParams();
   const sessionId = params?.sessionId as string;
-  const [stickyNotes, setStickyNotes] = useState<StickyNote[]>([]);
-  const [editingNote, setEditingNote] = useState<string | null>(null);
-  const [editContent, setEditContent] = useState("");
-  const [selectedColor, setSelectedColor] = useState(STICKY_COLORS[0]);
-  const [showColorPicker, setShowColorPicker] = useState(false);
-  const [draggedNote, setDraggedNote] = useState<string | null>(null);
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const { setQuestionnaireBreadcrumbs } = useBreadcrumb();
+
+  const [availableStoryboards, setAvailableStoryboards] = useState<
+    Storyboard[]
+  >([]);
+  const [selectedStoryboardId, setSelectedStoryboardId] = useState<
+    string | null
+  >(null);
+  const [currentStoryboard, setCurrentStoryboard] = useState<Storyboard | null>(
+    null
+  );
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const canvasRef = useRef<HTMLButtonElement>(null);
-  const router = useRouter();
-  // Load data on component mount
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [isLoadingData, setIsLoadingData] = useState(false);
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const currentStoryboardRef = useRef<Storyboard | null>(null);
+  const selectedStoryboardIdRef = useRef<string | null>(null);
+  const isLoadingDataRef = useRef<boolean>(false);
+  // Set breadcrumbs on component mount
   useEffect(() => {
-    loadStoryBoard();
+    setQuestionnaireBreadcrumbs(sessionId, "My Story-5 Activity [Final]");
+  }, [sessionId, setQuestionnaireBreadcrumbs]);
+  const handleStoryboardSelect = useCallback(
+    (storyboardId: string) => {
+      const selectedStoryboard = availableStoryboards.find(
+        (sb) => sb.id === storyboardId
+      );
+      if (selectedStoryboard) {
+        setSelectedStoryboardId(storyboardId);
+        setCurrentStoryboard(selectedStoryboard);
+        setShowDropdown(false);
+
+        // Update refs
+        selectedStoryboardIdRef.current = storyboardId;
+        currentStoryboardRef.current = selectedStoryboard;
+      }
+    },
+    [availableStoryboards]
+  );
+
+  // Load data on component mount - only run once when sessionId is available
+  useEffect(() => {
+    if (!sessionId || isLoadingDataRef.current) return;
+
+    const loadDataOnce = async () => {
+      try {
+        isLoadingDataRef.current = true;
+        setIsLoadingData(true);
+        setLoading(true);
+
+        // Load available session-6 storyboards from career-story-5
+        const storyboardsResponse = await fetch(
+          `/api/journey/sessions/6/a/career-story-5`
+        );
+
+        let parsedStoryboards: Storyboard[] = [];
+        if (storyboardsResponse.ok) {
+          const storyboardsData = await storyboardsResponse.json();
+          parsedStoryboards =
+            storyboardsData.storyboards?.map((sb: any) => ({
+              ...sb,
+              createdAt: new Date(sb.createdAt),
+              cells:
+                sb.cells?.map((cell: any) => ({
+                  ...cell,
+                  createdAt: new Date(cell.createdAt),
+                })) || [],
+            })) || [];
+        }
+
+        // Load selected storyboard from career-story-6
+        const selectedResponse = await fetch(
+          `/api/journey/sessions/${sessionId}/a/career-story-6`
+        );
+
+        let selectedStoryboardId: string | null = null;
+        let currentStoryboard: Storyboard | null = null;
+
+        if (selectedResponse.ok) {
+          const selectedData = await selectedResponse.json();
+          selectedStoryboardId = selectedData.selected_storyboard_id;
+
+          if (selectedData.storyboard_data) {
+            currentStoryboard = selectedData.storyboard_data;
+          } else if (parsedStoryboards.length > 0) {
+            // If no selected storyboard, use the first available one
+            const firstStoryboard = parsedStoryboards[0];
+            selectedStoryboardId = firstStoryboard.id;
+            currentStoryboard = firstStoryboard;
+          }
+        } else if (selectedResponse.status === 404) {
+          // No selected storyboard, use first available if any
+          if (parsedStoryboards.length > 0) {
+            const firstStoryboard = parsedStoryboards[0];
+            selectedStoryboardId = firstStoryboard.id;
+            currentStoryboard = firstStoryboard;
+          }
+        }
+
+        // Batch all state updates together to prevent flickering
+        setAvailableStoryboards(parsedStoryboards);
+        setSelectedStoryboardId(selectedStoryboardId);
+        setCurrentStoryboard(currentStoryboard);
+
+        // Update refs for debounced save
+        currentStoryboardRef.current = currentStoryboard;
+        selectedStoryboardIdRef.current = selectedStoryboardId;
+      } catch (error) {
+        console.error("Error loading data:", error);
+        toast({
+          type: "error",
+          description: "Error loading storyboards. Please try again.",
+        });
+      } finally {
+        isLoadingDataRef.current = false;
+        setLoading(false);
+        setIsLoadingData(false);
+      }
+    };
+
+    loadDataOnce();
   }, [sessionId]);
 
-  const loadStoryBoard = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch(`/api/journey/sessions/7/a/career-story-5`);
+  // Keep refs in sync with state changes
+  useEffect(() => {
+    currentStoryboardRef.current = currentStoryboard;
+  }, [currentStoryboard]);
 
-      if (response.ok) {
-        const data = await response.json();
-        // Parse dates back from string format
-        const parsedNotes = data.stickyNotes.map((note: any) => ({
-          ...note,
-          createdAt: new Date(note.createdAt),
-        }));
-        setStickyNotes(parsedNotes);
-        toast({
-          type: "success", // Changed to match your toast interface
-          description: "Your previous work has been restored.",
-        });
-      } else if (response.status === 404) {
-        // No saved data, use defaults
-        setStickyNotes(DEFAULT_STICKY_NOTES);
-      } else {
-        throw new Error("Failed to load story board");
+  useEffect(() => {
+    selectedStoryboardIdRef.current = selectedStoryboardId;
+  }, [selectedStoryboardId]);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
       }
-    } catch (error) {
-      console.error("Error loading story board:", error);
-      setStickyNotes(DEFAULT_STICKY_NOTES);
-      toast({
-        type: "error", // Changed to match your toast interface
-        description:
-          "Using default story board. Your previous work may not be available.",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
+  }, []);
 
-  const saveStoryBoard = async () => {
+  const saveStoryboard = useCallback(async () => {
+    if (!currentStoryboard || !selectedStoryboardId) return;
+
     try {
       setSaving(true);
-      const response = await fetch(`/api/journey/sessions/7/a/career-story-5`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          stickyNotes: stickyNotes,
-        }),
-      });
+      const response = await fetch(
+        `/api/journey/sessions/${sessionId}/a/career-story-6`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            selected_storyboard_id: selectedStoryboardId,
+            storyboard_data: currentStoryboard,
+          }),
+        }
+      );
 
       if (response.ok) {
         toast({
-          type: "success", // Changed to match your toast interface
-          description: "Your story board has been saved successfully.",
+          type: "success",
+          description: "Your storyboard has been saved successfully.",
         });
       } else {
         const errorData = await response.json().catch(() => ({}));
@@ -183,146 +215,122 @@ export default function CareerStory6({ className = "" }: CareerStory6Props) {
         );
       }
     } catch (error) {
-      console.error("Error saving story board:", error);
+      console.error("Error saving storyboard:", error);
       toast({
-        type: "error", // Changed to match your toast interface
+        type: "error",
         description: "Please try again. Check your internet connection.",
       });
     } finally {
       setSaving(false);
     }
-  };
+  }, [sessionId, currentStoryboard, selectedStoryboardId]);
 
-  const addStickyNote = () => {
-    const newNote: StickyNote = {
-      id: `note-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+  const addCell = useCallback(() => {
+    if (!currentStoryboard) return;
+
+    const newCell: StoryCell = {
+      id: `cell-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       content: "",
-      color: selectedColor.value,
-      position: {
-        x: Math.random() * 500 + 50,
-        y: Math.random() * 300 + 100,
-      },
       createdAt: new Date(),
     };
 
-    setStickyNotes((prev) => [...prev, newNote]);
-    setEditingNote(newNote.id);
-    setEditContent("");
-  };
+    setCurrentStoryboard((prev) => {
+      if (!prev) return null;
+      const updatedStoryboard = {
+        ...prev,
+        cells: [...prev.cells, newCell],
+      };
+      // Update ref immediately
+      currentStoryboardRef.current = updatedStoryboard;
+      return updatedStoryboard;
+    });
+  }, [currentStoryboard]);
 
-  const updateStickyNote = (id: string, content: string) => {
-    setStickyNotes((prev) =>
-      prev.map((note) => (note.id === id ? { ...note, content } : note))
-    );
-  };
-
-  const updateStickyNotePosition = (
-    id: string,
-    position: { x: number; y: number }
-  ) => {
-    setStickyNotes((prev) =>
-      prev.map((note) => (note.id === id ? { ...note, position } : note))
-    );
-  };
-
-  const deleteStickyNote = (id: string) => {
-    setStickyNotes((prev) => prev.filter((note) => note.id !== id));
-  };
-
-  const startEditing = (note: StickyNote) => {
-    setEditingNote(note.id);
-    setEditContent(note.content);
-  };
-
-  const saveEdit = () => {
-    if (editingNote) {
-      updateStickyNote(editingNote, editContent);
-      setEditingNote(null);
-      setEditContent("");
+  const debouncedSave = useCallback(() => {
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
     }
-  };
-
-  const cancelEdit = () => {
-    if (editingNote) {
-      const note = stickyNotes.find((n) => n.id === editingNote);
-      if (note && !note.content) {
-        deleteStickyNote(editingNote);
+    saveTimeoutRef.current = setTimeout(() => {
+      if (currentStoryboardRef.current && selectedStoryboardIdRef.current) {
+        saveStoryboard();
       }
-    }
-    setEditingNote(null);
-    setEditContent("");
-  };
+    }, 2000); // Save after 2 seconds of inactivity
+  }, [saveStoryboard]);
 
-  const getColorClasses = (colorValue: string) => {
-    const colorObj = STICKY_COLORS.find((c) => c.value === colorValue);
-    return colorObj || STICKY_COLORS[0];
-  };
+  const updateCellContent = useCallback(
+    (cellId: string, content: string) => {
+      if (!currentStoryboard) return;
 
-  const handleMouseDown = useCallback(
-    (e: React.MouseEvent, noteId: string) => {
-      if (editingNote) return; // Don't drag while editing
+      const cell = currentStoryboard.cells.find((cell) => cell.id === cellId);
+      if (!cell || cell.content === content) return;
 
-      const rect = e.currentTarget.getBoundingClientRect();
-      const note = stickyNotes.find((n) => n.id === noteId);
-      if (!note) return;
-
-      setDraggedNote(noteId);
-      setDragOffset({
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top,
+      setCurrentStoryboard((prev) => {
+        if (!prev) return null;
+        const updatedStoryboard = {
+          ...prev,
+          cells: prev.cells.map((cell) =>
+            cell.id === cellId ? { ...cell, content } : cell
+          ),
+        };
+        // Update ref immediately
+        currentStoryboardRef.current = updatedStoryboard;
+        return updatedStoryboard;
       });
-      e.preventDefault();
+
+      // Trigger debounced save
+      debouncedSave();
     },
-    [editingNote, stickyNotes]
+    [currentStoryboard, debouncedSave]
   );
 
-  const handleMouseMove = useCallback(
-    (e: React.MouseEvent) => {
-      if (!draggedNote || !canvasRef.current) return;
+  const deleteCell = useCallback(
+    (cellId: string) => {
+      if (!currentStoryboard) return;
 
-      const canvasRect = canvasRef.current.getBoundingClientRect();
-      const x = e.clientX - canvasRect.left - dragOffset.x;
-      const y = e.clientY - canvasRect.top - dragOffset.y;
-
-      // Constrain to canvas bounds
-      const maxX = canvasRect.width - 192; // 192px is sticky note width
-      const maxY = canvasRect.height - 192; // 192px is sticky note height
-
-      const constrainedX = Math.max(0, Math.min(x, maxX));
-      const constrainedY = Math.max(0, Math.min(y, maxY));
-
-      updateStickyNotePosition(draggedNote, {
-        x: constrainedX,
-        y: constrainedY,
+      setCurrentStoryboard((prev) => {
+        if (!prev) return null;
+        const updatedStoryboard = {
+          ...prev,
+          cells: prev.cells.filter((cell) => cell.id !== cellId),
+        };
+        // Update ref immediately
+        currentStoryboardRef.current = updatedStoryboard;
+        return updatedStoryboard;
       });
     },
-    [draggedNote, dragOffset]
+    [currentStoryboard]
   );
 
-  const handleMouseUp = useCallback(() => {
-    setDraggedNote(null);
-    setDragOffset({ x: 0, y: 0 });
-  }, []);
-
-  // Close color picker when clicking outside
-  const handleCanvasClick = useCallback(
-    (e: React.MouseEvent) => {
-      if (showColorPicker) {
-        setShowColorPicker(false);
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        showDropdown &&
+        !(event.target as Element).closest(".dropdown-container")
+      ) {
+        setShowDropdown(false);
       }
-    },
-    [showColorPicker]
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showDropdown]);
+
+  // Memoize current storyboard to prevent unnecessary re-renders
+  const memoizedCurrentStoryboard = useMemo(
+    () => currentStoryboard,
+    [currentStoryboard]
   );
 
   if (loading) {
     return (
-      <div
-        className={`min-h-screen bg-gradient-to-br from-primary-blue-25 via-white to-primary-green-25 p-4 sm:py-8 ${className} flex items-center justify-center`}
-      >
+      <div className="flex items-center justify-center min-h-screen p-4 bg-gradient-to-br from-primary-green-50 via-white to-primary-blue-50">
         <div className="text-center">
-          <Loader2 className="mx-auto mb-4 size-12 animate-spin text-primary-blue-500" />
-          <p className="font-medium text-primary-blue-700">
-            Loading your story board...
+          <div className="mx-auto mb-4 border-b-2 rounded-full animate-spin size-12 border-primary-blue-600" />
+          <p className="text-sm text-slate-600 sm:text-base">
+            Loading your storyboards...
           </p>
         </div>
       </div>
@@ -330,387 +338,148 @@ export default function CareerStory6({ className = "" }: CareerStory6Props) {
   }
 
   return (
-    <div
-      className={`min-h-screen bg-gradient-to-br from-primary-blue-25 via-white to-primary-green-25 p-4 sm:py-8 ${className}`}
-    >
-      <div className="relative mx-auto max-w-7xl">
-        {/* Header */}
-        <Header
-          headerIcon={Sparkles}
-          headerText="Story Boarding"
-          headerDescription="Create and organize your story elements using beautiful interactive sticky notes"
-        />
-
-        {/* Controls */}
-        <Card className="relative mb-8 overflow-hidden border shadow-2xl bg-white/90 backdrop-blur-xl border-slate-300 shadow-primary-blue-100/20 rounded-3xl ">
-          <CardHeader className="border-b bg-gradient-to-r from-primary-blue-50/80 to-primary-green-50/80 border-primary-blue-100/30">
-            <CardTitle className="flex items-center gap-4 text-primary-blue-800">
-              <div className="p-3 shadow-lg bg-gradient-to-br from-primary-blue-500 to-primary-green-500 rounded-2xl">
-                <Palette className="text-white size-6" />
-              </div>
-              <div>
-                <h3 className="text-xl font-bold text-transparent bg-gradient-to-r from-primary-blue-700 to-primary-green-700 bg-clip-text">
-                  Story Board Controls
-                </h3>
-                <p className="mt-1 text-sm font-medium text-primary-blue-600/80">
-                  Customize your creative workspace
-                </p>
-              </div>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-8">
-            <div className="flex flex-wrap items-center justify-between gap-6">
-              <div className="flex items-center gap-6">
-                <div className="flex items-center gap-3">
-                  <span className="text-sm font-semibold text-primary-blue-700">
-                    Sticky Note Color:
-                  </span>
-                  <div className="relative z-50">
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setShowColorPicker(!showColorPicker);
-                      }}
-                      className={`size-12 rounded-2xl border-3 ${selectedColor.border} ${selectedColor.value} shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-110 hover:rotate-3`}
-                    />
-                    {showColorPicker && (
-                      <div className="absolute -top-16 left-0 z-20 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-primary-blue-200/50 p-4 min-w-[200px]">
-                        <div className="grid grid-cols-3 gap-3">
-                          {STICKY_COLORS.map((color) => (
-                            <button
-                              key={color.name}
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setSelectedColor(color);
-                                setShowColorPicker(false);
-                              }}
-                              className={`size-12 rounded-xl border-2 ${
-                                color.border
-                              } ${
-                                color.value
-                              } shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 hover:rotate-3 ${
-                                selectedColor.name === color.name
-                                  ? "ring-3 ring-primary-blue-400 ring-offset-2 scale-110"
-                                  : ""
-                              }`}
-                              title={color.name}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3 px-4 py-2 border bg-gradient-to-r from-primary-blue-50 to-primary-green-50 rounded-2xl border-primary-blue-200/50">
-                  <Sticky className="size-5 text-primary-blue-600" />
-                  <span className="text-sm font-semibold text-primary-blue-700">
-                    {stickyNotes.length} sticky notes
-                  </span>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-4">
-                <Button
-                  onClick={saveStoryBoard}
-                  disabled={saving}
-                  className="px-4 py-2 font-semibold text-white transition-all duration-300 shadow-lg group bg-gradient-to-r from-primary-green-500 to-primary-blue-500 hover:from-primary-green-600 hover:to-primary-blue-600 rounded-2xl hover:shadow-xl hover:scale-105"
-                >
-                  <div className="flex items-center gap-2">
-                    {saving ? (
-                      <Loader2 className="size-4 animate-spin" />
-                    ) : (
-                      <Save className="size-4" />
-                    )}
-                    <span>{saving ? "Saving..." : "Save"}</span>
-                  </div>
-                </Button>
-
-                <Button
-                  onClick={addStickyNote}
-                  className="px-6 py-3 font-semibold text-white transition-all duration-300 shadow-xl group bg-gradient-to-r from-primary-blue-500 to-primary-green-500 hover:from-primary-blue-600 hover:to-primary-green-600 rounded-2xl hover:shadow-2xl hover:scale-105 hover:-translate-y-1"
-                >
-                  <div className="flex items-center gap-2">
-                    <Plus className="transition-transform duration-300 size-5 group-hover:rotate-90" />
-                    <span>Add Sticky Note</span>
-                  </div>
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Story Board Canvas */}
-        <Card className="relative overflow-hidden border shadow-2xl bg-white/90 backdrop-blur-xl border-slate-300 shadow-primary-blue-100/20 rounded-3xl ">
-          <CardHeader className="border-b bg-gradient-to-r from-primary-blue-50/80 to-primary-green-50/80 border-primary-blue-100/30">
-            <CardTitle className="flex items-center gap-4 text-primary-blue-800">
+    <div className="p-3 sm:p-6">
+      <div className="max-w-7xl mx-auto">
+        <JourneyBreadcrumbLayout>
+          {/* Header */}
+          <div className="mb-8">
+            <div className="flex items-center gap-4 mb-4">
               <div className="p-3 shadow-lg bg-gradient-to-br from-primary-blue-500 to-primary-green-500 rounded-2xl">
                 <Grid3X3 className="text-white size-6" />
               </div>
               <div>
-                <h3 className="text-xl font-bold text-transparent bg-gradient-to-r from-primary-blue-700 to-primary-green-700 bg-clip-text">
-                  Story Board Canvas
-                </h3>
-                <p className="mt-1 text-sm font-medium text-primary-blue-600/80">
-                  Drag and arrange your story elements freely
+                <h1 className="text-2xl font-bold text-transparent bg-gradient-to-r from-primary-blue-700 to-primary-green-700 bg-clip-text">
+                  Story Boarding
+                </h1>
+                <p className="text-primary-blue-600/80">
+                  Create and organize your story elements using interactive
+                  storyboards
                 </p>
               </div>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-8">
-            <button
-              ref={canvasRef}
-              type="button"
-              className="relative min-h-[700px] bg-gradient-to-br from-primary-blue-25/30 to-primary-green-25/30 rounded-2xl border-2 border-dashed border-primary-blue-200/50 overflow-hidden select-none w-full"
-              onMouseMove={handleMouseMove}
-              onMouseUp={handleMouseUp}
-              onMouseLeave={handleMouseUp}
-              onClick={handleCanvasClick}
-              aria-label="Story board canvas - drag and drop area for sticky notes"
-            >
-              {/* Background Pattern */}
-              <div className="absolute inset-0 pointer-events-none opacity-5">
-                <div
-                  className="absolute inset-0"
-                  style={{
-                    backgroundImage: `radial-gradient(circle at 1px 1px, rgba(59, 130, 246, 0.3) 1px, transparent 0)`,
-                    backgroundSize: "30px 30px",
-                  }}
-                />
-              </div>
+            </div>
+          </div>
 
-              {/* Sticky Notes */}
-              {stickyNotes.map((note) => {
-                const colorClasses = getColorClasses(note.color);
-                const isEditing = editingNote === note.id;
-                const isDragging = draggedNote === note.id;
+          {/* Storyboard Selection and Grid */}
+          {memoizedCurrentStoryboard && (
+            <Card className="overflow-hidden border shadow-lg bg-white/90 backdrop-blur-sm border-slate-200/60 rounded-2xl">
+              <CardHeader className="border-b bg-gradient-to-r from-primary-blue-50/80 to-primary-green-50/80 border-primary-blue-100/30">
+                <div className="space-y-4">
+                  {/* Storyboard Selection Dropdown */}
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                      <span className="text-sm font-semibold text-primary-blue-700">
+                        Select Storyboard:
+                      </span>
+                      <div className="relative dropdown-container">
+                        <button
+                          type="button"
+                          onClick={() => setShowDropdown(!showDropdown)}
+                          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white transition-all duration-200 bg-gradient-to-r from-primary-blue-500 to-primary-green-500 hover:from-primary-blue-600 hover:to-primary-green-600 rounded-lg shadow-md hover:shadow-lg min-w-[200px] justify-between"
+                        >
+                          <span>{memoizedCurrentStoryboard.name}</span>
+                          <ChevronDown
+                            className={`size-4 transition-transform duration-200 ${
+                              showDropdown ? "rotate-180" : ""
+                            }`}
+                          />
+                        </button>
 
-                return (
-                  <button
-                    key={note.id}
-                    type="button"
-                    className={`absolute size-48 ${note.color} ${
-                      colorClasses.border
-                    } border-2 rounded-2xl shadow-xl ${
-                      colorClasses.shadow
-                    } transition-all duration-200 group/note ${
-                      isDragging
-                        ? "scale-105 rotate-2 shadow-2xl z-50 cursor-grabbing"
-                        : isEditing
-                        ? "z-40"
-                        : "hover:shadow-2xl hover:scale-105 hover:-rotate-1 cursor-grab z-30"
-                    }`}
-                    style={{
-                      left: `${note.position.x}px`,
-                      top: `${note.position.y}px`,
-                      userSelect: "none",
-                    }}
-                    onMouseDown={(e) => handleMouseDown(e, note.id)}
-                  >
-                    {isEditing ? (
-                      <div className="flex flex-col p-4 size-full">
-                        <textarea
-                          value={editContent}
-                          onChange={(e) => setEditContent(e.target.value)}
-                          className={`flex-1 bg-transparent border-none outline-none resize-none text-sm ${colorClasses.text} placeholder:text-gray-500 font-medium leading-relaxed`}
-                          placeholder="Enter your story element..."
-                          autoFocus
-                          onMouseDown={(e) => e.stopPropagation()}
-                          maxLength={500}
-                        />
-                        <div className="flex justify-end gap-2 mt-3">
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              saveEdit();
-                            }}
-                            className="p-2 text-white transition-all duration-200 bg-green-500 shadow-lg rounded-xl hover:bg-green-600 hover:shadow-xl hover:scale-110"
-                          >
-                            <Save className="size-4" />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              cancelEdit();
-                            }}
-                            className="p-2 text-white transition-all duration-200 bg-red-500 shadow-lg rounded-xl hover:bg-red-600 hover:shadow-xl hover:scale-110"
-                          >
-                            <X className="size-4" />
-                          </button>
-                        </div>
+                        {showDropdown && (
+                          <div className="absolute top-full left-0 z-50 mt-1 w-full bg-white border border-slate-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                            {availableStoryboards.map((storyboard) => (
+                              <button
+                                key={storyboard.id}
+                                type="button"
+                                onClick={() =>
+                                  handleStoryboardSelect(storyboard.id)
+                                }
+                                className={`w-full px-4 py-2 text-left text-sm hover:bg-slate-50 transition-colors duration-200 ${
+                                  selectedStoryboardId === storyboard.id
+                                    ? "bg-primary-blue-50 text-primary-blue-700 font-medium"
+                                    : "text-slate-700"
+                                }`}
+                              >
+                                {storyboard.name}
+                              </button>
+                            ))}
+                          </div>
+                        )}
                       </div>
-                    ) : (
-                      <>
-                        <div className="p-4 overflow-hidden pointer-events-none size-full">
-                          <p
-                            className={`text-sm ${colorClasses.text} leading-relaxed font-medium break-words`}
-                          >
-                            {note.content || "Click to edit..."}
-                          </p>
-                        </div>
-                        <div className="absolute flex gap-2 transition-all duration-300 opacity-0 top-3 right-3 group-hover/note:opacity-100">
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              startEditing(note);
-                            }}
-                            onMouseDown={(e) => e.stopPropagation()}
-                            className="p-2 text-white transition-all duration-200 shadow-lg bg-primary-blue-500 rounded-xl hover:bg-primary-blue-600 hover:shadow-xl hover:scale-110"
-                          >
-                            <Edit3 className="size-3" />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              deleteStickyNote(note.id);
-                            }}
-                            onMouseDown={(e) => e.stopPropagation()}
-                            className="p-2 text-white transition-all duration-200 bg-red-500 shadow-lg rounded-xl hover:bg-red-600 hover:shadow-xl hover:scale-110"
-                          >
-                            <Trash2 className="size-3" />
-                          </button>
-                        </div>
-                      </>
-                    )}
-                  </button>
-                );
-              })}
-
-              {/* Empty State Message */}
-              {stickyNotes.length === 0 && (
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <div className="text-center">
-                    <div className="inline-block p-6 mb-4 shadow-xl bg-gradient-to-br from-primary-blue-100 to-primary-green-100 rounded-3xl">
-                      <Sticky className="size-12 text-primary-blue-600" />
                     </div>
-                    <h3 className="mb-2 text-xl font-bold text-primary-blue-700">
-                      Start Your Story Board
-                    </h3>
-                    <p className="font-medium text-primary-blue-600/80">
-                      Click &quot;Add Sticky Note&quot; to begin organizing your
-                      ideas
-                    </p>
                   </div>
                 </div>
-              )}
-            </button>
-          </CardContent>
-        </Card>
+              </CardHeader>
+              <CardContent className="p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {memoizedCurrentStoryboard.cells.map((cell) => (
+                    <div
+                      key={cell.id}
+                      className="relative group p-4 border rounded-lg bg-gradient-to-br from-slate-50 to-slate-100 border-slate-200 hover:shadow-md transition-all duration-200"
+                    >
+                      <Textarea
+                        value={cell.content}
+                        onChange={(e) =>
+                          updateCellContent(cell.id, e.target.value)
+                        }
+                        placeholder="Enter your story element..."
+                        className="min-h-[150px] resize-y border-none bg-transparent focus:ring-0 focus:outline-none text-sm"
+                        rows={5}
+                      />
 
-        {/* Instructions */}
-        <Card className="mt-8 overflow-hidden border shadow-2xl bg-white/90 backdrop-blur-xl border-slate-300 shadow-primary-blue-100/20 rounded-3xl">
-          <CardContent className="p-8">
-            <div className="text-center">
-              <div className="flex items-center justify-center gap-3 mb-6">
-                <div className="p-3 shadow-lg bg-gradient-to-br from-primary-blue-500 to-primary-green-500 rounded-2xl">
-                  <Sparkles className="text-white size-6" />
-                </div>
-                <h3 className="text-2xl font-bold text-transparent bg-gradient-to-r from-primary-blue-700 to-primary-green-700 bg-clip-text">
-                  How to Use Story Boarding
-                </h3>
-              </div>
-              <div className="grid gap-6 text-sm md:grid-cols-2">
-                <div className="flex items-start gap-4 p-4 border bg-gradient-to-br from-primary-blue-25 to-primary-blue-50 rounded-2xl border-primary-blue-100/50">
-                  <div className="p-2 shadow-lg bg-primary-blue-500 rounded-xl">
-                    <Plus className="text-white size-5" />
-                  </div>
-                  <div className="text-left">
-                    <p className="mb-2 font-bold text-primary-blue-800">
-                      Add Sticky Notes
-                    </p>
-                    <p className="leading-relaxed text-primary-blue-700">
-                      Click &quot;Add Sticky Note&quot; to create new story
-                      elements anywhere on the canvas
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-4 p-4 border bg-gradient-to-br from-primary-green-25 to-primary-green-50 rounded-2xl border-primary-green-100/50">
-                  <div className="p-2 shadow-lg bg-primary-green-500 rounded-xl">
-                    <Edit3 className="text-white size-5" />
-                  </div>
-                  <div className="text-left">
-                    <p className="mb-2 font-bold text-primary-green-800">
-                      Edit Content
-                    </p>
-                    <p className="leading-relaxed text-primary-green-700">
-                      Click the edit button on any sticky note to modify its
-                      content
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-4 p-4 border bg-gradient-to-br from-primary-blue-25 to-primary-blue-50 rounded-2xl border-primary-blue-100/50">
-                  <div className="p-2 shadow-lg bg-primary-blue-500 rounded-xl">
-                    <Palette className="text-white size-5" />
-                  </div>
-                  <div className="text-left">
-                    <p className="mb-2 font-bold text-primary-blue-800">
-                      Choose Colors
-                    </p>
-                    <p className="leading-relaxed text-primary-blue-700">
-                      Select different colors for your sticky notes to organize
-                      by themes
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-4 p-4 border bg-gradient-to-br from-primary-green-25 to-primary-green-50 rounded-2xl border-primary-green-100/50">
-                  <div className="p-2 shadow-lg bg-primary-green-500 rounded-xl">
-                    <Grid3X3 className="text-white size-5" />
-                  </div>
-                  <div className="text-left">
-                    <p className="mb-2 font-bold text-primary-green-800">
-                      Drag & Arrange
-                    </p>
-                    <p className="leading-relaxed text-primary-green-700">
-                      Drag sticky notes around the canvas to organize your story
-                      elements
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+                      {/* Delete Cell Button */}
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => deleteCell(cell.id)}
+                        className="absolute size-6 -top-2 -right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-1 text-white hover:text-white bg-red-500 hover:bg-red-600 rounded-full"
+                      >
+                        <X className="size-5" />
+                      </Button>
+                    </div>
+                  ))}
 
-        {/* Final Save Progress Button */}
-        {/* Action Buttons */}
-        <div className="flex items-center justify-center gap-4 mt-8">
-          <Button
-            onClick={() => router.push(`/journey/sessions/${sessionId}`)}
-            className="relative px-8 py-6 text-lg font-bold text-white transition-all duration-300 shadow-2xl group bg-gradient-to-r from-slate-500 to-slate-600 rounded-2xl hover:from-slate-600 hover:to-slate-700 hover:shadow-3xl hover:-translate-y-1"
-          >
-            <div className="absolute inset-0 transition-opacity duration-300 bg-gradient-to-r from-slate-400 to-slate-500 rounded-2xl blur opacity-30 group-hover:opacity-50" />
-            <div className="relative flex items-center gap-3">
-              <span>Write Another Letter</span>
-              <ArrowRight className="transition-transform duration-200 size-5 group-hover:translate-x-1" />
-            </div>
-          </Button>
-          <Button
-            onClick={saveStoryBoard}
-            disabled={saving}
-            className="relative px-10 py-6 text-lg font-bold text-white transition-all duration-300 shadow-2xl group bg-gradient-to-r from-primary-green-500 to-primary-blue-500 rounded-2xl hover:from-primary-green-600 hover:to-primary-blue-600 hover:shadow-3xl hover:-translate-y-1"
-          >
-            <div className="absolute inset-0 transition-opacity duration-300 bg-gradient-to-r from-primary-green-400 to-primary-blue-400 rounded-2xl blur opacity-30 group-hover:opacity-50" />
-            <div className="relative flex items-center gap-3">
-              {saving ? (
-                <>
-                  <Loader2 className="size-5 animate-spin" />
-                  <span>Saving Progress...</span>
-                </>
-              ) : (
-                <>
-                  <span>Save Progress</span>
-                  <ArrowRight className="transition-transform duration-200 size-5 group-hover:translate-x-1" />
-                </>
-              )}
-            </div>
-          </Button>
-        </div>
+                  {/* Add Cell Button */}
+                  <button
+                    type="button"
+                    className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-slate-300 rounded-xl hover:border-primary-blue-400 hover:bg-gradient-to-br hover:from-primary-blue-50/80 hover:to-primary-green-50/80 transition-all duration-300 group cursor-pointer min-h-[150px]"
+                    onClick={addCell}
+                  >
+                    <div className="p-4 mb-3 bg-gradient-to-br from-primary-blue-100 to-primary-green-100 rounded-full group-hover:from-primary-blue-200 group-hover:to-primary-green-200 group-hover:scale-110 transition-all duration-300">
+                      <Plus className="size-8 text-primary-blue-600 group-hover:text-primary-blue-700" />
+                    </div>
+                    <p className="text-sm font-semibold text-slate-600 group-hover:text-primary-blue-700 transition-colors duration-300">
+                      Add New Cell
+                    </p>
+                  </button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Save Button */}
+          <div className="flex justify-end mt-8">
+            <Button
+              onClick={saveStoryboard}
+              disabled={saving}
+              className="relative px-10 py-3 font-semibold text-white transition-all duration-300 shadow-xl group bg-gradient-to-r from-primary-green-500 to-primary-blue-500 rounded-xl hover:from-primary-green-600 hover:to-primary-blue-600 hover:shadow-2xl hover:-translate-y-1"
+            >
+              <div className="absolute inset-0 transition-opacity duration-300 bg-gradient-to-r from-primary-green-400 to-primary-blue-400 rounded-2xl blur opacity-30 group-hover:opacity-50" />
+              <div className="relative flex items-center gap-3">
+                {saving ? (
+                  <>
+                    <Loader2 className="size-5 animate-spin" />
+                    <span>Saving Progress...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Save Story Board</span>
+                    <ArrowRight className="transition-transform duration-200 size-5 group-hover:translate-x-1" />
+                  </>
+                )}
+              </div>
+            </Button>
+          </div>
+        </JourneyBreadcrumbLayout>
       </div>
     </div>
   );

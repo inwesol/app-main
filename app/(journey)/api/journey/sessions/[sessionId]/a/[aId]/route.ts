@@ -1,8 +1,10 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { auth } from "@/app/(auth)/auth";
 import {
-  getCareerStoryBoard,
-  upsertCareerStoryBoard,
+  getCareerStoryFive,
+  upsertCareerStoryFive,
+  getCareerStorySix,
+  upsertCareerStorySix,
   getCareerStoryOne,
   upsertCareerStoryOne,
   getCareerStoryTwo,
@@ -22,7 +24,6 @@ import {
   completeUserSessionFormProgress,
   updateJourneyProgressAfterForm,
 } from "@/lib/db/queries";
-import { careerStoryBoardSchema } from "@/lib/form-validation-schemas/activity-schemas/career-story-board-schema";
 import { careerStoryOneSchema } from "@/lib/form-validation-schemas/activity-schemas/career-story-one-schema";
 import { careerStoryTwoSchema } from "@/lib/form-validation-schemas/activity-schemas/career-story-two-schema";
 import { careerStoryThreeSchema } from "@/lib/form-validation-schemas/activity-schemas/career-story-three-schema";
@@ -88,11 +89,11 @@ export async function GET(
         console.log("Career Story 5 GET - Session ID:", sessionId);
         console.log("Career Story 5 GET - User ID:", session.user.id);
 
-        const data = await getCareerStoryBoard(session.user.id, sessionIdNum);
+        const data = await getCareerStoryFive(session.user.id, sessionIdNum);
 
         if (!data) {
           console.log(
-            "Career story board not found for user:",
+            "Career story five not found for user:",
             session.user.id,
             "session:",
             sessionIdNum
@@ -100,13 +101,41 @@ export async function GET(
           return new NextResponse("Not Found", { status: 404 });
         }
 
-        console.log("Career story board found:", data);
+        console.log("Career story five found:", data);
 
         return NextResponse.json({
-          stickyNotes: data.stickyNotes,
+          storyboards: data.storyboards,
         });
       } catch (err) {
-        console.error("Error fetching career story board:", err);
+        console.error("Error fetching career story five:", err);
+        return new NextResponse("Internal Server Error", { status: 500 });
+      }
+
+    case "career-story-6":
+      try {
+        console.log("Career Story 6 GET - Session ID:", sessionId);
+        console.log("Career Story 6 GET - User ID:", session.user.id);
+
+        const data = await getCareerStorySix(session.user.id, sessionIdNum);
+
+        if (!data) {
+          console.log(
+            "Career story six not found for user:",
+            session.user.id,
+            "session:",
+            sessionIdNum
+          );
+          return new NextResponse("Not Found", { status: 404 });
+        }
+
+        console.log("Career story six found:", data);
+
+        return NextResponse.json({
+          selected_storyboard_id: data.selected_storyboard_id,
+          storyboard_data: data.storyboard_data,
+        });
+      } catch (err) {
+        console.error("Error fetching career story six:", err);
         return new NextResponse("Internal Server Error", { status: 500 });
       }
 
@@ -405,19 +434,14 @@ export async function POST(
         console.log("Career Story 5 POST - User ID:", session.user.id);
         console.log("Career Story 5 POST - Data:", activityData);
 
-        // Validate the incoming data
-        const validation = careerStoryBoardSchema.safeParse(activityData);
-        if (!validation.success) {
-          console.error("Validation failed:", validation.error.format());
-          return NextResponse.json(
-            { errors: validation.error.format() },
-            { status: 400 }
-          );
-        }
+        // For now, skip validation since we don't have a schema for the new format
+        // TODO: Create careerStoryFiveSchema for proper validation
+        const data = {
+          storyboards:
+            activityData.storyboards || activityData.stickyNotes || [],
+        };
 
-        const data = validation.data;
-
-        await upsertCareerStoryBoard(session.user.id, sessionIdNum, data);
+        await upsertCareerStoryFive(session.user.id, sessionIdNum, data);
 
         // Mark activity as completed
         await completeUserSessionFormProgress({
@@ -430,7 +454,36 @@ export async function POST(
 
         return NextResponse.json({ success: true });
       } catch (err) {
-        console.error("Error saving career story board:", err);
+        console.error("Error saving career story five:", err);
+        return new NextResponse("Internal Server Error", { status: 500 });
+      }
+
+    case "career-story-6":
+      try {
+        // Debug logging
+        console.log("Career Story 6 POST - Session ID:", sessionId);
+        console.log("Career Story 6 POST - User ID:", session.user.id);
+        console.log("Career Story 6 POST - Data:", activityData);
+
+        const data = {
+          selected_storyboard_id: activityData.selected_storyboard_id,
+          storyboard_data: activityData.storyboard_data,
+        };
+
+        await upsertCareerStorySix(session.user.id, sessionIdNum, data);
+
+        // Mark activity as completed
+        await completeUserSessionFormProgress({
+          userId: session.user.id,
+          sessionId: sessionIdNum,
+          qId: aId, // Using aId as the identifier for activities
+        });
+
+        await updateJourneyProgressAfterForm(session.user.id, sessionIdNum);
+
+        return NextResponse.json({ success: true });
+      } catch (err) {
+        console.error("Error saving career story six:", err);
         return new NextResponse("Internal Server Error", { status: 500 });
       }
 
@@ -796,19 +849,19 @@ export async function DELETE(
 
     case "career-story-5":
       try {
-        console.log("Career Story Board DELETE - Session ID:", sessionId);
-        console.log("Career Story Board DELETE - User ID:", session.user.id);
+        console.log("Career Story Five DELETE - Session ID:", sessionId);
+        console.log("Career Story Five DELETE - User ID:", session.user.id);
 
-        const { deleteCareerStoryBoard } = await import("@/lib/db/queries");
+        const { deleteCareerStoryFive } = await import("@/lib/db/queries");
 
-        await deleteCareerStoryBoard(session.user.id, sessionIdNum);
+        await deleteCareerStoryFive(session.user.id, sessionIdNum);
 
         return NextResponse.json({
           success: true,
-          message: "Career story board data deleted successfully",
+          message: "Career story five data deleted successfully",
         });
       } catch (err) {
-        console.error("Error deleting career story board:", err);
+        console.error("Error deleting career story five:", err);
         return new NextResponse("Internal Server Error", { status: 500 });
       }
 

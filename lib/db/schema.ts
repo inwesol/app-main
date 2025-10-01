@@ -733,6 +733,58 @@ export const careerStoryOneTable = pgTable(
   })
 );
 
+// Career Story Five - Multiple Storyboards Support
+export const career_story_five = pgTable(
+  "career_story_five",
+  {
+    id: uuid("id").primaryKey().notNull().defaultRandom(),
+    user_id: varchar("user_id", { length: 255 }).notNull(),
+    session_id: integer("session_id").notNull(),
+    storyboards: jsonb("storyboards").notNull().default([]), // Array of storyboards
+    created_at: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updated_at: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => ({
+    userSessionIdx: uniqueIndex("career_story_five_user_session_idx").on(
+      table.user_id,
+      table.session_id
+    ),
+  })
+);
+
+export type CareerStoryFive = typeof career_story_five.$inferSelect;
+export type NewCareerStoryFive = typeof career_story_five.$inferInsert;
+
+export const career_story_six = pgTable(
+  "career_story_six",
+  {
+    id: uuid("id").primaryKey().notNull().defaultRandom(),
+    user_id: varchar("user_id", { length: 255 }).notNull(),
+    session_id: integer("session_id").notNull(),
+    selected_storyboard_id: varchar("selected_storyboard_id", { length: 255 }),
+    storyboard_data: jsonb("storyboard_data"), // Single storyboard data
+    created_at: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updated_at: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => ({
+    userSessionIdx: uniqueIndex("career_story_six_user_session_idx").on(
+      table.user_id,
+      table.session_id
+    ),
+  })
+);
+
+export type CareerStorySix = typeof career_story_six.$inferSelect;
+export type NewCareerStorySix = typeof career_story_six.$inferInsert;
+
 export const myLifeCollageTable = pgTable(
   "my_life_collage",
   {
