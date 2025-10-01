@@ -18,9 +18,10 @@ export const authConfig = {
       const isOnResetPassword = nextUrl.pathname.startsWith("/reset-password");
       const isOnVerifyEmail = nextUrl.pathname.startsWith("/verify-email");
       const isOnAuth = nextUrl.pathname.startsWith("/api/auth");
+      const isOnOccupations = nextUrl.pathname.startsWith("/api/occupations");
 
-      // Allow auth routes to pass through
-      if (isOnAuth) {
+      // Allow auth routes and occupations API to pass through
+      if (isOnAuth || isOnOccupations) {
         return true;
       }
 
