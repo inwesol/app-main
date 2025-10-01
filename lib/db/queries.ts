@@ -1,6 +1,6 @@
 // lib/db/queries.ts - Fixed version with consistent camelCase naming
 import "server-only";
-import { hash, genSaltSync, hashSync } from "bcrypt-ts";
+import { genSaltSync, hashSync } from "bcrypt-ts";
 import {
   and,
   asc,
@@ -10,12 +10,11 @@ import {
   gte,
   inArray,
   lt,
-  SQL,
+  type SQL,
   sql,
 } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/postgres-js";
-import postgres from "postgres";
 import crypto from "node:crypto";
+import { db } from "../db";
 import {
   user,
   emailVerificationTokens,
@@ -27,7 +26,7 @@ import {
   message,
   vote,
   type DBMessage,
-  Chat,
+  type Chat,
   passwordResetToken,
   type PasswordResetToken,
   journey_progress,
@@ -38,7 +37,6 @@ import {
   riasec_test,
   personality_test,
   psychological_wellbeing_test,
-  feedback,
   career_story_boards,
   dailyJournalingTable,
   careerStoryThree,
@@ -52,7 +50,6 @@ import {
   postCoachingAssessments,
   dailyJournalEntries,
   type DailyJournalEntry,
-  type NewDailyJournalEntry,
 } from "./schema";
 import type { ArtifactKind } from "@/components/artifact";
 import { SESSION_TEMPLATES } from "@/lib/constants";
@@ -65,10 +62,6 @@ import type { CareerOptionsMatrixData } from "@/lib/form-validation-schemas/acti
 import type { CareerStoryFour } from "@/lib/form-validation-schemas/activity-schemas/career-story-four-schema";
 import type { CareerStoryOneData } from "@/lib/form-validation-schemas/activity-schemas/career-story-one-schema";
 import type { LifeCollageFormData } from "@/lib/form-validation-schemas/activity-schemas/life-collage-schema";
-
-// Database connection
-const client = postgres(process.env.POSTGRES_URL as string);
-const db = drizzle(client);
 
 // User Management Functions
 export async function createUser(
@@ -2171,6 +2164,7 @@ export async function upsertCareerStoryFour(
         userId,
         sessionId,
         rewrittenStory: data.rewrittenStory,
+        createdAt: new Date(),
         updatedAt: new Date(),
       })
       .onConflictDoUpdate({

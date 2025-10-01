@@ -688,7 +688,7 @@ export const careerOptionsMatrix = pgTable("career_options_matrix", {
 });
 
 export const careerStoryFours = pgTable(
-  "career_story_fours",
+  "career_story_four",
   {
     id: uuid("id").primaryKey().defaultRandom(),
     userId: text("user_id").notNull(),

@@ -12,12 +12,12 @@ import {
   CheckCircle,
   Loader2,
   AlertCircle,
-  Info,
 } from "lucide-react";
-import { QuestionSection } from "@/components/activity-components/question-section";
+import { JourneyBreadcrumbLayout } from "@/components/layouts/JourneyBreadcrumbLayout";
+import { useBreadcrumb } from "@/hooks/useBreadcrumb";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { TextArea } from "@/components/activity-components/text-area";
+import { Card, CardContent, CardTitle } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Sheet,
   SheetContent,
@@ -29,13 +29,11 @@ import {
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import Header from "@/components/form-components/header";
 
 // Form validation schema
 const careerStory4Schema = z.object({
@@ -77,60 +75,13 @@ export default function CareerStory4() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  // mock data career story 1
-  const mockCareerStoryOneData: CareerStory1Data = {
-    transitionEssay:
-      "I am currently facing a transition from college to the professional world. This is an exciting but challenging time as I close the chapter of my academic journey and begin the next phase of my career. I'm seeking guidance on how to identify my true passions and find a career path that aligns with my values and interests.",
-    occupations:
-      "Software Developer, UX Designer, Product Manager, Teacher, Entrepreneur, Data Scientist, Marketing Specialist",
-    heroes: [
-      {
-        id: "1",
-        title: "Maya Angelou",
-        description:
-          "I admired her courage to speak truth through her writing and her ability to overcome adversity. She taught me that our experiences, even painful ones, can become sources of strength and wisdom.",
-      },
-      {
-        id: "2",
-        title: "Steve Jobs",
-        description:
-          "His innovative thinking and dedication to creating beautiful, functional products inspired me. I loved how he combined technology with artistry and never compromised on his vision.",
-      },
-      {
-        id: "3",
-        title: "Wonder Woman",
-        description:
-          "She represented justice, compassion, and strength. I admired how she fought for what was right while maintaining her kindness and empathy for others.",
-      },
-    ],
-    magazines:
-      "National Geographic, Wired, The Atlantic, Netflix documentaries, TED Talks",
-    magazineWhy:
-      "I'm drawn to content that explores human potential, scientific discoveries, and innovative solutions to global challenges. I love learning about different cultures and emerging technologies.",
-    favoriteStory:
-      "My favorite book is 'The Alchemist' by Paulo Coelho. It's about a young shepherd who follows his dreams to find treasure, but discovers that the real treasure was the journey itself. I connect with Santiago's courage to pursue his personal legend despite obstacles and uncertainty.",
-    favoriteSaying:
-      "'The only way to do great work is to love what you do.' - Steve Jobs. This quote reminds me that passion is essential for meaningful work and that I should never settle for something that doesn't ignite my enthusiasm.",
-  };
-
-  // mock data career story 3
-  const mockCareerStoryThreeData: CareerStory3Data = {
-    ableToBeStatement:
-      "I will be most happy and successful when I am able to be creative, collaborative, and authentic in my work while making a positive impact on others.",
-    placesWhereStatement:
-      "I will be most happy and successful in places where people value innovation, support each other's growth, and work together to solve meaningful challenges.",
-    soThatStatement:
-      "I will be most happy and successful so that I can help others achieve their potential and create technology solutions that make the world more connected and compassionate.",
-    mottoStatement:
-      "Follow your curiosity, embrace challenges as opportunities to grow, and never forget that the journey of learning and helping others is the real treasure.",
-    selectedOccupations: [
-      "Software Developer",
-      "UX Designer",
-      "Product Manager",
-      "Teacher",
-    ],
-  };
+  const [careerStoryOneData, setCareerStoryOneData] =
+    useState<CareerStory1Data | null>(null);
+  const [careerStoryThreeData, setCareerStoryThreeData] =
+    useState<CareerStory3Data | null>(null);
+  const [isLoadingReferences, setIsLoadingReferences] = useState(true);
+  const [referenceError, setReferenceError] = useState<string | null>(null);
+  const { setQuestionnaireBreadcrumbs } = useBreadcrumb();
 
   const form = useForm<CareerStory4FormData>({
     resolver: zodResolver(careerStory4Schema),
@@ -146,11 +97,20 @@ export default function CareerStory4() {
   } = form;
   const watchedStory = watch("rewrittenStory");
 
-  // Load existing data on component mount
+  // Set breadcrumbs on component mount
+  useEffect(() => {
+    setQuestionnaireBreadcrumbs(sessionId, "My Story-4 Activity");
+  }, [sessionId, setQuestionnaireBreadcrumbs]);
+
+  // Load existing data and reference data on component mount
   useEffect(() => {
     const loadData = async () => {
       try {
         setIsLoading(true);
+        setIsLoadingReferences(true);
+        setReferenceError(null);
+
+        // Load current form data
         const response = await fetch(
           `/api/journey/sessions/${sessionId}/a/career-story-4`
         );
@@ -163,11 +123,32 @@ export default function CareerStory4() {
         } else if (response.status !== 404) {
           setError("Failed to load existing data");
         }
+
+        // Load reference data in parallel
+        await Promise.all([
+          // Fetch Career Story 1 data
+          fetch(`/api/journey/sessions/1/a/career-story-1`)
+            .then((response) => (response.ok ? response.json() : null))
+            .then((data) => data && setCareerStoryOneData(data))
+            .catch((error) =>
+              console.error("Error fetching Career Story 1 data:", error)
+            ),
+
+          // Fetch Career Story 3 data
+          fetch(`/api/journey/sessions/4/a/career-story-3`)
+            .then((response) => (response.ok ? response.json() : null))
+            .then((data) => data && setCareerStoryThreeData(data))
+            .catch((error) =>
+              console.error("Error fetching Career Story 3 data:", error)
+            ),
+        ]);
       } catch (err) {
         console.error("Error loading data:", err);
         setError("Failed to load existing data");
+        setReferenceError("Failed to load reference data");
       } finally {
         setIsLoading(false);
+        setIsLoadingReferences(false);
       }
     };
 
@@ -207,6 +188,11 @@ export default function CareerStory4() {
 
       console.log("Career Story 4 saved successfully");
       setIsSubmitted(true);
+
+      // Redirect to session page after 2 seconds
+      setTimeout(() => {
+        router.push(`/journey/sessions/${sessionId}`);
+      }, 1000);
     } catch (error) {
       console.error("Error submitting form:", error);
       setError(
@@ -215,10 +201,6 @@ export default function CareerStory4() {
     } finally {
       setIsSubmitting(false);
     }
-  };
-
-  const handleWriteAnotherStory = () => {
-    router.push(`/journey/sessions/${sessionId}`);
   };
 
   if (isLoading) {
@@ -274,10 +256,10 @@ export default function CareerStory4() {
             <div className="mb-6">
               <CheckCircle className="mx-auto mb-4 size-16 text-primary-green-600" />
               <h2 className="mb-2 text-3xl font-bold text-primary-green-800">
-                Story Rewritten!
+                Thank You!
               </h2>
               <p className="text-lg text-primary-green-700">
-                Your Career Story 4 has been saved successfully.
+                Your My Story-4 Activity has been saved successfully.
               </p>
             </div>
             <div className="mb-8 space-y-3 text-sm text-primary-green-600">
@@ -286,13 +268,9 @@ export default function CareerStory4() {
               <p>✓ Future direction clearly articulated</p>
               <p>✓ Personal growth journey documented</p>
             </div>
-            <Button
-              className="bg-primary-green-600 hover:bg-primary-green-700"
-              onClick={handleWriteAnotherStory}
-            >
-              Write Another Story
-              <ArrowRight className="ml-2 size-4" />
-            </Button>
+            <p className="text-sm text-slate-500">
+              Redirecting you back to your session...
+            </p>
           </div>
         </Card>
       </div>
@@ -300,369 +278,356 @@ export default function CareerStory4() {
   }
 
   return (
-    <div className="min-h-screen p-4 bg-gradient-to-br from-primary-green-50 to-primary-blue-50 sm:py-8">
+    <div className="p-3 sm:p-6">
       <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        <Header
-          headerIcon={RefreshCw}
-          headerText="Career Story Exploration - 4"
-          headerDescription="Rewrite your story with your success formula and self-advice"
-        />
+        <JourneyBreadcrumbLayout>
+          {/* Story Transformation Guide */}
+          <div className="p-4 mb-4 border bg-gradient-to-r from-primary-green-100/50 to-primary-blue-100/50 rounded-lg border-primary-green-200/40">
+            <h4 className="flex items-center gap-2 mb-3 text-sm font-semibold text-primary-green-800">
+              <RefreshCw className="size-4" />
+              Story Transformation Guide
+            </h4>
+            <div className="space-y-3 text-xs text-emerald-700">
+              <div className="p-3 border rounded-md bg-white/60 border-emerald-200/40">
+                <p className="mb-1 font-semibold">
+                  1. Revisit Your Career Story
+                </p>
+                <p className="text-slate-600">
+                  Revisit the career story you wrote in My Career Story-1, about
+                  the changes you&apos;re facing and the decisions you may need
+                  to make.
+                </p>
+              </div>
+              <div className="p-3 border rounded-md bg-white/60 border-emerald-200/40">
+                <p className="mb-1 font-semibold">
+                  2. Reflect on Your Excellence Formula
+                </p>
+                <p className="text-slate-600">
+                  Next, reflect on your excellence formula and the advice you
+                  gave yourself in My Career Story-3 to consider this as
+                  direction for yourself.
+                </p>
+              </div>
+              <div className="p-3 border rounded-md bg-white/60 border-emerald-200/40">
+                <p className="mb-1 font-semibold">3. Revise Your Essay</p>
+                <p className="text-slate-600">
+                  Now, using these insights, revise the essay from My Career
+                  Story-1 and describe how you plan to navigate this transition
+                  and the choices ahead.
+                </p>
+              </div>
+            </div>
+          </div>
 
-        {/* Reference Cards */}
-        <div className="grid gap-6 mb-8 md:grid-cols-2">
-          {/* Career Story 1 Reference */}
-          <Card className="bg-gradient-to-br from-primary-blue-50/50 to-cyan-50/50 border-primary-blue-100/60">
-            <CardHeader>
-              <div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-primary-blue-100">
-                      <Book className="sm:size-5 text-primary-blue-600 size-4" />
+          {/* Reference Cards */}
+          <div className="grid gap-4 mb-6 md:grid-cols-2">
+            {/* Career Story 1 Reference */}
+            <Sheet>
+              <SheetTrigger asChild>
+                <Card className="cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-[1.02] bg-gradient-to-br from-primary-blue-50/50 to-cyan-50/50 border-primary-blue-100/60 hover:border-primary-blue-200">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="p-2 rounded-lg bg-primary-blue-100">
+                        <Book className="size-4 text-primary-blue-600" />
+                      </div>
+                      <CardTitle className="text-base text-primary-blue-600">
+                        My Story-1 Activity Reference
+                      </CardTitle>
                     </div>
-                    <CardTitle className="text-lg text-primary-blue-600 sm:text-xl">
-                      Career Story 1 Reference
-                    </CardTitle>
-                  </div>
-                  <div>
-                    <Sheet>
-                      <SheetTrigger>
-                        <Info className="text-primary-blue-600 size-4 sm:size-5" />
-                      </SheetTrigger>
-                      <SheetContent className="min-w-[340px] sm:min-w-[600px] overflow-y-scroll bg-gradient-to-r from-primary-blue-100 to-white">
-                        <SheetHeader>
-                          <SheetTitle className="text-xl font-bold text-primary-blue-600">
-                            Career Story 1 - Your Original Transition Essay
-                          </SheetTitle>
-                          <SheetDescription>
-                            Review your original transition essay and career
-                            aspirations
-                          </SheetDescription>
-                        </SheetHeader>
-
-                        {/* Original Transition Essay */}
-                        <div className="mt-6">
-                          <div className="flex items-center gap-3 mb-4">
-                            <h4 className="text-sm font-medium text-slate-600">
-                              Your Original Transition Essay
-                            </h4>
-                          </div>
-                          <div className="p-4 border shadow-md bg-white/90 rounded-xl border-primary-blue-200/60">
-                            <h5 className="mb-2 font-semibold text-primary-blue-600">
-                              Transition Challenge
-                            </h5>
-                            <p className="text-sm leading-relaxed text-slate-600">
-                              {mockCareerStoryOneData.transitionEssay}
-                            </p>
-                          </div>
-                        </div>
-
-                        {/* Occupations */}
-                        <div className="mt-6">
-                          <div className="flex items-center gap-3 mb-4">
-                            <h4 className="text-sm font-medium text-slate-600">
-                              Occupations You Listed
-                            </h4>
-                          </div>
-                          <div className="p-4 border shadow-md bg-white/90 rounded-xl border-primary-blue-200/60">
-                            <h5 className="mb-2 font-semibold text-primary-blue-600">
-                              Career Interests
-                            </h5>
-                            <p className="text-sm leading-relaxed text-slate-600">
-                              {mockCareerStoryOneData.occupations}
-                            </p>
-                          </div>
-                        </div>
-
-                        {/* Heroes */}
-                        <div className="mt-6">
-                          <div className="flex items-center gap-3 mb-4">
-                            <h4 className="text-sm font-medium text-slate-600">
-                              Your Heroes & Role Models
-                            </h4>
-                          </div>
-                          <div className="space-y-4">
-                            {mockCareerStoryOneData.heroes.map(
-                              (hero, index) => (
-                                <div
-                                  key={hero.id}
-                                  className="p-4 border shadow-md bg-white/90 rounded-xl border-primary-blue-200/60"
-                                >
-                                  <div className="flex items-start gap-4">
-                                    <div className="flex items-center justify-center rounded-full shadow-md shrink-0 size-6 bg-primary-blue-600">
-                                      <span className="text-xs font-bold text-white">
-                                        {index + 1}
-                                      </span>
-                                    </div>
-                                    <div className="flex-1">
-                                      <h5 className="font-semibold text-primary-blue-600">
-                                        {hero.title}
-                                      </h5>
-                                      <p className="text-sm leading-relaxed text-slate-600">
-                                        {hero.description}
-                                      </p>
-                                    </div>
-                                  </div>
-                                </div>
-                              )
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Favorite Story & Saying */}
-                        <div className="mt-6">
-                          <div className="flex items-center gap-3 mb-4">
-                            <h4 className="text-sm font-medium text-slate-600">
-                              Your Favorite Story & Saying
-                            </h4>
-                          </div>
-                          <div className="space-y-4">
-                            <div className="p-4 border shadow-md bg-white/90 rounded-xl border-primary-blue-200/60">
-                              <h5 className="mb-2 font-semibold text-primary-blue-600">
-                                Favorite Story
-                              </h5>
-                              <p className="text-sm leading-relaxed text-slate-600">
-                                {mockCareerStoryOneData.favoriteStory}
-                              </p>
-                            </div>
-                            <div className="p-4 border shadow-md bg-white/90 rounded-xl border-primary-blue-200/60">
-                              <h5 className="mb-2 font-semibold text-primary-blue-600">
-                                Favorite Saying
-                              </h5>
-                              <p className="text-sm leading-relaxed text-slate-600">
-                                {mockCareerStoryOneData.favoriteSaying}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      </SheetContent>
-                    </Sheet>
-                  </div>
-                </div>
-                <div>
-                  <p className="mt-2 text-sm leading-relaxed text-slate-600">
+                    <p className="text-sm text-slate-600 mb-3">
+                      {isLoadingReferences
+                        ? "Loading your career story..."
+                        : "Review your original transition essay and career aspirations"}
+                    </p>
+                    <div className="p-3 border bg-gradient-to-r from-primary-blue-100/50 to-cyan-100/50 rounded-lg border-primary-blue-200/40">
+                      <h4 className="text-sm font-semibold text-primary-blue-600 mb-1">
+                        Original Challenge
+                      </h4>
+                      <p className="text-xs text-primary-blue-700 line-clamp-2">
+                        {careerStoryOneData?.transitionEssay
+                          ? `${careerStoryOneData.transitionEssay.substring(
+                              0,
+                              100
+                            )}...`
+                          : "Loading your transition essay..."}
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </SheetTrigger>
+              <SheetContent className="min-w-[340px] sm:min-w-[600px] overflow-y-scroll bg-gradient-to-r from-primary-blue-100 to-white">
+                <SheetHeader>
+                  <SheetTitle className="text-xl font-bold text-primary-blue-600">
+                    My Story-1 Activity - Your Original Transition Essay
+                  </SheetTitle>
+                  <SheetDescription>
                     Review your original transition essay and career aspirations
-                    from Career Story 1.
-                  </p>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="p-4 border bg-gradient-to-r from-primary-blue-100/50 to-cyan-100/50 rounded-xl border-primary-blue-200/40">
-                <h4 className="mb-2 font-semibold text-primary-blue-600">
-                  Original Challenge
-                </h4>
-                <p className="text-sm leading-relaxed text-primary-blue-700">
-                  Click the info icon to review your original transition essay
-                  and the challenges you identified.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+                  </SheetDescription>
+                </SheetHeader>
 
-          {/* Career Story 3 Reference */}
-          <Card className="bg-gradient-to-br from-primary-green-50/50 to-emerald-50/50 border-primary-green-100/60">
-            <CardHeader>
-              <div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-primary-green-100">
-                      <Sparkles className="sm:size-5 text-primary-green-600 size-4" />
-                    </div>
-                    <CardTitle className="text-lg text-primary-green-600 sm:text-xl">
-                      Career Story 3 Reference
-                    </CardTitle>
+                {/* Original Transition Essay */}
+                <div className="mt-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <h4 className="text-sm font-medium text-slate-600">
+                      Your Original Transition Essay
+                    </h4>
                   </div>
-                  <div>
-                    <Sheet>
-                      <SheetTrigger>
-                        <Info className="text-primary-green-600 size-4 sm:size-5" />
-                      </SheetTrigger>
-                      <SheetContent className="min-w-[340px] sm:min-w-[600px] overflow-y-scroll bg-gradient-to-r from-primary-green-100 to-white">
-                        <SheetHeader>
-                          <SheetTitle className="text-xl font-bold text-primary-green-600">
-                            Career Story 3 - Your Success Formula & Advice
-                          </SheetTitle>
-                          <SheetDescription>
-                            Review your excellence formula and personal motto
-                            from Career Story 3
-                          </SheetDescription>
-                        </SheetHeader>
+                  <div className="p-4 border shadow-md bg-white/90 rounded-xl border-primary-blue-200/60">
+                    <h5 className="mb-2 font-semibold text-primary-blue-600">
+                      Transition Challenge
+                    </h5>
+                    <p className="text-sm leading-relaxed text-slate-600 whitespace-pre-wrap">
+                      {careerStoryOneData?.transitionEssay ||
+                        "No transition essay available"}
+                    </p>
+                  </div>
+                </div>
 
-                        {/* Excellence Formula */}
-                        <div className="mt-6">
-                          <div className="flex items-center gap-3 mb-4">
-                            <h4 className="text-sm font-medium text-slate-600">
-                              Your Excellence Formula
-                            </h4>
-                          </div>
-                          <div className="space-y-4">
-                            <div className="p-4 border shadow-md bg-white/90 rounded-xl border-primary-green-200/60">
-                              <h5 className="mb-2 font-semibold text-primary-green-600">
-                                &quot;I will be most happy and successful when I
-                                am able to be...&quot;
-                              </h5>
-                              <p className="text-sm leading-relaxed text-slate-600">
-                                {mockCareerStoryThreeData.ableToBeStatement}
-                              </p>
-                            </div>
-                            <div className="p-4 border shadow-md bg-white/90 rounded-xl border-primary-green-200/60">
-                              <h5 className="mb-2 font-semibold text-primary-green-600">
-                                &quot;I will be most happy and successful in
-                                places where people...&quot;
-                              </h5>
-                              <p className="text-sm leading-relaxed text-slate-600">
-                                {mockCareerStoryThreeData.placesWhereStatement}
-                              </p>
-                            </div>
-                            <div className="p-4 border shadow-md bg-white/90 rounded-xl border-primary-green-200/60">
-                              <h5 className="mb-2 font-semibold text-primary-green-600">
-                                &quot;I will be most happy and successful so
-                                that I can...&quot;
-                              </h5>
-                              <p className="text-sm leading-relaxed text-slate-600">
-                                {mockCareerStoryThreeData.soThatStatement}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
+                {/* Occupations */}
+                <div className="mt-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <h4 className="text-sm font-medium text-slate-600">
+                      Occupations You Listed
+                    </h4>
+                  </div>
+                  <div className="p-4 border shadow-md bg-white/90 rounded-xl border-primary-blue-200/60">
+                    <h5 className="mb-2 font-semibold text-primary-blue-600">
+                      Career Interests
+                    </h5>
+                    <p className="text-sm leading-relaxed text-slate-600 whitespace-pre-wrap">
+                      {careerStoryOneData?.occupations ||
+                        "No occupations listed"}
+                    </p>
+                  </div>
+                </div>
 
-                        {/* Personal Motto */}
-                        <div className="mt-6">
-                          <div className="flex items-center gap-3 mb-4">
-                            <h4 className="text-sm font-medium text-slate-600">
-                              Your Personal Career Motto
-                            </h4>
+                {/* Heroes */}
+                <div className="mt-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <h4 className="text-sm font-medium text-slate-600">
+                      Your Heroes & Role Models
+                    </h4>
+                  </div>
+                  <div className="space-y-4">
+                    {careerStoryOneData?.heroes?.map((hero, index) => (
+                      <div
+                        key={hero.id}
+                        className="p-4 border shadow-md bg-white/90 rounded-xl border-primary-blue-200/60"
+                      >
+                        <div className="flex items-start gap-4">
+                          <div className="flex items-center justify-center rounded-full shadow-md shrink-0 size-6 bg-primary-blue-600">
+                            <span className="text-xs font-bold text-white">
+                              {index + 1}
+                            </span>
                           </div>
-                          <div className="p-4 border shadow-md bg-white/90 rounded-xl border-primary-green-200/60">
-                            <h5 className="mb-2 font-semibold text-primary-green-600">
-                              Your Best Advice to Yourself
+                          <div className="flex-1">
+                            <h5 className="font-semibold text-primary-blue-600">
+                              {hero.title}
                             </h5>
-                            <p className="text-sm leading-relaxed text-slate-600">
-                              {mockCareerStoryThreeData.mottoStatement}
+                            <p className="text-sm leading-relaxed text-slate-600 whitespace-pre-wrap">
+                              {hero.description}
                             </p>
                           </div>
                         </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
 
-                        {/* Selected Occupations */}
-                        <div className="mt-6">
-                          <div className="flex items-center gap-3 mb-4">
-                            <h4 className="text-sm font-medium text-slate-600">
-                              Occupations You&apos;re Considering
-                            </h4>
+                {/* Favorite Story & Saying */}
+                <div className="mt-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <h4 className="text-sm font-medium text-slate-600">
+                      Your Favorite Story & Saying
+                    </h4>
+                  </div>
+                  <div className="space-y-4">
+                    <div className="p-4 border shadow-md bg-white/90 rounded-xl border-primary-blue-200/60">
+                      <h5 className="mb-2 font-semibold text-primary-blue-600">
+                        Favorite Story
+                      </h5>
+                      <p className="text-sm leading-relaxed text-slate-600 whitespace-pre-wrap">
+                        {careerStoryOneData?.favoriteStory ||
+                          "No favorite story available"}
+                      </p>
+                    </div>
+                    <div className="p-4 border shadow-md bg-white/90 rounded-xl border-primary-blue-200/60">
+                      <h5 className="mb-2 font-semibold text-primary-blue-600">
+                        Favorite Saying
+                      </h5>
+                      <p className="text-sm leading-relaxed text-slate-600 whitespace-pre-wrap">
+                        {careerStoryOneData?.favoriteSaying ||
+                          "No favorite saying available"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </SheetContent>
+            </Sheet>
+
+            {/* Career Story 3 Reference */}
+            <Sheet>
+              <SheetTrigger asChild>
+                <Card className="cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-[1.02] bg-gradient-to-br from-primary-green-50/50 to-emerald-50/50 border-primary-green-100/60 hover:border-primary-green-200">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="p-2 rounded-lg bg-primary-green-100">
+                        <Sparkles className="size-4 text-primary-green-600" />
+                      </div>
+                      <CardTitle className="text-base text-primary-green-600">
+                        My Story-3 Activity Reference
+                      </CardTitle>
+                    </div>
+                    <p className="text-sm text-slate-600 mb-3">
+                      {isLoadingReferences
+                        ? "Loading your success formula..."
+                        : "Review your success formula and personal motto"}
+                    </p>
+                    <div className="p-3 border bg-gradient-to-r from-primary-green-100/50 to-emerald-100/50 rounded-lg border-primary-green-200/40">
+                      <h4 className="text-sm font-semibold text-primary-green-600 mb-1">
+                        Success Formula
+                      </h4>
+                      <p className="text-xs text-primary-green-700 line-clamp-2">
+                        {careerStoryThreeData?.ableToBeStatement
+                          ? `${careerStoryThreeData.ableToBeStatement.substring(
+                              0,
+                              100
+                            )}...`
+                          : "Loading your success formula..."}
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </SheetTrigger>
+              <SheetContent className="min-w-[340px] sm:min-w-[600px] overflow-y-scroll bg-gradient-to-r from-primary-green-100 to-white">
+                <SheetHeader>
+                  <SheetTitle className="text-xl font-bold text-primary-green-600">
+                    My Story-3 Activity - Your Success Formula & Advice
+                  </SheetTitle>
+                  <SheetDescription>
+                    Review your excellence formula and personal motto from My
+                    Story-3 Activity
+                  </SheetDescription>
+                </SheetHeader>
+
+                {/* Excellence Formula */}
+                <div className="mt-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <h4 className="text-sm font-medium text-slate-600">
+                      Your Excellence Formula
+                    </h4>
+                  </div>
+                  <div className="space-y-4">
+                    <div className="p-4 border shadow-md bg-white/90 rounded-xl border-primary-green-200/60">
+                      <h5 className="mb-2 font-semibold text-primary-green-600">
+                        &quot;I will be most happy and successful when I am able
+                        to be...&quot;
+                      </h5>
+                      <p className="text-sm leading-relaxed text-slate-600 whitespace-pre-wrap">
+                        {careerStoryThreeData?.ableToBeStatement ||
+                          "No statement available"}
+                      </p>
+                    </div>
+                    <div className="p-4 border shadow-md bg-white/90 rounded-xl border-primary-green-200/60">
+                      <h5 className="mb-2 font-semibold text-primary-green-600">
+                        &quot;I will be most happy and successful in places
+                        where people...&quot;
+                      </h5>
+                      <p className="text-sm leading-relaxed text-slate-600 whitespace-pre-wrap">
+                        {careerStoryThreeData?.placesWhereStatement ||
+                          "No statement available"}
+                      </p>
+                    </div>
+                    <div className="p-4 border shadow-md bg-white/90 rounded-xl border-primary-green-200/60">
+                      <h5 className="mb-2 font-semibold text-primary-green-600">
+                        &quot;I will be most happy and successful so that I
+                        can...&quot;
+                      </h5>
+                      <p className="text-sm leading-relaxed text-slate-600 whitespace-pre-wrap">
+                        {careerStoryThreeData?.soThatStatement ||
+                          "No statement available"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Personal Motto */}
+                <div className="mt-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <h4 className="text-sm font-medium text-slate-600">
+                      Your Personal Career Motto
+                    </h4>
+                  </div>
+                  <div className="p-4 border shadow-md bg-white/90 rounded-xl border-primary-green-200/60">
+                    <h5 className="mb-2 font-semibold text-primary-green-600">
+                      Your Best Advice to Yourself
+                    </h5>
+                    <p className="text-sm leading-relaxed text-slate-600 whitespace-pre-wrap">
+                      {careerStoryThreeData?.mottoStatement ||
+                        "No motto available"}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Selected Occupations */}
+                <div className="mt-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <h4 className="text-sm font-medium text-slate-600">
+                      Occupations You&apos;re Considering
+                    </h4>
+                  </div>
+                  <div className="space-y-2">
+                    {careerStoryThreeData?.selectedOccupations?.map(
+                      (occupation, index) => (
+                        <div
+                          key={occupation}
+                          className="flex items-center gap-3 p-3 border rounded-lg bg-white/90 border-primary-green-200/50"
+                        >
+                          <div className="flex items-center justify-center text-xs font-bold text-white rounded-full size-6 bg-primary-green-500">
+                            {index + 1}
                           </div>
-                          <div className="space-y-2">
-                            {mockCareerStoryThreeData.selectedOccupations.map(
-                              (occupation, index) => (
-                                <div
-                                  key={occupation}
-                                  className="flex items-center gap-3 p-3 border rounded-lg bg-white/90 border-primary-green-200/50"
-                                >
-                                  <div className="flex items-center justify-center text-xs font-bold text-white rounded-full size-6 bg-primary-green-500">
-                                    {index + 1}
-                                  </div>
-                                  <span className="text-sm font-medium text-slate-700">
-                                    {occupation}
-                                  </span>
-                                </div>
-                              )
-                            )}
-                          </div>
+                          <span className="text-sm font-medium text-slate-700">
+                            {occupation}
+                          </span>
                         </div>
-                      </SheetContent>
-                    </Sheet>
+                      )
+                    )}
                   </div>
                 </div>
-                <div>
-                  <p className="mt-2 text-sm leading-relaxed text-slate-600">
-                    Review your success formula and personal motto from Career
-                    Story 3.
-                  </p>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="p-4 border bg-gradient-to-r from-primary-green-100/50 to-emerald-100/50 rounded-xl border-primary-green-200/40">
-                <h4 className="mb-2 font-semibold text-primary-green-600">
-                  Success Formula & Advice
-                </h4>
-                <p className="text-sm leading-relaxed text-primary-green-700">
-                  Click the info icon to review your excellence formula and
-                  personal career motto.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+              </SheetContent>
+            </Sheet>
+          </div>
 
-        {/* Main Form */}
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            <QuestionSection
-              title="Re-Writing My Story"
-              subtitle="Look at Career Story 1 and read your essay about the change or transition you must make or the choices you might take. Then, based on your success formula (Career Story 3) and advice to yourself, think about where your story directs you to go next. Now, use your success formula and self-advice to rework the essay you wrote in Activity 1 to tell about how you will make this transition and these choices."
-              icon={<RefreshCw className="size-6 text-primary-green-600" />}
-              className="shadow-xl"
-            >
-              <div className="p-6 mb-6 border bg-gradient-to-r from-primary-green-100/50 to-primary-blue-100/50 rounded-xl border-primary-green-200/40">
-                <h4 className="flex items-center gap-2 mb-4 font-semibold text-primary-green-800">
-                  <RefreshCw className="size-5" />
-                  Story Transformation Guide
-                </h4>
-                <div className="grid gap-4 text-sm md:grid-cols-3 text-emerald-700">
-                  <div className="p-3 border rounded-lg bg-white/60 border-emerald-200/40">
-                    <p className="mb-2 font-semibold">1. Review Your Past</p>
-                    <p className="text-xs text-slate-600">
-                      Look at your original transition essay and career
-                      aspirations from Story 1
-                    </p>
-                  </div>
-                  <div className="p-3 border rounded-lg bg-white/60 border-emerald-200/40">
-                    <p className="mb-2 font-semibold">2. Apply Your Formula</p>
-                    <p className="text-xs text-slate-600">
-                      Use your success formula and self-advice from Story 3 as
-                      your guide
-                    </p>
-                  </div>
-                  <div className="p-3 border rounded-lg bg-white/60 border-emerald-200/40">
-                    <p className="mb-2 font-semibold">3. Rewrite Your Future</p>
-                    <p className="text-xs text-slate-600">
-                      Create a new narrative that shows how you&apos;ll make
-                      this transition successfully
-                    </p>
-                  </div>
-                </div>
-              </div>
-
+          {/* Main Form */}
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
               <FormField
                 control={form.control}
                 name="rewrittenStory"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="flex items-center gap-2 text-lg font-semibold text-slate-700">
-                      Your Rewritten Story *
+                      Rewrite Your Story
                     </FormLabel>
-                    <FormDescription className="leading-relaxed text-slate-600">
-                      Rewrite your transition story incorporating your success
-                      formula and self-advice. Show how you will navigate this
-                      change with confidence and purpose. Minimum 50 words,
-                      maximum 2000 characters.
-                    </FormDescription>
                     <FormControl>
-                      <div className="relative">
-                        <TextArea
-                          {...field}
-                          placeholder="Begin rewriting your story here... How will you use your success formula to navigate this transition? What specific steps will you take based on your self-advice? Paint a picture of your successful journey ahead..."
-                          rows={12}
-                          className={`resize-none ${
-                            errors.rewrittenStory
-                              ? "border-red-300 focus:border-red-500"
-                              : "border-emerald-300/60 focus:border-emerald-500"
-                          } bg-white/80 backdrop-blur-sm shadow-sm`}
-                        />
-                        <div className="absolute px-2 py-1 text-xs rounded bottom-3 right-3 text-slate-500 bg-white/80">
-                          {getWordCount(field.value)} words |{" "}
-                          {getCharacterCount(field.value)}/2000
+                      <div className="relative p-1.5 space-y-1 border shadow-sm bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl border-slate-200">
+                        <div className="space-y-3">
+                          <Textarea
+                            {...field}
+                            placeholder="Begin rewriting your story here... How will you use your success formula to navigate this transition? What specific steps will you take based on your self-advice? Paint a picture of your successful journey ahead..."
+                            rows={12}
+                            className="min-h-[200px] resize-y rounded-lg bg-white/80 backdrop-blur-sm transition-all duration-200 md:text-lg"
+                          />
+                        </div>
+                        <div className="flex items-center justify-between pt-2 text-xs border-t text-slate-500 border-slate-200/50">
+                          <span className="flex items-center gap-1">
+                            <RefreshCw className="size-3" />
+                            Take your time to reflect and write thoughtfully
+                          </span>
+                          <span className="font-medium">
+                            {getWordCount(field.value)} words |{" "}
+                            {getCharacterCount(field.value)}/2000
+                          </span>
                         </div>
                       </div>
                     </FormControl>
@@ -674,99 +639,38 @@ export default function CareerStory4() {
                   </FormItem>
                 )}
               />
-            </QuestionSection>
 
-            {/* Writing Tips */}
-            <div className="p-6 border shadow-lg bg-gradient-to-r from-cyan-100/50 to-primary-blue-100/50 rounded-xl border-cyan-200/60">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 rounded-lg bg-cyan-200">
-                  <Sparkles className="size-5 text-cyan-700" />
-                </div>
-                <h3 className="text-lg font-semibold text-cyan-800">
-                  Writing Tips
-                </h3>
-              </div>
-              <div className="grid gap-4 text-sm md:grid-cols-2 text-slate-700">
-                <div className="p-4 border rounded-lg bg-white/60 border-cyan-200/40">
-                  <h4 className="mb-3 font-semibold text-cyan-700">
-                    Include in Your Story:
-                  </h4>
-                  <ul className="space-y-2 text-slate-600">
-                    <li className="flex items-start gap-2">
-                      <div className="size-1.5 bg-cyan-500 rounded-full mt-2 shrink-0" />
-                      How your success formula will guide your decisions
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <div className="size-1.5 bg-cyan-500 rounded-full mt-2 shrink-0" />
-                      Specific actions you&apos;ll take based on your
-                      self-advice
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <div className="size-1.5 bg-cyan-500 rounded-full mt-2 shrink-0" />
-                      How you&apos;ll overcome challenges mentioned in Story 1
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <div className="size-1.5 bg-cyan-500 rounded-full mt-2 shrink-0" />
-                      Your vision for success in this transition
-                    </li>
-                  </ul>
-                </div>
-                <div className="p-4 border rounded-lg bg-white/60 border-cyan-200/40">
-                  <h4 className="mb-3 font-semibold text-cyan-700">
-                    Writing Approach:
-                  </h4>
-                  <ul className="space-y-2 text-slate-600">
-                    <li className="flex items-start gap-2">
-                      <div className="size-1.5 bg-cyan-500 rounded-full mt-2 shrink-0" />
-                      Write in first person (&quot;I will...&quot;)
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <div className="size-1.5 bg-cyan-500 rounded-full mt-2 shrink-0" />
-                      Be specific about your plans and timeline
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <div className="size-1.5 bg-cyan-500 rounded-full mt-2 shrink-0" />
-                      Show confidence and determination
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <div className="size-1.5 bg-cyan-500 rounded-full mt-2 shrink-0" />
-                      Connect past insights to future actions
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-
-            {/* Submit Button */}
-            <div className="text-center">
-              <Button
-                type="submit"
-                disabled={isSubmitting || !isValid}
-                className="relative px-10 py-4 text-lg font-bold text-white transition-all duration-300 shadow-2xl group bg-gradient-to-r from-emerald-500 via-cyan-500 to-primary-blue-500 rounded-2xl hover:from-emerald-600 hover:via-cyan-600 hover:to-primary-blue-600 hover:shadow-3xl hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-              >
-                {isSubmitting && (
-                  <Loader2 className="mr-2 size-5 animate-spin" />
-                )}
-                <div className="absolute inset-0 transition-opacity duration-300 bg-gradient-to-r from-emerald-400 via-cyan-400 to-primary-blue-400 rounded-2xl blur opacity-30 group-hover:opacity-50" />
-                <div className="relative flex items-center gap-3">
-                  <span>
-                    {isSubmitting
-                      ? "Saving Your Story..."
-                      : "Save Rewritten Story"}
-                  </span>
-                  {!isSubmitting && (
-                    <ArrowRight className="transition-transform duration-200 size-5 group-hover:translate-x-1" />
+              {/* Submit Button */}
+              <div className="text-center pb-6">
+                <Button
+                  type="submit"
+                  disabled={isSubmitting || !isValid}
+                  className="relative px-10 py-4 text-lg font-bold text-white transition-all duration-300 shadow-2xl group bg-gradient-to-r from-emerald-500 via-cyan-500 to-primary-blue-500 rounded-2xl hover:from-emerald-600 hover:via-cyan-600 hover:to-primary-blue-600 hover:shadow-3xl hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                >
+                  {isSubmitting && (
+                    <Loader2 className="mr-2 size-5 animate-spin" />
                   )}
-                </div>
-              </Button>
-              <p className="mt-3 text-sm text-slate-500">
-                {isSubmitting
-                  ? "Please wait while we save your rewritten story..."
-                  : "Your story transformation will be saved securely"}
-              </p>
-            </div>
-          </form>
-        </Form>
+                  <div className="absolute inset-0 transition-opacity duration-300 bg-gradient-to-r from-emerald-400 via-cyan-400 to-primary-blue-400 rounded-2xl blur opacity-30 group-hover:opacity-50" />
+                  <div className="relative flex items-center gap-3">
+                    <span>
+                      {isSubmitting
+                        ? "Saving Your Story..."
+                        : "Save Rewritten Story"}
+                    </span>
+                    {!isSubmitting && (
+                      <ArrowRight className="transition-transform duration-200 size-5 group-hover:translate-x-1" />
+                    )}
+                  </div>
+                </Button>
+                {/* <p className="mt-3 text-sm text-slate-500">
+                  {isSubmitting
+                    ? "Please wait while we save your rewritten story..."
+                    : "Your story transformation will be saved securely"}
+                </p> */}
+              </div>
+            </form>
+          </Form>
+        </JourneyBreadcrumbLayout>
       </div>
     </div>
   );
