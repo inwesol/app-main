@@ -358,13 +358,13 @@ export const SESSION_TEMPLATES = [
     icon: "Users",
     forms: [
       {
-        id: "career-option-matrix",
+        id: "career-options-matrix",
         title: "Matrix Activity",
         description:
           "To guide you in evaluating your options based on what is most important and relevant for you",
         status: "not-completed",
         icon: "Book",
-        route: "/journey/sessions/5/a/career-option-matrix",
+        route: "/journey/sessions/5/a/career-options-matrix",
       },
       {
         id: "career-story-4",
@@ -382,7 +382,7 @@ export const SESSION_TEMPLATES = [
         status: "not-completed",
         icon: "Video",
         route: "/journey/sessions/5/schedule",
-        prerequisites: ["career-option-matrix", "career-story-4"],
+        prerequisites: ["career-options-matrix", "career-story-4"],
       },
       {
         id: "session-feedback",

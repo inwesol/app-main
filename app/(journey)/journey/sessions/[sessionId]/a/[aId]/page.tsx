@@ -46,7 +46,7 @@ export default async function ActivityPage({ params }: ActivityPageProps) {
       session: "4",
     },
     {
-      id: "career-option-matrix",
+      id: "career-options-matrix",
       Component: CareerOptionsMatrix,
       session: "5",
     },
