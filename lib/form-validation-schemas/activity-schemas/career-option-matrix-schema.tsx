@@ -8,17 +8,17 @@ const matrixCellSchema = z.object({
   comment: z.string(),
 });
 
-// Matrix Row Schema
+// Matrix Row Schema (Career Options - no weights)
 const matrixRowSchema = z.object({
   id: z.string(),
   name: z.string(),
-  weight: z.number().min(1).max(5),
 });
 
-// Matrix Column Schema
+// Matrix Column Schema (Criteria - no weights)
 const matrixColumnSchema = z.object({
   id: z.string(),
   name: z.string(),
+  disabled: z.boolean(),
 });
 
 // Main Career Options Matrix Schema
