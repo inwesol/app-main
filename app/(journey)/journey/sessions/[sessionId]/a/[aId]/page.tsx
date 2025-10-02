@@ -26,7 +26,7 @@ export default async function ActivityPage({ params }: ActivityPageProps) {
       session: "1",
     },
     {
-      id: "life-collage",
+      id: "my-life-collage",
       Component: LifeCollage,
       session: "2",
     },

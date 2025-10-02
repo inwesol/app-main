@@ -2346,7 +2346,6 @@ export async function getMyLifeCollage(userId: string, sessionId: number) {
     return {
       presentLifeCollage: data.presentLifeCollage || [],
       futureLifeCollage: data.futureLifeCollage || [],
-      retirementValues: data.retirementValues || "",
     };
   } catch (error) {
     console.error("Error fetching my life collage:", error);
@@ -2368,7 +2367,6 @@ export async function upsertMyLifeCollage(
         sessionId,
         presentLifeCollage: data.presentLifeCollage,
         futureLifeCollage: data.futureLifeCollage,
-        retirementValues: data.retirementValues,
         createdAt: new Date(),
         updatedAt: new Date(),
       })
@@ -2377,7 +2375,6 @@ export async function upsertMyLifeCollage(
         set: {
           presentLifeCollage: data.presentLifeCollage,
           futureLifeCollage: data.futureLifeCollage,
-          retirementValues: data.retirementValues,
           updatedAt: new Date(),
         },
       })

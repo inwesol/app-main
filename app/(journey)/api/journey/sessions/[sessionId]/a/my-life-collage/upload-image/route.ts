@@ -5,6 +5,7 @@ import { auth } from "@/app/(auth)/auth";
 import { db } from "@/lib/db";
 import { user } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
+import { BLOB_CONFIG } from "@/lib/config/blob-config";
 
 export async function POST(
   request: NextRequest,
@@ -42,28 +43,40 @@ export async function POST(
     }
 
     // Validate file type
-    const allowedTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
-    if (!allowedTypes.includes(file.type)) {
+    if (!BLOB_CONFIG.ALLOWED_IMAGE_TYPES.includes(file.type as any)) {
       return NextResponse.json(
         {
-          error:
-            "Invalid file type. Only JPEG, PNG, GIF, and WebP are allowed.",
+          error: `Invalid file type. Allowed types: ${BLOB_CONFIG.ALLOWED_IMAGE_TYPES.join(
+            ", "
+          )}`,
         },
         { status: 400 }
       );
     }
 
-    // Validate file size (5MB limit)
-    const maxSize = 5 * 1024 * 1024; // 5MB
-    if (file.size > maxSize) {
+    // Validate file size
+    if (file.size > BLOB_CONFIG.MAX_FILE_SIZE) {
       return NextResponse.json(
-        { error: "File too large. Maximum size is 5MB." },
+        {
+          error: `File too large. Maximum size: ${Math.round(
+            BLOB_CONFIG.MAX_FILE_SIZE / (1024 * 1024)
+          )}MB`,
+        },
         { status: 400 }
       );
     }
 
-    // Upload the image
-    const uploadResult = await uploadImage(file, userEmail, imageType);
+    // Get session ID
+    const { sessionId } = await params;
+
+    // Upload the image with optimization and tracking
+    const uploadResult = await uploadImage(
+      file,
+      userEmail,
+      userData[0].id,
+      imageType,
+      sessionId
+    );
 
     return NextResponse.json({
       success: true,
@@ -99,19 +112,19 @@ export async function DELETE(
       );
     }
 
-    // Verify the image belongs to the user (optional security check)
-    const userEmail = session.user.email;
-    const sanitizedEmail = userEmail.replace(/[^a-zA-Z0-9@.-]/g, "_");
+    // Get user details for security check
+    const userData = await db
+      .select()
+      .from(user)
+      .where(eq(user.email, session.user.email))
+      .limit(1);
 
-    if (!imageUrl.includes(`my-life-collage/${sanitizedEmail}`)) {
-      return NextResponse.json(
-        { error: "Unauthorized to delete this image" },
-        { status: 403 }
-      );
+    if (!userData.length) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // Delete the image
-    await deleteImage(imageUrl);
+    // Delete the image with user verification
+    await deleteImage(imageUrl, userData[0].id);
 
     return NextResponse.json({
       success: true,

@@ -27,7 +27,6 @@ const collageElementSchema = z.object({
 export const lifeCollageSchema = z.object({
   presentLifeCollage: z.array(collageElementSchema),
   futureLifeCollage: z.array(collageElementSchema),
-  retirementValues: z.string().min(1, "Please share your retirement values"),
 });
 
 export type LifeCollageFormData = z.infer<typeof lifeCollageSchema>;

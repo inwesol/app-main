@@ -185,6 +185,7 @@ import {
   numeric,
   uniqueIndex,
   jsonb,
+  index,
 } from "drizzle-orm/pg-core";
 // import { z } from "zod";
 
@@ -801,7 +802,6 @@ export const myLifeCollageTable = pgTable(
     sessionId: integer("session_id").notNull(),
     presentLifeCollage: jsonb("present_life_collage").notNull().default([]),
     futureLifeCollage: jsonb("future_life_collage").notNull().default([]),
-    retirementValues: text("retirement_values").notNull().default(""),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
   },
@@ -898,3 +898,34 @@ export const dailyJournalEntries = pgTable(
 
 export type DailyJournalEntry = typeof dailyJournalEntries.$inferSelect;
 export type NewDailyJournalEntry = typeof dailyJournalEntries.$inferInsert;
+
+// Uploaded Images tracking table for cleanup and management
+export const uploadedImages = pgTable(
+  "uploaded_images",
+  {
+    id: uuid("id").primaryKey().notNull().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    sessionId: integer("session_id"), // Optional: link to specific session
+    imageUrl: text("image_url").notNull().unique(),
+    imagePath: text("image_path").notNull(), // Vercel Blob pathname
+    fileName: varchar("file_name", { length: 255 }).notNull(),
+    fileSize: integer("file_size").notNull(),
+    mimeType: varchar("mime_type", { length: 100 }).notNull(),
+    imageType: varchar("image_type", { length: 50 }), // 'present' or 'future' for collage
+    isOptimized: boolean("is_optimized").default(false).notNull(),
+    lastAccessedAt: timestamp("last_accessed_at").defaultNow().notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => ({
+    userImageType: index("idx_user_image_type").on(
+      table.userId,
+      table.imageType
+    ),
+    lastAccessed: index("idx_last_accessed").on(table.lastAccessedAt),
+  })
+);
+
+export type UploadedImage = typeof uploadedImages.$inferSelect;
+export type NewUploadedImage = typeof uploadedImages.$inferInsert;

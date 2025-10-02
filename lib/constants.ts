@@ -188,13 +188,13 @@ export const SESSION_TEMPLATES = [
         // prerequisites: ["riasec-test"],
       },
       {
-        id: "life-collage",
+        id: "my-life-collage",
         title: "My Life Collage Activity",
         description:
           "To understand where you are in life, where you want to go, and the challenges you're facing",
         status: "not-completed",
         icon: "Image",
-        route: "/journey/sessions/2/a/life-collage",
+        route: "/journey/sessions/2/a/my-life-collage",
         // prerequisites: ["riasec-test", "personality-test"],
       },
       {
@@ -205,7 +205,7 @@ export const SESSION_TEMPLATES = [
         status: "not-completed",
         icon: "Video",
         route: "/journey/sessions/2/schedule",
-        prerequisites: ["riasec-test", "personality-test", "life-collage"],
+        prerequisites: ["riasec-test", "personality-test", "my-life-collage"],
       },
 
       {
@@ -235,7 +235,7 @@ export const SESSION_TEMPLATES = [
     topics: [
       "Interest Assessment",
       "Personality Assessment",
-      "Life Collage Activity",
+      "My Life Collage Activity",
     ],
   },
   {

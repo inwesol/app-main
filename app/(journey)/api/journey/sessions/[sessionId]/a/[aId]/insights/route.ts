@@ -34,13 +34,12 @@ export async function GET(
       .limit(1);
 
     if (formProgress.length === 0) {
-      return NextResponse.json({ values: [] });
+      return NextResponse.json({ insights: {} });
     }
 
     const insights = formProgress[0].insights as any;
-    const values = insights?.values || [];
 
-    return NextResponse.json({ values });
+    return NextResponse.json({ insights });
   } catch (error) {
     console.error("Error fetching insights:", error);
     return NextResponse.json(
@@ -62,11 +61,11 @@ export async function POST(
 
     const { sessionId, aId: formId } = await params;
     const body = await request.json();
-    const { values } = body;
+    const { insights } = body;
 
-    if (!Array.isArray(values)) {
+    if (!insights || typeof insights !== "object") {
       return NextResponse.json(
-        { error: "values array is required" },
+        { error: "insights object is required" },
         { status: 400 }
       );
     }
@@ -86,8 +85,6 @@ export async function POST(
         )
       )
       .limit(1);
-
-    const insights = { values };
 
     if (existingProgress.length > 0) {
       // Update existing record
@@ -118,7 +115,7 @@ export async function POST(
       });
     }
 
-    return NextResponse.json({ success: true, values });
+    return NextResponse.json({ success: true, insights });
   } catch (error) {
     console.error("Error saving insights:", error);
     return NextResponse.json(

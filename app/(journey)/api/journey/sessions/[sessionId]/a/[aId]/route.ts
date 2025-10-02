@@ -358,7 +358,6 @@ export async function GET(
           return NextResponse.json({
             presentLifeCollage: [],
             futureLifeCollage: [],
-            retirementValues: "",
           });
         }
 
