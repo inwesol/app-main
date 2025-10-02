@@ -186,7 +186,9 @@ import {
   uniqueIndex,
   jsonb,
   index,
+  check,
 } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
 // import { z } from "zod";
 
 export const user = pgTable("User", {
@@ -550,18 +552,36 @@ export const chat_feedback = pgTable("chat_feedback", {
 
 export type ChatFeedback = InferSelectModel<typeof chat_feedback>;
 
-export const feedback = pgTable("feedback", {
-  id: uuid("id").primaryKey().notNull().defaultRandom(),
-  feeling: text("feeling").notNull(), // e.g., 'enlightened', 'confident', etc.
-  takeaway: text("takeaway"),
-  rating: integer("rating").notNull(), // 1-5 stars
-  wouldRecommend: boolean("would_recommend").default(false),
-  suggestions: text("suggestions"),
-  sessionId: integer("session_id"), // zero-based session index
-  userId: uuid("user_id"),
-  userAgent: text("user_agent"), // Optional: for analytics
-  createdAt: timestamp("created_at").defaultNow(),
-});
+export const feedback = pgTable(
+  "feedback",
+  {
+    id: uuid("id").primaryKey().notNull().defaultRandom(),
+    userId: uuid("user_id").notNull(),
+    sessionId: integer("session_id").notNull(),
+    overallFeeling: jsonb("overall_feeling").notNull(), // Array of feeling strings: ["enlightened", "confident"]
+    keyInsight: text("key_insight").notNull(), // Renamed from takeaway
+    overallRating: integer("overall_rating").notNull(), // 1-5 stars, renamed from rating
+    wouldRecommend: boolean("would_recommend").default(false).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => ({
+    // Unique constraint to prevent duplicate feedback per user per session
+    userSessionUnique: uniqueIndex("feedback_user_session_unique").on(
+      table.userId,
+      table.sessionId
+    ),
+    // Check constraint for rating range only
+    ratingRange: check(
+      "feedback_rating_range",
+      sql`${table.overallRating} >= 1 AND ${table.overallRating} <= 5`
+    ),
+  })
+);
 
 export type Feedback = typeof feedback.$inferInsert;
 export type FeedbackSelect = typeof feedback.$inferSelect;

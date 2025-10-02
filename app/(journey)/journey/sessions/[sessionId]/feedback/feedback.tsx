@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useRef, useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
@@ -16,26 +16,29 @@ import {
   MessageCircle,
   AlertCircle,
   Loader2,
+  PenTool,
 } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 
 // Updated Zod schema to match your database structure
 const feedbackSchema = z.object({
-  overallFeeling: z.string().min(1, "Please select how you're feeling"),
+  overallFeeling: z
+    .array(z.string())
+    .min(1, "Please select at least one feeling"),
   keyInsight: z.string().min(10, "Please share at least a brief insight"),
   overallRating: z.number().min(1, "Please rate the session").max(5),
   wouldRecommend: z.boolean(),
-  improvementSuggestion: z.string().optional(),
 });
 
 type FeedbackFormData = z.infer<typeof feedbackSchema>;
 
 interface SessionFeedbackFormProps {
-  sessionNumber?: number;
+  sessionId?: number;
   sessionTitle?: string;
   userId?: string;
   onSubmit?: (
     feedback: FeedbackFormData & {
-      sessionNumber?: number;
+      sessionId?: number;
       sessionTitle?: string;
       submittedAt: Date;
     }
@@ -83,8 +86,8 @@ const FEELING_OPTIONS = [
 ];
 
 export function SessionFeedbackForm({
-  sessionNumber = 1,
-  sessionTitle = "Feedback Session",
+  sessionId = 0,
+  sessionTitle = "",
   userId,
   onSubmit,
   className = "",
@@ -112,6 +115,17 @@ export function SessionFeedbackForm({
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  const form = useForm<FeedbackFormData>({
+    resolver: zodResolver(feedbackSchema),
+    mode: "onChange",
+    defaultValues: {
+      overallFeeling: [],
+      keyInsight: "",
+      overallRating: 0,
+      wouldRecommend: false,
+    },
+  });
+
   const {
     register,
     handleSubmit,
@@ -119,31 +133,14 @@ export function SessionFeedbackForm({
     watch,
     setValue,
     trigger,
-  } = useForm<FeedbackFormData>({
-    resolver: zodResolver(feedbackSchema),
-    mode: "onChange",
-    defaultValues: {
-      overallRating: 0,
-      wouldRecommend: false,
-    },
-  });
+  } = form;
 
   const watchedValues = watch();
 
   const onFormSubmit = async (data: FeedbackFormData) => {
-    console.log("🚀 Form submission started");
-    console.log("📋 Form data:", data);
-    console.log("🎯 Session number:", sessionNumber);
-
     // Validate userId is provided
     if (!userId) {
       setSubmitError("User identification is required");
-      return;
-    }
-
-    // Validate sessionNumber (0-8 range)
-    if (sessionNumber < 0 || sessionNumber > 8) {
-      setSubmitError("Invalid session number. Must be between 0 and 8");
       return;
     }
 
@@ -151,45 +148,30 @@ export function SessionFeedbackForm({
     setSubmitError(null);
 
     try {
-      // Use sessionNumber directly as sessionId (no conversion needed)
-      const sessionId = sessionNumber;
-
-      console.log("🔢 Session ID for database:", sessionId);
-
       const apiData = {
         userId: userId,
-        feeling: String(data.overallFeeling),
-        takeaway: String(data.keyInsight),
-        rating: Number(data.overallRating),
-        wouldRecommend: Boolean(data.wouldRecommend),
-        suggestions: data.improvementSuggestion
-          ? String(data.improvementSuggestion)
-          : null,
-        sessionId: sessionId, // Direct mapping: URL param = database value
-        sessionNumber: sessionNumber, // Same as sessionId for logging
+        overallFeeling: data.overallFeeling,
+        keyInsight: data.keyInsight,
+        overallRating: data.overallRating,
+        wouldRecommend: data.wouldRecommend,
+        sessionId: sessionId,
       };
 
-      console.log("🌐 Sending data to API:", apiData);
-
-      const response = await fetch("/api/feedback", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(apiData),
-      });
-
-      console.log("📡 Response status:", response.status);
-      console.log(
-        "📡 Response headers:",
-        Object.fromEntries(response.headers.entries())
+      const response = await fetch(
+        `/api/journey/sessions/${sessionId}/feedback`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(apiData),
+        }
       );
 
       // Check if response is actually JSON
       const contentType = response.headers.get("content-type");
       if (!contentType || !contentType.includes("application/json")) {
         const textResponse = await response.text();
-        console.error("❌ Non-JSON response received:", textResponse);
         throw new Error(
           "Server returned non-JSON response. Check your API endpoint."
         );
@@ -197,7 +179,6 @@ export function SessionFeedbackForm({
 
       if (!response.ok) {
         const errorData = await response.json();
-        console.error("❌ API Error Response:", errorData);
         throw new Error(
           errorData.error ||
             `HTTP ${response.status}: Failed to submit feedback`
@@ -205,12 +186,11 @@ export function SessionFeedbackForm({
       }
 
       const result = await response.json();
-      console.log("✅ Success! Response:", result);
 
       // Call the optional onSubmit callback if provided
       const completeData = {
         ...data,
-        sessionNumber,
+        sessionId,
         sessionTitle,
         submittedAt: new Date(),
       };
@@ -218,8 +198,6 @@ export function SessionFeedbackForm({
 
       setIsSubmitted(true);
     } catch (error) {
-      console.error("❌ Submission error:", error);
-
       let errorMessage = "An unexpected error occurred";
 
       if (error instanceof TypeError && error.message.includes("fetch")) {
@@ -236,7 +214,6 @@ export function SessionFeedbackForm({
 
   const handleRatingClick = (rating: number) => {
     setValue("overallRating", rating);
-    trigger("overallRating");
   };
 
   const renderStars = (rating: number) => {
@@ -245,24 +222,30 @@ export function SessionFeedbackForm({
         key={`star-${index + 1}`}
         type="button"
         onClick={() => handleRatingClick(index + 1)}
-        className={`transition-all duration-300 hover:scale-110 ${
+        className={`transition-all duration-200 hover:scale-110 ${
           index < rating
             ? "text-yellow-400 hover:text-yellow-500"
             : "text-gray-300 hover:text-yellow-300"
         }`}
       >
-        <Star
-          className={`size-6 sm:size-7 ${index < rating ? "fill-current" : ""}`}
-        />
+        <Star className={`size-5 ${index < rating ? "fill-current" : ""}`} />
       </button>
     ));
   };
 
+  // Auto-redirect after successful submission
+  useEffect(() => {
+    if (isSubmitted) {
+      const timer = setTimeout(() => {
+        router.push(`/journey/sessions/${sessionId}`);
+      }, 1000); // Redirect after 1 seconds
+      return () => clearTimeout(timer);
+    }
+  }, [isSubmitted, router, sessionId]);
+
   if (isSubmitted) {
     return (
-      <div
-        className={`min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 p-4 py-6 sm:py-8 ${className}`}
-      >
+      <div className={`p-4 py-6 sm:py-8 ${className}`}>
         <div className="max-w-xl mx-auto">
           <div className="bg-white/95 backdrop-blur-xl border-2 border-green-200/50 shadow-2xl shadow-green-100/20 rounded-2xl overflow-hidden">
             <div className="p-6 sm:p-8 text-center">
@@ -274,31 +257,9 @@ export function SessionFeedbackForm({
                   Thank You!
                 </h2>
                 <p className="text-green-700/80 text-base sm:text-lg leading-relaxed">
-                  Your feedback for {sessionTitle} has been successfully saved
-                  and helps us create better experiences for your journey of
-                  self-discovery.
+                  Your feedback has been successfully saved.
                 </p>
               </div>
-
-              <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-4 border border-green-200/50 mb-6">
-                <h3 className="font-bold text-green-800 mb-1 text-sm sm:text-base">
-                  What&apos;s Next?
-                </h3>
-                <p className="text-green-700/90 text-xs sm:text-sm">
-                  You&apos;ll receive a summary and next steps via email within
-                  24 hours.
-                </p>
-              </div>
-
-              <button
-                type="button"
-                onClick={() =>
-                  router.push(`/journey/sessions/${sessionNumber}`)
-                }
-                className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white px-6 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5 text-sm sm:text-base"
-              >
-                Continue Your Journey
-              </button>
             </div>
           </div>
         </div>
@@ -307,75 +268,73 @@ export function SessionFeedbackForm({
   }
 
   return (
-    <div
-      className={`min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 p-4 py-6 sm:py-12 ${className}`}
-    >
-      <div className="max-w-2xl mx-auto">
-        {/* Header */}
-        {/* <div className="text-center mb-6">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <div className="p-2.5 bg-gradient-to-br from-blue-500 to-green-500 rounded-xl shadow-lg">
-              <Heart className="size-4 sm:size-5 text-white" />
-            </div>
-            <div>
-              <h1 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-blue-700 to-green-700 bg-clip-text text-transparent">
-                {sessionTitle} Feedback
-              </h1>
-              <p className="text-xs sm:text-sm text-slate-500">
-                Session {sessionNumber}
-              </p>
-            </div>
+    <div className={className}>
+      {/* Compact Header */}
+      <div className="text-center mb-4">
+        <div className="flex items-center justify-center gap-2 mb-2">
+          <div className="p-1.5 bg-gradient-to-br from-blue-500 to-green-500 rounded-lg shadow-md">
+            <MessageCircle className="size-3 text-white" />
           </div>
-          <p className="text-slate-600 text-sm sm:text-base max-w-xl mx-auto">
-            Just 5 quick questions to help us improve your experience
-          </p>
-        </div> */}
+          <h1 className="text-lg font-bold bg-gradient-to-r from-blue-700 to-green-700 bg-clip-text text-transparent">
+            {sessionTitle} Feedback
+          </h1>
+        </div>
+      </div>
 
-        <form onSubmit={handleSubmit(onFormSubmit)}>
-          <div className="bg-white/95 backdrop-blur-xl border-2 border-blue-100/50 shadow-xl shadow-blue-100/20 rounded-2xl overflow-hidden">
-            <div className="p-4 sm:p-6 space-y-5 sm:space-y-6">
+      {/* Main Form Card */}
+      <Card className="overflow-hidden border-0 shadow-xl bg-white/95 backdrop-blur-sm rounded-2xl">
+        <CardContent className="p-4 sm:p-6">
+          <form onSubmit={handleSubmit(onFormSubmit)}>
+            <div className="space-y-4">
               {/* Error Display */}
               {submitError && (
-                <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-center">
+                <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-center">
                   <div className="flex items-center justify-center gap-2 text-red-600">
-                    <AlertCircle className="size-5" />
-                    <p className="font-medium">Submission Failed</p>
+                    <AlertCircle className="size-4" />
+                    <p className="font-medium text-sm">Submission Failed</p>
                   </div>
-                  <p className="text-red-600 text-sm mt-1">{submitError}</p>
+                  <p className="text-red-600 text-xs mt-1">{submitError}</p>
                 </div>
               )}
 
               {/* 1. Overall Feeling */}
               <div>
                 <fieldset>
-                  <legend className="block text-lg sm:text-xl font-bold text-blue-800 mb-3 text-center">
+                  <legend className="block text-base font-semibold text-slate-800 mb-3 text-center">
                     How are you feeling after this session?
                   </legend>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
                     {FEELING_OPTIONS.map((feeling) => {
                       const Icon = feeling.icon;
                       const isSelected =
-                        watchedValues.overallFeeling === feeling.value;
+                        watchedValues.overallFeeling?.includes(feeling.value) ||
+                        false;
                       return (
                         <button
                           key={feeling.value}
                           type="button"
                           onClick={() => {
-                            setValue("overallFeeling", feeling.value);
-                            trigger("overallFeeling");
+                            const currentFeelings =
+                              watchedValues.overallFeeling || [];
+                            const newFeelings = isSelected
+                              ? currentFeelings.filter(
+                                  (f) => f !== feeling.value
+                                )
+                              : [...currentFeelings, feeling.value];
+                            setValue("overallFeeling", newFeelings);
                           }}
-                          className={`p-3 rounded-xl border-2 transition-all duration-300 hover:scale-105 hover:shadow-lg ${
+                          className={`p-2 rounded-lg border-2 transition-all duration-200 hover:scale-105 hover:shadow-md ${
                             isSelected
-                              ? "border-blue-400 bg-gradient-to-br from-blue-50 to-green-50 shadow-lg scale-105"
+                              ? "border-blue-400 bg-gradient-to-br from-blue-50 to-green-50 shadow-md scale-105"
                               : "border-gray-200 hover:border-blue-300 bg-white hover:bg-gradient-to-br hover:from-blue-25 hover:to-green-25"
                           }`}
                         >
                           <div
-                            className={`inline-flex p-2 rounded-lg mb-2 bg-gradient-to-br ${feeling.color} shadow-md`}
+                            className={`inline-flex p-1.5 rounded-md mb-1.5 bg-gradient-to-br ${feeling.color} shadow-sm`}
                           >
-                            <Icon className="size-4 text-white" />
+                            <Icon className="size-3 text-white" />
                           </div>
-                          <h3 className="font-bold text-blue-800 text-xs sm:text-sm">
+                          <h3 className="font-semibold text-slate-700 text-xs">
                             {feeling.label}
                           </h3>
                         </button>
@@ -395,22 +354,44 @@ export function SessionFeedbackForm({
               <div>
                 <label
                   htmlFor="keyInsight"
-                  className="block text-lg sm:text-xl font-bold text-blue-800 mb-3 text-center"
+                  className="block text-base font-semibold text-slate-800 mb-2 text-center"
                 >
                   What&apos;s your biggest takeaway from this session?
                 </label>
-                <textarea
-                  id="keyInsight"
-                  {...register("keyInsight")}
-                  ref={textareaRef}
-                  className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none resize-none text-center min-h-[80px]"
-                  rows={2}
-                  placeholder="Share your key insight or realization..."
-                  onInput={(e) => autoResize(e.target as HTMLTextAreaElement)}
-                />
+                <div className="relative p-1.5 space-y-1 border shadow-sm bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl border-slate-200">
+                  <div className="space-y-3">
+                    <Controller
+                      name="keyInsight"
+                      control={form.control}
+                      render={({ field }) => (
+                        <textarea
+                          id="keyInsight"
+                          {...field}
+                          ref={textareaRef}
+                          placeholder="Share your key insight or realization..."
+                          rows={3}
+                          className="w-full min-h-[200px] resize-y rounded-lg bg-white/80 backdrop-blur-sm transition-all duration-200 md:text-lg p-3 border border-gray-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none"
+                          onInput={(e) => {
+                            field.onChange(e);
+                            autoResize(e.target as HTMLTextAreaElement);
+                          }}
+                        />
+                      )}
+                    />
+                  </div>
+                  <div className="flex items-center justify-between pt-2 text-xs border-t text-slate-500 border-slate-200/50">
+                    <span className="flex items-center gap-1">
+                      <PenTool className="size-3" />
+                      Take your time to reflect and write thoughtfully
+                    </span>
+                    <span className="font-medium">
+                      {watchedValues.keyInsight?.length || 0} characters
+                    </span>
+                  </div>
+                </div>
                 {errors.keyInsight && (
-                  <p className="text-red-500 text-sm mt-2 flex items-center justify-center gap-2">
-                    <AlertCircle className="size-4" />
+                  <p className="text-red-500 text-xs mt-1 flex items-center justify-center gap-1">
+                    <AlertCircle className="size-3" />
                     {errors.keyInsight.message}
                   </p>
                 )}
@@ -419,18 +400,15 @@ export function SessionFeedbackForm({
               {/* 3. Overall Rating */}
               <div className="text-center">
                 <fieldset>
-                  <legend className="block text-lg sm:text-xl font-bold text-blue-800 mb-3">
+                  <legend className="block text-base font-semibold text-slate-800 mb-2">
                     How would you rate this session overall?
                   </legend>
-                  <div className="flex justify-center gap-1 sm:gap-2 mb-2">
+                  <div className="flex justify-center gap-1 mb-1">
                     {renderStars(watchedValues.overallRating || 0)}
                   </div>
-                  <p className="text-slate-600 text-xs sm:text-sm">
-                    Click the stars to rate from 1 to 5
-                  </p>
                   {errors.overallRating && (
-                    <p className="text-red-500 text-sm mt-2 flex items-center justify-center gap-2">
-                      <AlertCircle className="size-4" />
+                    <p className="text-red-500 text-xs mt-1 flex items-center justify-center gap-1">
+                      <AlertCircle className="size-3" />
                       {errors.overallRating.message}
                     </p>
                   )}
@@ -438,69 +416,50 @@ export function SessionFeedbackForm({
               </div>
 
               {/* 4. Would Recommend */}
-              <div className="bg-gradient-to-r from-blue-25 to-green-25 rounded-xl p-4 border border-blue-200/50">
-                <div className="flex items-center justify-center gap-3">
+              <div className="bg-gradient-to-r from-blue-50 to-green-50 rounded-lg p-3 border border-blue-200/50">
+                <div className="flex items-center justify-center gap-2">
                   <input
                     id="wouldRecommend"
                     type="checkbox"
                     {...register("wouldRecommend")}
-                    className="size-5 text-blue-600 border-2 border-blue-300 rounded focus-visible:ring-transparent"
+                    className="size-4 text-blue-600 border-2 border-blue-300 rounded focus-visible:ring-transparent"
                   />
                   <label
                     htmlFor="wouldRecommend"
-                    className="text-sm sm:text-base font-bold text-blue-800 text-center"
+                    className="text-sm font-semibold text-slate-700 text-center"
                   >
                     I would recommend this session to others
                   </label>
                 </div>
               </div>
 
-              {/* 5. Improvement Suggestion (Optional) */}
-              {/* <div>
-                <label
-                  htmlFor="improvementSuggestion"
-                  className="block text-base sm:text-lg font-semibold text-blue-800 mb-3 text-center"
+              {/* Submit Button */}
+              <div className="pt-3 border-t border-slate-200 text-center">
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-green-500 hover:from-blue-600 hover:to-green-600 text-white px-5 py-2 rounded-lg font-semibold text-sm shadow-md hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5 mx-auto disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                 >
-                  Any quick suggestion to make it even better? (Optional)
-                </label>
-                <textarea
-                  id="improvementSuggestion"
-                  {...register("improvementSuggestion")}
-                  ref={suggestionRef}
-                  className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all duration-300 resize-none text-center min-h-[60px]"
-                  rows={1}
-                  placeholder="One thing we could improve..."
-                  onInput={(e) => autoResize(e.target as HTMLTextAreaElement)}
-                />
-              </div> */}
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="size-3 animate-spin" />
+                      Submitting...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="size-3" />
+                      Submit Feedback
+                    </>
+                  )}
+                </button>
+                <p className="text-slate-500 text-xs mt-1.5">
+                  Takes less than 2 minutes • Your privacy is protected
+                </p>
+              </div>
             </div>
-
-            {/* Submit Button */}
-            <div className="p-4 sm:p-6 bg-gradient-to-r from-blue-25/50 to-green-25/50 border-t border-blue-100/50 text-center">
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-green-500 hover:from-blue-600 hover:to-green-600 text-white px-6 py-2.5 rounded-lg font-semibold text-sm sm:text-base shadow-md hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5 mx-auto disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-              >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="size-4 animate-spin" />
-                    Submitting...
-                  </>
-                ) : (
-                  <>
-                    <Send className="size-4" />
-                    Submit Feedback
-                  </>
-                )}
-              </button>
-              <p className="text-slate-600 text-xs sm:text-sm mt-2">
-                Takes less than 2 minutes • Your privacy is protected
-              </p>
-            </div>
-          </div>
-        </form>
-      </div>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 }

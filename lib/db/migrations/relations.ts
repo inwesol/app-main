@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm/relations";
-import { user, suggestion, chat, message, messageV2, passwordResetToken, emailVerificationTokens, vote, voteV2, document } from "./schema";
+import { user, suggestion, chat, message, messageV2, passwordResetToken, emailVerificationTokens, uploadedImages, vote, voteV2, document } from "./schema";
 
 export const suggestionRelations = relations(suggestion, ({one}) => ({
 	user: one(user, {
@@ -13,6 +13,7 @@ export const userRelations = relations(user, ({many}) => ({
 	chats: many(chat),
 	passwordResetTokens: many(passwordResetToken),
 	emailVerificationTokens: many(emailVerificationTokens),
+	uploadedImages: many(uploadedImages),
 	documents: many(document),
 }));
 
@@ -53,6 +54,13 @@ export const passwordResetTokenRelations = relations(passwordResetToken, ({one})
 export const emailVerificationTokensRelations = relations(emailVerificationTokens, ({one}) => ({
 	user: one(user, {
 		fields: [emailVerificationTokens.userId],
+		references: [user.id]
+	}),
+}));
+
+export const uploadedImagesRelations = relations(uploadedImages, ({one}) => ({
+	user: one(user, {
+		fields: [uploadedImages.userId],
 		references: [user.id]
 	}),
 }));

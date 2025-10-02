@@ -1,7 +1,10 @@
 "use client";
-import React from "react";
-import { useSearchParams } from "next/navigation";
+import React, { useEffect } from "react";
+import { useSearchParams, useParams } from "next/navigation";
 import { SessionFeedbackForm } from "./feedback";
+import { useBreadcrumb } from "@/hooks/useBreadcrumb";
+import { JourneyBreadcrumbLayout } from "@/components/layouts/JourneyBreadcrumbLayout";
+import { SESSION_TEMPLATES } from "@/lib/constants";
 
 function parseSessionNumber(value: string | null): number {
   if (!value) return 0; // Default to session 0
@@ -18,45 +21,43 @@ function parseSessionNumber(value: string | null): number {
 }
 
 function getTitleForSession(sessionNumber: number): string {
-  // You can customize session titles here (0-8)
-  const sessionTitles: Record<number, string> = {
-    0: "Getting Started",
-    1: "Foundation Building",
-    2: "Personal Discovery",
-    3: "Goal Setting & Planning",
-    4: "Skill Development",
-    5: "Progress Review",
-    6: "Advanced Techniques",
-    7: "Integration & Practice",
-    8: "Final Assessment",
-    // Add more as needed
-  };
-
-  return sessionTitles[sessionNumber] || `Session ${sessionNumber}`;
+  // Get session title from SESSION_TEMPLATES
+  const sessionTemplate = SESSION_TEMPLATES.find(
+    (template) => template.id === sessionNumber
+  );
+  return sessionTemplate?.title || `Session ${sessionNumber}`;
 }
 
 interface ClientSessionFeedbackProps {
   userId?: string;
   // Optional: allow overriding session from props (useful for testing)
-  defaultSession?: number;
+  defaultSessionId?: number;
 }
 
 export default function ClientSessionFeedback({
   userId,
-  defaultSession,
+  defaultSessionId,
 }: ClientSessionFeedbackProps) {
   const searchParams = useSearchParams();
+  const params = useParams();
+  const { setJourneyBreadcrumbs } = useBreadcrumb();
 
-  // Get session from URL params, fallback to defaultSession or 0
-  const sessionParam = searchParams.get("session");
-  const sessionNumber = parseSessionNumber(sessionParam) || defaultSession || 0;
-  const sessionTitle = getTitleForSession(sessionNumber);
+  // Get session from URL params, fallback to defaultSessionId or 0
+  const sessionParam = params.sessionId as string;
+  const sessionId = parseSessionNumber(sessionParam) || defaultSessionId || 0;
+  const sessionTitle = getTitleForSession(sessionId);
+
+  // Set up breadcrumbs
+  useEffect(() => {
+    const sessionId = params.sessionId as string;
+    setJourneyBreadcrumbs(sessionId, "Feedback");
+  }, [params.sessionId, setJourneyBreadcrumbs]);
 
   // Debug logging (will be removed in production)
   console.log("🔍 ClientSessionFeedback Debug:", {
-    searchParams: Object.fromEntries(searchParams.entries()),
+    urlParams: params,
     sessionParam,
-    sessionNumber,
+    sessionId,
     sessionTitle,
     userId,
   });
@@ -80,20 +81,26 @@ export default function ClientSessionFeedback({
   }
 
   return (
-    <SessionFeedbackForm
-      sessionNumber={sessionNumber}
-      sessionTitle={sessionTitle}
-      userId={userId}
-      onSubmit={(feedback) => {
-        console.log("✅ Feedback submitted successfully:", {
-          sessionNumber: feedback.sessionNumber,
-          sessionTitle: feedback.sessionTitle,
-          submittedAt: feedback.submittedAt,
-        });
+    <div className="p-3 sm:p-6">
+      <div className="max-w-4xl mx-auto">
+        <JourneyBreadcrumbLayout>
+          <SessionFeedbackForm
+            sessionId={sessionId}
+            sessionTitle={sessionTitle}
+            userId={userId}
+            onSubmit={(feedback) => {
+              console.log("✅ Feedback submitted successfully:", {
+                sessionId: feedback.sessionId,
+                sessionTitle: feedback.sessionTitle,
+                submittedAt: feedback.submittedAt,
+              });
 
-        // Optional: Add additional client-side handling here
-        // e.g., analytics tracking, notifications, etc.
-      }}
-    />
+              // Optional: Add additional client-side handling here
+              // e.g., analytics tracking, notifications, etc.
+            }}
+          />
+        </JourneyBreadcrumbLayout>
+      </div>
+    </div>
   );
 }

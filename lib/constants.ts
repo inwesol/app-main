@@ -41,7 +41,6 @@ export const SESSION_TEMPLATES = [
         status: "not-completed",
         icon: "FilePen",
         route: "/journey/sessions/0/feedback",
-        // route: "/session-feedback?session=0",
       },
       {
         id: "session-report",

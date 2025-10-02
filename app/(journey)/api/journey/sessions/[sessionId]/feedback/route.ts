@@ -1,5 +1,6 @@
 // app/api/feedback/route.ts
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
+import { auth } from "@/app/(auth)/auth";
 import { db } from "@/lib/db"; // Adjust path to your database connection
 import { feedback } from "@/lib/db/schema"; // Adjust path to your schema
 import { z } from "zod";
@@ -8,22 +9,28 @@ import { eq, desc, and } from "drizzle-orm";
 // Validation schema for the incoming request
 const feedbackRequestSchema = z.object({
   userId: z.string().uuid("Invalid user ID format"),
-  feeling: z.string().min(1, "Feeling is required"),
-  takeaway: z.string().min(10, "Takeaway must be at least 10 characters"),
-  rating: z.number().int().min(1).max(5, "Rating must be between 1 and 5"),
-  wouldRecommend: z.boolean(),
-  suggestions: z.string().nullable().optional(),
-  sessionId: z
+  overallFeeling: z
+    .array(z.string())
+    .min(1, "At least one feeling is required"),
+  keyInsight: z.string().min(10, "Key insight must be at least 10 characters"),
+  overallRating: z
     .number()
     .int()
-    .min(0)
-    .max(8, "Session ID must be between 0 and 8"), // 0-8 range
-  sessionNumber: z.number().int().min(0).max(8).optional(), // Same as sessionId, for logging
+    .min(1)
+    .max(5, "Rating must be between 1 and 5"),
+  wouldRecommend: z.boolean(),
+  sessionId: z.number().int(), // No range validation required
 });
 
 export async function POST(request: NextRequest) {
   try {
     console.log("🚀 API: Feedback submission started");
+
+    // Check authentication
+    const session = await auth();
+    if (!session || !session.user || !session.user.id) {
+      return new NextResponse("Unauthorized", { status: 401 });
+    }
 
     // Parse and validate the request body
     const body = await request.json();
@@ -32,20 +39,15 @@ export async function POST(request: NextRequest) {
     const validatedData = feedbackRequestSchema.parse(body);
     console.log("✅ API: Validation passed:", validatedData);
 
-    // Extract user agent for analytics (optional)
-    const userAgent = request.headers.get("user-agent") || null;
-
     // Prepare data for database insertion
     const insertData = {
       userId: validatedData.userId,
-      feeling: validatedData.feeling,
-      takeaway: validatedData.takeaway,
-      rating: validatedData.rating,
+      sessionId: validatedData.sessionId,
+      overallFeeling: validatedData.overallFeeling,
+      keyInsight: validatedData.keyInsight,
+      overallRating: validatedData.overallRating,
       wouldRecommend: validatedData.wouldRecommend,
-      suggestions: validatedData.suggestions || null,
-      sessionId: validatedData.sessionId, // Store 0-based session ID
-      userAgent,
-      // createdAt will be set automatically by the database default
+      // createdAt and updatedAt will be set automatically by the database defaults
     };
 
     console.log("💾 API: Inserting data into database:", insertData);
@@ -67,7 +69,6 @@ export async function POST(request: NextRequest) {
         data: {
           id: result[0].id,
           sessionId: result[0].sessionId,
-          sessionNumber: validatedData.sessionId, // Same as sessionId (no conversion)
           submittedAt: result[0].createdAt,
         },
       },
@@ -144,23 +145,22 @@ export async function POST(request: NextRequest) {
 // Optional: Add GET endpoint to retrieve feedback
 export async function GET(request: NextRequest) {
   try {
+    // Check authentication
+    const session = await auth();
+    if (!session || !session.user || !session.user.id) {
+      return new NextResponse("Unauthorized", { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
     const sessionId = searchParams.get("sessionId");
-    const userId = searchParams.get("userId");
-
-    if (!userId) {
-      return NextResponse.json(
-        { success: false, error: "User ID is required" },
-        { status: 400 }
-      );
-    }
+    const userId = session.user.id;
 
     // Build where conditions array
     const whereConditions = [eq(feedback.userId, userId)];
 
     if (sessionId !== null) {
-      const sessionIdNum = parseInt(sessionId);
-      if (!isNaN(sessionIdNum)) {
+      const sessionIdNum = Number.parseInt(sessionId);
+      if (!Number.isNaN(sessionIdNum)) {
         whereConditions.push(eq(feedback.sessionId, sessionIdNum));
       }
     }
@@ -178,15 +178,65 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      data: results.map((item) => ({
-        ...item,
-        sessionNumber: item.sessionId ?? 0, // Same as sessionId (no conversion)
-      })),
+      data: results,
     });
   } catch (error) {
     console.error("❌ API: Error retrieving feedback:", error);
     return NextResponse.json(
       { success: false, error: "Failed to retrieve feedback" },
+      { status: 500 }
+    );
+  }
+}
+
+// DELETE endpoint to remove feedback
+export async function DELETE(request: NextRequest) {
+  try {
+    // Check authentication
+    const session = await auth();
+    if (!session || !session.user || !session.user.id) {
+      return new NextResponse("Unauthorized", { status: 401 });
+    }
+
+    const { searchParams } = new URL(request.url);
+    const feedbackId = searchParams.get("id");
+    const userId = session.user.id;
+
+    if (!feedbackId) {
+      return NextResponse.json(
+        { success: false, error: "Feedback ID is required" },
+        { status: 400 }
+      );
+    }
+
+    // Verify the feedback belongs to the user before deleting
+    const existingFeedback = await db
+      .select()
+      .from(feedback)
+      .where(and(eq(feedback.id, feedbackId), eq(feedback.userId, userId)))
+      .limit(1);
+
+    if (existingFeedback.length === 0) {
+      return NextResponse.json(
+        { success: false, error: "Feedback not found or access denied" },
+        { status: 404 }
+      );
+    }
+
+    // Delete the feedback
+    await db
+      .delete(feedback)
+      .where(and(eq(feedback.id, feedbackId), eq(feedback.userId, userId)));
+
+    return NextResponse.json({
+      success: true,
+      message: "Feedback deleted successfully",
+      data: { id: feedbackId },
+    });
+  } catch (error) {
+    console.error("❌ API: Error deleting feedback:", error);
+    return NextResponse.json(
+      { success: false, error: "Failed to delete feedback" },
       { status: 500 }
     );
   }
