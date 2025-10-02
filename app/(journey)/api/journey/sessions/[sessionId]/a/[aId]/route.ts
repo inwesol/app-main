@@ -240,7 +240,16 @@ export async function GET(
         console.log("Daily Journaling GET - Session ID:", sessionId);
         console.log("Daily Journaling GET - User ID:", session.user.id);
 
-        const data = await getDailyJournaling(session.user.id, sessionIdNum);
+        // Extract date parameter from query string
+        const { searchParams } = new URL(req.url);
+        const date = searchParams.get("date");
+        console.log("Daily Journaling GET - Date:", date);
+
+        const data = await getDailyJournaling(
+          session.user.id,
+          sessionIdNum,
+          date || undefined
+        );
 
         if (!data) {
           console.log(
@@ -870,9 +879,21 @@ export async function DELETE(
         console.log("Daily Journaling DELETE - Session ID:", sessionId);
         console.log("Daily Journaling DELETE - User ID:", session.user.id);
 
+        // Extract date parameter from query string
+        const { searchParams } = new URL(req.url);
+        const date = searchParams.get("date");
+        console.log("Daily Journaling DELETE - Date:", date);
+
+        if (!date) {
+          return NextResponse.json(
+            { error: "Date parameter is required for deletion" },
+            { status: 400 }
+          );
+        }
+
         const { deleteDailyJournaling } = await import("@/lib/db/queries");
 
-        await deleteDailyJournaling(session.user.id, sessionIdNum);
+        await deleteDailyJournaling(session.user.id, sessionIdNum, date);
 
         return NextResponse.json({
           success: true,

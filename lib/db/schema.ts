@@ -592,21 +592,29 @@ export const career_story_boards = pgTable(
 export type CareerStoryBoard = typeof career_story_boards.$inferSelect;
 export type NewCareerStoryBoard = typeof career_story_boards.$inferInsert;
 
-export const dailyJournalingTable = pgTable("daily_journaling", {
-  id: uuid("id").primaryKey().notNull().defaultRandom(),
-  userId: varchar("user_id", { length: 255 }).notNull(),
-  sessionId: integer("session_id").notNull(),
-  date: varchar("date", { length: 10 }).notNull(), // YYYY-MM-DD format
-  tookAction: varchar("took_action", { length: 3 }).default(""), // "yes", "no", or ""
-  whatHeldBack: text("what_held_back").default(""),
-  challenges: text("challenges").default("[]"), // JSON string
-  progress: text("progress").default("[]"), // JSON string
-  gratitude: text("gratitude").default("[]"), // JSON string
-  gratitudeHelp: text("gratitude_help").default("[]"), // JSON string
-  tomorrowStep: text("tomorrow_step").default(""),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
+export const dailyJournalingTable = pgTable(
+  "daily_journaling",
+  {
+    id: uuid("id").primaryKey().notNull().defaultRandom(),
+    userId: varchar("user_id", { length: 255 }).notNull(),
+    sessionId: integer("session_id").notNull(),
+    date: varchar("date", { length: 10 }).notNull(), // YYYY-MM-DD format
+    tookAction: varchar("took_action", { length: 3 }).default(""), // "yes", "no", or ""
+    whatHeldBack: text("what_held_back").default(""),
+    challenges: text("challenges").default("[]"), // JSON string
+    progress: text("progress").default("[]"), // JSON string
+    gratitude: text("gratitude").default("[]"), // JSON string
+    gratitudeHelp: text("gratitude_help").default("[]"), // JSON string
+    tomorrowStep: text("tomorrow_step").default(""),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (table) => ({
+    userSessionDateUnique: unique(
+      "daily_journaling_user_session_date_unique"
+    ).on(table.userId, table.sessionId, table.date),
+  })
+);
 
 // Export the table type for TypeScript
 export type DailyJournalingTable = typeof dailyJournalingTable;

@@ -1779,18 +1779,23 @@ export async function upsertCareerStorySix(
 // Get daily journaling data for a user and session
 export async function getDailyJournaling(
   userId: string,
-  sessionId: number
+  sessionId: number,
+  date?: string
 ): Promise<DailyJournalingData | null> {
   try {
+    const conditions = [
+      eq(dailyJournalingTable.userId, userId),
+      eq(dailyJournalingTable.sessionId, sessionId),
+    ];
+
+    if (date) {
+      conditions.push(eq(dailyJournalingTable.date, date));
+    }
+
     const result = await db
       .select()
       .from(dailyJournalingTable)
-      .where(
-        and(
-          eq(dailyJournalingTable.userId, userId),
-          eq(dailyJournalingTable.sessionId, sessionId)
-        )
-      )
+      .where(and(...conditions))
       .limit(1);
 
     if (result.length === 0) {
@@ -1830,7 +1835,8 @@ export async function upsertDailyJournaling(
       .where(
         and(
           eq(dailyJournalingTable.userId, userId),
-          eq(dailyJournalingTable.sessionId, sessionId)
+          eq(dailyJournalingTable.sessionId, sessionId),
+          eq(dailyJournalingTable.date, data.date)
         )
       )
       .limit(1);
@@ -1857,7 +1863,8 @@ export async function upsertDailyJournaling(
         .where(
           and(
             eq(dailyJournalingTable.userId, userId),
-            eq(dailyJournalingTable.sessionId, sessionId)
+            eq(dailyJournalingTable.sessionId, sessionId),
+            eq(dailyJournalingTable.date, data.date)
           )
         );
     } else {
@@ -2894,7 +2901,8 @@ export async function deleteCareerStoryFive(
 
 export async function deleteDailyJournaling(
   userId: string,
-  sessionId: number
+  sessionId: number,
+  date: string
 ): Promise<void> {
   try {
     await db
@@ -2902,7 +2910,8 @@ export async function deleteDailyJournaling(
       .where(
         and(
           eq(dailyJournalingTable.userId, userId),
-          eq(dailyJournalingTable.sessionId, sessionId)
+          eq(dailyJournalingTable.sessionId, sessionId),
+          eq(dailyJournalingTable.date, date)
         )
       );
   } catch (error) {
