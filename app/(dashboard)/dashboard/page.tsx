@@ -27,10 +27,20 @@ import {
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { SidebarToggle } from "@/components/sidebar-toggle";
 import { useSidebar } from "@/components/ui/sidebar";
-import { useSession } from "next-auth/react";
+
+interface User {
+  id: string;
+  name?: string | null;
+  email?: string | null;
+  image?: string | null;
+}
+
+interface AuthStatus {
+  authenticated: boolean;
+  user: User | null;
+}
 
 export default function Dashboard() {
-  const { data: session, status } = useSession();
   const [date, setDate] = useState<Date | undefined>(undefined);
   const [isClient, setIsClient] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -65,7 +75,27 @@ export default function Dashboard() {
   );
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingEntries, setIsLoadingEntries] = useState(false);
+  const [authStatus, setAuthStatus] = useState<AuthStatus | null>(null);
+  const [isLoadingAuth, setIsLoadingAuth] = useState(true);
   const { isMobile } = useSidebar();
+
+  // Check authentication status
+  const checkAuthStatus = useCallback(async () => {
+    try {
+      const response = await fetch("/api/dashboard");
+      if (response.ok) {
+        const data: AuthStatus = await response.json();
+        setAuthStatus(data);
+      } else {
+        setAuthStatus({ authenticated: false, user: null });
+      }
+    } catch (error) {
+      console.error("Error checking auth status:", error);
+      setAuthStatus({ authenticated: false, user: null });
+    } finally {
+      setIsLoadingAuth(false);
+    }
+  }, []);
 
   // Sample meditation tracks with working audio URLs
   const meditationTracks = useMemo(
@@ -295,7 +325,7 @@ export default function Dashboard() {
   // Journal management functions
   const saveJournalEntry = useCallback(async () => {
     if (!todayEntry.title.trim() && !todayEntry.content.trim()) return;
-    if (!session?.user?.id) return;
+    if (!authStatus?.authenticated || !authStatus?.user?.id) return;
 
     const today = new Date();
     const dateKey = today.toISOString().split("T")[0];
@@ -349,7 +379,7 @@ export default function Dashboard() {
     } finally {
       setIsSaving(false);
     }
-  }, [todayEntry, session?.user?.id]);
+  }, [todayEntry, authStatus?.authenticated, authStatus?.user?.id]);
 
   const getWordCount = (text: string) => {
     return text
@@ -371,7 +401,7 @@ export default function Dashboard() {
 
   // Load journal entries from API
   const loadJournalEntries = useCallback(async () => {
-    if (!session?.user?.id) return;
+    if (!authStatus?.authenticated || !authStatus?.user?.id) return;
 
     setIsLoadingEntries(true);
     try {
@@ -385,11 +415,11 @@ export default function Dashboard() {
     } finally {
       setIsLoadingEntries(false);
     }
-  }, [session?.user?.id]);
+  }, [authStatus?.authenticated, authStatus?.user?.id]);
 
   // Load today's entry if it exists
   const loadTodayEntry = useCallback(async () => {
-    if (!session?.user?.id) return;
+    if (!authStatus?.authenticated || !authStatus?.user?.id) return;
 
     const today = new Date().toISOString().split("T")[0];
     try {
@@ -404,7 +434,7 @@ export default function Dashboard() {
     } catch (error) {
       console.error("Error loading today's entry:", error);
     }
-  }, [session?.user?.id]);
+  }, [authStatus?.authenticated, authStatus?.user?.id]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
@@ -467,20 +497,9 @@ export default function Dashboard() {
     }
   }, []);
 
-  // Load journal data when user is authenticated
-  useEffect(() => {
-    if (session?.user?.id) {
-      loadJournalEntries();
-      loadTodayEntry();
-
-      // Check for localStorage data to migrate
-      migrateLocalStorageData();
-    }
-  }, [session?.user?.id, loadJournalEntries, loadTodayEntry]);
-
   // Migrate localStorage data to database
   const migrateLocalStorageData = useCallback(async () => {
-    if (!session?.user?.id) return;
+    if (!authStatus?.authenticated || !authStatus?.user?.id) return;
 
     try {
       const savedJournalEntries = localStorage.getItem(
@@ -515,7 +534,36 @@ export default function Dashboard() {
     } catch (error) {
       console.error("Error migrating localStorage data:", error);
     }
-  }, [session?.user?.id, loadJournalEntries, loadTodayEntry]);
+  }, [
+    authStatus?.authenticated,
+    authStatus?.user?.id,
+    loadJournalEntries,
+    loadTodayEntry,
+  ]);
+
+  // Load journal data when user is authenticated
+  useEffect(() => {
+    if (authStatus?.authenticated && authStatus?.user?.id) {
+      loadJournalEntries();
+      loadTodayEntry();
+    }
+  }, [
+    authStatus?.authenticated,
+    authStatus?.user?.id,
+    loadJournalEntries,
+    loadTodayEntry,
+  ]);
+
+  // Migrate localStorage data when user is authenticated
+  useEffect(() => {
+    if (authStatus?.authenticated && authStatus?.user?.id) {
+      migrateLocalStorageData();
+    }
+  }, [
+    authStatus?.authenticated,
+    authStatus?.user?.id,
+    migrateLocalStorageData,
+  ]);
 
   // Save tasks to localStorage whenever tasks change
   useEffect(() => {
@@ -537,7 +585,8 @@ export default function Dashboard() {
     const autoSaveTimer = setInterval(async () => {
       if (
         (todayEntry.title.trim() || todayEntry.content.trim()) &&
-        session?.user?.id
+        authStatus?.authenticated &&
+        authStatus?.user?.id
       ) {
         // Auto-save without clearing the form
         const today = new Date().toISOString().split("T")[0];
@@ -563,7 +612,7 @@ export default function Dashboard() {
     }, 30000); // Auto-save every 30 seconds
 
     return () => clearInterval(autoSaveTimer);
-  }, [todayEntry, session?.user?.id]);
+  }, [todayEntry, authStatus?.authenticated, authStatus?.user?.id]);
 
   // Update current time for real-time last saved display
   useEffect(() => {
@@ -574,8 +623,13 @@ export default function Dashboard() {
     return () => clearInterval(timeUpdateInterval);
   }, []);
 
+  // Check authentication status on mount
+  useEffect(() => {
+    checkAuthStatus();
+  }, [checkAuthStatus]);
+
   // Show loading state while checking authentication
-  if (status === "loading") {
+  if (isLoadingAuth || authStatus === null) {
     return (
       <div className="p-2 md:p-4 lg:p-6 space-y-6 md:space-y-8">
         {isMobile ? <SidebarToggle /> : <div />}
@@ -587,7 +641,7 @@ export default function Dashboard() {
   }
 
   // Show login prompt if not authenticated
-  if (status === "unauthenticated") {
+  if (!authStatus.authenticated) {
     return (
       <div className="p-2 md:p-4 lg:p-6 space-y-6 md:space-y-8">
         {isMobile ? <SidebarToggle /> : <div />}
@@ -597,6 +651,14 @@ export default function Dashboard() {
             <p className="text-muted-foreground">
               You need to be signed in to access the dashboard.
             </p>
+            <div className="mt-2">
+              <a
+                href="/login"
+                className="text-blue-600 hover:text-blue-800 underline"
+              >
+                Go to Login
+              </a>
+            </div>
           </div>
         </div>
       </div>
@@ -942,7 +1004,7 @@ export default function Dashboard() {
                       Previous Entries
                     </h3>
                     <div className="text-xs text-muted-foreground">
-                      {Object.keys(journalEntries).length} entries
+                      {journalEntries.length} entries
                     </div>
                   </div>
 

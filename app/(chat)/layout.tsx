@@ -2,7 +2,6 @@ import { cookies } from "next/headers";
 
 import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { SessionProviderWrapper } from "@/components/session-provider";
 import { auth } from "../(auth)/auth";
 import Script from "next/script";
 
@@ -22,17 +21,17 @@ export default async function Layout({
         src="https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js"
         strategy="beforeInteractive"
       />
-      <SessionProviderWrapper session={session}>
-        <SidebarProvider
-          defaultOpen={false}
-          className="relative z-10 h-screen w-full overflow-hidden"
-        >
-          <AppSidebar user={session?.user} />
-          <SidebarInset className="!bg-transparent size-full overflow-y-auto overflow-x-hidden">
-            {children}
-          </SidebarInset>
-        </SidebarProvider>
-      </SessionProviderWrapper>
+      {/* <SessionProviderWrapper session={session}> */}
+      <SidebarProvider
+        defaultOpen={false}
+        className="relative z-10 h-screen w-full overflow-hidden"
+      >
+        <AppSidebar user={session?.user} />
+        <SidebarInset className="!bg-transparent size-full overflow-y-auto overflow-x-hidden">
+          {children}
+        </SidebarInset>
+      </SidebarProvider>
+      {/* </SessionProviderWrapper> */}
     </>
   );
 }

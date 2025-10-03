@@ -40,15 +40,15 @@ const data = {
   },
   navMain: [
     {
-      title: "Dashboard",
-      url: "/dashboard",
-      icon: LayoutDashboard,
+      title: "CoCo",
+      url: "/",
+      icon: Sparkles,
       isActive: false,
     },
     {
-      title: "CoCo",
-      url: "/chat",
-      icon: Sparkles,
+      title: "Dashboard",
+      url: "/dashboard",
+      icon: LayoutDashboard,
       isActive: false,
     },
     {
@@ -76,28 +76,27 @@ export function AppSidebar({
   const [showSecondSidebar, setShowSecondSidebar] = React.useState(false);
 
   // Function to get active item based on current path
-  const getActiveItem = () => {
+  const getActiveItem = React.useCallback(() => {
     return (
       data.navMain.find((item) => {
         if (item.url === "/") return pathname === "/";
         return pathname.startsWith(item.url);
       }) || data.navMain[0]
     ); // fallback to first item
-  };
+  }, [pathname]);
 
-  const [activeItem, setActiveItem] = React.useState(getActiveItem());
+  const [activeItem, setActiveItem] = React.useState(() => getActiveItem());
 
   // Update activeItem when pathname changes
   React.useEffect(() => {
     setActiveItem(getActiveItem());
-  }, [pathname]);
+  }, [getActiveItem]);
 
   // Handler for new chat creation
   const handleNewChat = () => {
     setOpenMobile(false);
     setShowSecondSidebar(false);
     router.push("/");
-    router.refresh();
   };
 
   // Handle navigation item click
@@ -109,12 +108,10 @@ export function AppSidebar({
       } else {
         setShowSecondSidebar(false);
         router.push(item?.url);
-        router.refresh();
       }
     } else {
       setOpen(false);
       router.push(item?.url);
-      router.refresh();
     }
   };
 

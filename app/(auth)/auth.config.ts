@@ -50,8 +50,7 @@ export const authConfig = {
 
       // For all other routes, require authentication
       if (!isLoggedIn) {
-        // Redirect to login but allow the OAuth flow to work
-        return false;
+        return Response.redirect(new URL("/login", nextUrl));
       }
 
       return true;
