@@ -789,6 +789,80 @@ export async function POST(
           });
         }
 
+        // Calculate career maturity scores
+        const answerKey: Record<number, "agree" | "disagree"> = {
+          1: "disagree",
+          5: "disagree",
+          9: "disagree",
+          13: "disagree",
+          17: "disagree",
+          21: "disagree", // Concern
+          2: "disagree",
+          6: "disagree",
+          10: "disagree",
+          14: "disagree",
+          18: "disagree",
+          22: "disagree", // Curiosity
+          3: "disagree",
+          7: "disagree",
+          11: "disagree",
+          15: "disagree",
+          19: "disagree",
+          23: "disagree", // Confidence
+          4: "disagree",
+          8: "agree",
+          12: "agree",
+          16: "disagree",
+          20: "agree",
+          24: "agree", // Consultation
+        };
+
+        const categoryMap: Record<string, number[]> = {
+          Concern: [1, 5, 9, 13, 17, 21],
+          Curiosity: [2, 6, 10, 14, 18, 22],
+          Confidence: [3, 7, 11, 15, 19, 23],
+          Consultation: [4, 8, 12, 16, 20, 24],
+        };
+
+        // Convert answers to number-based keys for easier processing
+        const allAnswers: Record<number, "agree" | "disagree"> = {};
+        Object.entries(answers).forEach(([key, value]) => {
+          const questionNumber = Number.parseInt(key.replace("q", ""));
+          allAnswers[questionNumber] = value as "agree" | "disagree";
+        });
+
+        // Calculate scores for each category
+        const categoryScores: Record<string, number> = {
+          Concern: 0,
+          Curiosity: 0,
+          Confidence: 0,
+          Consultation: 0,
+        };
+
+        for (const questionId in allAnswers) {
+          const answer = allAnswers[Number(questionId)];
+          const correctAnswer = answerKey[Number(questionId)];
+
+          if (answer === correctAnswer) {
+            (Object.keys(categoryMap) as string[]).forEach((category) => {
+              if (categoryMap[category].includes(Number(questionId))) {
+                categoryScores[category] += 1;
+              }
+            });
+          }
+        }
+
+        // Convert to percentages (each category has 6 questions)
+        (Object.keys(categoryScores) as string[]).forEach((category) => {
+          categoryScores[category] = Number.parseFloat(
+            ((categoryScores[category] / 6) * 100).toFixed(2)
+          );
+        });
+
+        console.log("Career maturity scores calculated:", {
+          categoryScores,
+        });
+
         await upsertCareerMaturityAssessment(
           session.user.id,
           sessionIdNum,
@@ -798,6 +872,9 @@ export async function POST(
           userId: session.user.id,
           sessionId: Number(sessionId),
           qId,
+          insights: {
+            score: categoryScores,
+          },
         });
         await updateJourneyProgressAfterForm(
           session.user.id,
@@ -1150,6 +1227,80 @@ export async function POST(
           });
         }
 
+        // Calculate career maturity scores (same logic as pre-assessment)
+        const answerKey: Record<number, "agree" | "disagree"> = {
+          1: "disagree",
+          5: "disagree",
+          9: "disagree",
+          13: "disagree",
+          17: "disagree",
+          21: "disagree", // Concern
+          2: "disagree",
+          6: "disagree",
+          10: "disagree",
+          14: "disagree",
+          18: "disagree",
+          22: "disagree", // Curiosity
+          3: "disagree",
+          7: "disagree",
+          11: "disagree",
+          15: "disagree",
+          19: "disagree",
+          23: "disagree", // Confidence
+          4: "disagree",
+          8: "agree",
+          12: "agree",
+          16: "disagree",
+          20: "agree",
+          24: "agree", // Consultation
+        };
+
+        const categoryMap: Record<string, number[]> = {
+          Concern: [1, 5, 9, 13, 17, 21],
+          Curiosity: [2, 6, 10, 14, 18, 22],
+          Confidence: [3, 7, 11, 15, 19, 23],
+          Consultation: [4, 8, 12, 16, 20, 24],
+        };
+
+        // Convert answers to number-based keys for easier processing
+        const allAnswers: Record<number, "agree" | "disagree"> = {};
+        Object.entries(answers).forEach(([key, value]) => {
+          const questionNumber = Number.parseInt(key.replace("q", ""));
+          allAnswers[questionNumber] = value as "agree" | "disagree";
+        });
+
+        // Calculate scores for each category
+        const categoryScores: Record<string, number> = {
+          Concern: 0,
+          Curiosity: 0,
+          Confidence: 0,
+          Consultation: 0,
+        };
+
+        for (const questionId in allAnswers) {
+          const answer = allAnswers[Number(questionId)];
+          const correctAnswer = answerKey[Number(questionId)];
+
+          if (answer === correctAnswer) {
+            (Object.keys(categoryMap) as string[]).forEach((category) => {
+              if (categoryMap[category].includes(Number(questionId))) {
+                categoryScores[category] += 1;
+              }
+            });
+          }
+        }
+
+        // Convert to percentages (each category has 6 questions)
+        (Object.keys(categoryScores) as string[]).forEach((category) => {
+          categoryScores[category] = Number.parseFloat(
+            ((categoryScores[category] / 6) * 100).toFixed(2)
+          );
+        });
+
+        console.log("Post Career maturity scores calculated:", {
+          categoryScores,
+        });
+
         await upsertPostCareerMaturityAssessment(
           session.user.id,
           sessionIdNum,
@@ -1159,6 +1310,9 @@ export async function POST(
           userId: session.user.id,
           sessionId: Number(sessionId),
           qId,
+          insights: {
+            score: categoryScores,
+          },
         });
         await updateJourneyProgressAfterForm(
           session.user.id,

@@ -235,11 +235,7 @@ export function SessionDetail() {
   };
 
   // Filter forms into activity and discussion sections
-  const discussionFormIds = [
-    "schedule-call",
-    "session-feedback",
-    "session-report",
-  ];
+  const discussionFormIds = ["schedule-call", "feedback", "session-report"];
   const activityForms =
     sessionData?.forms?.filter(
       (form) => !discussionFormIds.includes(form.id)

@@ -1036,10 +1036,12 @@ export async function completeUserSessionFormProgress({
   userId,
   sessionId,
   qId,
+  insights,
 }: {
   userId: string;
   sessionId: number;
   qId: string;
+  insights?: any;
 }) {
   const [progress] = await db
     .select()
@@ -1057,6 +1059,7 @@ export async function completeUserSessionFormProgress({
       .set({
         status: "completed",
         completed_at: new Date().toISOString(),
+        insights: insights || progress.insights,
         updated_at: new Date(),
       })
       .where(eq(user_session_form_progress.id, progress.id));
@@ -1067,6 +1070,7 @@ export async function completeUserSessionFormProgress({
       form_id: qId,
       status: "completed",
       completed_at: new Date().toISOString(),
+      insights: insights || {},
       updated_at: new Date(),
     });
   }

@@ -26,6 +26,9 @@ import { useRouter } from "next/navigation";
 
 const ResponseSchema = z.enum(["agree", "disagree"]);
 
+export type AnswerChoice = "agree" | "disagree";
+export type Category = "Concern" | "Curiosity" | "Confidence" | "Consultation";
+
 const CareerAssessmentFormSchema = z.object({
   q1: ResponseSchema.optional(),
   q2: ResponseSchema.optional(),
@@ -242,6 +245,47 @@ const questions = [
     color: "orange",
   },
 ];
+
+export const answerKey: Record<number, AnswerChoice> = {
+  1: "disagree",
+  5: "disagree",
+  9: "disagree",
+  13: "disagree",
+  17: "disagree",
+  21: "disagree", // Concern
+  2: "disagree",
+  6: "disagree",
+  10: "disagree",
+  14: "disagree",
+  18: "disagree",
+  22: "disagree", // Curiosity
+  3: "disagree",
+  7: "disagree",
+  11: "disagree",
+  15: "disagree",
+  19: "disagree",
+  23: "disagree", // Confidence
+  4: "disagree",
+  8: "agree",
+  12: "agree",
+  16: "disagree",
+  20: "agree",
+  24: "agree", // Consultation
+};
+
+export const categoryMap: Record<Category, number[]> = {
+  Concern: [1, 5, 9, 13, 17, 21],
+  Curiosity: [2, 6, 10, 14, 18, 22],
+  Confidence: [3, 7, 11, 15, 19, 23],
+  Consultation: [4, 8, 12, 16, 20, 24],
+};
+
+export const categoryDescriptions: Record<Category, string> = {
+  Concern: `Concern refers to an individual's awareness of the importance of career planning and their orientation toward the future. It reflects how much an individual thinks about, prepares for, and feels responsible for their career development.`,
+  Curiosity: `Curiosity refers to how an individual seeks information about themselves and the world of work. It involves exploring career options and reflecting on personal interests and values.`,
+  Confidence: `Confidence refers to an individual's belief in their ability to make and implement career decisions successfully. It reflects persistence in planning and executing career plans.`,
+  Consultation: `Consultation refers to the willingness to seek and utilize advice from others during the career decision-making process. It reflects openness to external input and collaborative decision-making.`,
+};
 
 const questionPages = [
   {

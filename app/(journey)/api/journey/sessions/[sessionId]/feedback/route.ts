@@ -5,6 +5,10 @@ import { db } from "@/lib/db"; // Adjust path to your database connection
 import { feedback } from "@/lib/db/schema"; // Adjust path to your schema
 import { z } from "zod";
 import { eq, desc, and } from "drizzle-orm";
+import {
+  completeUserSessionFormProgress,
+  updateJourneyProgressAfterForm,
+} from "@/lib/db/queries";
 
 // Validation schema for the incoming request
 const feedbackRequestSchema = z.object({
@@ -60,6 +64,21 @@ export async function POST(request: NextRequest) {
     });
 
     console.log("✅ API: Database insertion successful:", result[0]);
+
+    // Complete the form progress
+    await completeUserSessionFormProgress({
+      userId: session.user.id,
+      sessionId: validatedData.sessionId,
+      qId: "feedback",
+    });
+
+    // Update journey progress
+    await updateJourneyProgressAfterForm(
+      session.user.id,
+      validatedData.sessionId
+    );
+
+    console.log("✅ API: Form progress updated successfully");
 
     // Return success response
     return NextResponse.json(
