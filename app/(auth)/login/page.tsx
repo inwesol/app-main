@@ -156,7 +156,7 @@ export default function LoginPage() {
             <div className="text-center mb-4 relative">
               <div className="flex justify-center mb-2">
                 <Image
-                  src="./images/logo.svg"
+                  src="/images/logo.svg"
                   alt="Inwesol Logo"
                   className="object-contain"
                   width="48"

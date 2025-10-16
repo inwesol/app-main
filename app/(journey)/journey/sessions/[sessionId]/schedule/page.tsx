@@ -1,20 +1,25 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
+import { useParams } from "next/navigation";
 import {
   Calendar,
   Clock,
   Video,
   ArrowRight,
-  Check,
-  Copy,
   ChevronLeft,
   ChevronRight,
   MapPin,
   ArrowLeft,
+  Loader2,
+  Users,
 } from "lucide-react";
+import { BreadcrumbUI } from "@/components/breadcrumbUI";
 
 const MeetingScheduler = () => {
+  const params = useParams();
+  const sessionId = params.sessionId as string;
+
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
   const [selectedTime, setSelectedTime] = useState<{
     value: string;
@@ -26,9 +31,33 @@ const MeetingScheduler = () => {
   const [isCopied, setIsCopied] = useState(false);
   const [step, setStep] = useState(2); // 2: date & time, 3: confirm
 
-  // Generate time slots
+  // New scheduling states
+  const [schedulingStatus, setSchedulingStatus] = useState<
+    "not_scheduled" | "pending" | "assigned" | "completed"
+  >("not_scheduled");
+  const [insights, setInsights] = useState<any>({});
+  const [timeUntilSession, setTimeUntilSession] = useState<number | null>(null);
+  const [canJoinSession, setCanJoinSession] = useState(false);
+  const [isSessionCompleted, setIsSessionCompleted] = useState(false);
+  const [showCompletedPage, setShowCompletedPage] = useState(false);
+
+  // Time slots state - initialized on client side
+  const [timeSlots, setTimeSlots] = useState<
+    Array<{
+      value: string;
+      display: string;
+      isPast: boolean;
+    }>
+  >([]);
+  const [isTimeSlotsLoaded, setIsTimeSlotsLoaded] = useState(false);
+
+  // Generate time slots - moved to useEffect to prevent hydration mismatch
   const generateTimeSlots = () => {
     const slots = [];
+    const now = new Date();
+    const currentHour = now.getHours();
+    const currentMinute = now.getMinutes();
+
     for (let hour = 9; hour <= 22; hour++) {
       for (const minute of [0, 30]) {
         const time = `${hour.toString().padStart(2, "0")}:${minute
@@ -39,13 +68,157 @@ const MeetingScheduler = () => {
         const displayTime = `${displayHour}:${minute
           .toString()
           .padStart(2, "0")} ${period}`;
-        slots.push({ value: time, display: displayTime });
+
+        // Check if this time slot is in the past
+        const isPast =
+          hour < currentHour ||
+          (hour === currentHour && minute <= currentMinute);
+
+        slots.push({
+          value: time,
+          display: displayTime,
+          isPast: isPast,
+        });
       }
     }
     return slots;
   };
 
-  const timeSlots = generateTimeSlots();
+  // Update session status to completed in database
+  const updateSessionStatusToCompleted = useCallback(async () => {
+    try {
+      await fetch(`/api/journey/sessions/${sessionId}/schedule`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          status: "completed",
+        }),
+      });
+      setSchedulingStatus("completed");
+    } catch (error) {
+      console.error("Error updating session status to completed:", error);
+    }
+  }, [sessionId]);
+
+  // Calculate time until session and check if user can join
+  const calculateTimeUntilSession = useCallback(
+    (sessionDateTime: string) => {
+      const sessionDate = new Date(sessionDateTime);
+      const now = new Date();
+      const timeDiff = sessionDate.getTime() - now.getTime();
+
+      setTimeUntilSession(timeDiff);
+
+      // Can join 10 minutes before session OR up to 24 hours after session starts
+      const tenMinutesInMs = 10 * 60 * 1000;
+      const twentyFourHoursInMs = 24 * 60 * 60 * 1000;
+
+      // Check if session is completed (more than 24 hours after session)
+      if (timeDiff < -twentyFourHoursInMs) {
+        setIsSessionCompleted(true);
+        setCanJoinSession(false);
+        // Update status to completed in database
+        updateSessionStatusToCompleted();
+      } else {
+        setIsSessionCompleted(false);
+        setCanJoinSession(
+          timeDiff <= tenMinutesInMs && timeDiff > -twentyFourHoursInMs
+        );
+      }
+    },
+    [updateSessionStatusToCompleted]
+  );
+
+  // Check scheduling status on component mount
+  const checkSchedulingStatus = useCallback(async () => {
+    try {
+      const response = await fetch(
+        `/api/journey/sessions/${sessionId}/schedule`
+      );
+      const data = await response.json();
+
+      if (response.ok) {
+        setSchedulingStatus(data.scheduling_status);
+        setInsights(data.insights || {});
+
+        // If there's a scheduled session, calculate time until session
+        if (data.insights?.session_datetime) {
+          calculateTimeUntilSession(data.insights.session_datetime);
+        }
+      }
+    } catch (error) {
+      console.error("Error checking scheduling status:", error);
+    }
+  }, [sessionId, calculateTimeUntilSession]);
+
+  // Generate time slots on client side to prevent hydration mismatch
+  useEffect(() => {
+    const slots = generateTimeSlots();
+    setTimeSlots(slots);
+    setIsTimeSlotsLoaded(true);
+  }, []);
+
+  // Set default time slot on component mount
+  useEffect(() => {
+    if (!selectedTime && isTimeSlotsLoaded) {
+      const nearestSlot = timeSlots.find((slot) => !slot.isPast);
+      if (nearestSlot) {
+        setSelectedTime({
+          value: nearestSlot.value,
+          display: nearestSlot.display,
+        });
+      }
+    }
+  }, [selectedTime, timeSlots, isTimeSlotsLoaded]);
+
+  // Check scheduling status on mount
+  useEffect(() => {
+    checkSchedulingStatus();
+  }, [checkSchedulingStatus]);
+
+  // Update step based on scheduling status
+  useEffect(() => {
+    if (schedulingStatus === "pending" || schedulingStatus === "assigned") {
+      setStep(3);
+    } else if (schedulingStatus === "completed") {
+      setStep(4); // Show completed page
+      setShowCompletedPage(true);
+
+      // Redirect to session page after 5 seconds
+      const redirectTimer = setTimeout(() => {
+        window.location.href = `/journey/sessions/${sessionId}`;
+      }, 3000);
+
+      return () => clearTimeout(redirectTimer);
+    }
+  }, [schedulingStatus, sessionId]);
+
+  // Set up real-time updates for scheduling status
+  useEffect(() => {
+    if (schedulingStatus === "pending" || schedulingStatus === "assigned") {
+      const interval = setInterval(() => {
+        checkSchedulingStatus();
+      }, 30000); // Check every 30 seconds
+
+      return () => clearInterval(interval);
+    }
+    // Don't poll when status is "completed" - show static completed page
+  }, [schedulingStatus, checkSchedulingStatus]);
+
+  // Update time countdown every minute
+  useEffect(() => {
+    if (timeUntilSession !== null && timeUntilSession > 0) {
+      const interval = setInterval(() => {
+        if (insights.session_datetime) {
+          calculateTimeUntilSession(insights.session_datetime);
+        }
+      }, 60000); // Update every minute
+
+      return () => clearInterval(interval);
+    }
+  }, [timeUntilSession, insights.session_datetime, calculateTimeUntilSession]);
 
   // Get calendar days
   const getCalendarDays = () => {
@@ -105,16 +278,44 @@ const MeetingScheduler = () => {
     }
   };
 
-  const generateMeetingLink = async () => {
+  // Submit schedule request
+  const submitScheduleRequest = async () => {
+    if (!selectedDate || !selectedTime) return;
+
     setIsGenerating(true);
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      const meetingId = `meeting_${Date.now()}`;
-      const streamLink = `https://getstream.io/video/demos/join/${meetingId}`;
-      setGeneratedLink(streamLink);
+      // Combine date and time
+      const [hours, minutes] = selectedTime.value.split(":").map(Number);
+      const sessionDateTime = new Date(selectedDate);
+      sessionDateTime.setHours(hours, minutes, 0, 0);
+
+      const response = await fetch(
+        `/api/journey/sessions/${sessionId}/schedule`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            session_datetime: sessionDateTime.toISOString(),
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setSchedulingStatus("pending");
+        setInsights(data.insights);
+        setStep(3);
+      } else {
+        console.error("Error submitting schedule request:", data.error);
+        alert(data.error || "Failed to submit schedule request");
+      }
     } catch (error) {
-      console.error("Error generating meeting link:", error);
+      console.error("Error submitting schedule request:", error);
+      alert("Failed to submit schedule request");
     } finally {
       setIsGenerating(false);
     }
@@ -132,6 +333,32 @@ const MeetingScheduler = () => {
 
   const redirectToJourney = () => {
     window.location.href = "/journey";
+  };
+
+  // Join session - open meeting link in new tab
+  const joinSession = () => {
+    if (insights.meeting_link) {
+      window.open(insights.meeting_link, "_blank");
+    } else {
+      console.error("Meeting link not available");
+    }
+  };
+
+  // Format time remaining
+  const formatTimeRemaining = (milliseconds: number) => {
+    const days = Math.floor(milliseconds / (1000 * 60 * 60 * 24));
+    const hours = Math.floor(
+      (milliseconds % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+    );
+    const minutes = Math.floor((milliseconds % (1000 * 60 * 60)) / (1000 * 60));
+
+    if (days > 0) {
+      return `${days}d ${hours}h ${minutes}m`;
+    } else if (hours > 0) {
+      return `${hours}h ${minutes}m`;
+    } else {
+      return `${minutes}m`;
+    }
   };
 
   const resetScheduler = () => {
@@ -167,54 +394,24 @@ const MeetingScheduler = () => {
     "December",
   ];
 
+  // Breadcrumb navigation
+  const getBreadcrumbs = () => {
+    return [
+      { label: "Home", href: "/" },
+      { label: "Career Journey", href: "/journey" },
+      {
+        label: `Session ${Number(sessionId) + 1}`,
+        href: `/journey/sessions/${sessionId}`,
+      },
+      { label: "Schedule Meeting", isActive: true },
+    ];
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-emerald-50/50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-        {/* Header Card */}
-        <div className="bg-white/90 backdrop-blur-sm border border-slate-200/60 rounded-3xl shadow-2xl p-6 sm:p-8 mb-8">
-          <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
-            <div className="shrink-0">
-              <div className="inline-flex items-center justify-center size-16 sm:size-20 bg-gradient-to-br from-emerald-500 to-blue-600 rounded-2xl shadow-lg">
-                <Video className="size-8 sm:size-10 text-white" />
-              </div>
-            </div>
-            <div className="text-center sm:text-left flex-1">
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-800 mb-2">
-                Schedule Your Meeting
-              </h1>
-              <p className="text-slate-600 text-sm sm:text-base max-w-2xl">
-                Choose your preferred date and time for our coaching session.
-                We&apos;ll send you a confirmation email with all the details.
-              </p>
-            </div>
-            {/* Progress Steps */}
-            <div className="flex items-center space-x-2 sm:space-x-4">
-              <div
-                className={`flex items-center justify-center size-8 sm:size-10 rounded-full border-2 transition-all duration-300 ${
-                  step >= 2
-                    ? "bg-emerald-500 border-emerald-500 text-white shadow-lg"
-                    : "border-slate-300 text-slate-400"
-                }`}
-              >
-                <Calendar className="size-4 sm:size-5" />
-              </div>
-              <div
-                className={`w-6 sm:w-8 h-1 rounded-full transition-all duration-300 ${
-                  step >= 3 ? "bg-emerald-500" : "bg-slate-200"
-                }`}
-              />
-              <div
-                className={`flex items-center justify-center size-8 sm:size-10 rounded-full border-2 transition-all duration-300 ${
-                  step >= 3
-                    ? "bg-gradient-to-r from-emerald-500 to-blue-500 border-transparent text-white shadow-lg"
-                    : "border-slate-300 text-slate-400"
-                }`}
-              >
-                <Check className="size-4 sm:size-5" />
-              </div>
-            </div>
-          </div>
-        </div>
+        {/* Breadcrumb Navigation */}
+        <BreadcrumbUI items={getBreadcrumbs()} />
 
         {/* Main Content */}
         <div className="bg-white/90 backdrop-blur-sm border border-slate-200/60 rounded-3xl shadow-2xl overflow-hidden">
@@ -311,20 +508,33 @@ const MeetingScheduler = () => {
                   </div>
 
                   <div className="grid grid-cols-4 gap-2 max-h-80 p-2 overflow-y-auto custom-scrollbar">
-                    {timeSlots.map((slot) => (
-                      <button
-                        key={slot.value}
-                        type="button"
-                        onClick={() => selectTime(slot)}
-                        className={`p-3 rounded-lg text-sm font-medium transition-all duration-200 border-2 ${
-                          selectedTime?.value === slot.value
-                            ? "bg-gradient-to-r from-emerald-500 to-blue-500 text-white border-transparent shadow-lg scale-105"
-                            : "bg-white border-slate-200 text-slate-700 hover:border-emerald-300 hover:bg-emerald-50 hover:scale-105 hover:shadow-md"
-                        }`}
-                      >
-                        {slot.display}
-                      </button>
-                    ))}
+                    {!isTimeSlotsLoaded
+                      ? // Loading state
+                        Array.from({ length: 16 }, (_, i) => (
+                          <div
+                            key={`loading-slot-${Date.now()}-${i}`}
+                            className="p-3 rounded-lg bg-gray-100 animate-pulse"
+                          >
+                            <div className="h-4 bg-gray-200 rounded" />
+                          </div>
+                        ))
+                      : timeSlots.map((slot) => (
+                          <button
+                            key={slot.value}
+                            type="button"
+                            onClick={() => !slot.isPast && selectTime(slot)}
+                            disabled={slot.isPast}
+                            className={`p-3 rounded-lg text-sm font-medium transition-all duration-200 border-2 ${
+                              selectedTime?.value === slot.value
+                                ? "bg-gradient-to-r from-emerald-500 to-blue-500 text-white border-transparent shadow-lg scale-105"
+                                : slot.isPast
+                                ? "bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed opacity-50"
+                                : "bg-white border-slate-200 text-slate-700 hover:border-emerald-300 hover:bg-emerald-50 hover:scale-105 hover:shadow-md"
+                            }`}
+                          >
+                            {slot.display}
+                          </button>
+                        ))}
                   </div>
                 </div>
               </div>
@@ -350,7 +560,11 @@ const MeetingScheduler = () => {
               <div className="text-center mb-6 sm:mb-8">
                 <div className="bg-gradient-to-r from-emerald-50 to-blue-50 rounded-t-2xl p-4 sm:p-6 border border-slate-200/60 shadow-sm">
                   <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-800 mb-4 sm:mb-6">
-                    Confirm Your Meeting
+                    {schedulingStatus === "pending"
+                      ? "Scheduling Under Process"
+                      : schedulingStatus === "assigned"
+                      ? "Coach Assigned!"
+                      : "Confirm Your Meeting"}
                   </h2>
                   <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8">
                     <div className="flex items-center gap-3">
@@ -358,7 +572,17 @@ const MeetingScheduler = () => {
                         <Calendar className="size-5 text-emerald-600" />
                       </div>
                       <span className="font-semibold text-slate-800 text-sm sm:text-base">
-                        {formatSelectedDate()}
+                        {["pending", "assigned"].includes(schedulingStatus) &&
+                        insights.session_datetime
+                          ? new Date(
+                              insights.session_datetime
+                            ).toLocaleDateString("en-US", {
+                              weekday: "long",
+                              month: "long",
+                              day: "numeric",
+                              year: "numeric",
+                            })
+                          : formatSelectedDate()}
                       </span>
                     </div>
                     <div className="flex items-center gap-3">
@@ -366,7 +590,15 @@ const MeetingScheduler = () => {
                         <Clock className="size-5 text-blue-600" />
                       </div>
                       <span className="font-semibold text-slate-800 text-sm sm:text-base">
-                        {selectedTime?.display}
+                        {["pending", "assigned"].includes(schedulingStatus) &&
+                        insights.session_datetime
+                          ? new Date(
+                              insights.session_datetime
+                            ).toLocaleTimeString("en-US", {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })
+                          : selectedTime?.display}
                       </span>
                     </div>
                   </div>
@@ -438,7 +670,7 @@ const MeetingScheduler = () => {
                 </div>
               </div>
 
-              {!generatedLink ? (
+              {schedulingStatus === "not_scheduled" ? (
                 <div className="space-y-4 sm:space-y-6">
                   <div className="flex justify-center gap-4">
                     <button
@@ -451,7 +683,7 @@ const MeetingScheduler = () => {
                     </button>
                     <button
                       type="button"
-                      onClick={generateMeetingLink}
+                      onClick={submitScheduleRequest}
                       disabled={isGenerating}
                       className={`inline-flex items-center gap-2 px-8 py-3 rounded-xl font-semibold text-white transition-all duration-300 shadow-lg ${
                         isGenerating
@@ -461,16 +693,16 @@ const MeetingScheduler = () => {
                     >
                       {isGenerating ? (
                         <>
-                          <div className="size-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                          <Loader2 className="size-5 animate-spin" />
                           <span className="text-sm sm:text-base">
-                            Creating...
+                            Submitting...
                           </span>
                         </>
                       ) : (
                         <>
                           <Video className="size-5" />
                           <span className="text-sm sm:text-base">
-                            Generate Meeting Link
+                            Send Schedule Request
                           </span>
                           <ArrowRight className="size-5" />
                         </>
@@ -478,82 +710,279 @@ const MeetingScheduler = () => {
                     </button>
                   </div>
                 </div>
-              ) : (
-                <div className="space-y-4 sm:space-y-6 animate-in slide-in-from-bottom duration-500">
+              ) : schedulingStatus === "pending" ? (
+                <div className="space-y-4 sm:space-y-6 max-w-4xl mx-auto animate-in slide-in-from-bottom duration-500">
                   <div className="text-center">
-                    <div className="bg-emerald-100 rounded-full p-3 size-16 sm:size-20 mx-auto mb-4 flex items-center justify-center">
-                      <Check className="size-8 sm:size-10 text-emerald-600" />
+                    <div className="bg-amber-100 rounded-full p-3 size-16 sm:size-20 mx-auto mb-4 flex items-center justify-center">
+                      <Loader2 className="size-8 sm:size-10 text-amber-600 animate-spin" />
                     </div>
-                    <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-emerald-800 mb-2">
-                      Meeting Link Ready!
+                    <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-amber-800 mb-2">
+                      Scheduling Under Process
                     </h3>
                     <p className="text-slate-600 text-sm sm:text-base">
-                      Your meeting has been successfully scheduled
+                      Your schedule request has been submitted. We&apos;re
+                      working on assigning a coach for your session.
                     </p>
                   </div>
 
-                  <div className="bg-slate-50 rounded-2xl p-3 sm:p-4 border-2 border-dashed border-slate-200">
-                    <p className="font-mono text-xs sm:text-sm text-blue-600 break-all text-center">
-                      {generatedLink}
+                  <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl p-4 sm:p-6 border border-amber-200/50 text-center">
+                    <div className="flex items-center justify-center gap-2 mb-3">
+                      <div className="size-2 bg-amber-500 rounded-full animate-pulse" />
+                      <p className="text-amber-700 font-semibold text-sm sm:text-base">
+                        We&apos;ll notify you once a coach is assigned!
+                      </p>
+                    </div>
+                    <p className="text-slate-600 text-xs sm:text-sm leading-relaxed">
+                      📅 Your session is scheduled for{" "}
+                      {insights.session_datetime
+                        ? new Date(
+                            insights.session_datetime
+                          ).toLocaleDateString("en-US", {
+                            weekday: "long",
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })
+                        : "TBD"}
                     </p>
                   </div>
 
-                  <div className="space-y-3 sm:space-y-4">
-                    <button
-                      type="button"
-                      onClick={copyToClipboard}
-                      className={`w-full py-3 px-4 rounded-2xl font-medium transition-all duration-200 flex items-center justify-center gap-2 ${
-                        isCopied
-                          ? "bg-emerald-100 text-emerald-700 border-2 border-emerald-200"
-                          : "bg-blue-100 text-blue-700 border-2 border-blue-200 hover:bg-blue-200"
-                      }`}
-                    >
-                      {isCopied ? (
-                        <>
-                          <Check className="size-4" />
-                          <span className="text-sm sm:text-base">
-                            Copied to Clipboard!
-                          </span>
-                        </>
-                      ) : (
-                        <>
-                          <Copy className="size-4" />
-                          <span className="text-sm sm:text-base">
-                            Copy Meeting Link
-                          </span>
-                        </>
-                      )}
-                    </button>
-
-                    {/* Journey Redirect Button */}
+                  <div className="flex justify-end">
                     <button
                       type="button"
                       onClick={redirectToJourney}
-                      className="w-full py-3 px-4 rounded-2xl font-medium transition-all duration-200 flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-blue-500 text-white hover:from-emerald-600 hover:to-blue-600 hover:shadow-lg hover:scale-[1.02]"
+                      className="inline-flex items-center gap-2 py-3 px-4 rounded-xl font-medium transition-all duration-200 bg-gradient-to-r from-emerald-500 to-blue-500 text-white hover:from-emerald-600 hover:to-blue-600 hover:shadow-lg hover:scale-105"
                     >
-                      <MapPin className="size-4" />
-                      <span className="text-sm sm:text-base">
-                        Continue Your Journey
-                      </span>
-                      <ArrowRight className="size-4" />
+                      <MapPin className="size-3" />
+                      <span className="text-xs">Continue Your Journey</span>
+                      <ArrowRight className="size-3" />
                     </button>
+                  </div>
+                </div>
+              ) : schedulingStatus === "assigned" ||
+                schedulingStatus === "completed" ? (
+                <div className="space-y-4 sm:space-y-6 max-w-4xl mx-auto animate-in slide-in-from-bottom duration-500">
+                  <div className="text-center">
+                    <div className="bg-emerald-100 rounded-full p-3 size-16 sm:size-20 mx-auto mb-4 flex items-center justify-center">
+                      <Users className="size-8 sm:size-10 text-emerald-600" />
+                    </div>
+                    <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-emerald-800 mb-2">
+                      {schedulingStatus === "completed"
+                        ? "Session Completed!"
+                        : "Coach Assigned!"}
+                    </h3>
+                    <p className="text-slate-600 text-sm sm:text-base">
+                      {schedulingStatus === "completed"
+                        ? `Your coaching session has been completed. Thank you for participating!${
+                            insights.session_datetime
+                              ? ` Session was held on ${new Date(
+                                  insights.session_datetime
+                                ).toLocaleDateString("en-US", {
+                                  weekday: "long",
+                                  year: "numeric",
+                                  month: "long",
+                                  day: "numeric",
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                })}.`
+                              : ""
+                          }`
+                        : `Your coach has been assigned. ${
+                            insights.meeting_link
+                              ? "Meeting link is ready!"
+                              : "Meeting link will be available 10 minutes before your session."
+                          }`}
+                    </p>
+                  </div>
 
-                    <div className="bg-gradient-to-r from-emerald-50 to-blue-50 rounded-2xl p-4 sm:p-6 border border-emerald-200/50 text-center">
-                      <div className="flex items-center justify-center gap-2 mb-3">
-                        <div className="size-2 bg-emerald-500 rounded-full animate-pulse" />
-                        <p className="text-emerald-700 font-semibold text-sm sm:text-base">
-                          Confirmation email will be sent to you soon!
+                  {insights.session_datetime && (
+                    <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200">
+                      <div className="text-center">
+                        <p className="text-slate-700 font-semibold mb-2">
+                          {schedulingStatus === "completed"
+                            ? "Session Information"
+                            : "Session Details"}
+                        </p>
+                        <p className="text-slate-600 text-sm">
+                          {new Date(
+                            insights.session_datetime
+                          ).toLocaleDateString("en-US", {
+                            weekday: "long",
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </p>
+                        {schedulingStatus === "completed" ? (
+                          <p className="text-green-600 font-semibold mt-2">
+                            Session Completed Successfully
+                          </p>
+                        ) : timeUntilSession !== null &&
+                          timeUntilSession > 0 ? (
+                          <p className="text-emerald-600 font-semibold mt-2">
+                            {formatTimeRemaining(timeUntilSession)} remaining
+                          </p>
+                        ) : null}
+
+                        {/* Join Session Button inside Session Details */}
+                        {insights.meeting_link && !isSessionCompleted && (
+                          <div className="mt-4">
+                            {canJoinSession ? (
+                              <button
+                                type="button"
+                                onClick={joinSession}
+                                className="inline-flex items-center gap-2 py-2 px-4 rounded-xl font-medium transition-all duration-200 bg-gradient-to-r from-emerald-500 to-blue-500 text-white hover:from-emerald-600 hover:to-blue-600 hover:shadow-lg hover:scale-105"
+                              >
+                                <Video className="size-4" />
+                                <span className="text-sm">Join Session</span>
+                                <ArrowRight className="size-4" />
+                              </button>
+                            ) : (
+                              <div className="bg-blue-50 rounded-xl p-3 border border-blue-200">
+                                <p className="text-blue-700 font-semibold text-sm">
+                                  Meeting link is ready! You can join 10 minutes
+                                  before your session.
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Session Completed Message */}
+                        {isSessionCompleted && (
+                          <div className="mt-4">
+                            <div className="bg-green-50 rounded-xl p-3 border border-green-200">
+                              <p className="text-green-700 font-semibold text-sm">
+                                Session has been completed. Thank you for
+                                participating!
+                              </p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="space-y-3 sm:space-y-4">
+                    {!insights.meeting_link && (
+                      <div className="bg-amber-50 rounded-2xl p-4 border border-amber-200 text-center">
+                        <p className="text-amber-700 font-semibold text-sm">
+                          Coach is assigned. Meeting link will be available
+                          soon.
                         </p>
                       </div>
-                      <p className="text-slate-600 text-xs sm:text-sm leading-relaxed">
-                        🎉 You&apos;re all set! We&apos;ll send you a
-                        confirmation email with all the meeting details and
-                        calendar invite. Looking forward to connecting with you!
-                      </p>
+                    )}
+
+                    <div className="flex justify-end">
+                      <button
+                        type="button"
+                        onClick={redirectToJourney}
+                        className="inline-flex items-center gap-2 py-3 px-4 rounded-xl font-medium transition-all duration-200 bg-gradient-to-r from-emerald-500 to-blue-500 text-white hover:from-emerald-600 hover:to-blue-600 hover:shadow-lg hover:scale-105"
+                      >
+                        <MapPin className="size-3" />
+                        <span className="text-xs">Continue Your Journey</span>
+                        <ArrowRight className="size-3" />
+                      </button>
                     </div>
                   </div>
                 </div>
-              )}
+              ) : null}
+            </div>
+          )}
+
+          {/* Step 4: Session Completed Page */}
+          {step === 4 && (
+            <div className="p-4 sm:p-6 lg:p-8 animate-in slide-in-from-bottom duration-500">
+              <div className="text-center mb-6 sm:mb-8">
+                <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-t-2xl p-4 sm:p-6 border border-green-200/60 shadow-sm">
+                  <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-green-800 mb-4 sm:mb-6">
+                    Session Completed!
+                  </h2>
+                  <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-green-100 rounded-lg">
+                        <Calendar className="size-5 text-green-600" />
+                      </div>
+                      <span className="font-semibold text-slate-800 text-sm sm:text-base">
+                        {insights.session_datetime
+                          ? new Date(
+                              insights.session_datetime
+                            ).toLocaleDateString("en-US", {
+                              weekday: "long",
+                              month: "long",
+                              day: "numeric",
+                              year: "numeric",
+                            })
+                          : "Session Date"}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-emerald-100 rounded-lg">
+                        <Clock className="size-5 text-emerald-600" />
+                      </div>
+                      <span className="font-semibold text-slate-800 text-sm sm:text-base">
+                        {insights.session_datetime
+                          ? new Date(
+                              insights.session_datetime
+                            ).toLocaleTimeString("en-US", {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })
+                          : "Session Time"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Session Completion Message */}
+                <div className="bg-green-50 rounded-b-2xl p-4 sm:p-6 border border-green-200/60">
+                  <div className="text-center">
+                    <div className="bg-green-100 rounded-full p-3 size-16 sm:size-20 mx-auto mb-4 flex items-center justify-center">
+                      <Users className="size-8 sm:size-10 text-green-600" />
+                    </div>
+                    <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-green-800 mb-2">
+                      Thank You for Participating!
+                    </h3>
+                    <p className="text-slate-600 text-sm sm:text-base mb-4">
+                      Your coaching session has been completed successfully. We
+                      hope you found it valuable and insightful.
+                    </p>
+                    <p className="text-green-700 font-semibold text-sm mb-4">
+                      Session was held on{" "}
+                      {insights.session_datetime
+                        ? new Date(
+                            insights.session_datetime
+                          ).toLocaleDateString("en-US", {
+                            weekday: "long",
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })
+                        : "the scheduled date"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* <div className="space-y-3 sm:space-y-4">
+                <div className="flex justify-end">
+                  <button
+                    type="button"
+                    onClick={redirectToJourney}
+                    className="inline-flex items-center gap-2 py-3 px-4 rounded-xl font-medium transition-all duration-200 bg-gradient-to-r from-emerald-500 to-blue-500 text-white hover:from-emerald-600 hover:to-blue-600 hover:shadow-lg hover:scale-105"
+                  >
+                    <MapPin className="size-3" />
+                    <span className="text-xs">Continue Your Journey</span>
+                    <ArrowRight className="size-3" />
+                  </button>
+                </div>
+              </div> */}
             </div>
           )}
         </div>

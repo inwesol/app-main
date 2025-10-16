@@ -50,6 +50,7 @@ export const authConfig = {
 
       // For all other routes, require authentication
       if (!isLoggedIn) {
+        // return false;
         return Response.redirect(new URL("/login", nextUrl));
       }
 
