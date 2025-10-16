@@ -6,40 +6,37 @@ export default function Carousel() {
   const slides = [
     {
       id: 1,
-      image:
-        "https://images.pexels.com/photos/4101143/pexels-photo-4101143.jpeg",
+      image: "/images/career-clarity.jpg",
       icon: <UserCheck className="size-16 text-white" />,
-      title: "Find Your Best Fit",
-      subtitle: "Discover careers that align with you",
+      title: "Career Clarity",
+      subtitle: "From career confusion to clarity and direction.",
       description:
-        "Get personalized career recommendations based on your interests, strengths, and values. Make informed decisions for a fulfilling future.",
-      gradient: "from-primary-green-600 via-primary-blue-600 to-blue-600",
-      accentGradient: "from-primary-green-400/30 to-primary-blue-400/30",
+        "Discover your strengths and explore possibilities to make informed career choices.",
+      gradient: "from-emerald-500/60 via-blue-500/50 to-indigo-600/40",
+      accentGradient: "from-emerald-300/20 to-blue-300/20",
     },
     {
       id: 2,
-      image:
-        "https://images.pexels.com/photos/6382633/pexels-photo-6382633.jpeg",
+      image: "/images/stress-free-mind.jpg",
 
       icon: <Heart className="size-16 text-white" />,
-      title: "Wellbeing First",
-      subtitle: "Balance career and mental wellness",
+      title: "Stress-Free Mind",
+      subtitle: "Support in dealing with academic pressure.",
       description:
-        "Access mental wellness tools, regular check-ins, and stress management support to stay grounded and focused in your career journey.",
-      gradient: "from-emerald-600 via-teal-600 to-cyan-600",
-      accentGradient: "from-emerald-400/30 to-teal-400/30",
+        "Manage academic pressure and become future ready with clarity and confidence.",
+      gradient: "from-teal-500/60 via-cyan-500/50 to-sky-600/40",
+      accentGradient: "from-teal-300/20 to-cyan-300/20",
     },
     {
       id: 3,
-      image:
-        "https://images.pexels.com/photos/4144222/pexels-photo-4144222.jpeg",
+      image: "/images/confident-action.jpg",
       icon: <BookOpenCheck className="size-16 text-white" />,
-      title: "Grow with Purpose",
-      subtitle: "Upskill and evolve continuously",
+      title: "Confident Actions",
+      subtitle: "Turn your goals into growth.",
       description:
-        "Stay ahead with curated learning paths, skill-building resources, and expert insights to support your career growth and transformation.",
-      gradient: "from-slate-600 via-gray-500 to-zinc-400",
-      accentGradient: "from-slate-300/30 to-zinc-300/30",
+        "Develop positive habits, set clear goals, and take consistent steps toward the future.",
+      gradient: "from-violet-500/60 via-purple-500/50 to-fuchsia-600/40",
+      accentGradient: "from-violet-300/20 to-purple-300/20",
     },
   ];
 
@@ -93,9 +90,9 @@ export default function Carousel() {
           priority
         />
         <div
-          className={`absolute inset-0 bg-gradient-to-br ${slides[current].gradient} opacity-90 transition-all duration-1000`}
+          className={`absolute inset-0 bg-gradient-to-br ${slides[current].gradient} transition-all duration-1000`}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
       </div>
 
       <div className="absolute inset-0 overflow-hidden">
@@ -140,8 +137,8 @@ export default function Carousel() {
         </div>
       </button> */}
 
-      <div className="relative z-10 h-full flex flex-col justify-center items-center text-center px-16 py-20">
-        <div
+      <div className="relative z-10 h-full flex flex-col justify-end items-center text-center px-16 py-20">
+        {/* <div
           className={`mb-10 p-6 rounded-3xl bg-white/10 backdrop-blur-md border border-white/20 shadow-2xl transition-all duration-1000 ${
             isTransitioning
               ? "scale-75 opacity-0 rotate-12"
@@ -152,7 +149,7 @@ export default function Carousel() {
             {slides[current].icon}
             <div className="absolute inset-0 bg-white/20 rounded-full blur-xl animate-pulse" />
           </div>
-        </div>
+        </div> */}
 
         <h2
           className={`text-3xl md:text-5xl font-black text-white mb-6 transition-all duration-1000 ${
@@ -177,7 +174,7 @@ export default function Carousel() {
         </p>
 
         <p
-          className={`text-lg text-white/90 max-w-2xl leading-relaxed mb-12 transition-all duration-1000 delay-200 ${
+          className={`text-lg text-white/90 max-w-3xl leading-relaxed mb-12 transition-all duration-1000 delay-200 ${
             isTransitioning
               ? "translate-y-12 opacity-0"
               : "translate-y-0 opacity-100"
