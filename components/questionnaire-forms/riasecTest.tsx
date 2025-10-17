@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   CheckCircle2,
   Circle,
@@ -13,6 +13,9 @@ import {
   BarChart3,
   Award,
   Loader2,
+  ArrowRight,
+  ArrowLeft,
+  CheckCircle,
 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -144,6 +147,30 @@ const questions: Question[] = [
   { id: 42, text: "I like to give speeches", category: "enterprising" },
 ];
 
+const questionPages = [
+  {
+    title: "Section 1",
+    description: "Questions about hands-on work and analytical thinking",
+    questions: questions.slice(0, 14), // Questions 1-14
+    icon: Wrench,
+    color: "primary-blue",
+  },
+  {
+    title: "Section 2",
+    description: "Questions about creative expression and helping others",
+    questions: questions.slice(14, 28), // Questions 15-28
+    icon: Palette,
+    color: "primary-green",
+  },
+  {
+    title: "Section 3",
+    description: "Questions about leadership, business, and systematic work",
+    questions: questions.slice(28, 42), // Questions 29-42
+    icon: Briefcase,
+    color: "purple",
+  },
+];
+
 const formSchema = z.object({
   selectedAnswers: z.array(z.string()).default([]),
 });
@@ -151,6 +178,7 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 export default function RiasecTest({ sessionId }: { sessionId: string }) {
+  const [currentPage, setCurrentPage] = useState(0);
   const [showResults, setShowResults] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -225,6 +253,68 @@ export default function RiasecTest({ sessionId }: { sessionId: string }) {
     setShowResults(false);
   };
 
+  // Navigation functions
+  const nextPage = useCallback(
+    (event?: React.MouseEvent) => {
+      if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+
+      if (currentPage < questionPages.length - 1) {
+        setCurrentPage(currentPage + 1);
+      }
+    },
+    [currentPage]
+  );
+
+  const prevPage = useCallback(
+    (event?: React.MouseEvent) => {
+      if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+
+      if (currentPage > 0) {
+        setCurrentPage(currentPage - 1);
+      }
+    },
+    [currentPage]
+  );
+
+  const getPageCompletionStatus = useCallback(
+    (pageIndex: number) => {
+      const pageQuestions = questionPages[pageIndex].questions;
+      const answeredInPage = pageQuestions.filter((q) =>
+        watchedAnswers.includes(q.text)
+      ).length;
+      return {
+        answered: answeredInPage,
+        total: pageQuestions.length,
+        isComplete: answeredInPage === pageQuestions.length,
+      };
+    },
+    [watchedAnswers]
+  );
+
+  const goToPage = useCallback(
+    (pageIndex: number, event?: React.MouseEvent) => {
+      if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+
+      // All navigation is enabled - users can freely move between sections
+      setCurrentPage(pageIndex);
+    },
+    []
+  );
+
+  const canNavigateToPage = (pageIndex: number) => {
+    // All navigation is enabled - users can freely move between sections
+    return true;
+  };
+
   const onSubmit = async (data: FormData) => {
     const qId = "riasec-test";
     setIsSubmitting(true);
@@ -247,6 +337,14 @@ export default function RiasecTest({ sessionId }: { sessionId: string }) {
       router.push(`/journey/sessions/${sessionId}`);
     }
   };
+
+  // Scroll to top when page changes
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [currentPage]);
+
+  const currentPageData = questionPages[currentPage];
+  const currentPageStatus = getPageCompletionStatus(currentPage);
 
   if (isLoading) {
     return (
@@ -293,7 +391,7 @@ export default function RiasecTest({ sessionId }: { sessionId: string }) {
   };
 
   return (
-    <div className="p-3 bg-gradient-to-br from-primary-blue-50 via-white to-primary-green-50 sm:p-6">
+    <div className="p-3  sm:p-6">
       <div className="max-w-6xl mx-auto">
         <JourneyBreadcrumbLayout>
           {/* Header Card - Matching pre-assessment style */}
@@ -364,120 +462,193 @@ export default function RiasecTest({ sessionId }: { sessionId: string }) {
             </div>
           </div>
 
+          {/* Page Navigation Dots with Reset Button */}
+          <div className="relative flex items-center justify-center mb-4">
+            {/* Page Navigation Dots - Absolutely centered */}
+            <div className="flex flex-wrap gap-1.5">
+              {questionPages.map((page, index) => {
+                const status = getPageCompletionStatus(index);
+
+                return (
+                  <button
+                    key={page.title}
+                    type="button"
+                    onClick={(e) => goToPage(index, e)}
+                    className={`
+                    size-10 rounded-md font-bold text-xs transition-all duration-300 hover:scale-105 flex justify-center items-center
+                    ${
+                      index === currentPage
+                        ? "bg-gradient-to-r from-primary-blue-500 to-primary-green-500 text-white shadow-md"
+                        : status.isComplete
+                        ? "bg-primary-green-100 text-primary-green-700 hover:bg-primary-green-200"
+                        : status.answered > 0
+                        ? "bg-amber-100 text-amber-700 hover:bg-amber-200"
+                        : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+                    }
+                  `}
+                  >
+                    {status.isComplete ? (
+                      <CheckCircle className="size-4" />
+                    ) : (
+                      index + 1
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Reset Button - Absolutely positioned to the right */}
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleClearAll}
+              className="absolute right-0 px-4 py-2 text-sm transition-all duration-200 rounded-lg hover:scale-105"
+              aria-label="Clear all selections"
+            >
+              <RotateCcw className="mr-2 size-4" />
+              Reset All
+            </Button>
+          </div>
+
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              {/* Reset Button Only */}
-              <div className="flex justify-end">
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                }
+              }}
+            >
+              <div className="border-0 shadow-lg bg-white/95 backdrop-blur-sm rounded-xl">
+                <div className="p-4 sm:p-6">
+                  <div className="space-y-6">
+                    {/* Page Header with Icon */}
+
+                    {/* Questions Grid - 3 columns */}
+                    <div className="grid gap-3 mb-6 sm:grid-cols-2 lg:grid-cols-3">
+                      {currentPageData.questions.map((question) => {
+                        const selectedAnswers = form.watch("selectedAnswers");
+                        const isSelected = selectedAnswers.includes(
+                          question.text
+                        );
+                        const CategoryIcon =
+                          categoryInfo[question.category].icon;
+
+                        const handleToggle = () => {
+                          const currentValue = selectedAnswers;
+                          if (isSelected) {
+                            form.setValue(
+                              "selectedAnswers",
+                              currentValue.filter(
+                                (answer: string) => answer !== question.text
+                              )
+                            );
+                          } else {
+                            form.setValue("selectedAnswers", [
+                              ...currentValue,
+                              question.text,
+                            ]);
+                          }
+                        };
+
+                        return (
+                          <div
+                            key={question.id}
+                            className={`group relative overflow-hidden rounded-lg shadow-sm transition-all duration-200 cursor-pointer hover:scale-[1.01] hover:shadow-md border ${
+                              isSelected
+                                ? "border-primary-blue-300 bg-primary-blue-50/50"
+                                : "border-slate-200 bg-white hover:border-slate-300"
+                            }`}
+                            onClick={handleToggle}
+                            role="checkbox"
+                            aria-checked={isSelected}
+                            tabIndex={0}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter" || e.key === " ") {
+                                e.preventDefault();
+                                handleToggle();
+                              }
+                            }}
+                          >
+                            <div className="relative flex items-start p-3 space-x-3">
+                              <div
+                                className={`shrink-0 size-8 rounded-lg flex items-center justify-center transition-all duration-200 ${
+                                  isSelected
+                                    ? "bg-primary-blue-500 text-white shadow-md"
+                                    : "bg-slate-100 group-hover:bg-slate-200 text-slate-600"
+                                }`}
+                              >
+                                <CategoryIcon className="size-4" />
+                              </div>
+
+                              <div className="flex-1 min-w-0">
+                                <p
+                                  className={`text-xs sm:text-sm font-medium transition-colors duration-200 leading-relaxed ${
+                                    isSelected
+                                      ? "text-slate-800"
+                                      : "text-slate-700 group-hover:text-slate-900"
+                                  }`}
+                                >
+                                  {question.text}
+                                </p>
+                              </div>
+
+                              <div className="shrink-0 mt-0.5">
+                                {isSelected ? (
+                                  <CheckCircle2 className="size-3 text-primary-green-500" />
+                                ) : (
+                                  <Circle className="size-3 text-slate-400" />
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Navigation Buttons */}
+              <div className="flex flex-col gap-3 pt-4 border-t sm:flex-row border-slate-200">
                 <Button
                   type="button"
-                  variant="outline"
-                  onClick={handleClearAll}
-                  className="px-4 py-2 text-sm transition-all duration-200 rounded-lg hover:scale-105"
-                  aria-label="Clear all selections"
+                  onClick={(e) => prevPage(e)}
+                  disabled={currentPage === 0}
+                  className="flex items-center justify-center w-full h-10 gap-2 font-medium transition-all duration-200 bg-white border rounded-lg sm:flex-1 border-slate-300 hover:bg-slate-50 text-slate-700 disabled:opacity-50 disabled:cursor-not-allowed group"
                 >
-                  <RotateCcw className="mr-2 size-4" />
-                  Reset All
+                  <ArrowLeft className="transition-transform duration-200 size-4 group-hover:-translate-x-1" />
+                  Previous
                 </Button>
-              </div>
 
-              {/* Questions Grid - 3 columns */}
-              <div className="grid gap-3 mb-6 sm:grid-cols-2 lg:grid-cols-3">
-                {questions.map((question) => {
-                  const selectedAnswers = form.watch("selectedAnswers");
-                  const isSelected = selectedAnswers.includes(question.text);
-                  const CategoryIcon = categoryInfo[question.category].icon;
-
-                  const handleToggle = () => {
-                    const currentValue = selectedAnswers;
-                    if (isSelected) {
-                      form.setValue(
-                        "selectedAnswers",
-                        currentValue.filter(
-                          (answer: string) => answer !== question.text
-                        )
-                      );
-                    } else {
-                      form.setValue("selectedAnswers", [
-                        ...currentValue,
-                        question.text,
-                      ]);
-                    }
-                  };
-
-                  return (
-                    <div
-                      key={question.id}
-                      className={`group relative overflow-hidden rounded-lg shadow-sm transition-all duration-200 cursor-pointer hover:scale-[1.01] hover:shadow-md border ${
-                        isSelected
-                          ? "border-primary-blue-300 bg-primary-blue-50/50"
-                          : "border-slate-200 bg-white hover:border-slate-300"
-                      }`}
-                      onClick={handleToggle}
-                      role="checkbox"
-                      aria-checked={isSelected}
-                      tabIndex={0}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" || e.key === " ") {
-                          e.preventDefault();
-                          handleToggle();
-                        }
-                      }}
-                    >
-                      <div className="relative flex items-start p-3 space-x-3">
-                        <div
-                          className={`shrink-0 size-8 rounded-lg flex items-center justify-center transition-all duration-200 ${
-                            isSelected
-                              ? "bg-primary-blue-500 text-white shadow-md"
-                              : "bg-slate-100 group-hover:bg-slate-200 text-slate-600"
-                          }`}
-                        >
-                          <CategoryIcon className="size-4" />
-                        </div>
-
-                        <div className="flex-1 min-w-0">
-                          <p
-                            className={`text-xs sm:text-sm font-medium transition-colors duration-200 leading-relaxed ${
-                              isSelected
-                                ? "text-slate-800"
-                                : "text-slate-700 group-hover:text-slate-900"
-                            }`}
-                          >
-                            {question.text}
-                          </p>
-                        </div>
-
-                        <div className="shrink-0 mt-0.5">
-                          {isSelected ? (
-                            <CheckCircle2 className="size-3 text-primary-green-500" />
-                          ) : (
-                            <Circle className="size-3 text-slate-400" />
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* Submit Button */}
-              <div className="flex justify-center pt-4 border-t border-slate-200/60">
-                <Button
-                  type="submit"
-                  disabled={isSubmitting || watchedAnswers.length === 0}
-                  className="px-6 py-3 sm:px-8 sm:py-4 bg-gradient-to-r from-primary-green-500 to-primary-green-600 hover:from-primary-green-600 hover:to-primary-green-700 text-white font-semibold rounded-lg shadow-md hover:shadow-lg hover:scale-[1.02] transition-all duration-200 flex items-center gap-2 text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-                >
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="size-4 sm:size-5 animate-spin" />
-                      Processing...
-                    </>
-                  ) : (
-                    <>
-                      <Award className="size-4 sm:size-5" />
-                      Complete Assessment
-                    </>
-                  )}
-                </Button>
+                {currentPage === questionPages.length - 1 ? (
+                  <Button
+                    type="submit"
+                    disabled={isSubmitting || watchedAnswers.length === 0}
+                    className="w-full sm:flex-1 h-10 bg-gradient-to-r from-primary-green-500 to-primary-green-600 hover:from-primary-green-600 hover:to-primary-green-700 text-white font-medium rounded-lg shadow-md hover:shadow-lg hover:scale-[1.02] transition-all duration-300 group flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-md"
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="size-4 sm:size-5 animate-spin" />
+                        Processing...
+                      </>
+                    ) : (
+                      <>
+                        Complete Assessment
+                        <Award className="transition-transform duration-200 size-4 group-hover:rotate-12" />
+                      </>
+                    )}
+                  </Button>
+                ) : (
+                  <Button
+                    type="button"
+                    onClick={(e) => nextPage(e)}
+                    className="w-full sm:flex-1 h-10 bg-gradient-to-r from-primary-blue-500 to-primary-blue-600 hover:from-primary-blue-600 hover:to-primary-blue-700 text-white font-medium rounded-lg shadow-md hover:shadow-lg hover:scale-[1.02] transition-all duration-300 group flex items-center justify-center gap-2"
+                  >
+                    Next
+                    <ArrowRight className="transition-transform duration-200 size-4 group-hover:translate-x-1" />
+                  </Button>
+                )}
               </div>
             </form>
           </Form>
