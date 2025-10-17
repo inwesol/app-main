@@ -1,5 +1,6 @@
 // route.ts
-import { NextRequest, NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 import nodemailer from "nodemailer";
 import {
   completeUserSessionFormProgress,
@@ -7,6 +8,9 @@ import {
   updateJourneyProgressAfterForm,
 } from "@/lib/db/queries";
 import { auth } from "@/app/(auth)/auth";
+import { db } from "@/lib/db";
+import { report } from "@/lib/db/schema";
+import { eq, and } from "drizzle-orm";
 
 export async function POST(
   req: NextRequest,
@@ -65,6 +69,45 @@ export async function POST(
       <p>Additional Notes: ${reportData.additionalNotes ?? "None"}</p>
     `;
 
+    // Create summary text for the report
+    const summary = `
+Session: ${reportData.sessionName}
+Date Completed: ${reportData.dateCompleted}
+Completed Forms: ${reportData.forms.map((form: any) => form.title).join(", ")}
+Scheduler Summary: ${reportData.schedulerSummary}
+Additional Notes: ${reportData.additionalNotes ?? "None"}
+    `.trim();
+
+    // Check if report already exists for this user and session
+    const existingReport = await db
+      .select()
+      .from(report)
+      .where(
+        and(
+          eq(report.user_id, session.user.id),
+          eq(report.session_id, Number(sessionId))
+        )
+      )
+      .limit(1);
+
+    if (existingReport.length > 0) {
+      // Update existing report
+      await db
+        .update(report)
+        .set({
+          summary,
+          updated_at: new Date(),
+        })
+        .where(eq(report.id, existingReport[0].id));
+    } else {
+      // Create new report
+      await db.insert(report).values({
+        user_id: session.user.id,
+        session_id: Number(sessionId),
+        summary,
+      });
+    }
+
     // Send the email to the authenticated user's email
     await transporter.sendMail({
       from: process.env.SMTP_FROM,
@@ -83,6 +126,47 @@ export async function POST(
     console.error("Failed to send report email:", error);
     return NextResponse.json(
       { error: "Failed to send email" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function GET(
+  req: NextRequest,
+  { params }: { params: Promise<{ sessionId: string }> }
+) {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return new NextResponse("Unauthorized", { status: 401 });
+    }
+
+    const { sessionId } = await params;
+
+    // Get the report for this user and session
+    const reportData = await db
+      .select()
+      .from(report)
+      .where(
+        and(
+          eq(report.user_id, session.user.id),
+          eq(report.session_id, Number(sessionId))
+        )
+      )
+      .limit(1);
+
+    if (reportData.length === 0) {
+      return NextResponse.json({ error: "Report not found" }, { status: 404 });
+    }
+
+    return NextResponse.json({
+      success: true,
+      report: reportData[0],
+    });
+  } catch (error) {
+    console.error("Failed to fetch report:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch report" },
       { status: 500 }
     );
   }

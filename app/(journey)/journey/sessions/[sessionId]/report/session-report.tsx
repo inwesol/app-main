@@ -2,25 +2,21 @@
 
 import { useEffect, useState } from "react";
 import {
-  Mail,
-  Calendar,
   Clock,
-  CheckCircle2,
   Activity,
-  Loader2,
   Target,
   Heart,
   User,
   MessageCircle,
   CheckCircle,
-  Sparkles,
   Eye,
   ChevronUp,
   ChevronDown,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
+import { useBreadcrumb } from "@/hooks/useBreadcrumb";
+import { JourneyBreadcrumbLayout } from "@/components/layouts/JourneyBreadcrumbLayout";
 
 // Session Report Types
 export interface FormReport {
@@ -64,6 +60,16 @@ interface SessionData {
   status: string;
   topics: string[];
   learningObjectives: string[];
+}
+
+interface ReportData {
+  id: string;
+  user_id: string;
+  session_id: number;
+  summary: string;
+  created_at: string;
+  updated_at: string;
+  coach_feedback: string | null;
 }
 interface RiasecResults {
   selectedAnswers: string[];
@@ -218,6 +224,7 @@ const CircularGauge = ({
 export default function SessionReport({ sessionId }: { sessionId: string }) {
   const [loading, setLoading] = useState(true);
   const [sessionData, setSessionData] = useState<SessionData | null>(null);
+  const [reportData, setReportData] = useState<ReportData | null>(null);
   const [isEmailLoading, setIsEmailLoading] = useState(false);
   const [riasecResults, setRiasecResults] = useState<null | RiasecResults>(
     null
@@ -234,6 +241,14 @@ export default function SessionReport({ sessionId }: { sessionId: string }) {
   const [showRiasecTestAnswers, setShowRiasecTestAnswers] = useState(false);
 
   const router = useRouter();
+  const params = useParams();
+  const { setJourneyBreadcrumbs } = useBreadcrumb();
+
+  // Set up breadcrumbs
+  useEffect(() => {
+    setJourneyBreadcrumbs(sessionId, "Session Summary");
+  }, [sessionId, setJourneyBreadcrumbs]);
+
   useEffect(() => {
     const fetchSessionData = async () => {
       setLoading(true);
@@ -253,7 +268,29 @@ export default function SessionReport({ sessionId }: { sessionId: string }) {
         setLoading(false);
       }
     };
+
+    const fetchReportData = async () => {
+      try {
+        const res = await fetch(
+          `/api/journey/sessions/${sessionId}/session-report`
+        );
+
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && data.report) {
+            setReportData(data.report);
+            console.log("Report Data:", data.report);
+          }
+        } else {
+          setReportData(null);
+        }
+      } catch {
+        setReportData(null);
+      }
+    };
+
     fetchSessionData();
+    fetchReportData();
   }, [sessionId]);
 
   useEffect(() => {
@@ -392,76 +429,70 @@ export default function SessionReport({ sessionId }: { sessionId: string }) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-emerald-50/50">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-        {/* Session Header */}
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-blue-600 via-blue-500 to-emerald-600 p-6 sm:p-8 text-white shadow-2xl mb-8">
-          <div className="absolute inset-0 bg-black/10" />
-          <div className="relative z-10">
-            <div className="flex flex-col sm:flex-row items-start justify-between gap-4 sm:gap-6">
-              <div className="space-y-3 flex-1">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-white/20 rounded-xl">
-                    <Activity className="size-6 sm:size-8" />
+    <div className="p-3 sm:p-6">
+      <div className="max-w-5xl mx-auto">
+        <JourneyBreadcrumbLayout>
+          <div className="min-h-screen ">
+            <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-4">
+              {/* Session Header */}
+              <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-blue-600 via-blue-500 to-emerald-600 p-6 sm:p-8 text-white shadow-2xl mb-8">
+                <div className="absolute inset-0 bg-black/10" />
+                <div className="relative z-10">
+                  <div className="flex flex-col sm:flex-row items-start justify-between gap-4 sm:gap-6">
+                    <div className="space-y-3 flex-1">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-white/20 rounded-xl">
+                          <Activity className="size-6 sm:size-8" />
+                        </div>
+                        <div>
+                          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight">
+                            Report: {sessionData?.title}
+                          </h1>
+                          <p className="text-blue-100 text-sm sm:text-base mt-1">
+                            {reportData?.created_at
+                              ? formatDate(reportData.created_at)
+                              : formatDate(new Date().toISOString())}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-3 py-2 border border-white/30">
+                      <CheckCircle className="size-4 text-emerald-300" />
+                      <span className="text-sm font-semibold">Completed</span>
+                    </div>
                   </div>
-                  <div>
-                    <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight">
-                      {sessionData?.title}
-                    </h1>
-                    <p className="text-blue-100 text-sm sm:text-base mt-1">
-                      Session #{sessionId} Assessment Report
+                </div>
+              </div>
+
+              {/* Session Summary & Completed Forms Grid */}
+              <div className="grid grid-cols-1 lg:grid-cols-1 gap-6 mb-8">
+                {/* Session Summary */}
+                <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-slate-200/60">
+                  <div className="bg-gradient-to-r from-slate-50 to-blue-50 p-4 sm:p-6 border-b border-slate-100">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-blue-100 rounded-lg">
+                        <Clock className="size-5 sm:size-6 text-blue-600" />
+                      </div>
+                      <div>
+                        <h2 className="text-lg sm:text-xl font-bold text-slate-900">
+                          Session Summary
+                        </h2>
+                        <p className="text-slate-600 text-sm">
+                          Your session summary
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="p-4 sm:p-6">
+                    <p className="text-slate-700 leading-relaxed font-semibold text-lg sm:text-base whitespace-pre-wrap">
+                      {reportData?.summary ||
+                        "No summary available. The report summary will be displayed here once it's generated."}
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-4 text-blue-100">
-                  <div className="flex items-center gap-2">
-                    <Calendar className="size-4" />
-                    <span className="text-sm">
-                      {formatDate(new Date().toISOString())}
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-3 py-2 border border-white/30">
-                <CheckCircle className="size-4 text-emerald-300" />
-                <span className="text-sm font-semibold">Completed</span>
-              </div>
-            </div>
-          </div>
-        </div>
 
-        {/* Schedule Summary & Completed Forms Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          {/* Schedule Summary */}
-          <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-slate-200/60">
-            <div className="bg-gradient-to-r from-slate-50 to-blue-50 p-4 sm:p-6 border-b border-slate-100">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-blue-100 rounded-lg">
-                  <Clock className="size-5 sm:size-6 text-blue-600" />
-                </div>
-                <div>
-                  <h2 className="text-lg sm:text-xl font-bold text-slate-900">
-                    Schedule Summary
-                  </h2>
-                  <p className="text-slate-600 text-sm">
-                    Your structured wellness journey
-                  </p>
-                </div>
-              </div>
-            </div>
-            <div className="p-4 sm:p-6">
-              <p className="text-slate-700 leading-relaxed text-sm sm:text-base">
-                The scheduler in our psychological well-being application is
-                designed to help users build consistent and structured mental
-                health routines. It allows users to plan and manage daily
-                activities such as meditation, journaling, therapy sessions, and
-                medication reminders, all in one place.
-              </p>
-            </div>
-          </div>
-
-          {/* Completed Forms */}
-          <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-slate-200/60">
+                {/* Completed Forms */}
+                {/* <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-slate-200/60">
             <div className="bg-gradient-to-r from-emerald-50 to-green-50 p-4 sm:p-6 border-b border-slate-100">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-emerald-100 rounded-lg">
@@ -506,232 +537,372 @@ export default function SessionReport({ sessionId }: { sessionId: string }) {
                   ))}
               </div>
             </div>
-          </div>
-        </div>
+          </div> */}
+              </div>
 
-        {/* Assessment Results */}
-        <div className="space-y-6 mb-8">
-          <div className="text-center">
+              {/* Assessment Results */}
+              <div className="space-y-6 mb-8">
+                {/* <div className="text-center">
             <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-800 mb-2">
               Assessment Results
             </h2>
             <p className="text-slate-600 text-sm sm:text-base">
               Your comprehensive psychological evaluation
             </p>
-          </div>
-          {riasecResults && personalityTestResults && (
-            <>
-              {/* RIASEC Results */}
-              {riasecResults && (
-                <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-slate-200/60">
-                  <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-4 sm:p-6">
-                    <div className="flex items-center gap-3">
-                      <Target className="size-6 sm:size-7" />
-                      <div>
-                        <h3 className="text-lg sm:text-xl font-bold">
-                          RIASEC Career Assessment
-                        </h3>
-                        <p className="text-sm text-blue-100">
-                          Discover your career interests and aptitudes
-                        </p>
-                      </div>
-                    </div>
-                  </div>
+          </div> */}
+                {riasecResults && personalityTestResults && (
+                  <>
+                    {/* RIASEC Results */}
+                    {riasecResults && (
+                      <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-slate-200/60">
+                        <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-4 sm:p-6">
+                          <div className="flex items-center gap-3">
+                            <Target className="size-6 sm:size-7" />
+                            <div>
+                              <h3 className="text-lg sm:text-xl font-bold">
+                                RIASEC Career Assessment
+                              </h3>
+                              <p className="text-sm text-blue-100">
+                                Discover your career interests and aptitudes
+                              </p>
+                            </div>
+                          </div>
+                        </div>
 
-                  <div className="p-4 sm:p-6 space-y-6">
-                    {/* Interest Code */}
-                    <div className="text-center">
-                      <h4 className="text-base sm:text-lg font-semibold text-slate-900 mb-4">
-                        Your Interest Code
-                      </h4>
-                      <div className="flex justify-center gap-2 sm:gap-3">
-                        {riasecResults.interestCode
-                          ?.split("")
-                          .map((char, i) => (
-                            <div
-                              key={char}
-                              className="size-10 sm:size-14 bg-gradient-to-r from-blue-500 to-emerald-500 
+                        <div className="p-4 sm:p-6 space-y-6">
+                          {/* Interest Code */}
+                          <div className="text-center">
+                            <h4 className="text-base sm:text-lg font-semibold text-slate-900 mb-4">
+                              Your Interest Code
+                            </h4>
+                            <div className="flex justify-center gap-2 sm:gap-3">
+                              {riasecResults.interestCode
+                                ?.split("")
+                                .map((char, i) => (
+                                  <div
+                                    key={char}
+                                    className="size-10 sm:size-14 bg-gradient-to-r from-blue-500 to-emerald-500 
                                    text-white rounded-full flex items-center justify-center 
                                    text-lg sm:text-xl font-bold shadow-lg"
-                            >
-                              {char}
-                            </div>
-                          ))}
-                      </div>
-                    </div>
-
-                    {/* Category Scores */}
-                    <div>
-                      <h4 className="text-base sm:text-lg font-semibold text-slate-900 mb-4">
-                        Interest Categories
-                      </h4>
-                      <div className="grid gap-3">
-                        {Object.entries(riasecResults.categoryCounts).map(
-                          ([category, score]) => (
-                            <ProgressBar
-                              key={category}
-                              label={category}
-                              score={score || 0}
-                              maxScore={7}
-                              color="primary-blue"
-                            />
-                          )
-                        )}
-                      </div>
-                    </div>
-
-                    {/* User's Question Answers */}
-                    <div className="col-span-full">
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setShowRiasecTestAnswers(!showRiasecTestAnswers)
-                        }
-                        className="flex items-center justify-between w-full p-4 bg-purple-50 hover:bg-purple-100 
-                               rounded-lg border border-purple-200 transition-all duration-200"
-                      >
-                        <div className="flex items-center gap-3">
-                          <Eye className="size-5 text-purple-600" />
-                          <span className="text-sm sm:text-base font-semibold text-purple-800">
-                            View Your Responses{" "}
-                            <span className="hidden sm:inline-block">
-                              ({riasecResults.selectedAnswers.length} questions)
-                            </span>
-                          </span>
-                        </div>
-                        {showRiasecTestAnswers ? (
-                          <ChevronUp className="size-5 text-purple-600" />
-                        ) : (
-                          <ChevronDown className="size-5 text-purple-600" />
-                        )}
-                      </button>
-
-                      {showRiasecTestAnswers && (
-                        <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                          <h5 className="font-medium text-gray-800 mb-3">
-                            Your Selected Statements:
-                          </h5>
-                          <div className="space-y-3 max-h-64 overflow-y-auto">
-                            {riasecResults.selectedAnswers.map(
-                              (statement, index) => (
-                                <div
-                                  key={statement}
-                                  className="p-4 bg-primary-blue-50/90 rounded-md border border-primary-blue-400 hover:bg-primary-blue-100/90 hover:border-primary-blue-500
-                                       transition-colors duration-200"
-                                >
-                                  <div className="space-y-2">
-                                    <p className="text-sm font-medium text-gray-800">
-                                      <span className="font-semibold">
-                                        Statment {index + 1}:
-                                      </span>{" "}
-                                      {statement}
-                                    </p>
+                                  >
+                                    {char}
                                   </div>
+                                ))}
+                            </div>
+                          </div>
+
+                          {/* Category Scores */}
+                          <div>
+                            <h4 className="text-base sm:text-lg font-semibold text-slate-900 mb-4">
+                              Interest Categories
+                            </h4>
+                            <div className="grid gap-3">
+                              {Object.entries(riasecResults.categoryCounts).map(
+                                ([category, score]) => (
+                                  <ProgressBar
+                                    key={category}
+                                    label={category}
+                                    score={score || 0}
+                                    maxScore={7}
+                                    color="primary-blue"
+                                  />
+                                )
+                              )}
+                            </div>
+                          </div>
+
+                          {/* User's Question Answers */}
+                          <div className="col-span-full">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setShowRiasecTestAnswers(!showRiasecTestAnswers)
+                              }
+                              className="flex items-center justify-between w-full p-4 bg-purple-50 hover:bg-purple-100 
+                               rounded-lg border border-purple-200 transition-all duration-200"
+                            >
+                              <div className="flex items-center gap-3">
+                                <Eye className="size-5 text-purple-600" />
+                                <span className="text-sm sm:text-base font-semibold text-purple-800">
+                                  View Your Responses{" "}
+                                  <span className="hidden sm:inline-block">
+                                    ({riasecResults.selectedAnswers.length}{" "}
+                                    questions)
+                                  </span>
+                                </span>
+                              </div>
+                              {showRiasecTestAnswers ? (
+                                <ChevronUp className="size-5 text-purple-600" />
+                              ) : (
+                                <ChevronDown className="size-5 text-purple-600" />
+                              )}
+                            </button>
+
+                            {showRiasecTestAnswers && (
+                              <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                <h5 className="font-medium text-gray-800 mb-3">
+                                  Your Selected Statements:
+                                </h5>
+                                <div className="space-y-3 max-h-64 overflow-y-auto">
+                                  {riasecResults.selectedAnswers.map(
+                                    (statement, index) => (
+                                      <div
+                                        key={statement}
+                                        className="p-4 bg-primary-blue-50/90 rounded-md border border-primary-blue-400 hover:bg-primary-blue-100/90 hover:border-primary-blue-500
+                                       transition-colors duration-200"
+                                      >
+                                        <div className="space-y-2">
+                                          <p className="text-sm font-medium text-gray-800">
+                                            <span className="font-semibold">
+                                              Statment {index + 1}:
+                                            </span>{" "}
+                                            {statement}
+                                          </p>
+                                        </div>
+                                      </div>
+                                    )
+                                  )}
                                 </div>
-                              )
+                              </div>
                             )}
                           </div>
                         </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Personality Test Results */}
-              {personalityTestResults && (
-                <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-slate-200/60">
-                  <div className="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white p-4 sm:p-6">
-                    <div className="flex items-center gap-3">
-                      <User className="size-6 sm:size-7" />
-                      <div>
-                        <h3 className="text-lg sm:text-xl font-bold">
-                          Personality Assessment
-                        </h3>
-                        <p className="text-sm text-emerald-100">
-                          Big Five personality traits analysis
-                        </p>
                       </div>
-                    </div>
-                  </div>
+                    )}
 
-                  <div className="p-4 sm:p-6">
-                    <div className="grid lg:grid-cols-2 gap-6 lg:gap-8">
-                      {/* Trait Scores */}
-                      <div>
-                        <h4 className="text-base sm:text-lg font-semibold text-slate-900 mb-4">
-                          Personality Traits
-                        </h4>
-                        <div className="space-y-3">
-                          {Object.entries(
-                            personalityTestResults.subscaleScores
-                          ).map(([trait, score]) => (
-                            <ProgressBar
-                              key={trait}
-                              label={trait}
-                              score={score}
-                              maxScore={
-                                MaxScoresPersonalityTest[
-                                  trait as keyof PersonalityTraits
-                                ] || 100
+                    {/* Personality Test Results */}
+                    {personalityTestResults && (
+                      <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-slate-200/60">
+                        <div className="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white p-4 sm:p-6">
+                          <div className="flex items-center gap-3">
+                            <User className="size-6 sm:size-7" />
+                            <div>
+                              <h3 className="text-lg sm:text-xl font-bold">
+                                Personality Assessment
+                              </h3>
+                              <p className="text-sm text-emerald-100">
+                                Big Five personality traits analysis
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="p-4 sm:p-6">
+                          <div className="grid lg:grid-cols-2 gap-6 lg:gap-8">
+                            {/* Trait Scores */}
+                            <div>
+                              <h4 className="text-base sm:text-lg font-semibold text-slate-900 mb-4">
+                                Personality Traits
+                              </h4>
+                              <div className="space-y-3">
+                                {Object.entries(
+                                  personalityTestResults.subscaleScores
+                                ).map(([trait, score]) => (
+                                  <ProgressBar
+                                    key={trait}
+                                    label={trait}
+                                    score={score}
+                                    maxScore={
+                                      MaxScoresPersonalityTest[
+                                        trait as keyof PersonalityTraits
+                                      ] || 100
+                                    }
+                                    color="primary-green"
+                                  />
+                                ))}
+                              </div>
+                            </div>
+
+                            {/* Overall Score */}
+                            <div className="flex justify-center items-center">
+                              <CircularGauge
+                                score={Number.parseInt(
+                                  personalityTestResults.score
+                                )}
+                                maxScore={100}
+                                label="Overall Personality Score"
+                              />
+                            </div>
+                          </div>
+
+                          {/* User's Question Answers */}
+                          <div className="col-span-full">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setShowPersonalityTestAnswers(
+                                  !showPersonalityTestAnswers
+                                )
                               }
-                              color="primary-green"
-                            />
-                          ))}
+                              className="flex items-center justify-between w-full p-4 bg-purple-50 hover:bg-purple-100 
+                               rounded-lg border border-purple-200 transition-all duration-200"
+                            >
+                              <div className="flex items-center gap-3">
+                                <Eye className="size-5 text-purple-600" />
+                                <span className="text-sm sm:text-base font-semibold text-purple-800">
+                                  View Your Responses{" "}
+                                  <span className="hidden sm:inline-block">
+                                    (
+                                    {
+                                      Object.keys(
+                                        personalityTestResults.answers
+                                      ).length
+                                    }{" "}
+                                    questions)
+                                  </span>
+                                </span>
+                              </div>
+                              {showWellbeingAnswers ? (
+                                <ChevronUp className="size-5 text-purple-600" />
+                              ) : (
+                                <ChevronDown className="size-5 text-purple-600" />
+                              )}
+                            </button>
+
+                            {showPersonalityTestAnswers && (
+                              <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                <h5 className="font-medium text-gray-800 mb-3">
+                                  Your Question Responses:
+                                </h5>
+                                <div className="space-y-3 max-h-64 overflow-y-auto">
+                                  {Object.entries(
+                                    personalityTestResults.answers
+                                  ).map(([question, answer], index) => (
+                                    <div
+                                      key={question}
+                                      className="p-4 bg-white rounded-md border border-gray-200 hover:border-purple-300 
+                                       transition-colors duration-200"
+                                    >
+                                      <div className="space-y-2">
+                                        <p className="text-sm font-medium text-gray-800">
+                                          Q{index + 1}: {question}
+                                        </p>
+                                        <div className="flex items-center gap-2">
+                                          <span className="text-xs text-gray-500">
+                                            Your answer:
+                                          </span>
+                                          <span
+                                            className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                              answer.includes("Strongly Agree")
+                                                ? "bg-green-100 text-green-800"
+                                                : answer.includes("Agree")
+                                                ? "bg-primary-blue-100 text-primary-blue-800"
+                                                : answer.includes("Neutral")
+                                                ? "bg-gray-100 text-gray-800"
+                                                : answer.includes("Disagree")
+                                                ? "bg-orange-100 text-orange-800"
+                                                : "bg-red-100 text-red-800"
+                                            }`}
+                                          >
+                                            {answer}
+                                          </span>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </div>
-
-                      {/* Overall Score */}
-                      <div className="flex justify-center items-center">
-                        <CircularGauge
-                          score={Number.parseInt(personalityTestResults.score)}
-                          maxScore={100}
-                          label="Overall Personality Score"
-                        />
+                    )}
+                  </>
+                )}
+                {/* Psychological Wellbeing Results */}
+                {psychologicalWellbeingTestResults && (
+                  <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-slate-200/60">
+                    <div className="bg-gradient-to-r from-purple-500 to-pink-600 text-white p-4 sm:p-6">
+                      <div className="flex items-center gap-3">
+                        <Heart className="size-5 sm:size-6" />
+                        <div>
+                          <h3 className="text-lg sm:text-xl font-bold">
+                            Psychological Wellbeing
+                          </h3>
+                          <p className="text-sm text-purple-100">
+                            Six dimensions of psychological wellness
+                          </p>
+                        </div>
                       </div>
                     </div>
 
-                    {/* User's Question Answers */}
-                    <div className="col-span-full">
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setShowPersonalityTestAnswers(
-                            !showPersonalityTestAnswers
-                          )
-                        }
-                        className="flex items-center justify-between w-full p-4 bg-purple-50 hover:bg-purple-100 
-                               rounded-lg border border-purple-200 transition-all duration-200"
-                      >
-                        <div className="flex items-center gap-3">
-                          <Eye className="size-5 text-purple-600" />
-                          <span className="text-sm sm:text-base font-semibold text-purple-800">
-                            View Your Responses{" "}
-                            <span className="hidden sm:inline-block">
-                              (
-                              {
-                                Object.keys(personalityTestResults.answers)
-                                  .length
-                              }{" "}
-                              questions)
-                            </span>
-                          </span>
+                    <div className="p-4 sm:p-6">
+                      <div className="grid lg:grid-cols-2 gap-6 lg:gap-8">
+                        {/* Wellbeing Dimensions */}
+                        <div>
+                          <h4 className="text-base sm:text-lg font-semibold text-slate-900 mb-4">
+                            Wellbeing Dimensions
+                          </h4>
+                          <div className="space-y-3">
+                            {Object.entries(
+                              psychologicalWellbeingTestResults.subscaleScores
+                            ).map(([dimension, score]) => (
+                              <ProgressBar
+                                key={dimension}
+                                label={dimension
+                                  .replace(/([A-Z])/g, " $1")
+                                  .trim()}
+                                score={score}
+                                maxScore={49}
+                                color="primary-blue"
+                              />
+                            ))}
+                          </div>
                         </div>
-                        {showWellbeingAnswers ? (
-                          <ChevronUp className="size-5 text-purple-600" />
-                        ) : (
-                          <ChevronDown className="size-5 text-purple-600" />
-                        )}
-                      </button>
 
-                      {showPersonalityTestAnswers && (
-                        <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                          <h5 className="font-medium text-gray-800 mb-3">
-                            Your Question Responses:
-                          </h5>
-                          <div className="space-y-3 max-h-64 overflow-y-auto">
-                            {Object.entries(personalityTestResults.answers).map(
-                              ([question, answer], index) => (
+                        {/* Overall Wellbeing Score */}
+                        <div className="flex justify-center items-center">
+                          <CircularGauge
+                            score={Number.parseInt(
+                              psychologicalWellbeingTestResults.score
+                            )}
+                            maxScore={100}
+                            label="Overall Wellbeing Score"
+                          />
+                        </div>
+                      </div>
+
+                      {/* User's Question Answers */}
+                      <div className="col-span-full">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setShowWellbeingAnswers(!showWellbeingAnswers)
+                          }
+                          className="flex items-center justify-between w-full sm:p-4 p-2 bg-purple-50 hover:bg-purple-100 
+                               rounded-lg border border-purple-200 transition-all duration-200"
+                        >
+                          <div className="flex items-center gap-3">
+                            <Eye className="size-5 text-purple-600" />
+                            <span className="text-sm sm:text-base font-semibold text-purple-800">
+                              View Your Responses{" "}
+                              <span className="hidden sm:inline-block">
+                                (
+                                {
+                                  Object.keys(
+                                    psychologicalWellbeingTestResults.answers
+                                  ).length
+                                }{" "}
+                                questions)
+                              </span>
+                            </span>
+                          </div>
+                          {showWellbeingAnswers ? (
+                            <ChevronUp className="size-5 text-purple-600" />
+                          ) : (
+                            <ChevronDown className="size-5 text-purple-600" />
+                          )}
+                        </button>
+
+                        {showWellbeingAnswers && (
+                          <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                            <h5 className="font-medium text-gray-800 mb-3">
+                              Your Question Responses:
+                            </h5>
+                            <div className="space-y-3 max-h-64 overflow-y-auto">
+                              {Object.entries(
+                                psychologicalWellbeingTestResults.answers
+                              ).map(([question, answer], index) => (
                                 <div
                                   key={question}
                                   className="p-4 bg-white rounded-md border border-gray-200 hover:border-purple-300 
@@ -748,203 +919,75 @@ export default function SessionReport({ sessionId }: { sessionId: string }) {
                                       <span
                                         className={`px-2 py-1 rounded-full text-xs font-medium ${
                                           answer.includes("Strongly Agree")
-                                            ? "bg-green-100 text-green-800"
-                                            : answer.includes("Agree")
+                                            ? "bg-primary-green-100 text-primary-green-800"
+                                            : answer.includes("A Little Agree")
+                                            ? "bg-primary-blue-50 text-primary-blue-700"
+                                            : answer.includes("Agree") &&
+                                              !answer.includes("A Little Agree")
                                             ? "bg-primary-blue-100 text-primary-blue-800"
                                             : answer.includes("Neutral")
+                                            ? "bg-primary-blue-50 text-primary-blue-700"
+                                            : answer.includes(
+                                                "A Little Disagree"
+                                              )
                                             ? "bg-gray-100 text-gray-800"
-                                            : answer.includes("Disagree")
-                                            ? "bg-orange-100 text-orange-800"
-                                            : "bg-red-100 text-red-800"
-                                        }`}
+                                            : answer.includes("Disagree") &&
+                                              !answer.includes(
+                                                "A Little Disagree"
+                                              )
+                                            ? "bg-orange-50 text-orange-700"
+                                            : answer.includes(
+                                                "Strongly Disagree"
+                                              )
+                                            ? "bg-red-100 text-red-800"
+                                            : ""
+                                        }
+                                  }`}
                                       >
                                         {answer}
                                       </span>
                                     </div>
                                   </div>
                                 </div>
-                              )
-                            )}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              )}
-            </>
-          )}
-          {/* Psychological Wellbeing Results */}
-          {psychologicalWellbeingTestResults && (
-            <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-slate-200/60">
-              <div className="bg-gradient-to-r from-purple-500 to-pink-600 text-white p-4 sm:p-6">
-                <div className="flex items-center gap-3">
-                  <Heart className="size-5 sm:size-6" />
-                  <div>
-                    <h3 className="text-lg sm:text-xl font-bold">
-                      Psychological Wellbeing
-                    </h3>
-                    <p className="text-sm text-purple-100">
-                      Six dimensions of psychological wellness
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="p-4 sm:p-6">
-                <div className="grid lg:grid-cols-2 gap-6 lg:gap-8">
-                  {/* Wellbeing Dimensions */}
-                  <div>
-                    <h4 className="text-base sm:text-lg font-semibold text-slate-900 mb-4">
-                      Wellbeing Dimensions
-                    </h4>
-                    <div className="space-y-3">
-                      {Object.entries(
-                        psychologicalWellbeingTestResults.subscaleScores
-                      ).map(([dimension, score]) => (
-                        <ProgressBar
-                          key={dimension}
-                          label={dimension.replace(/([A-Z])/g, " $1").trim()}
-                          score={score}
-                          maxScore={49}
-                          color="primary-blue"
-                        />
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Overall Wellbeing Score */}
-                  <div className="flex justify-center items-center">
-                    <CircularGauge
-                      score={Number.parseInt(
-                        psychologicalWellbeingTestResults.score
-                      )}
-                      maxScore={100}
-                      label="Overall Wellbeing Score"
-                    />
-                  </div>
-                </div>
-
-                {/* User's Question Answers */}
-                <div className="col-span-full">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setShowWellbeingAnswers(!showWellbeingAnswers)
-                    }
-                    className="flex items-center justify-between w-full sm:p-4 p-2 bg-purple-50 hover:bg-purple-100 
-                               rounded-lg border border-purple-200 transition-all duration-200"
-                  >
-                    <div className="flex items-center gap-3">
-                      <Eye className="size-5 text-purple-600" />
-                      <span className="text-sm sm:text-base font-semibold text-purple-800">
-                        View Your Responses{" "}
-                        <span className="hidden sm:inline-block">
-                          (
-                          {
-                            Object.keys(
-                              psychologicalWellbeingTestResults.answers
-                            ).length
-                          }{" "}
-                          questions)
-                        </span>
-                      </span>
-                    </div>
-                    {showWellbeingAnswers ? (
-                      <ChevronUp className="size-5 text-purple-600" />
-                    ) : (
-                      <ChevronDown className="size-5 text-purple-600" />
-                    )}
-                  </button>
-
-                  {showWellbeingAnswers && (
-                    <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                      <h5 className="font-medium text-gray-800 mb-3">
-                        Your Question Responses:
-                      </h5>
-                      <div className="space-y-3 max-h-64 overflow-y-auto">
-                        {Object.entries(
-                          psychologicalWellbeingTestResults.answers
-                        ).map(([question, answer], index) => (
-                          <div
-                            key={question}
-                            className="p-4 bg-white rounded-md border border-gray-200 hover:border-purple-300 
-                                       transition-colors duration-200"
-                          >
-                            <div className="space-y-2">
-                              <p className="text-sm font-medium text-gray-800">
-                                Q{index + 1}: {question}
-                              </p>
-                              <div className="flex items-center gap-2">
-                                <span className="text-xs text-gray-500">
-                                  Your answer:
-                                </span>
-                                <span
-                                  className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                    answer.includes("Strongly Agree")
-                                      ? "bg-primary-green-100 text-primary-green-800"
-                                      : answer.includes("A Little Agree")
-                                      ? "bg-primary-blue-50 text-primary-blue-700"
-                                      : answer.includes("Agree") &&
-                                        !answer.includes("A Little Agree")
-                                      ? "bg-primary-blue-100 text-primary-blue-800"
-                                      : answer.includes("Neutral")
-                                      ? "bg-primary-blue-50 text-primary-blue-700"
-                                      : answer.includes("A Little Disagree")
-                                      ? "bg-gray-100 text-gray-800"
-                                      : answer.includes("Disagree") &&
-                                        !answer.includes("A Little Disagree")
-                                      ? "bg-orange-50 text-orange-700"
-                                      : answer.includes("Strongly Disagree")
-                                      ? "bg-red-100 text-red-800"
-                                      : ""
-                                  }
-                                  }`}
-                                >
-                                  {answer}
-                                </span>
-                              </div>
+                              ))}
                             </div>
                           </div>
-                        ))}
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Coach's Notes & Email CTA Grid */}
+              <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
+                {/* Coach's Notes - Only show if coach_feedback exists */}
+                {reportData?.coach_feedback &&
+                  reportData.coach_feedback.trim() !== "" && (
+                    <div className="bg-gradient-to-br from-orange-50 to-yellow-50 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-orange-200">
+                      <div className="p-4 sm:p-6">
+                        <div className="flex items-center gap-3 mb-4">
+                          <div className="p-2 bg-orange-100 rounded-lg">
+                            <MessageCircle className="size-5 sm:size-6 text-orange-600" />
+                          </div>
+                          <h3 className="text-lg sm:text-xl font-bold text-slate-900">
+                            Coach&apos;s Notes
+                          </h3>
+                        </div>
+                        <div className="bg-white/80 backdrop-blur-sm rounded-xl p-4 border-l-4 border-orange-400">
+                          <p className="text-sm sm:text-base text-slate-700 leading-relaxed italic whitespace-pre-wrap">
+                            &ldquo;{reportData.coach_feedback}&rdquo;
+                          </p>
+                          <div className="mt-3 text-sm text-orange-600 font-medium">
+                            — Your Coach
+                          </div>
+                        </div>
                       </div>
                     </div>
                   )}
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
 
-        {/* Coach's Notes & Email CTA Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Coach's Notes */}
-          <div className="bg-gradient-to-br from-orange-50 to-yellow-50 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-orange-200">
-            <div className="p-4 sm:p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 bg-orange-100 rounded-lg">
-                  <MessageCircle className="size-5 sm:size-6 text-orange-600" />
-                </div>
-                <h3 className="text-lg sm:text-xl font-bold text-slate-900">
-                  Coach&apos;s Notes
-                </h3>
-              </div>
-              <div className="bg-white/80 backdrop-blur-sm rounded-xl p-4 border-l-4 border-orange-400">
-                <p className="text-sm sm:text-base text-slate-700 leading-relaxed italic">
-                  &ldquo;Excellent progress on your assessment journey! Your
-                  results show strong self-awareness and thoughtful responses
-                  across all evaluations. Continue building on these insights
-                  for your personal and professional development.&rdquo;
-                </p>
-                <div className="mt-3 text-sm text-orange-600 font-medium">
-                  — Your Wellness Coach
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Email CTA */}
-          <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-emerald-600 rounded-2xl shadow-2xl overflow-hidden">
+                {/* Email CTA */}
+                {/* <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-emerald-600 rounded-2xl shadow-2xl overflow-hidden">
             <div className="bg-black/20 p-4 sm:p-6 text-center">
               <div className="space-y-4">
                 <div className="flex justify-center">
@@ -990,8 +1033,11 @@ export default function SessionReport({ sessionId }: { sessionId: string }) {
                 </p>
               </div>
             </div>
+          </div> */}
+              </div>
+            </div>
           </div>
-        </div>
+        </JourneyBreadcrumbLayout>
       </div>
     </div>
   );

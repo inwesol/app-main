@@ -949,3 +949,25 @@ export const uploadedImages = pgTable(
 
 export type UploadedImage = typeof uploadedImages.$inferSelect;
 export type NewUploadedImage = typeof uploadedImages.$inferInsert;
+
+// Report table for storing session reports
+export const report = pgTable(
+  "report",
+  {
+    id: uuid("id").primaryKey().notNull().defaultRandom(),
+    user_id: uuid("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    session_id: integer("session_id").notNull(),
+    summary: text("summary").notNull(),
+    created_at: timestamp("created_at").defaultNow().notNull(),
+    updated_at: timestamp("updated_at").defaultNow().notNull(),
+    coach_feedback: text("coach_feedback"),
+  },
+  (table) => ({
+    userSessionUnique: unique().on(table.user_id, table.session_id),
+  })
+);
+
+export type Report = typeof report.$inferSelect;
+export type NewReport = typeof report.$inferInsert;
