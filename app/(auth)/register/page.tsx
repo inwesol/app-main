@@ -14,7 +14,6 @@ import Image from "next/image";
 export default function Page() {
   const router = useRouter();
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
-  const [email, setEmail] = useState("");
   const [isSuccessful, setIsSuccessful] = useState(false);
   const [showPlaceholder, setShowPlaceholder] = useState(true);
 
@@ -49,14 +48,11 @@ export default function Page() {
         description: "Verification email sent! Check your inbox.",
       });
       setIsSuccessful(true);
-      router.push(`/verify-email?email=${encodeURIComponent(email)}`);
+      router.push(
+        `/verify-email?email=${encodeURIComponent(state.email || "")}`
+      );
     }
-  }, [state, email, router]);
-
-  const handleSubmit = (formData: FormData) => {
-    setEmail(formData.get("email") as string);
-    formAction(formData);
-  };
+  }, [state, router]);
 
   const handleGoogleSignIn = async () => {
     try {
@@ -177,11 +173,15 @@ export default function Page() {
             {showPlaceholder && (
               <div className="space-y-3 animate-pulse px-4 py-3">
                 <div className="space-y-3">
-                  <div className="h-4 bg-gradient-to-r from-gray-200 to-gray-300 rounded-lg w-24" />
-                  <div className="h-12 bg-gradient-to-r from-gray-200 to-gray-300 rounded-xl w-80" />
+                  <div className="h-4 bg-gradient-to-r from-gray-200 to-gray-300 rounded-lg w-20" />
+                  <div className="h-12 bg-gradient-to-r from-gray-200 to-gray-300 rounded-xl" />
                 </div>
                 <div className="space-y-3">
                   <div className="h-4 bg-gradient-to-r from-gray-200 to-gray-300 rounded-lg w-24" />
+                  <div className="h-12 bg-gradient-to-r from-gray-200 to-gray-300 rounded-xl" />
+                </div>
+                <div className="space-y-3">
+                  <div className="h-4 bg-gradient-to-r from-gray-200 to-gray-300 rounded-lg w-20" />
                   <div className="h-12 bg-gradient-to-r from-gray-200 to-gray-300 rounded-xl" />
                 </div>
                 <div className="h-12 bg-gradient-to-r from-primary-green-200 to-primary-green-200 rounded-xl" />
@@ -194,7 +194,12 @@ export default function Page() {
               className={showPlaceholder ? "opacity-0 absolute" : "opacity-100"}
             >
               <div className="space-y-4">
-                <AuthForm action={handleSubmit} defaultEmail={email}>
+                <AuthForm
+                  action={formAction}
+                  defaultEmail={state.email || ""}
+                  defaultName={state.name || ""}
+                  showNameField={true}
+                >
                   <SubmitButton isSuccessful={isSuccessful}>
                     Sign Up
                   </SubmitButton>

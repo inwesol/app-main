@@ -1,6 +1,6 @@
 // app/verify-email/page.tsx
 "use client";
-import { Suspense, useActionState, useEffect, useState } from "react";
+import { Suspense, useActionState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { verifyEmail, type VerifyEmailActionState } from "../actions";
 import { toast } from "@/components/toast";
@@ -24,7 +24,6 @@ function VerifyEmailForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const email = searchParams.get("email");
-  const [otp, setOtp] = useState("");
 
   const [state, formAction] = useActionState<VerifyEmailActionState, FormData>(
     verifyEmail,
@@ -42,13 +41,6 @@ function VerifyEmailForm() {
     }
   }, [state, router]);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const formData = new FormData();
-    formData.append("otp", otp);
-    formAction(formData);
-  };
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <div className="w-full max-w-md bg-white rounded-xl shadow-[4px_4px_10px_rgba(0,0,0,0.1),-4px_4px_10px_rgba(0,0,0,0.1),0_-4px_10px_rgba(0,0,0,0.1)] p-6 sm:p-8">
@@ -63,7 +55,7 @@ function VerifyEmailForm() {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form action={formAction} className="space-y-4">
           <div>
             <label
               htmlFor="verification-code"
@@ -73,11 +65,8 @@ function VerifyEmailForm() {
             </label>
             <input
               id="verification-code"
+              name="otp"
               type="text"
-              value={otp}
-              onChange={(e) =>
-                setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))
-              }
               className="w-full px-4 py-3 text-center text-2xl font-mono tracking-widest border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="000000"
               maxLength={6}

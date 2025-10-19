@@ -14,7 +14,6 @@ import Image from "next/image";
 export default function LoginPage() {
   const router = useRouter();
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
-  const [email, setEmail] = useState("");
   const [isSuccessful, setIsSuccessful] = useState(false);
   const [showPlaceholder, setShowPlaceholder] = useState(true);
 
@@ -50,11 +49,6 @@ export default function LoginPage() {
       router.refresh();
     }
   }, [state.status, router]);
-
-  const handleSubmit = (formData: FormData) => {
-    setEmail(formData.get("email") as string);
-    formAction(formData);
-  };
 
   const handleGoogleSignIn = async () => {
     try {
@@ -194,7 +188,11 @@ export default function LoginPage() {
                   : "opacity-100 transition-opacity duration-500"
               }
             >
-              <AuthForm action={handleSubmit} defaultEmail={email}>
+              <AuthForm
+                action={formAction}
+                defaultEmail={state.email || ""}
+                showNameField={false}
+              >
                 <SubmitButton isSuccessful={isSuccessful}>Sign In</SubmitButton>
 
                 <p className="text-center text-sm text-gray-600">
