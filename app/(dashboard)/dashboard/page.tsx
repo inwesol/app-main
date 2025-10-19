@@ -7,9 +7,6 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Play,
   Pause,
@@ -17,12 +14,6 @@ import {
   SkipForward,
   Volume2,
   VolumeX,
-  Plus,
-  Trash2,
-  Clock,
-  Search,
-  Save,
-  FileText,
 } from "lucide-react";
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { SidebarToggle } from "@/components/sidebar-toggle";
@@ -102,22 +93,22 @@ export default function Dashboard() {
     () => [
       {
         id: 1,
-        title: "🌿 Morning Calm",
-        duration: "01:57",
-        url: "/musics/dawn-of-change.mp3",
+        title: "🧘 Breathing Exercise",
+        duration: "04:36",
+        url: "/musics/breathing-exercise.mp3",
       },
-      {
-        id: 2,
-        title: "🌙 Evening Relax",
-        duration: "01:57",
-        url: "/musics/dawn-of-change.mp3",
-      },
-      {
-        id: 3,
-        title: "☀️ Focus Boost",
-        duration: "01:57",
-        url: "/musics/dawn-of-change.mp3",
-      },
+      // {
+      //   id: 2,
+      //   title: "🌙 Evening Relax",
+      //   duration: "01:57",
+      //   url: "/musics/dawn-of-change.mp3",
+      // },
+      // {
+      //   id: 3,
+      //   title: "☀️ Focus Boost",
+      //   duration: "01:57",
+      //   url: "/musics/dawn-of-change.mp3",
+      // },
       // {
       //   id: 4,
       //   title: "🌸 Spring Meditation",
@@ -280,123 +271,6 @@ export default function Dashboard() {
         setIsMuted(true);
       }
     }
-  };
-
-  // Task management functions
-  const addTask = () => {
-    if (!newTask.trim() || !date) return;
-
-    const dateKey = date.toISOString().split("T")[0];
-    const taskId = Date.now().toString();
-    const newTaskObj = {
-      id: taskId,
-      text: newTask.trim(),
-      time: newTaskTime || "All day",
-    };
-
-    setTasks((prev) => ({
-      ...prev,
-      [dateKey]: [...(prev[dateKey] || []), newTaskObj],
-    }));
-
-    setNewTask("");
-    setNewTaskTime("");
-  };
-
-  const removeTask = (taskId: string) => {
-    if (!date) return;
-
-    const dateKey = date.toISOString().split("T")[0];
-    setTasks((prev) => ({
-      ...prev,
-      [dateKey]: (prev[dateKey] || []).filter((task) => task.id !== taskId),
-    }));
-  };
-
-  const getTasksForDate = (selectedDate: Date) => {
-    const dateKey = selectedDate.toISOString().split("T")[0];
-    return tasks[dateKey] || [];
-  };
-
-  const getDateKey = (selectedDate: Date) => {
-    return selectedDate.toISOString().split("T")[0];
-  };
-
-  // Journal management functions
-  const saveJournalEntry = useCallback(async () => {
-    if (!todayEntry.title.trim() && !todayEntry.content.trim()) return;
-    if (!authStatus?.authenticated || !authStatus?.user?.id) return;
-
-    const today = new Date();
-    const dateKey = today.toISOString().split("T")[0];
-
-    setIsSaving(true);
-
-    try {
-      const response = await fetch("/api/journal/entries", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          title: todayEntry.title.trim() || null,
-          content: todayEntry.content.trim(),
-          entryDate: dateKey,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(
-          errorData.details || errorData.error || "Failed to save journal entry"
-        );
-      }
-
-      const { entry } = await response.json();
-
-      // Update the entries list
-      setJournalEntries((prev) => {
-        const existingIndex = prev.findIndex((e) => e.entryDate === dateKey);
-        if (existingIndex >= 0) {
-          const updated = [...prev];
-          updated[existingIndex] = entry;
-          return updated;
-        } else {
-          return [entry, ...prev];
-        }
-      });
-
-      // Clear today's entry after saving
-      setTodayEntry({ title: "", content: "" });
-      setLastSaved(new Date());
-    } catch (error) {
-      console.error("Error saving journal entry:", error);
-      const errorMessage =
-        error instanceof Error
-          ? error.message
-          : "Failed to save journal entry. Please try again.";
-      alert(errorMessage);
-    } finally {
-      setIsSaving(false);
-    }
-  }, [todayEntry, authStatus?.authenticated, authStatus?.user?.id]);
-
-  const getWordCount = (text: string) => {
-    return text
-      .trim()
-      .split(/\s+/)
-      .filter((word) => word.length > 0).length;
-  };
-
-  const getFilteredEntries = () => {
-    if (!searchTerm.trim()) return journalEntries;
-
-    return journalEntries.filter(
-      (entry) =>
-        entry.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        false ||
-        entry.content.toLowerCase().includes(searchTerm.toLowerCase())
-    );
   };
 
   // Load journal entries from API
@@ -670,91 +544,111 @@ export default function Dashboard() {
       {isMobile ? <SidebarToggle /> : <div />}
       {/* Row 1: Feature Introduction Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-4 md:gap-6 max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
-        {/* Career Journey Feature Card */}
-        <Card className="cursor-pointer hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
+        {/* CoCo AI Coach Feature Card */}
+        <Card
+          className="cursor-pointer hover:shadow-lg transition-all duration-300 hover:scale-[1.02]"
+          onClick={() => {
+            window.location.href = "/chat";
+          }}
+        >
           <CardHeader className="space-y-3">
             <div className="flex items-start justify-between">
               <div className="flex items-center space-x-3 flex-1">
                 <div className="size-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white text-lg font-bold">🎯</span>
+                  <span className="text-white text-lg font-bold">🤖</span>
                 </div>
                 <div className="flex-1">
-                  <CardTitle className="text-lg">Career Journey</CardTitle>
+                  <CardTitle className="text-lg">CoCo AI Coach</CardTitle>
                   <CardDescription className="text-sm text-muted-foreground">
-                    Discover your path to professional fulfillment
+                    Your personal AI career and wellness companion
                   </CardDescription>
                 </div>
               </div>
               <Button
                 size="sm"
                 className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 ml-3"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  window.location.href = "/chat";
+                }}
               >
-                Start
+                Chat Now
               </Button>
             </div>
           </CardHeader>
           <CardContent className="space-y-3">
             <p className="text-sm text-muted-foreground leading-relaxed">
-              Navigate through personalized career exploration tools, guided
-              assessments, and interactive activities designed to help you
-              discover your ideal career path and make informed decisions about
-              your professional future.
+              Get instant, personalized guidance from your AI coach. Whether
+              you&apos;re exploring career paths, seeking wellness advice, or
+              need support with life decisions, CoCo is here to help you
+              navigate your journey with intelligent, empathetic conversations.
             </p>
 
             <div className="space-y-2">
               <h4 className="text-sm font-semibold text-foreground">
-                How to use better:
+                How CoCo can help you:
               </h4>
               <ul className="text-xs text-muted-foreground space-y-1">
-                <li>• Complete assessments honestly for accurate insights</li>
-                <li>• Review your results regularly to track progress</li>
-                <li>
-                  • Engage with all available tools for comprehensive guidance
-                </li>
+                <li>• Provide 24/7 career guidance and mentorship</li>
+                <li>• Offer personalized wellness and mental health support</li>
+                <li>• Help with decision-making and problem-solving</li>
+                <li>• Answer questions about your career journey and goals</li>
+                <li>• Provide motivation and accountability for your growth</li>
               </ul>
             </div>
           </CardContent>
         </Card>
 
-        {/* Wellness Tools Feature Card */}
-        <Card className="cursor-pointer hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
+        {/* Human Coach Journey Feature Card */}
+        <Card
+          className="cursor-pointer hover:shadow-lg transition-all duration-300 hover:scale-[1.02]"
+          onClick={() => {
+            window.location.href = "/journey";
+          }}
+        >
           <CardHeader className="space-y-3">
             <div className="flex items-start justify-between">
               <div className="flex items-center space-x-3 flex-1">
                 <div className="size-10 bg-gradient-to-br from-green-500 to-teal-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white text-lg font-bold">🧘</span>
+                  <span className="text-white text-lg font-bold">👨‍🏫</span>
                 </div>
                 <div className="flex-1">
-                  <CardTitle className="text-lg">Wellness Tools</CardTitle>
+                  <CardTitle className="text-lg">Human Coach Journey</CardTitle>
                   <CardDescription className="text-sm text-muted-foreground">
-                    Enhance your mental and emotional well-being
+                    Get personalized guidance from certified human coaches
                   </CardDescription>
                 </div>
               </div>
               <Button
                 size="sm"
                 className="bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700 ml-3"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  window.location.href = "/journey";
+                }}
               >
-                Explore
+                Start Journey
               </Button>
             </div>
           </CardHeader>
           <CardContent className="space-y-3">
             <p className="text-sm text-muted-foreground leading-relaxed">
-              Access a comprehensive suite of wellness tools including
-              meditation playlists, daily journaling, time management tools, and
-              mindfulness exercises to support your personal growth and mental
-              health.
+              Connect with experienced human coaches who provide personalized,
+              one-on-one guidance tailored to your unique career and wellness
+              goals. Get expert insights, accountability, and support throughout
+              your personal and professional development journey.
             </p>
 
             <div className="space-y-2">
               <h4 className="text-sm font-semibold text-foreground">
-                How to use better:
+                How human coaches can help you:
               </h4>
               <ul className="text-xs text-muted-foreground space-y-1">
-                <li>• Use meditation tools daily for consistent practice</li>
-                <li>• Journal regularly to track your emotional patterns</li>
-                <li>• Set aside dedicated time for wellness activities</li>
+                <li>• Provide personalized career guidance and mentorship</li>
+                <li>• Offer emotional support and wellness coaching</li>
+                <li>• Create custom action plans for your goals</li>
+                <li>• Give real-time feedback and accountability</li>
+                <li>• Share professional insights and industry knowledge</li>
               </ul>
             </div>
           </CardContent>
@@ -879,261 +773,82 @@ export default function Dashboard() {
             </Card>
           </div>
 
-          {/* Time Management Calendar - 60% */}
+          {/* Daily Journaling Section - 60% */}
           <div className="lg:col-span-6">
             <Card className="h-full">
-              <CardHeader className="pb-4 text-center">
-                <CardTitle className="text-lg">Time Management</CardTitle>
+              <CardHeader className="pb-4">
+                <CardTitle className="text-lg">Daily Journaling</CardTitle>
                 <CardDescription className="text-sm">
-                  Plan your day effectively
+                  Reflect, grow, and track your personal journey
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                  {/* Calendar */}
-                  <div className="space-y-4">
-                    {isClient ? (
-                      <Calendar
-                        mode="single"
-                        selected={date}
-                        onSelect={setDate}
-                        className="rounded-md border"
-                        classNames={{
-                          day_selected:
-                            "bg-blue-500 text-white hover:bg-blue-600 focus:bg-blue-500",
-                          day_today: "bg-blue-100 text-blue-900 font-bold",
-                        }}
-                      />
-                    ) : (
-                      <div className="rounded-md border h-[300px] flex items-center justify-center">
-                        <div className="text-muted-foreground">
-                          Loading calendar...
-                        </div>
-                      </div>
-                    )}
-                  </div>
+              <CardContent className="space-y-4">
+                <div className="space-y-3">
+                  <h4 className="text-sm font-semibold text-foreground">
+                    Why Daily Journaling Matters:
+                  </h4>
+                  <ul className="text-xs text-muted-foreground space-y-2">
+                    <li className="flex items-start gap-2">
+                      <span className="text-blue-500 mt-1">•</span>
+                      <span>
+                        <strong>Self-Reflection:</strong> Process your thoughts
+                        and emotions to gain deeper self-awareness
+                      </span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-blue-500 mt-1">•</span>
+                      <span>
+                        <strong>Stress Relief:</strong> Release pent-up emotions
+                        and reduce mental clutter
+                      </span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-blue-500 mt-1">•</span>
+                      <span>
+                        <strong>Goal Tracking:</strong> Monitor your progress
+                        and celebrate achievements
+                      </span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-blue-500 mt-1">•</span>
+                      <span>
+                        <strong>Pattern Recognition:</strong> Identify recurring
+                        themes in your life and behavior
+                      </span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-blue-500 mt-1">•</span>
+                      <span>
+                        <strong>Mental Clarity:</strong> Organize your thoughts
+                        and improve decision-making
+                      </span>
+                    </li>
+                  </ul>
+                </div>
 
-                  {/* Task Management for Selected Date */}
-                  {date && (
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-2 text-sm font-medium">
-                        <Clock size={16} />
-                        Tasks for {date.toLocaleDateString()}
-                      </div>
+                <div className="pt-2">
+                  <Button
+                    onClick={() =>
+                      window.open(
+                        "/journey/sessions/8/a/daily-journaling",
+                        "_blank"
+                      )
+                    }
+                    className="w-full bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700"
+                  >
+                    Start Your Journaling Journey
+                  </Button>
+                </div>
 
-                      {/* Add New Task */}
-                      <div className="space-y-2">
-                        <div className="flex gap-2">
-                          <Input
-                            placeholder="Add new task..."
-                            value={newTask}
-                            onChange={(e) => setNewTask(e.target.value)}
-                            className="flex-1"
-                            onKeyDown={(e) => {
-                              if (e.key === "Enter" && newTask.trim()) {
-                                addTask();
-                              }
-                            }}
-                          />
-                          <Button
-                            onClick={addTask}
-                            size="icon"
-                            disabled={!newTask.trim()}
-                          >
-                            <Plus size={16} />
-                          </Button>
-                        </div>
-                      </div>
-
-                      {/* Task List */}
-                      <div className="space-y-2 max-h-48 overflow-y-auto border border-gray-200 rounded-lg p-2">
-                        {getTasksForDate(date).length === 0 ? (
-                          <p className="text-sm text-muted-foreground text-center py-4">
-                            No tasks for this date
-                          </p>
-                        ) : (
-                          getTasksForDate(date).map((task) => (
-                            <div
-                              key={task.id}
-                              className="flex items-center justify-between p-3 bg-muted rounded-lg"
-                            >
-                              <div className="flex-1">
-                                <p className="text-sm font-medium">
-                                  {task.text}
-                                </p>
-                                <p className="text-xs text-muted-foreground">
-                                  {task.time}
-                                </p>
-                              </div>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => removeTask(task.id)}
-                                className="size-8 text-destructive hover:text-destructive"
-                              >
-                                <Trash2 size={14} />
-                              </Button>
-                            </div>
-                          ))
-                        )}
-                      </div>
-                    </div>
-                  )}
+                <div className="text-xs text-muted-foreground text-center">
+                  <p>
+                    Take just 5-10 minutes daily to transform your mental
+                    well-being
+                  </p>
                 </div>
               </CardContent>
             </Card>
           </div>
-        </div>
-
-        {/* Row 3: Daily Journaling - Full Width */}
-        <div className="w-full">
-          <Card>
-            <CardHeader className="pb-4 text-center">
-              <CardTitle className="text-lg">Daily Journaling</CardTitle>
-              <CardDescription className="text-sm">
-                Reflect on your day and track your thoughts
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Previous Entries */}
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-semibold flex items-center gap-2">
-                      <FileText size={20} />
-                      Previous Entries
-                    </h3>
-                    <div className="text-xs text-muted-foreground">
-                      {journalEntries.length} entries
-                    </div>
-                  </div>
-
-                  {/* Search */}
-                  <div className="relative">
-                    <Search
-                      size={16}
-                      className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-                    />
-                    <Input
-                      placeholder="Search entries..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10"
-                    />
-                  </div>
-
-                  {/* Entries List */}
-                  <div className="space-y-2 max-h-64 overflow-y-auto border border-gray-200 rounded-lg p-3">
-                    {isLoadingEntries ? (
-                      <p className="text-sm text-muted-foreground text-center py-4">
-                        Loading entries...
-                      </p>
-                    ) : getFilteredEntries().length === 0 ? (
-                      <p className="text-sm text-muted-foreground text-center py-4">
-                        {searchTerm
-                          ? "No entries match your search"
-                          : "No journal entries yet"}
-                      </p>
-                    ) : (
-                      getFilteredEntries().map((entry) => (
-                        <div
-                          key={entry.id}
-                          className="p-3 bg-muted rounded-lg cursor-pointer hover:bg-muted/80 transition-colors"
-                        >
-                          <div className="flex justify-between items-start mb-2">
-                            <h4 className="font-medium text-sm line-clamp-1">
-                              {entry.title ||
-                                `Journal Entry - ${formatDate(
-                                  entry.entryDate
-                                )}`}
-                            </h4>
-                            <span className="text-xs text-muted-foreground">
-                              {formatDate(entry.entryDate)}
-                            </span>
-                          </div>
-                          <p className="text-xs text-muted-foreground line-clamp-2 mb-2">
-                            {entry.content}
-                          </p>
-                          <div className="flex justify-between items-center">
-                            <span className="text-xs text-muted-foreground">
-                              {entry.wordCount} words
-                            </span>
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </div>
-
-                {/* Today's Journal */}
-                <div className="space-y-4">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <h3 className="text-lg font-semibold">
-                      Today&apos;s Journal
-                    </h3>
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      {isSaving && <span>Saving...</span>}
-                      {lastSaved && !isSaving && (
-                        <span className="hidden sm:inline">
-                          Saved {formatLastSaved(lastSaved)}
-                        </span>
-                      )}
-                      {lastSaved && !isSaving && (
-                        <span className="sm:hidden">Saved</span>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="space-y-3">
-                    <Input
-                      placeholder="Entry title (optional)"
-                      value={todayEntry.title}
-                      onChange={(e) =>
-                        setTodayEntry((prev) => ({
-                          ...prev,
-                          title: e.target.value,
-                        }))
-                      }
-                    />
-
-                    <div className="space-y-2">
-                      <Textarea
-                        placeholder="Write your thoughts here..."
-                        value={todayEntry.content}
-                        onChange={(e) =>
-                          setTodayEntry((prev) => ({
-                            ...prev,
-                            content: e.target.value,
-                          }))
-                        }
-                        rows={8}
-                        className="resize-none"
-                      />
-
-                      <div className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center gap-1 text-xs text-muted-foreground">
-                        <span>{getWordCount(todayEntry.content)} words</span>
-                        <span className="hidden sm:inline">
-                          Auto-saves every 30 seconds
-                        </span>
-                        <span className="sm:hidden">Auto-save enabled</span>
-                      </div>
-                    </div>
-
-                    <Button
-                      onClick={saveJournalEntry}
-                      disabled={
-                        !todayEntry.title.trim() && !todayEntry.content.trim()
-                      }
-                      className="w-full"
-                    >
-                      <Save size={16} className="mr-2" />
-                      Save Entry
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
         </div>
       </div>
     </div>
