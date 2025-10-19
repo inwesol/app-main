@@ -7,16 +7,29 @@ import {
   ArrowRight,
   BarChart3,
   Rocket,
+  Download,
+  Eye,
+  FileText,
+  Mail,
+  ImageIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import Header from "@/components/form-components/header";
 import { useRouter } from "next/navigation";
 import { SESSION_TEMPLATES } from "@/lib/constants";
 import { SidebarToggle } from "@/components/sidebar-toggle";
 import { useSidebar } from "@/components/ui/sidebar";
+import { SimpleViewDialog } from "@/components/simple-view-dialog";
 
 interface UserProgress {
   userId: string;
@@ -30,6 +43,8 @@ export const JourneyPage: React.FC = () => {
   const [userProgress, setUserProgress] = useState<UserProgress | null>(null);
   const [sessions, setSessions] = useState(SESSION_TEMPLATES);
   const [loading, setLoading] = useState(true);
+  const [isDownloadDialogOpen, setIsDownloadDialogOpen] = useState(false);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const router = useRouter();
   const { isMobile } = useSidebar();
 
@@ -136,40 +151,101 @@ export const JourneyPage: React.FC = () => {
               </div>
             </div>
           </Card>
+          {/* revise your journey */}
           <Card className="p-4 bg-white border-primary-green-200/50 shadow-sm hover:shadow-md transition-all duration-300">
             <div className="flex items-center gap-3 mb-3">
               <div className="bg-primary-green-500 rounded-lg p-2 shrink-0">
-                <BarChart3 className="size-4 text-white" />
+                <FileText className="size-4 text-white" />
               </div>
               <div className="min-w-0">
                 <h3 className="font-semibold text-primary-green-800 text-sm">
-                  Journey Progress
+                  Journey Insights
                 </h3>
                 <p className="text-xs text-primary-green-700">
-                  Get snippet of your Journey Status
+                  Download and view your journey insights
                 </p>
               </div>
             </div>
-            <div className="mb-2">
-              <div className="flex items-center justify-between text-xs text-primary-green-700 mb-1">
-                <span>Status</span>
-                <span className="font-bold">
-                  {Math.round(getProgressPercentage())}%
-                </span>
-              </div>
-              <Progress
-                value={getProgressPercentage()}
-                className="h-2 bg-primary-green-100"
-              />
-              <div className="flex items-center justify-between text-xs text-primary-green-700 mt-1 pt-1">
-                <span className="">
-                  Active Session #{userProgress.currentSession + 1}
-                </span>
-                <span className="">
-                  Latest activity on{" "}
-                  {new Date(userProgress.lastActiveDate).toLocaleDateString()}
-                </span>
-              </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {/* Download Section */}
+              <Dialog
+                open={isDownloadDialogOpen}
+                onOpenChange={setIsDownloadDialogOpen}
+              >
+                <DialogTrigger asChild>
+                  <div className="flex items-center justify-between p-3 bg-primary-green-50/50 rounded-lg border border-primary-green-200/30 cursor-pointer hover:bg-primary-green-100/50 transition-colors duration-200">
+                    <div className="flex items-center gap-2">
+                      <Download className="size-4 text-primary-green-600" />
+                      <span className="text-sm font-medium text-primary-green-800">
+                        Download Section
+                      </span>
+                    </div>
+                    <ArrowRight className="size-4 text-primary-green-600" />
+                  </div>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-md">
+                  <DialogHeader>
+                    <DialogTitle className="text-center text-lg font-semibold text-slate-800">
+                      Download Important Insights
+                    </DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-3 py-4">
+                    <Button
+                      disabled
+                      className="w-full justify-start gap-3 p-4 h-auto bg-slate-100 text-slate-500 border-slate-200"
+                    >
+                      <FileText className="size-5" />
+                      <div className="text-left">
+                        <div className="font-medium">Self Analysis Report</div>
+                        <div className="text-xs text-slate-400">
+                          Comprehensive self-assessment
+                        </div>
+                      </div>
+                    </Button>
+                    <Button
+                      disabled
+                      className="w-full justify-start gap-3 p-4 h-auto bg-slate-100 text-slate-500 border-slate-200"
+                    >
+                      <Mail className="size-5" />
+                      <div className="text-left">
+                        <div className="font-medium">Letter from Future</div>
+                        <div className="text-xs text-slate-400">
+                          Your future self&apos;s perspective
+                        </div>
+                      </div>
+                    </Button>
+                    <Button
+                      disabled
+                      className="w-full justify-start gap-3 p-4 h-auto bg-slate-100 text-slate-500 border-slate-200"
+                    >
+                      <ImageIcon className="size-5" />
+                      <div className="text-left">
+                        <div className="font-medium">Final Story Board</div>
+                        <div className="text-xs text-slate-400">
+                          Visual journey representation
+                        </div>
+                      </div>
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+
+              {/* View Section */}
+              <button
+                type="button"
+                className="flex items-center justify-between p-3 bg-primary-blue-50/50 rounded-lg border border-primary-blue-200/30 cursor-pointer hover:bg-primary-blue-100/50 transition-colors duration-200 w-full"
+                onClick={() => {
+                  setIsViewDialogOpen(true);
+                }}
+              >
+                <div className="flex items-center gap-2">
+                  <Eye className="size-4 text-primary-blue-600" />
+                  <span className="text-sm font-medium text-primary-blue-800">
+                    View Section
+                  </span>
+                </div>
+                <ArrowRight className="size-4 text-primary-blue-600" />
+              </button>
             </div>
           </Card>
         </div>
@@ -372,6 +448,12 @@ export const JourneyPage: React.FC = () => {
           </div>
         </Card>
       </div>
+
+      {/* Simple View Dialog */}
+      <SimpleViewDialog
+        isOpen={isViewDialogOpen}
+        onClose={() => setIsViewDialogOpen(false)}
+      />
     </div>
   );
 };

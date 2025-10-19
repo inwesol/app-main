@@ -34,7 +34,7 @@ export function StrengthDialog({
       );
       if (response.ok) {
         const data = await response.json();
-        setStrengths(data.values || []);
+        setStrengths(data.insights?.values || []);
       }
     } catch (error) {
       console.error("Error loading strengths:", error);
@@ -79,7 +79,9 @@ export function StrengthDialog({
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            values: strengths,
+            insights: {
+              values: strengths,
+            },
           }),
         }
       );

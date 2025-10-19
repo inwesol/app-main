@@ -34,7 +34,7 @@ export function ValuesDialog({
       );
       if (response.ok) {
         const data = await response.json();
-        setValues(data.values || []);
+        setValues(data.insights?.values || []);
       }
     } catch (error) {
       console.error("Error loading values:", error);
@@ -79,7 +79,9 @@ export function ValuesDialog({
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            values,
+            insights: {
+              values,
+            },
           }),
         }
       );
@@ -101,7 +103,7 @@ export function ValuesDialog({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <Card className="w-full max-w-2xl mx-4 max-h-[80vh] overflow-hidden">
+      <Card className="w-full max-w-4xl mx-4 max-h-[90vh] overflow-hidden">
         <CardHeader className="flex flex-row items-center justify-between pb-4 space-y-0">
           <CardTitle className="text-xl font-semibold text-slate-800">
             My Values
