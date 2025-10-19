@@ -1,20 +1,20 @@
-'use client';
+"use client";
 
-import type { Attachment, UIMessage } from 'ai';
-import { useChat } from '@ai-sdk/react';
-import { useState } from 'react';
-import useSWR, { useSWRConfig } from 'swr';
-import { ChatHeader } from '@/components/chat-header';
-import type { Vote } from '@/lib/db/schema';
-import { fetcher, generateUUID } from '@/lib/utils';
-import { Artifact } from './artifact';
-import { MultimodalInput } from './multimodal-input';
-import { Messages } from './messages';
-import type { VisibilityType } from './visibility-selector';
-import { useArtifactSelector } from '@/hooks/use-artifact';
-import { toast } from 'sonner';
-import { unstable_serialize } from 'swr/infinite';
-import { getChatHistoryPaginationKey } from './sidebar-history';
+import type { Attachment, UIMessage } from "ai";
+import { useChat } from "@ai-sdk/react";
+import { useState } from "react";
+import useSWR, { useSWRConfig } from "swr";
+import { ChatHeader } from "@/components/chat-header";
+import type { Vote } from "@/lib/db/schema";
+import { fetcher, generateUUID } from "@/lib/utils";
+import { Artifact } from "./artifact";
+import { MultimodalInput } from "./multimodal-input";
+import { Messages } from "./messages";
+import type { VisibilityType } from "./visibility-selector";
+import { useArtifactSelector } from "@/hooks/use-artifact";
+import { toast } from "sonner";
+import { unstable_serialize } from "swr/infinite";
+import { getChatHistoryPaginationKey } from "./sidebar-history";
 
 export function Chat({
   id,
@@ -52,13 +52,13 @@ export function Chat({
       mutate(unstable_serialize(getChatHistoryPaginationKey));
     },
     onError: () => {
-      toast.error('An error occured, please try again!');
+      toast.error("An error occured, please try again!");
     },
   });
 
   const { data: votes } = useSWR<Array<Vote>>(
     messages.length >= 2 ? `/api/vote?chatId=${id}` : null,
-    fetcher,
+    fetcher
   );
 
   const [attachments, setAttachments] = useState<Array<Attachment>>([]);

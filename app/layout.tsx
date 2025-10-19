@@ -1,13 +1,13 @@
-import { Toaster } from 'sonner';
-import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
+import { Toaster } from "sonner";
+import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
 
-import './globals.css';
+import "./globals.css";
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://app.inwesol.com'),
-  title: 'CoCo - AI Mindset Coach',
-  description: 'AI Mindset Coach from Inwesol.',
+  metadataBase: new URL("https://app.inwesol.com"),
+  title: "CoCo - AI Mindset Coach",
+  description: "AI Mindset Coach from Inwesol.",
 };
 
 export const viewport = {
@@ -15,18 +15,18 @@ export const viewport = {
 };
 
 const geist = Geist({
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-geist',
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-geist",
 });
 
 const geistMono = Geist_Mono({
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-geist-mono',
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-geist-mono",
 });
 
-const LIGHT_THEME_COLOR = 'hsl(0 0% 100%)';
+const LIGHT_THEME_COLOR = "hsl(0 0% 100%)";
 
 export default async function RootLayout({
   children,
@@ -41,7 +41,10 @@ export default async function RootLayout({
       <head>
         <meta name="theme-color" content={LIGHT_THEME_COLOR} />
       </head>
-      <body className="antialiased min-h-screen bg-gradient-to-br from-blue-50 via-cyan-50 to-green-50">
+      <body
+        className="antialiased min-h-screen bg-gradient-to-br from-blue-50 via-cyan-50 to-green-50"
+        suppressHydrationWarning={true}
+      >
         <Toaster position="top-center" />
         {children}
       </body>

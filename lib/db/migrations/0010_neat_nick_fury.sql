@@ -1,0 +1,1 @@
+ALTER TABLE "journey_progress" ALTER COLUMN "last_active_date" SET DATA TYPE varchar(32);

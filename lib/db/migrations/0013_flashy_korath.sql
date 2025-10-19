@@ -1,0 +1,1 @@
+ALTER TABLE "demographics_details_form" ADD CONSTRAINT "demographics_details_form_user_id_unique" UNIQUE("user_id");

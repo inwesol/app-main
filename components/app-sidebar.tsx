@@ -1,14 +1,20 @@
-'use client';
+"use client";
 
-import * as React from 'react';
-import type { User } from 'next-auth';
-import Image from 'next/image';
-import { useRouter } from 'next/navigation';
-import { MessageSquare, PlusIcon, ChevronLeft } from 'lucide-react';
-import { SidebarHistory } from '@/components/sidebar-history';
-import { SidebarUserNav } from '@/components/sidebar-user-nav';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
+import * as React from "react";
+import type { User } from "next-auth";
+import Image from "next/image";
+import { useRouter, usePathname } from "next/navigation";
+import {
+  PlusIcon,
+  ChevronLeft,
+  Sparkles,
+  LayoutDashboard,
+  Route,
+} from "lucide-react";
+import { SidebarHistory } from "@/components/sidebar-history";
+import { SidebarUserNav } from "@/components/sidebar-user-nav";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import {
   Sidebar,
   SidebarContent,
@@ -21,67 +27,43 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from '@/components/ui/sidebar';
-import { Switch } from '@/components/ui/switch';
-import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
+} from "@/components/ui/sidebar";
+import { Switch } from "@/components/ui/switch";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
 // This is sample data
 const data = {
   user: {
-    name: 'shadcn',
-    email: 'm@example.com',
-    avatar: '/avatars/shadcn.jpg',
+    name: "shadcn",
+    email: "m@example.com",
+    avatar: "/avatars/shadcn.jpg",
   },
   navMain: [
     {
-      title: 'Chat History',
-      url: '#',
-      icon: MessageSquare,
-      isActive: true,
+      title: "Dashboard",
+      url: "/",
+      icon: LayoutDashboard,
+      isActive: false,
     },
-    //   {
-    //     title: "Inbox",
-    //     url: "#",
-    //     icon: Inbox,
-    //     isActive: false,
-    //   },
-    //   {
-    //     title: "Drafts",
-    //     url: "#",
-    //     icon: File,
-    //     isActive: false,
-    //   },
-    //   {
-    //     title: "Sent",
-    //     url: "#",
-    //     icon: Send,
-    //     isActive: false,
-    //   },
-    //   {
-    //     title: "Junk",
-    //     url: "#",
-    //     icon: ArchiveX,
-    //     isActive: false,
-    //   },
-    //   {
-    //     title: "Trash",
-    //     url: "#",
-    //     icon: Trash2,
-    //     isActive: false,
-    //   },
+    {
+      title: "CoCo",
+      url: "/chat",
+      icon: Sparkles,
+      isActive: false,
+    },
+    {
+      title: "Journey",
+      url: "/journey",
+      icon: Route,
+      isActive: false,
+    },
+    // {
+    //   title: "Behavioural Tools",
+    //   url: "/behavioural-tools",
+    //   icon: Cog,
+    //   isActive: false,
+    // },
   ],
-  // Commented out mail data since we're not using it anymore
-  // mails: [
-  //   {
-  //     name: "William Smith",
-  //     email: "williamsmith@example.com",
-  //     subject: "Meeting Tomorrow",
-  //     date: "09:34 AM",
-  //     teaser:
-  //       "Hi team, just a reminder about our meeting tomorrow at 10 AM.\nPlease come prepared with your project updates.",
-  //   },
-  //   // ... rest of mail data
-  // ],
 };
 
 export function AppSidebar({
@@ -89,25 +71,47 @@ export function AppSidebar({
   ...props
 }: { user: User | undefined } & React.ComponentProps<typeof Sidebar>) {
   const router = useRouter();
-  const [activeItem, setActiveItem] = React.useState(data.navMain[0]);
+  const pathname = usePathname();
   const { setOpen, setOpenMobile, isMobile } = useSidebar();
   const [showSecondSidebar, setShowSecondSidebar] = React.useState(false);
+
+  // Function to get active item based on current path
+  const getActiveItem = React.useCallback(() => {
+    return (
+      data.navMain.find((item) => {
+        if (item.url === "/") return pathname === "/";
+        return pathname.startsWith(item.url);
+      }) || data.navMain[0]
+    ); // fallback to first item
+  }, [pathname]);
+
+  const [activeItem, setActiveItem] = React.useState(() => getActiveItem());
+
+  // Update activeItem when pathname changes
+  React.useEffect(() => {
+    setActiveItem(getActiveItem());
+  }, [getActiveItem]);
 
   // Handler for new chat creation
   const handleNewChat = () => {
     setOpenMobile(false);
     setShowSecondSidebar(false);
-    router.push('/');
-    router.refresh();
+    router.push("/");
   };
 
   // Handle navigation item click
   const handleNavItemClick = (item: (typeof data.navMain)[0]) => {
     setActiveItem(item);
     if (isMobile) {
-      setShowSecondSidebar(true);
+      if (item?.title === "CoCo") {
+        setShowSecondSidebar(true);
+      } else {
+        setShowSecondSidebar(false);
+        router.push(item?.url);
+      }
     } else {
-      setOpen(true);
+      setOpen(false);
+      router.push(item?.url);
     }
   };
 
@@ -119,7 +123,7 @@ export function AppSidebar({
   // Function to render content based on active item
   const renderContent = () => {
     switch (activeItem?.title) {
-      case 'Chat History':
+      case "CoCo":
         return (
           <div className="p-2">
             <SidebarHistory user={user} />
@@ -139,30 +143,6 @@ export function AppSidebar({
       //   return (
       //     <div className="p-4 text-sm text-muted-foreground">
       //       Drafts component will be added here
-      //     </div>
-      //   );
-
-      // case "Sent":
-      //   // TODO: Add Sent component here
-      //   return (
-      //     <div className="p-4 text-sm text-muted-foreground">
-      //       Sent component will be added here
-      //     </div>
-      //   );
-
-      // case "Junk":
-      //   // TODO: Add Junk component here
-      //   return (
-      //     <div className="p-4 text-sm text-muted-foreground">
-      //       Junk component will be added here
-      //     </div>
-      //   );
-
-      // case "Trash":
-      //   // TODO: Add Trash component here
-      //   return (
-      //     <div className="p-4 text-sm text-muted-foreground">
-      //       Trash component will be added here
       //     </div>
       //   );
 
@@ -198,7 +178,7 @@ export function AppSidebar({
                       asChild
                       className="h-8 p-0 hover:bg-transparent"
                     >
-                      <a>
+                      <a href="/">
                         <div className="flex aspect-square size-8 items-center justify-center rounded-lg ">
                           <Image
                             src="/images/logo.svg"
@@ -278,7 +258,7 @@ export function AppSidebar({
                       {activeItem?.title}
                     </div>
                   </div>
-                  {activeItem?.title === 'Chat History' ? (
+                  {activeItem?.title === "CoCo" ? (
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <Button
@@ -301,8 +281,8 @@ export function AppSidebar({
                 </div>
                 <SidebarInput
                   placeholder={
-                    activeItem?.title === 'Chat History'
-                      ? 'Search chats...'
+                    activeItem?.title === "CoCo"
+                      ? "Search chats..."
                       : `Search ${activeItem?.title.toLowerCase()}...`
                   }
                 />
@@ -331,7 +311,7 @@ export function AppSidebar({
                     asChild
                     className="h-8 p-0 hover:bg-transparent"
                   >
-                    <a>
+                    <a href="/">
                       <div className="flex aspect-square size-8 items-center justify-center rounded-lg ">
                         <Image
                           src="/images/logo.svg"
@@ -364,10 +344,12 @@ export function AppSidebar({
                           }}
                           onClick={() => handleNavItemClick(item)}
                           isActive={activeItem?.title === item.title}
-                          className="px-2 data-[state=open]:hover:bg-transparent data-[active=true]:bg-transparent hover:bg-[rgba(16,185,129,0.2)]"
+                          className="px-4 py-3 h-12 data-[state=open]:hover:bg-transparent data-[active=true]:bg-white hover:bg-[rgba(16,185,129,0.2)] rounded-lg"
                         >
-                          <item.icon className="text-black" />
-                          <span>{item.title}</span>
+                          <item.icon className="text-black size-6" />
+                          <span className="text-base font-medium">
+                            {item.title}
+                          </span>
                         </SidebarMenuButton>
                       </SidebarMenuItem>
                     ))}
@@ -375,7 +357,7 @@ export function AppSidebar({
                 </SidebarGroupContent>
               </SidebarGroup>
             </SidebarContent>
-            <SidebarFooter className="pb-2">
+            <SidebarFooter className="p-2">
               {user && <SidebarUserNav user={user} />}
             </SidebarFooter>
           </Sidebar>
@@ -390,7 +372,7 @@ export function AppSidebar({
                 <div className="text-base font-medium text-foreground">
                   {activeItem?.title}
                 </div>
-                {activeItem?.title === 'Chat History' ? (
+                {activeItem?.title === "CoCo" ? (
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Button
@@ -413,8 +395,8 @@ export function AppSidebar({
               </div>
               <SidebarInput
                 placeholder={
-                  activeItem?.title === 'Chat History'
-                    ? 'Search chats...'
+                  activeItem?.title === "CoCo"
+                    ? "Search chats..."
                     : `Search ${activeItem?.title.toLowerCase()}...`
                 }
               />
@@ -422,7 +404,7 @@ export function AppSidebar({
             <SidebarContent>
               <SidebarGroup className="pr-10">
                 <SidebarGroupContent>
-                  <div></div>
+                  <div />
                   {renderContent()}
                 </SidebarGroupContent>
               </SidebarGroup>

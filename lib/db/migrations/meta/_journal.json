@@ -64,6 +64,160 @@
       "when": 1750367255836,
       "tag": "0008_clammy_eternals",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1752998859531,
+      "tag": "0009_fixed_alex_power",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1753017609337,
+      "tag": "0010_neat_nick_fury",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1753023550447,
+      "tag": "0011_confused_loners",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1753042227911,
+      "tag": "0012_white_shriek",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1753043454880,
+      "tag": "0013_flashy_korath",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1753106343829,
+      "tag": "0014_open_the_hand",
+      "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1753151815463,
+      "tag": "0015_volatile_omega_red",
+      "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1753215316752,
+      "tag": "0016_powerful_mystique",
+      "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1753215900141,
+      "tag": "0017_overconfident_calypso",
+      "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1753237577586,
+      "tag": "0018_medical_killraven",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1753269678578,
+      "tag": "0019_ordinary_tag",
+      "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1754381595192,
+      "tag": "0020_bent_dragon_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1754384619491,
+      "tag": "0021_organic_mac_gargan",
+      "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1754387831604,
+      "tag": "0022_daily_dracula",
+      "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1754422287139,
+      "tag": "0023_stiff_cassandra_nova",
+      "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1754437878671,
+      "tag": "0024_calm_ben_grimm",
+      "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1754474190834,
+      "tag": "0025_round_agent_brand",
+      "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1754484417641,
+      "tag": "0026_dapper_spiral",
+      "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "7",
+      "when": 1754484768938,
+      "tag": "0027_even_cyclops",
+      "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1754485497983,
+      "tag": "0028_nervous_albert_cleary",
+      "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1754487489369,
+      "tag": "0029_nosy_surge",
+      "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1754568223499,
+      "tag": "0030_parallel_xavin",
+      "breakpoints": true
     }
   ]
 }
