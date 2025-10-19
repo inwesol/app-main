@@ -561,7 +561,7 @@ export const SESSION_TEMPLATES = [
         status: "not-completed",
         icon: "Activity",
         route: "/journey/sessions/8/q/post-coaching",
-        // prerequisites: ["daily-journaling"],
+        prerequisites: ["feedback"],
       },
       {
         id: "post-career-maturity",
@@ -571,7 +571,7 @@ export const SESSION_TEMPLATES = [
         status: "not-completed",
         icon: "User",
         route: "/journey/sessions/8/q/post-career-maturity",
-        // prerequisites: ["daily-journaling", "post-coaching"],
+        prerequisites: ["feedback"],
       },
       {
         id: "post-psychological-wellbeing",
@@ -581,7 +581,7 @@ export const SESSION_TEMPLATES = [
         status: "not-completed",
         icon: "Activity",
         route: "/journey/sessions/8/q/post-psychological-wellbeing",
-        // prerequisites: ["daily-journaling", "post-coaching", "post-career-maturity"],
+        prerequisites: ["feedback"],
       },
       {
         id: "post-strength-difficulty",
@@ -591,7 +591,7 @@ export const SESSION_TEMPLATES = [
         status: "not-completed",
         icon: "Activity",
         route: "/journey/sessions/8/q/post-strength-difficulty",
-        // prerequisites: ["daily-journaling", "post-coaching", "post-career-maturity", "post-psychological-wellbeing"],
+        prerequisites: ["feedback"],
       },
       {
         id: "schedule-call",

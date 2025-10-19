@@ -8,6 +8,7 @@ import {
   ChevronRight,
   Home,
   MessageCircle,
+  Activity,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -234,15 +235,47 @@ export function SessionDetail() {
     });
   };
 
-  // Filter forms into activity and discussion sections
+  // Filter forms into sections based on session
   const discussionFormIds = ["schedule-call", "feedback", "session-report"];
-  const activityForms =
-    sessionData?.forms?.filter(
-      (form) => !discussionFormIds.includes(form.id)
-    ) || [];
-  const discussionForms =
-    sessionData?.forms?.filter((form) => discussionFormIds.includes(form.id)) ||
-    [];
+  const postSessionFormIds = [
+    "post-coaching",
+    "post-career-maturity",
+    "post-psychological-wellbeing",
+    "post-strength-difficulty",
+  ];
+
+  let activityForms: FormData[];
+  let discussionForms: FormData[];
+  let postSessionForms: FormData[];
+
+  if (sessionId === 8) {
+    // Session 8: 3 sections
+    activityForms =
+      sessionData?.forms?.filter(
+        (form) =>
+          !discussionFormIds.includes(form.id) &&
+          !postSessionFormIds.includes(form.id)
+      ) || [];
+    discussionForms =
+      sessionData?.forms?.filter((form) =>
+        discussionFormIds.includes(form.id)
+      ) || [];
+    postSessionForms =
+      sessionData?.forms?.filter((form) =>
+        postSessionFormIds.includes(form.id)
+      ) || [];
+  } else {
+    // Other sessions: 2 sections
+    activityForms =
+      sessionData?.forms?.filter(
+        (form) => !discussionFormIds.includes(form.id)
+      ) || [];
+    discussionForms =
+      sessionData?.forms?.filter((form) =>
+        discussionFormIds.includes(form.id)
+      ) || [];
+    postSessionForms = [];
+  }
 
   // Reusable form card component
   const FormCard = ({ form }: { form: FormData }) => {
@@ -572,6 +605,31 @@ export function SessionDetail() {
 
               <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
                 {discussionForms.map((form) => (
+                  <FormCard key={form.id} form={form} />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Post Session Activity Section - Only for session 8 */}
+          {sessionId === 8 && postSessionForms.length > 0 && (
+            <div className="my-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-2 rounded-lg bg-gradient-to-r from-purple-100 to-violet-100">
+                  <Activity className="size-5 text-purple-600" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-bold text-slate-800">
+                    Post Session Activity
+                  </h2>
+                  <p className="text-sm text-slate-600">
+                    Complete these assessments to track your progress and growth
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+                {postSessionForms.map((form) => (
                   <FormCard key={form.id} form={form} />
                 ))}
               </div>
