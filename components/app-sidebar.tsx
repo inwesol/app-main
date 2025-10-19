@@ -40,15 +40,15 @@ const data = {
   },
   navMain: [
     {
-      title: "CoCo",
+      title: "Dashboard",
       url: "/",
-      icon: Sparkles,
+      icon: LayoutDashboard,
       isActive: false,
     },
     {
-      title: "Dashboard",
-      url: "/dashboard",
-      icon: LayoutDashboard,
+      title: "CoCo",
+      url: "/chat",
+      icon: Sparkles,
       isActive: false,
     },
     {
