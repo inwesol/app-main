@@ -74,12 +74,12 @@ export async function createUser(
   image?: string | null
 ): Promise<User> {
   try {
-    console.log("Creating user with:", {
-      email,
-      hasPassword: !!password,
-      name,
-      image,
-    });
+    // console.log("Creating user with:", {
+    //   email,
+    //   hasPassword: !!password,
+    //   name,
+    //   image,
+    // });
 
     const values: any = {
       email,
@@ -97,7 +97,7 @@ export async function createUser(
     if (image) values.image = image;
 
     const [newUser] = await db.insert(user).values(values).returning();
-    console.log("User created successfully:", newUser.id);
+    // console.log("User created successfully:", newUser.id);
     return newUser;
   } catch (error) {
     console.error("Error creating user:", error);
@@ -107,9 +107,9 @@ export async function createUser(
 
 export async function getUser(email: string): Promise<Array<User>> {
   try {
-    console.log("Getting user by email:", email);
+    // console.log("Getting user by email:", email);
     const result = await db.select().from(user).where(eq(user.email, email));
-    console.log("Users found:", result.length);
+    // console.log("Users found:", result.length);
     return result;
   } catch (error) {
     console.error("Failed to get user from database:", error);
@@ -119,7 +119,7 @@ export async function getUser(email: string): Promise<Array<User>> {
 
 export async function getUserById(id: string): Promise<User | null> {
   try {
-    console.log("Getting user by ID:", id);
+    // console.log("Getting user by ID:", id);
     const [selectedUser] = await db.select().from(user).where(eq(user.id, id));
     return selectedUser || null;
   } catch (error) {
@@ -130,7 +130,7 @@ export async function getUserById(id: string): Promise<User | null> {
 
 export async function getUserByEmail(email: string): Promise<User | null> {
   try {
-    console.log("Getting user by email (single):", email);
+    // console.log("Getting user by email (single):", email);
     const [selectedUser] = await db
       .select({
         id: user.id,
@@ -145,7 +145,7 @@ export async function getUserByEmail(email: string): Promise<User | null> {
       .from(user)
       .where(eq(user.email, email));
 
-    console.log("User found:", !!selectedUser);
+    // console.log("User found:", !!selectedUser);
     return selectedUser || null;
   } catch (error) {
     console.error("Error getting user by email:", error);
@@ -163,7 +163,7 @@ export async function updateUser(
   }
 ): Promise<User> {
   try {
-    console.log("Updating user:", id, updates);
+    // console.log("Updating user:", id, updates);
 
     const [updatedUser] = await db
       .update(user)
@@ -174,7 +174,7 @@ export async function updateUser(
       .where(eq(user.id, id))
       .returning();
 
-    console.log("User updated successfully");
+    // console.log("User updated successfully");
     return updatedUser;
   } catch (error) {
     console.error("Failed to update user in database:", error);
@@ -188,11 +188,11 @@ export async function createEmailVerificationToken(
 ): Promise<string> {
   try {
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    console.log("Creating email verification token for user:", userId);
+    // console.log("Creating email verification token for user:", userId);
 
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
 
-    console.log("Creating verification token:", { userId, otp, expiresAt });
+    // console.log("Creating verification token:", { userId, otp, expiresAt });
 
     // Delete any existing tokens for this user first
     await db
@@ -208,7 +208,7 @@ export async function createEmailVerificationToken(
       created_at: new Date(),
     });
 
-    console.log("Email verification token created successfully");
+    // console.log("Email verification token created successfully");
     return otp;
   } catch (error) {
     console.error("Error creating email verification token:", error);
@@ -220,7 +220,7 @@ export async function verifyEmailToken(
   otp: string
 ): Promise<{ success: boolean; userId?: string; userEmail?: string }> {
   try {
-    console.log("Verifying OTP:", otp);
+    // console.log("Verifying OTP:", otp);
 
     const [tokenRecord] = await db
       .select()
@@ -229,18 +229,18 @@ export async function verifyEmailToken(
       .limit(1);
 
     if (!tokenRecord) {
-      console.log("Token not found");
+      // console.log("Token not found");
       return { success: false };
     }
 
-    console.log("Token found:", {
-      userId: tokenRecord.user_id,
-      expiresAt: tokenRecord.expires_at,
-    });
+    // console.log("Token found:", {
+    //   userId: tokenRecord.user_id,
+    //   expiresAt: tokenRecord.expires_at,
+    // });
 
     // Check if token has expired
     if (new Date() > tokenRecord.expires_at) {
-      console.log("Token expired");
+      // console.log("Token expired");
       await db
         .delete(emailVerificationTokens)
         .where(eq(emailVerificationTokens.id, tokenRecord.id));
@@ -268,7 +268,7 @@ export async function verifyEmailToken(
       .delete(emailVerificationTokens)
       .where(eq(emailVerificationTokens.id, tokenRecord.id));
 
-    console.log("Email verified successfully");
+    // console.log("Email verified successfully");
     return {
       success: true,
       userId: tokenRecord.user_id,
@@ -287,13 +287,13 @@ export async function findOrCreateGoogleUser(
   image: string | null
 ): Promise<User> {
   try {
-    console.log("Finding or creating Google user:", email);
+    // console.log("Finding or creating Google user:", email);
 
     const existingUsers = await getUser(email);
 
     if (existingUsers.length > 0) {
       const existingUser = existingUsers[0];
-      console.log("Google user exists, updating info");
+      // console.log("Google user exists, updating info");
 
       if (
         existingUser.name !== name ||
@@ -311,7 +311,7 @@ export async function findOrCreateGoogleUser(
       return existingUser;
     }
 
-    console.log("Creating new Google user");
+    // console.log("Creating new Google user");
     const newUser = await createUser(email, null, name, image);
     const updatedUser = await updateUser(newUser.id, { email_verified: true });
     return updatedUser;
@@ -326,7 +326,7 @@ export async function createPasswordResetToken(
   userId: string
 ): Promise<string> {
   try {
-    console.log("Creating password reset token for user:", userId);
+    // console.log("Creating password reset token for user:", userId);
 
     const token = crypto.randomUUID() + crypto.randomUUID().replace(/-/g, "");
     const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour from now
@@ -342,7 +342,7 @@ export async function createPasswordResetToken(
       createdAt: new Date(),
     });
 
-    console.log("Password reset token created successfully");
+    // console.log("Password reset token created successfully");
     return token;
   } catch (error) {
     console.error("Failed to create password reset token:", error);
@@ -383,7 +383,7 @@ export async function resetUserPassword(
   newPassword: string
 ): Promise<User> {
   try {
-    console.log("Resetting password for user:", userId);
+    // console.log("Resetting password for user:", userId);
 
     const salt = genSaltSync(10);
     const hashPassword = hashSync(newPassword, salt);
@@ -397,7 +397,7 @@ export async function resetUserPassword(
       .where(eq(user.id, userId))
       .returning();
 
-    console.log("Password reset successfully");
+    // console.log("Password reset successfully");
     return updatedUser;
   } catch (error) {
     console.error("Failed to reset user password:", error);
@@ -823,11 +823,11 @@ export async function linkProviderAccount({
   refreshToken?: string;
 }) {
   try {
-    console.log("Provider account linked:", {
-      userId,
-      provider,
-      providerAccountId,
-    });
+    // console.log("Provider account linked:", {
+    //   userId,
+    //   provider,
+    //   providerAccountId,
+    // });
     return true;
   } catch (error) {
     console.error("Failed to link provider account");
@@ -838,7 +838,7 @@ export async function linkProviderAccount({
 // Delete user function with proper column naming
 export async function deleteUser(id: string) {
   try {
-    console.log("Deleting user:", id);
+    // console.log("Deleting user:", id);
 
     // Delete user's related data first
     const userChats = await db
@@ -877,7 +877,7 @@ export async function deleteUser(id: string) {
 
     // Finally delete the user
     const result = await db.delete(user).where(eq(user.id, id));
-    console.log("User deleted successfully");
+    // console.log("User deleted successfully");
     return result;
   } catch (error) {
     console.error("Failed to delete user from database:", error);
@@ -1713,7 +1713,7 @@ export async function upsertCareerStoryFive(
         },
       });
 
-    console.log("Career story five saved successfully");
+    // console.log("Career story five saved successfully");
   } catch (error) {
     console.error("Error upserting career story five:", error);
     throw error;
@@ -1773,7 +1773,7 @@ export async function upsertCareerStorySix(
         },
       });
 
-    console.log("Career story six saved successfully");
+    // console.log("Career story six saved successfully");
   } catch (error) {
     console.error("Error upserting career story six:", error);
     throw error;
@@ -2248,7 +2248,7 @@ export async function upsertCareerStoryFour(
         },
       });
 
-    console.log("Career story four upserted successfully");
+    // console.log("Career story four upserted successfully");
   } catch (error) {
     console.error("Error upserting career story four:", error);
     throw new Error("Failed to save career story four");

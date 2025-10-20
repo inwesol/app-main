@@ -263,9 +263,9 @@ export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ sessionId: string; qId: string }> }
 ) {
-  console.log("get api working");
+  // console.log("get api working");
   const { qId, sessionId } = await params;
-  console.log("qId: ", qId, "sessionId: ", sessionId);
+  // console.log("qId: ", qId, "sessionId: ", sessionId);
   switch (qId) {
     case "demographics-details": {
       try {
@@ -334,8 +334,8 @@ export async function GET(
         const { sessionId } = await params;
 
         // Debug logging
-        console.log("Pre-assessment GET - Session ID:", sessionId);
-        console.log("Pre-assessment GET - User ID:", session.user.id);
+        // console.log("Pre-assessment GET - Session ID:", sessionId);
+        // console.log("Pre-assessment GET - User ID:", session.user.id);
 
         // Validate sessionId
         const sessionIdNum = Number(sessionId);
@@ -348,16 +348,16 @@ export async function GET(
         const data = await getPreAssessment(session.user.id, sessionIdNum);
 
         if (!data) {
-          console.log(
-            "Pre-assessment not found for user:",
-            session.user.id,
-            "session:",
-            sessionIdNum
-          );
+          // console.log(
+          //   "Pre-assessment not found for user:",
+          //   session.user.id,
+          //   "session:",
+          //   sessionIdNum
+          // );
           return new NextResponse("Not Found", { status: 404 });
         }
 
-        console.log("Pre-assessment found:", data);
+        // console.log("Pre-assessment found:", data);
 
         // Return just the answers object that the frontend expects
         // Assuming your database returns { id, userId, sessionId, answers }
@@ -379,8 +379,8 @@ export async function GET(
 
         const { sessionId } = await params;
 
-        console.log("Career maturity GET - Session ID:", sessionId);
-        console.log("Career maturity GET - User ID:", session.user.id);
+        // console.log("Career maturity GET - Session ID:", sessionId);
+        // console.log("Career maturity GET - User ID:", session.user.id);
 
         const sessionIdNum = Number(sessionId);
         if (Number.isNaN(sessionIdNum)) {
@@ -395,16 +395,16 @@ export async function GET(
         );
 
         if (!data) {
-          console.log(
-            "Career maturity assessment not found for user:",
-            session.user.id,
-            "session:",
-            sessionIdNum
-          );
+          // console.log(
+          //   "Career maturity assessment not found for user:",
+          //   session.user.id,
+          //   "session:",
+          //   sessionIdNum
+          // );
           return new NextResponse("Not found", { status: 404 });
         }
 
-        console.log("Career maturity assessment found:", data);
+        // console.log("Career maturity assessment found:", data);
         // Return the answers object that the frontend expects
         // Assuming your database returns { id, userId, sessionId, answers }
         return NextResponse.json(data.answers || data);
@@ -527,8 +527,8 @@ export async function GET(
 
         const { sessionId } = await params;
 
-        console.log("Post Career maturity GET - Session ID:", sessionId);
-        console.log("Post Career maturity GET - User ID:", session.user.id);
+        // console.log("Post Career maturity GET - Session ID:", sessionId);
+        // console.log("Post Career maturity GET - User ID:", session.user.id);
 
         const sessionIdNum = Number(sessionId);
         if (Number.isNaN(sessionIdNum)) {
@@ -543,16 +543,16 @@ export async function GET(
         );
 
         if (!data) {
-          console.log(
-            "Post Career maturity assessment not found for user:",
-            session.user.id,
-            "session:",
-            sessionIdNum
-          );
+          // console.log(
+          //   "Post Career maturity assessment not found for user:",
+          //   session.user.id,
+          //   "session:",
+          //   sessionIdNum
+          // );
           return new NextResponse("Not found", { status: 404 });
         }
 
-        console.log("Post Career maturity assessment found:", data);
+        // console.log("Post Career maturity assessment found:", data);
         // Return the answers object that the frontend expects
         // Assuming your database returns { id, userId, sessionId, answers }
         return NextResponse.json(data.answers || data);
@@ -601,8 +601,8 @@ export async function GET(
 
         const { sessionId } = await params;
 
-        console.log("Post-coaching GET - Session ID:", sessionId);
-        console.log("Post-coaching GET - User ID:", session.user.id);
+        // console.log("Post-coaching GET - Session ID:", sessionId);
+        // console.log("Post-coaching GET - User ID:", session.user.id);
 
         // Validate sessionId
         const sessionIdNum = Number(sessionId);
@@ -618,16 +618,16 @@ export async function GET(
         );
 
         if (!data) {
-          console.log(
-            "Post-coaching assessment not found for user:",
-            session.user.id,
-            "session:",
-            sessionIdNum
-          );
+          // console.log(
+          //   "Post-coaching assessment not found for user:",
+          //   session.user.id,
+          //   "session:",
+          //   sessionIdNum
+          // );
           return new NextResponse("Not Found", { status: 404 });
         }
 
-        console.log("Post-coaching assessment found:", data);
+        // console.log("Post-coaching assessment found:", data);
 
         // Return the answers object that the frontend expects
         return NextResponse.json({
@@ -782,14 +782,14 @@ export async function POST(
           return new NextResponse("Unauthorized", { status: 401 });
         }
 
-        console.log("server params: ", await params);
+        // console.log("server params: ", await params);
         const { sessionId, qId } = await params;
         const answers = await req.json();
 
         // Debug logging
-        console.log("Pre-assessment POST - Session ID:", sessionId);
-        console.log("Pre-assessment POST - User ID:", session.user.id);
-        console.log("Pre-assessment POST - Answers:", answers);
+        // console.log("Pre-assessment POST - Session ID:", sessionId);
+        // console.log("Pre-assessment POST - User ID:", session.user.id);
+        // console.log("Pre-assessment POST - Answers:", answers);
 
         if (!answers || typeof answers !== "object") {
           return new NextResponse("Bad Request: Missing or invalid 'answers'", {
@@ -828,9 +828,9 @@ export async function POST(
         const { sessionId } = await params;
         const answers = await req.json();
 
-        console.log("Career maturity POST - Session ID:", sessionId);
-        console.log("Career maturity POST - User ID:", session.user.id);
-        console.log("Career maturity POST - Answers:", answers);
+        // console.log("Career maturity POST - Session ID:", sessionId);
+        // console.log("Career maturity POST - User ID:", session.user.id);
+        // console.log("Career maturity POST - Answers:", answers);
 
         const sessionIdNum = Number(sessionId);
         if (Number.isNaN(sessionIdNum)) {
@@ -921,9 +921,9 @@ export async function POST(
           );
         });
 
-        console.log("Career maturity scores calculated:", {
-          categoryScores,
-        });
+        // console.log("Career maturity scores calculated:", {
+        //   categoryScores,
+        // });
 
         await upsertCareerMaturityAssessment(
           session.user.id,
@@ -1266,9 +1266,9 @@ export async function POST(
         const { sessionId } = await params;
         const answers = await req.json();
 
-        console.log("Post Career maturity POST - Session ID:", sessionId);
-        console.log("Post Career maturity POST - User ID:", session.user.id);
-        console.log("Post Career maturity POST - Answers:", answers);
+        // console.log("Post Career maturity POST - Session ID:", sessionId);
+        // console.log("Post Career maturity POST - User ID:", session.user.id);
+        // console.log("Post Career maturity POST - Answers:", answers);
 
         const sessionIdNum = Number(sessionId);
         if (Number.isNaN(sessionIdNum)) {
@@ -1359,9 +1359,9 @@ export async function POST(
           );
         });
 
-        console.log("Post Career maturity scores calculated:", {
-          categoryScores,
-        });
+        // console.log("Post Career maturity scores calculated:", {
+        //   categoryScores,
+        // });
 
         await upsertPostCareerMaturityAssessment(
           session.user.id,
@@ -1483,14 +1483,14 @@ export async function POST(
           return new NextResponse("Unauthorized", { status: 401 });
         }
 
-        console.log("server params: ", await params);
+        // console.log("server params: ", await params);
         const { sessionId, qId } = await params;
         const answers = await req.json();
 
         // Debug logging
-        console.log("Post-coaching POST - Session ID:", sessionId);
-        console.log("Post-coaching POST - User ID:", session.user.id);
-        console.log("Post-coaching POST - Answers:", answers);
+        // console.log("Post-coaching POST - Session ID:", sessionId);
+        // console.log("Post-coaching POST - User ID:", session.user.id);
+        // console.log("Post-coaching POST - Answers:", answers);
 
         if (!answers || typeof answers !== "object") {
           return new NextResponse("Bad Request: Missing or invalid 'answers'", {
@@ -1536,9 +1536,9 @@ export async function POST(
         const { sessionId, qId } = await params;
         const body = await req.json();
 
-        console.log("Pre-coaching SDQ POST - Session ID:", sessionId);
-        console.log("Pre-coaching SDQ POST - User ID:", session.user.id);
-        console.log("Pre-coaching SDQ POST - Body:", body);
+        // console.log("Pre-coaching SDQ POST - Session ID:", sessionId);
+        // console.log("Pre-coaching SDQ POST - User ID:", session.user.id);
+        // console.log("Pre-coaching SDQ POST - Body:", body);
 
         if (!body || typeof body !== "object") {
           return new NextResponse(
@@ -1612,9 +1612,9 @@ export async function POST(
         const { sessionId, qId } = await params;
         const body = await req.json();
 
-        console.log("Post-coaching SDQ POST - Session ID:", sessionId);
-        console.log("Post-coaching SDQ POST - User ID:", session.user.id);
-        console.log("Post-coaching SDQ POST - Body:", body);
+        // console.log("Post-coaching SDQ POST - Session ID:", sessionId);
+        // console.log("Post-coaching SDQ POST - User ID:", session.user.id);
+        // console.log("Post-coaching SDQ POST - Body:", body);
 
         if (!body || typeof body !== "object") {
           return new NextResponse(
