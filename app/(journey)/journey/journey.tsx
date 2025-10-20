@@ -142,7 +142,9 @@ export const JourneyPage: React.FC = () => {
               />
               <div className="flex items-center justify-between text-xs text-primary-green-700 mt-1 pt-1">
                 <span className="">
-                  Active Session #{userProgress.currentSession + 1}
+                  {userProgress.currentSession > 8
+                    ? "All Sessions is completed"
+                    : `Active Session #${userProgress.currentSession + 1}`}
                 </span>
                 <span className="">
                   Latest activity on{" "}

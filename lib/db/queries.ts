@@ -51,6 +51,8 @@ import {
   postCoachingAssessments,
   dailyJournalEntries,
   type DailyJournalEntry,
+  preCoachingSdq,
+  postCoachingSdq,
 } from "./schema";
 import type { ArtifactKind } from "@/components/artifact";
 import { SESSION_TEMPLATES } from "@/lib/constants";
@@ -2975,5 +2977,193 @@ export async function deleteMyLifeCollage(
   } catch (error) {
     console.error("Error deleting my life collage:", error);
     throw error;
+  }
+}
+
+// Pre-coaching SDQ queries
+export async function getPreCoachingSdq(
+  userId: string,
+  sessionId: number
+): Promise<{
+  answers: Record<string, string>;
+  score: number;
+  subscaleScores: Record<string, number>;
+} | null> {
+  try {
+    const result = await db
+      .select()
+      .from(preCoachingSdq)
+      .where(
+        and(
+          eq(preCoachingSdq.userId, userId),
+          eq(preCoachingSdq.sessionId, sessionId)
+        )
+      )
+      .limit(1);
+
+    if (!result[0]) {
+      return null;
+    }
+
+    return {
+      answers: result[0].answers as Record<string, string>,
+      score: Number(result[0].score),
+      subscaleScores: result[0].subscaleScores as Record<string, number>,
+    };
+  } catch (error) {
+    console.error("Error fetching pre-coaching SDQ:", error);
+    throw error;
+  }
+}
+
+export async function upsertPreCoachingSdq(
+  userId: string,
+  sessionId: number,
+  answers: Record<string, string>,
+  score: number,
+  subscaleScores: Record<string, number>
+) {
+  try {
+    const result = await db
+      .insert(preCoachingSdq)
+      .values({
+        userId,
+        sessionId,
+        answers,
+        score: score.toString(),
+        subscaleScores,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .onConflictDoUpdate({
+        target: [preCoachingSdq.userId, preCoachingSdq.sessionId],
+        set: {
+          answers,
+          score: score.toString(),
+          subscaleScores,
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
+
+    return result[0];
+  } catch (error) {
+    console.error("Error upserting pre-coaching SDQ:", error);
+    throw error;
+  }
+}
+
+export async function deletePreCoachingSdq(
+  userId: string,
+  sessionId: number
+): Promise<boolean> {
+  try {
+    const result = await db
+      .delete(preCoachingSdq)
+      .where(
+        and(
+          eq(preCoachingSdq.userId, userId),
+          eq(preCoachingSdq.sessionId, sessionId)
+        )
+      );
+
+    return result.length > 0;
+  } catch (error) {
+    console.error("Error deleting pre-coaching SDQ:", error);
+    return false;
+  }
+}
+
+// Post-coaching SDQ queries
+export async function getPostCoachingSdq(
+  userId: string,
+  sessionId: number
+): Promise<{
+  answers: Record<string, string>;
+  score: number;
+  subscaleScores: Record<string, number>;
+} | null> {
+  try {
+    const result = await db
+      .select()
+      .from(postCoachingSdq)
+      .where(
+        and(
+          eq(postCoachingSdq.userId, userId),
+          eq(postCoachingSdq.sessionId, sessionId)
+        )
+      )
+      .limit(1);
+
+    if (!result[0]) {
+      return null;
+    }
+
+    return {
+      answers: result[0].answers as Record<string, string>,
+      score: Number(result[0].score),
+      subscaleScores: result[0].subscaleScores as Record<string, number>,
+    };
+  } catch (error) {
+    console.error("Error fetching post-coaching SDQ:", error);
+    throw error;
+  }
+}
+
+export async function upsertPostCoachingSdq(
+  userId: string,
+  sessionId: number,
+  answers: Record<string, string>,
+  score: number,
+  subscaleScores: Record<string, number>
+) {
+  try {
+    const result = await db
+      .insert(postCoachingSdq)
+      .values({
+        userId,
+        sessionId,
+        answers,
+        score: score.toString(),
+        subscaleScores,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .onConflictDoUpdate({
+        target: [postCoachingSdq.userId, postCoachingSdq.sessionId],
+        set: {
+          answers,
+          score: score.toString(),
+          subscaleScores,
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
+
+    return result[0];
+  } catch (error) {
+    console.error("Error upserting post-coaching SDQ:", error);
+    throw error;
+  }
+}
+
+export async function deletePostCoachingSdq(
+  userId: string,
+  sessionId: number
+): Promise<boolean> {
+  try {
+    const result = await db
+      .delete(postCoachingSdq)
+      .where(
+        and(
+          eq(postCoachingSdq.userId, userId),
+          eq(postCoachingSdq.sessionId, sessionId)
+        )
+      );
+
+    return result.length > 0;
+  } catch (error) {
+    console.error("Error deleting post-coaching SDQ:", error);
+    return false;
   }
 }

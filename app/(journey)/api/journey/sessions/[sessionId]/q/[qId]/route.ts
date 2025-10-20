@@ -32,6 +32,10 @@ import {
   getPostCoachingAssessment,
   upsertPostCoachingAssessment,
   deletePostCoachingAssessment,
+  getPreCoachingSdq,
+  upsertPreCoachingSdq,
+  getPostCoachingSdq,
+  upsertPostCoachingSdq,
 } from "@/lib/db/queries";
 import { demographicsDetailsSchema } from "@/lib/form-validation-schemas/questionnaire-schemas/demographics-details-form-schema";
 
@@ -631,6 +635,64 @@ export async function GET(
         });
       } catch (err) {
         console.error("Error fetching post-coaching assessment:", err);
+        return new NextResponse("Internal Server Error", { status: 500 });
+      }
+    case "pre-coaching-strength-difficulty":
+      try {
+        const session = await auth();
+        if (!session?.user?.id) {
+          return new NextResponse("Unauthorized", { status: 401 });
+        }
+
+        const sessionIdNum = Number(sessionId);
+        if (Number.isNaN(sessionIdNum)) {
+          return new NextResponse("Bad Request: Invalid session ID", {
+            status: 400,
+          });
+        }
+
+        const data = await getPreCoachingSdq(session.user.id, sessionIdNum);
+
+        if (!data) {
+          return new NextResponse("Not Found", { status: 404 });
+        }
+
+        return NextResponse.json({
+          answers: data.answers,
+          score: data.score,
+          subscaleScores: data.subscaleScores,
+        });
+      } catch (err) {
+        console.error("Error fetching pre-coaching SDQ:", err);
+        return new NextResponse("Internal Server Error", { status: 500 });
+      }
+    case "post-coaching-strength-difficulty":
+      try {
+        const session = await auth();
+        if (!session?.user?.id) {
+          return new NextResponse("Unauthorized", { status: 401 });
+        }
+
+        const sessionIdNum = Number(sessionId);
+        if (Number.isNaN(sessionIdNum)) {
+          return new NextResponse("Bad Request: Invalid session ID", {
+            status: 400,
+          });
+        }
+
+        const data = await getPostCoachingSdq(session.user.id, sessionIdNum);
+
+        if (!data) {
+          return new NextResponse("Not Found", { status: 404 });
+        }
+
+        return NextResponse.json({
+          answers: data.answers,
+          score: data.score,
+          subscaleScores: data.subscaleScores,
+        });
+      } catch (err) {
+        console.error("Error fetching post-coaching SDQ:", err);
         return new NextResponse("Internal Server Error", { status: 500 });
       }
     default:
@@ -1462,6 +1524,158 @@ export async function POST(
         return NextResponse.json({ success: true });
       } catch (err) {
         console.error("Error inserting post-coaching assessment:", err);
+        return new NextResponse("Internal Server Error", { status: 500 });
+      }
+    case "pre-coaching-strength-difficulty":
+      try {
+        const session = await auth();
+        if (!session?.user?.id) {
+          return new NextResponse("Unauthorized", { status: 401 });
+        }
+
+        const { sessionId, qId } = await params;
+        const body = await req.json();
+
+        console.log("Pre-coaching SDQ POST - Session ID:", sessionId);
+        console.log("Pre-coaching SDQ POST - User ID:", session.user.id);
+        console.log("Pre-coaching SDQ POST - Body:", body);
+
+        if (!body || typeof body !== "object") {
+          return new NextResponse(
+            "Bad Request: Missing or invalid request body",
+            {
+              status: 400,
+            }
+          );
+        }
+
+        const { answers, score, subscaleScores } = body;
+
+        if (!answers || typeof answers !== "object") {
+          return new NextResponse("Bad Request: Missing or invalid 'answers'", {
+            status: 400,
+          });
+        }
+
+        if (typeof score !== "number") {
+          return new NextResponse("Bad Request: Missing or invalid 'score'", {
+            status: 400,
+          });
+        }
+
+        if (!subscaleScores || typeof subscaleScores !== "object") {
+          return new NextResponse(
+            "Bad Request: Missing or invalid 'subscaleScores'",
+            {
+              status: 400,
+            }
+          );
+        }
+
+        // Validate sessionId
+        const sessionIdNum = Number(sessionId);
+        if (Number.isNaN(sessionIdNum)) {
+          return new NextResponse("Bad Request: Invalid session ID", {
+            status: 400,
+          });
+        }
+
+        await upsertPreCoachingSdq(
+          session.user.id,
+          sessionIdNum,
+          answers,
+          score,
+          subscaleScores
+        );
+        await completeUserSessionFormProgress({
+          userId: session.user.id,
+          sessionId: Number(sessionId),
+          qId,
+        });
+        await updateJourneyProgressAfterForm(
+          session.user.id,
+          Number(sessionId)
+        );
+
+        return NextResponse.json({ success: true });
+      } catch (err) {
+        console.error("Error inserting pre-coaching SDQ:", err);
+        return new NextResponse("Internal Server Error", { status: 500 });
+      }
+    case "post-coaching-strength-difficulty":
+      try {
+        const session = await auth();
+        if (!session?.user?.id) {
+          return new NextResponse("Unauthorized", { status: 401 });
+        }
+
+        const { sessionId, qId } = await params;
+        const body = await req.json();
+
+        console.log("Post-coaching SDQ POST - Session ID:", sessionId);
+        console.log("Post-coaching SDQ POST - User ID:", session.user.id);
+        console.log("Post-coaching SDQ POST - Body:", body);
+
+        if (!body || typeof body !== "object") {
+          return new NextResponse(
+            "Bad Request: Missing or invalid request body",
+            {
+              status: 400,
+            }
+          );
+        }
+
+        const { answers, score, subscaleScores } = body;
+
+        if (!answers || typeof answers !== "object") {
+          return new NextResponse("Bad Request: Missing or invalid 'answers'", {
+            status: 400,
+          });
+        }
+
+        if (typeof score !== "number") {
+          return new NextResponse("Bad Request: Missing or invalid 'score'", {
+            status: 400,
+          });
+        }
+
+        if (!subscaleScores || typeof subscaleScores !== "object") {
+          return new NextResponse(
+            "Bad Request: Missing or invalid 'subscaleScores'",
+            {
+              status: 400,
+            }
+          );
+        }
+
+        // Validate sessionId
+        const sessionIdNum = Number(sessionId);
+        if (Number.isNaN(sessionIdNum)) {
+          return new NextResponse("Bad Request: Invalid session ID", {
+            status: 400,
+          });
+        }
+
+        await upsertPostCoachingSdq(
+          session.user.id,
+          sessionIdNum,
+          answers,
+          score,
+          subscaleScores
+        );
+        await completeUserSessionFormProgress({
+          userId: session.user.id,
+          sessionId: Number(sessionId),
+          qId,
+        });
+        await updateJourneyProgressAfterForm(
+          session.user.id,
+          Number(sessionId)
+        );
+
+        return NextResponse.json({ success: true });
+      } catch (err) {
+        console.error("Error inserting post-coaching SDQ:", err);
         return new NextResponse("Internal Server Error", { status: 500 });
       }
     default:
