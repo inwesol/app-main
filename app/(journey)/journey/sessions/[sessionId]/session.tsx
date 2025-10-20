@@ -98,7 +98,7 @@ export function SessionDetail() {
   const getBreadcrumbs = (): BreadcrumbItem[] => {
     const breadcrumbs: BreadcrumbItem[] = [
       { label: "Home", href: "/" },
-      { label: "Coaching", href: "/journey" },
+      { label: "Journey", href: "/journey" },
     ];
 
     if (sessionData) {

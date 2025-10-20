@@ -35,16 +35,16 @@ export const {
       },
       async authorize({ email, password }: any) {
         try {
-          console.log("Credential sign in attempt for:", email);
+          // console.log("Credential sign in attempt for:", email);
 
           if (!email || !password) {
-            console.log("Missing email or password");
+            // console.log("Missing email or password");
             return null;
           }
 
           const users = await getUser(email);
           if (users.length === 0) {
-            console.log("No user found with email:", email);
+            // console.log("No user found with email:", email);
             return null;
           }
 
@@ -52,9 +52,9 @@ export const {
 
           // Handle special email verification auto-login
           if (password === "__EMAIL_VERIFIED__") {
-            console.log("Email verification auto-login");
+            // console.log("Email verification auto-login");
             if (!user.email_verified) {
-              console.log("User email not verified for auto-login");
+              // console.log("User email not verified for auto-login");
               return null;
             }
             return {
@@ -67,17 +67,17 @@ export const {
 
           // Regular password authentication
           if (!user.password) {
-            console.log("User has no password (OAuth user)");
+            // console.log("User has no password (OAuth user)");
             return null;
           }
 
           const passwordsMatch = await compare(password, user.password);
           if (!passwordsMatch) {
-            console.log("Password mismatch");
+            // console.log("Password mismatch");
             return null;
           }
 
-          console.log("Successful credential sign in");
+          // console.log("Successful credential sign in");
           return {
             id: user.id.toString(), // Ensure ID is string
             email: user.email,
@@ -94,19 +94,19 @@ export const {
   callbacks: {
     ...authConfig.callbacks,
     async signIn({ user, account, profile }) {
-      console.log("Sign in callback triggered:", {
-        provider: account?.provider,
-        email: user.email,
-        name: user.name,
-        userId: user.id,
-      });
+      // console.log("Sign in callback triggered:", {
+      //   provider: account?.provider,
+      //   email: user.email,
+      //   name: user.name,
+      //   userId: user.id,
+      // });
 
       if (account?.provider === "google") {
         try {
-          console.log("Processing Google sign in for:", user.email);
+          // console.log("Processing Google sign in for:", user.email);
 
           if (!user.email) {
-            console.log("No email provided by Google");
+            // console.log("No email provided by Google");
             return false;
           }
 
@@ -114,7 +114,7 @@ export const {
           const existingUsers = await getUser(user.email);
 
           if (existingUsers.length === 0) {
-            console.log("Creating new user from Google sign in");
+            // console.log("Creating new user from Google sign in");
             try {
               const newUser = await createUser(
                 user.email,
@@ -128,13 +128,13 @@ export const {
 
               // IMPORTANT: Set the user ID for the session
               user.id = newUser.id.toString();
-              console.log("Successfully created new user:", newUser.id);
+              // console.log("Successfully created new user:", newUser.id);
             } catch (createError) {
               console.error("Failed to create user:", createError);
               return false;
             }
           } else {
-            console.log("User already exists:", existingUsers[0].id);
+            // console.log("User already exists:", existingUsers[0].id);
             const existingUser = existingUsers[0];
 
             // IMPORTANT: Set the user ID for the session
@@ -147,7 +147,7 @@ export const {
               !existingUser.email_verified;
 
             if (needsUpdate) {
-              console.log("Updating user info from Google");
+              // console.log("Updating user info from Google");
               try {
                 await updateUser(existingUser.id, {
                   name: user.name || existingUser.name,
@@ -173,14 +173,14 @@ export const {
     },
 
     async jwt({ token, user, account }) {
-      console.log("JWT callback:", {
-        hasToken: !!token,
-        hasUser: !!user,
-        hasAccount: !!account,
-        provider: account?.provider,
-        userId: user?.id,
-        tokenId: token?.id,
-      });
+      // console.log("JWT callback:", {
+      //   hasToken: !!token,
+      //   hasUser: !!user,
+      //   hasAccount: !!account,
+      //   provider: account?.provider,
+      //   userId: user?.id,
+      //   tokenId: token?.id,
+      // });
 
       // First time sign in - user object will be available
       if (user) {
@@ -190,23 +190,23 @@ export const {
         token.name = user.name;
         token.image = user.image;
 
-        console.log("JWT token updated with user data:", {
-          id: token.id,
-          email: token.email,
-        });
+        // console.log("JWT token updated with user data:", {
+        //   id: token.id,
+        //   email: token.email,
+        // });
       }
 
       // If token doesn't have ID but has email, fetch from database
       if (!token.id && token.email) {
-        console.log(
-          "Token missing ID, fetching from database for:",
-          token.email
-        );
+        // console.log(
+        //   "Token missing ID, fetching from database for:",
+        //   token.email
+        // );
         try {
           const users = await getUser(token.email);
           if (users.length > 0) {
             token.id = users[0].id.toString();
-            console.log("Token ID updated from database:", token.id);
+            // console.log("Token ID updated from database:", token.id);
           }
         } catch (error) {
           console.error("Error fetching user ID for token:", error);
@@ -222,12 +222,12 @@ export const {
     },
 
     async session({ session, token }: { session: Session; token: any }) {
-      console.log("Session callback:", {
-        hasSession: !!session,
-        hasToken: !!token,
-        sessionEmail: session.user?.email,
-        tokenId: token?.id,
-      });
+      // console.log("Session callback:", {
+      //   hasSession: !!session,
+      //   hasToken: !!token,
+      //   sessionEmail: session.user?.email,
+      //   tokenId: token?.id,
+      // });
 
       if (session.user && token) {
         try {
@@ -238,16 +238,16 @@ export const {
             session.user.name = token.name || session.user.name;
             session.user.image = token.image || session.user.image;
 
-            console.log("Session updated from token:", {
-              id: (session.user as any).id,
-              email: session.user.email,
-            });
+            // console.log("Session updated from token:", {
+            //   id: (session.user as any).id,
+            //   email: session.user.email,
+            // });
           } else if (session.user.email) {
             // Fallback: fetch user data if token doesn't have ID
-            console.log(
-              "Session missing ID, fetching user data for:",
-              session.user.email
-            );
+            // console.log(
+            //   "Session missing ID, fetching user data for:",
+            //   session.user.email
+            // );
             const users = await getUser(session.user.email);
 
             if (users.length > 0) {
@@ -255,7 +255,7 @@ export const {
               (session.user as any).id = userData.id.toString();
               session.user.name = userData.name || session.user.name;
               session.user.image = userData.image || session.user.image;
-              console.log("Session user data updated from database");
+              // console.log("Session user data updated from database");
             } else {
               console.error(
                 "No user found in session callback for:",
@@ -302,23 +302,23 @@ export const {
   },
   events: {
     async signIn({ user, account, profile }) {
-      console.log("SignIn event:", {
-        provider: account?.provider,
-        email: user.email,
-        userId: user.id,
-      });
+      // console.log("SignIn event:", {
+      //   provider: account?.provider,
+      //   email: user.email,
+      //   userId: user.id,
+      // });
     },
     async signOut({ session, token }: any) {
-      console.log("SignOut event:", {
-        email: session?.user?.email || token?.email,
-        userId: session?.user?.id || token?.id,
-      });
+      // console.log("SignOut event:", {
+      //   email: session?.user?.email || token?.email,
+      //   userId: session?.user?.id || token?.id,
+      // });
     },
     async createUser({ user }) {
-      console.log("CreateUser event:", {
-        email: user.email,
-        id: user.id,
-      });
+      // console.log("CreateUser event:", {
+      //   email: user.email,
+      //   id: user.id,
+      // });
     },
   },
   logger: {
@@ -330,7 +330,7 @@ export const {
     },
     debug(code, ...message) {
       if (process.env.NODE_ENV === "development") {
-        console.log(`NextAuth Debug [${code}]:`, ...message);
+        // console.log(`NextAuth Debug [${code}]:`, ...message);
       }
     },
   },

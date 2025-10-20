@@ -30,6 +30,7 @@ import { SESSION_TEMPLATES } from "@/lib/constants";
 import { SidebarToggle } from "@/components/sidebar-toggle";
 import { useSidebar } from "@/components/ui/sidebar";
 import { SimpleViewDialog } from "@/components/simple-view-dialog";
+import { ReportDialog } from "@/components/report-dialog";
 
 interface UserProgress {
   userId: string;
@@ -45,6 +46,7 @@ export const JourneyPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [isDownloadDialogOpen, setIsDownloadDialogOpen] = useState(false);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
   const router = useRouter();
   const { isMobile } = useSidebar();
 
@@ -142,7 +144,9 @@ export const JourneyPage: React.FC = () => {
               />
               <div className="flex items-center justify-between text-xs text-primary-green-700 mt-1 pt-1">
                 <span className="">
-                  Active Session #{userProgress.currentSession + 1}
+                  {userProgress.currentSession > 8
+                    ? "All Sessions is completed"
+                    : `Active Session #${userProgress.currentSession + 1}`}
                 </span>
                 <span className="">
                   Latest activity on{" "}
@@ -166,7 +170,7 @@ export const JourneyPage: React.FC = () => {
                 </p>
               </div>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {/* Download Section */}
               <Dialog
                 open={isDownloadDialogOpen}
@@ -177,7 +181,7 @@ export const JourneyPage: React.FC = () => {
                     <div className="flex items-center gap-2">
                       <Download className="size-4 text-primary-green-600" />
                       <span className="text-sm font-medium text-primary-green-800">
-                        Download Section
+                        Download
                       </span>
                     </div>
                     <ArrowRight className="size-4 text-primary-green-600" />
@@ -241,10 +245,27 @@ export const JourneyPage: React.FC = () => {
                 <div className="flex items-center gap-2">
                   <Eye className="size-4 text-primary-blue-600" />
                   <span className="text-sm font-medium text-primary-blue-800">
-                    View Section
+                    View
                   </span>
                 </div>
                 <ArrowRight className="size-4 text-primary-blue-600" />
+              </button>
+
+              {/* Report Section */}
+              <button
+                type="button"
+                className="flex items-center justify-between p-3 bg-purple-50/50 rounded-lg border border-purple-200/30 cursor-pointer hover:bg-purple-100/50 transition-colors duration-200 w-full"
+                onClick={() => {
+                  setIsReportDialogOpen(true);
+                }}
+              >
+                <div className="flex items-center gap-2">
+                  <BarChart3 className="size-4 text-purple-600" />
+                  <span className="text-sm font-medium text-purple-800">
+                    Report
+                  </span>
+                </div>
+                <ArrowRight className="size-4 text-purple-600" />
               </button>
             </div>
           </Card>
@@ -453,6 +474,12 @@ export const JourneyPage: React.FC = () => {
       <SimpleViewDialog
         isOpen={isViewDialogOpen}
         onClose={() => setIsViewDialogOpen(false)}
+      />
+
+      {/* Report Dialog */}
+      <ReportDialog
+        isOpen={isReportDialogOpen}
+        onClose={() => setIsReportDialogOpen(false)}
       />
     </div>
   );

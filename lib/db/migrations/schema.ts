@@ -363,6 +363,22 @@ export const careerStoryTwo = pgTable("career_story_two", {
 	}
 });
 
+export const preCoachingSdq = pgTable("pre_coaching_sdq", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	userId: uuid("user_id").notNull(),
+	sessionId: integer("session_id").default(2).notNull(),
+	answers: jsonb().notNull(),
+	score: numeric({ precision: 5, scale:  2 }).default('0').notNull(),
+	subscaleScores: json("subscale_scores").default({}).notNull(),
+	createdAt: timestamp("created_at", { mode: 'string' }).default(sql`CURRENT_TIMESTAMP`).notNull(),
+	updatedAt: timestamp("updated_at", { mode: 'string' }).default(sql`CURRENT_TIMESTAMP`).notNull(),
+},
+(table) => {
+	return {
+		preCoachingSdqUserIdSessionIdUnique: unique("pre_coaching_sdq_user_id_session_id_unique").on(table.userId, table.sessionId),
+	}
+});
+
 export const uploadedImages = pgTable("uploaded_images", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
 	userId: uuid("user_id").notNull(),
@@ -521,6 +537,25 @@ export const postCareerMaturity = pgTable("post_career_maturity", {
 	}
 });
 
+export const mappings = pgTable("mappings", {
+	mappingId: text("mapping_id").primaryKey().notNull(),
+	userId: text("user_id").notNull(),
+	personId: text("person_id").notNull(),
+	coachEmail: text("coach_email").notNull(),
+	personData: jsonb("person_data"),
+	mappedAt: timestamp("mapped_at", { withTimezone: true, mode: 'string' }).defaultNow(),
+});
+
+export const people = pgTable("people", {
+	id: text().primaryKey().notNull(),
+	userId: text("user_id").notNull(),
+	name: text(),
+	email: text(),
+	role: text(),
+	data: jsonb(),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow(),
+});
+
 export const postPsychologicalWellbeingTest = pgTable("post_psychological_wellbeing_test", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
 	userId: uuid("user_id").notNull(),
@@ -534,6 +569,72 @@ export const postPsychologicalWellbeingTest = pgTable("post_psychological_wellbe
 (table) => {
 	return {
 		postPsychologicalWellbeingTestUserIdSessionIdUnique: unique("post_psychological_wellbeing_test_user_id_session_id_unique").on(table.userId, table.sessionId),
+	}
+});
+
+export const coaches = pgTable("coaches", {
+	id: uuid().default(sql`uuid_generate_v4()`).primaryKey().notNull(),
+	name: text(),
+	email: text(),
+	clients: text(),
+	sessionLinks: text("session_links"),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow(),
+	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow(),
+},
+(table) => {
+	return {
+		coachesEmailKey: unique("coaches_email_key").on(table.email),
+	}
+});
+
+export const report = pgTable("report", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	userId: uuid("user_id").notNull(),
+	sessionId: integer("session_id").notNull(),
+	summary: text().notNull(),
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().notNull(),
+	coachFeedback: text("coach_feedback"),
+},
+(table) => {
+	return {
+		userSessionUnique: uniqueIndex("report_user_session_unique").using("btree", table.userId.asc().nullsLast(), table.sessionId.asc().nullsLast()),
+	}
+});
+
+export const clientSummary = pgTable("client_summary", {
+	id: serial().primaryKey().notNull(),
+	clientId: uuid("client_id").notNull(),
+	sessionId: integer("session_id").notNull(),
+	summary: text(),
+	createdAt: timestamp("created_at", { mode: 'string' }).default(sql`CURRENT_TIMESTAMP`),
+	updatedAt: timestamp("updated_at", { mode: 'string' }).default(sql`CURRENT_TIMESTAMP`),
+},
+(table) => {
+	return {
+		idxClientSummaryClientSession: index("idx_client_summary_client_session").using("btree", table.clientId.asc().nullsLast(), table.sessionId.asc().nullsLast()),
+		clientSummaryClientIdFkey: foreignKey({
+			columns: [table.clientId],
+			foreignColumns: [user.id],
+			name: "client_summary_client_id_fkey"
+		}).onDelete("cascade"),
+		clientSummaryClientIdSessionIdKey: unique("client_summary_client_id_session_id_key").on(table.clientId, table.sessionId),
+	}
+});
+
+export const postCoachingSdq = pgTable("post_coaching_sdq", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	userId: uuid("user_id").notNull(),
+	sessionId: integer("session_id").default(8).notNull(),
+	answers: jsonb().notNull(),
+	score: numeric({ precision: 5, scale:  2 }).default('0').notNull(),
+	subscaleScores: json("subscale_scores").default({}).notNull(),
+	createdAt: timestamp("created_at", { mode: 'string' }).default(sql`CURRENT_TIMESTAMP`).notNull(),
+	updatedAt: timestamp("updated_at", { mode: 'string' }).default(sql`CURRENT_TIMESTAMP`).notNull(),
+},
+(table) => {
+	return {
+		postCoachingSdqUserIdSessionIdUnique: unique("post_coaching_sdq_user_id_session_id_unique").on(table.userId, table.sessionId),
 	}
 });
 

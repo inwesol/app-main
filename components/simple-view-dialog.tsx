@@ -259,12 +259,12 @@ export function SimpleViewDialog({ isOpen, onClose }: SimpleViewDialogProps) {
                           <div className="space-y-1">
                             <div className="flex items-center gap-2">
                               <Brain className="size-3 text-slate-600" />
-                              <span className="text-xs font-medium text-slate-600">
+                              <span className="text-sm font-medium text-slate-600">
                                 Thought
                               </span>
                             </div>
                             <div className="p-2 bg-red-50 border border-red-200 rounded-md">
-                              <p className="text-xs text-slate-700 whitespace-pre-wrap">
+                              <p className="text-sm text-slate-700 whitespace-pre-wrap">
                                 {prosCons.cons.thought}
                               </p>
                             </div>
@@ -275,12 +275,12 @@ export function SimpleViewDialog({ isOpen, onClose }: SimpleViewDialogProps) {
                           <div className="space-y-1">
                             <div className="flex items-center gap-2">
                               <Heart className="size-3 text-slate-600" />
-                              <span className="text-xs font-medium text-slate-600">
+                              <span className="text-sm font-medium text-slate-600">
                                 Emotions
                               </span>
                             </div>
                             <div className="p-2 bg-red-50 border border-red-200 rounded-md">
-                              <p className="text-xs text-slate-700 whitespace-pre-wrap">
+                              <p className="text-sm text-slate-700 whitespace-pre-wrap">
                                 {prosCons.cons.emotions}
                               </p>
                             </div>
@@ -291,12 +291,12 @@ export function SimpleViewDialog({ isOpen, onClose }: SimpleViewDialogProps) {
                           <div className="space-y-1">
                             <div className="flex items-center gap-2">
                               <Activity className="size-3 text-slate-600" />
-                              <span className="text-xs font-medium text-slate-600">
+                              <span className="text-sm font-medium text-slate-600">
                                 Behaviour
                               </span>
                             </div>
                             <div className="p-2 bg-red-50 border border-red-200 rounded-md">
-                              <p className="text-xs text-slate-700 whitespace-pre-wrap">
+                              <p className="text-sm text-slate-700 whitespace-pre-wrap">
                                 {prosCons.cons.behaviour}
                               </p>
                             </div>

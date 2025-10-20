@@ -971,3 +971,55 @@ export const report = pgTable(
 
 export type Report = typeof report.$inferSelect;
 export type NewReport = typeof report.$inferInsert;
+
+// Pre-coaching SDQ (Strengths and Difficulties Questionnaire) table
+export const preCoachingSdq = pgTable(
+  "pre_coaching_sdq",
+  {
+    id: uuid("id").primaryKey().notNull().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    sessionId: integer("session_id").default(1).notNull(),
+    answers: jsonb("answers").notNull(),
+    score: numeric("score", { precision: 5, scale: 2 }).default("0").notNull(),
+    subscaleScores: json("subscale_scores").default({}).notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (table) => ({
+    userSessionUnique: unique("pre_coaching_sdq_user_id_session_id_unique").on(
+      table.userId,
+      table.sessionId
+    ),
+  })
+);
+
+export type PreCoachingSdq = typeof preCoachingSdq.$inferSelect;
+export type NewPreCoachingSdq = typeof preCoachingSdq.$inferInsert;
+
+// Post-coaching SDQ (Strengths and Difficulties Questionnaire) table
+export const postCoachingSdq = pgTable(
+  "post_coaching_sdq",
+  {
+    id: uuid("id").primaryKey().notNull().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    sessionId: integer("session_id").default(8).notNull(),
+    answers: jsonb("answers").notNull(),
+    score: numeric("score", { precision: 5, scale: 2 }).default("0").notNull(),
+    subscaleScores: json("subscale_scores").default({}).notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (table) => ({
+    userSessionUnique: unique("post_coaching_sdq_user_id_session_id_unique").on(
+      table.userId,
+      table.sessionId
+    ),
+  })
+);
+
+export type PostCoachingSdq = typeof postCoachingSdq.$inferSelect;
+export type NewPostCoachingSdq = typeof postCoachingSdq.$inferInsert;

@@ -8,7 +8,9 @@ import { notFound } from "next/navigation";
 import { PostCareerMaturity } from "@/components/questionnaire-forms/post-career-maturity";
 import PostPsychologicalWellbeing from "@/components/questionnaire-forms/post-psychological-wellbeing";
 import { PostCoachingTest } from "@/components/questionnaire-forms/post-coaching";
-// import { PostCoachingStrengthDifficulty } from "@/components/questionnaire-forms/post-coaching-strength-difficulty";
+import PreCoachingSDQ from "@/components/questionnaire-forms/pre-coaching-sdq";
+import PostCoachingSDQ from "@/components/questionnaire-forms/post-coaching-sdq";
+
 interface PageProps {
   params: Promise<{
     qId: string;
@@ -37,11 +39,11 @@ export default async function Page({ params }: PageProps) {
       Component: PsychologicalWellbeing,
       session: "1",
     },
-    // {
-    //   id: "pre-coaching-strength-difficulty",
-    //   Component: PreCoachingStrengthDifficulty,
-    //   session: "1",
-    // },
+    {
+      id: "pre-coaching-strength-difficulty",
+      Component: PreCoachingSDQ,
+      session: "1",
+    },
     {
       id: "riasec-test",
       Component: RiasecTest,
@@ -67,11 +69,11 @@ export default async function Page({ params }: PageProps) {
       Component: PostPsychologicalWellbeing,
       session: "8",
     },
-    // {
-    //   id: "post-coaching-strength-difficulty",
-    //   Component: PostCoachingStrengthDifficulty,
-    //   session: "8",
-    // },
+    {
+      id: "post-coaching-strength-difficulty",
+      Component: PostCoachingSDQ,
+      session: "8",
+    },
   ];
 
   const { qId, sessionId } = await params;
