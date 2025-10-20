@@ -782,22 +782,6 @@ export default function CareerStory2() {
                                       {/* Sample TV Shows Column */}
                                       <div className="col-span-4 p-2">
                                         <div className="space-y-3">
-                                          <div>
-                                            <div className="inline-flex items-center px-2 py-1 text-xs font-semibold text-white bg-gradient-to-r from-orange-500 to-orange-600 rounded-full mb-1">
-                                              Telugu
-                                            </div>
-                                            <div className="text-sm text-slate-700 leading-relaxed">
-                                              {setting.sampleShows.telugu}
-                                            </div>
-                                          </div>
-                                          <div>
-                                            <div className="inline-flex items-center px-2 py-1 text-xs font-semibold text-white bg-gradient-to-r from-green-500 to-green-600 rounded-full mb-1">
-                                              Hindi
-                                            </div>
-                                            <div className="text-sm text-slate-700 leading-relaxed">
-                                              {setting.sampleShows.hindi}
-                                            </div>
-                                          </div>
                                           {setting.sampleShows.english && (
                                             <div>
                                               <div className="inline-flex items-center px-2 py-1 text-xs font-semibold text-white bg-gradient-to-r from-blue-500 to-blue-600 rounded-full mb-1">
@@ -808,6 +792,22 @@ export default function CareerStory2() {
                                               </div>
                                             </div>
                                           )}
+                                          <div>
+                                            <div className="inline-flex items-center px-2 py-1 text-xs font-semibold text-white bg-gradient-to-r from-green-500 to-green-600 rounded-full mb-1">
+                                              Hindi
+                                            </div>
+                                            <div className="text-sm text-slate-700 leading-relaxed">
+                                              {setting.sampleShows.hindi}
+                                            </div>
+                                          </div>
+                                          <div>
+                                            <div className="inline-flex items-center px-2 py-1 text-xs font-semibold text-white bg-gradient-to-r from-orange-500 to-orange-600 rounded-full mb-1">
+                                              Telugu
+                                            </div>
+                                            <div className="text-sm text-slate-700 leading-relaxed">
+                                              {setting.sampleShows.telugu}
+                                            </div>
+                                          </div>
                                         </div>
                                       </div>
 

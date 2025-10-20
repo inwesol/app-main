@@ -32,6 +32,40 @@ import { JourneyBreadcrumbLayout } from "@/components/layouts/JourneyBreadcrumbL
 import { useBreadcrumb } from "@/hooks/useBreadcrumb";
 import { useRouter } from "next/navigation";
 
+// Helpers to map between verbose question-text keys and compact q1..qN keys
+const questionTexts = (
+  questionsArray: typeof questions
+): Array<(typeof questions)[number]["text"]> =>
+  questionsArray.map((q) => q.text);
+
+function formToCompactAnswers(
+  data: Record<string, number>
+): Record<string, number> {
+  const texts = questionTexts(questions);
+  const compact: Record<string, number> = {};
+  texts.forEach((text, index) => {
+    const key = `q${index + 1}`;
+    const val = data[text as keyof typeof data];
+    if (typeof val === "number") compact[key] = val;
+  });
+  return compact;
+}
+
+function compactToFormAnswers(
+  compact: Record<string, number>
+): PreAssessmentFormData {
+  const texts = questionTexts(questions);
+  const expanded = { ...defaultValues } as PreAssessmentFormData;
+  texts.forEach((text, index) => {
+    const key = `q${index + 1}`;
+    const val = compact[key];
+    if (typeof val === "number") {
+      expanded[text as keyof PreAssessmentFormData] = val;
+    }
+  });
+  return expanded;
+}
+
 const questions = [
   {
     title: "Career Goals Clarity",
@@ -187,9 +221,19 @@ export function PreAssessment({ sessionId }: { sessionId: string }) {
 
           // Only update form if we have actual saved answers
           if (savedData?.answers && Object.keys(savedData.answers).length > 0) {
-            // Merge saved data with defaults to ensure all fields are present
-            const formData = { ...defaultValues, ...savedData.answers };
-            form.reset(formData);
+            const answers: Record<string, number> = savedData.answers;
+            const firstKey = Object.keys(answers)[0];
+            if (firstKey?.startsWith("q")) {
+              const expanded = compactToFormAnswers(answers);
+              form.reset(expanded);
+            } else {
+              // Backward compatibility: stored using question texts
+              const formData = {
+                ...defaultValues,
+                ...answers,
+              } as PreAssessmentFormData;
+              form.reset(formData);
+            }
           }
         } else if (response.status === 404) {
           // No data found - use default values
@@ -232,12 +276,14 @@ export function PreAssessment({ sessionId }: { sessionId: string }) {
     setIsSubmitting(true);
 
     try {
+      // Map verbose keys to compact q1..qN for storage
+      const compactAnswers = formToCompactAnswers(data);
       const response = await fetch(
         `/api/journey/sessions/${sessionId}/q/${qId}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
+          body: JSON.stringify(compactAnswers),
         }
       );
 
