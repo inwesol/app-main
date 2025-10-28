@@ -31,6 +31,8 @@ import { SidebarToggle } from "@/components/sidebar-toggle";
 import { useSidebar } from "@/components/ui/sidebar";
 import { SimpleViewDialog } from "@/components/simple-view-dialog";
 import { ReportDialog } from "@/components/report-dialog";
+import { generateReportPDF } from "@/lib/pdf-generator";
+import { toast } from "sonner";
 
 interface UserProgress {
   userId: string;
@@ -47,6 +49,7 @@ export const JourneyPage: React.FC = () => {
   const [isDownloadDialogOpen, setIsDownloadDialogOpen] = useState(false);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
   const router = useRouter();
   const { isMobile } = useSidebar();
 
@@ -102,6 +105,22 @@ export const JourneyPage: React.FC = () => {
 
   const getProgressPercentage = () => {
     return (userProgress.completedSessions.length / sessions.length) * 100;
+  };
+
+  const handleDownloadSelfAnalysis = async () => {
+    if (!userProgress) return;
+
+    setIsDownloading(true);
+    try {
+      await generateReportPDF(userProgress.userId);
+      toast.success("Self Analysis Report downloaded successfully!");
+      setIsDownloadDialogOpen(false);
+    } catch (error) {
+      console.error("Error downloading report:", error);
+      toast.error("Failed to download report. Please try again.");
+    } finally {
+      setIsDownloading(false);
+    }
   };
 
   return (
@@ -195,16 +214,28 @@ export const JourneyPage: React.FC = () => {
                   </DialogHeader>
                   <div className="space-y-3 py-4">
                     <Button
-                      disabled
-                      className="w-full justify-start gap-3 p-4 h-auto bg-slate-100 text-slate-500 border-slate-200"
+                      onClick={handleDownloadSelfAnalysis}
+                      disabled={isDownloading}
+                      className="w-full justify-start gap-3 p-4 h-auto bg-primary-green-50 hover:bg-primary-green-100 text-primary-green-700 border-primary-green-200 transition-colors duration-200"
                     >
                       <FileText className="size-5" />
                       <div className="text-left">
-                        <div className="font-medium">Self Analysis Report</div>
-                        <div className="text-xs text-slate-400">
-                          Comprehensive self-assessment
+                        <div className="font-medium">
+                          {isDownloading
+                            ? "Generating PDF..."
+                            : "Self Analysis Report"}
+                        </div>
+                        <div className="text-xs text-primary-green-600">
+                          {isDownloading
+                            ? "Please wait..."
+                            : "Comprehensive career assessment"}
                         </div>
                       </div>
+                      {isDownloading && (
+                        <div className="ml-auto">
+                          <div className="animate-spin rounded-full size-4 border-b-2 border-primary-green-600" />
+                        </div>
+                      )}
                     </Button>
                     <Button
                       disabled
