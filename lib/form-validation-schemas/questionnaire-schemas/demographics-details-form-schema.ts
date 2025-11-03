@@ -6,6 +6,20 @@ export const demographicsDetailsSchema = z.object({
     .min(2, "Full name must be at least 2 characters")
     .max(100, "Full name must be less than 100 characters"),
   email: z.string().email("Please enter a valid email address"),
+  phoneNumber: z
+    .string()
+    .min(1, "Phone number is required")
+    .refine(
+      (val) => {
+        // Basic phone validation: allows digits, spaces, hyphens, parentheses, and + for country code
+        const phoneRegex =
+          /^[\+]?[(]?[0-9]{1,4}[)]?[-\s\.]?[(]?[0-9]{1,4}[)]?[-\s\.]?[0-9]{1,9}$/;
+        return phoneRegex.test(val.replace(/\s/g, ""));
+      },
+      {
+        message: "Please enter a valid phone number",
+      }
+    ),
   age: z
     .union([z.string(), z.number()])
     .refine((val) => {

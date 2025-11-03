@@ -1008,6 +1008,7 @@ export async function upsertUserDemographics(userId: string, data: any) {
       user_id: userId,
       full_name: data.fullName,
       email: data.email,
+      phone_number: data.phoneNumber || null,
       age,
       gender: data.gender,
       profession: data.profession,
@@ -1023,6 +1024,7 @@ export async function upsertUserDemographics(userId: string, data: any) {
       set: {
         full_name: data.fullName,
         email: data.email,
+        phone_number: data.phoneNumber || null,
         age,
         gender: data.gender,
         profession: data.profession,
@@ -1144,6 +1146,7 @@ export async function softDeleteUserDemographics(
       .set({
         full_name: null,
         email: null,
+        phone_number: null,
         age: null,
         gender: null,
         profession: null,
@@ -1181,6 +1184,7 @@ export async function upsertUserDemographicsWithTransaction(
       user_id: userId,
       full_name: data.fullName,
       email: data.email,
+      phone_number: data.phoneNumber || null,
       age,
       gender: data.gender,
       profession: data.profession,
@@ -1196,6 +1200,7 @@ export async function upsertUserDemographicsWithTransaction(
       set: {
         full_name: data.fullName,
         email: data.email,
+        phone_number: data.phoneNumber || null,
         age,
         gender: data.gender,
         profession: data.profession,

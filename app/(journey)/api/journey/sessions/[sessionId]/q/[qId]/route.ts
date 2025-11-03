@@ -301,6 +301,7 @@ export async function GET(
         const transformedData = {
           fullName: details.full_name || "",
           email: details.email || "",
+          phoneNumber: details.phone_number || "",
           age: details.age ? String(details.age) : "",
           gender: details.gender || "",
           profession: details.profession || "",

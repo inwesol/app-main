@@ -10,6 +10,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -36,16 +43,16 @@ import {
   CheckCircle,
   Sparkles,
   Mail,
-  Calendar,
-  Users,
   Building,
   BookOpen,
   Brain,
   TrendingUp,
   MessageSquare,
   Zap,
-  Shield,
   Award,
+  Phone,
+  Calendar,
+  Users,
 } from "lucide-react";
 import {
   demographicsDetailsSchema,
@@ -71,6 +78,7 @@ export function DemographicsDetailsForm({
     defaultValues: {
       fullName: "",
       email: "",
+      phoneNumber: "",
       age: "",
       // gender: "",
       // profession: undefined,
@@ -105,6 +113,7 @@ export function DemographicsDetailsForm({
             form.reset({
               fullName: "",
               email: "",
+              phoneNumber: "",
               age: "",
               education: "",
               stressLevel: 5,
@@ -115,6 +124,7 @@ export function DemographicsDetailsForm({
             form.reset({
               fullName: data.fullName || "",
               email: data.email || "",
+              phoneNumber: data.phoneNumber || "",
               age: data.age || "",
               education: data.education || "",
               gender: data.gender || "",
@@ -192,6 +202,7 @@ export function DemographicsDetailsForm({
     const page1Fields = [
       "fullName",
       "email",
+      "phoneNumber",
       "age",
       "gender",
       "profession",
@@ -475,6 +486,9 @@ export function DemographicsDetailsForm({
                               </FormItem>
                             )}
                           />
+                        </div>
+                        {/* Phone Number, Age, and Gender in one row */}
+                        <div className="grid grid-cols-1 gap-2 md:grid-cols-4 sm:gap-4">
                           <FormField
                             control={form.control}
                             name="age"
@@ -493,8 +507,7 @@ export function DemographicsDetailsForm({
                                       placeholder="Enter your age"
                                       {...field}
                                       className={`
-                                      h-10 sm:h-12 border-2 focus:border-primary-blue-400 focus:ring-primary-blue-400/20 rounded-lg transition-all duration-200 bg-white/70 text-sm font-medium pl-3 placeholder:text-slate-500 outline-none focus:outline-none 
-    focus-visible:ring-0 focus-visible:ring-offset-0
+                                      h-10 sm:h-12 border-2 focus:border-primary-blue-400 focus:ring-primary-blue-400/20 rounded-lg transition-all duration-200 bg-white/70 text-sm font-medium pl-3 placeholder:text-slate-500 outline-none focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0
                                       ${
                                         fieldState.error
                                           ? "border-rose-300 bg-rose-50/50"
@@ -513,83 +526,86 @@ export function DemographicsDetailsForm({
                               </FormItem>
                             )}
                           />
-
                           <FormField
                             control={form.control}
                             name="gender"
                             render={({ field, fieldState }) => (
                               // gender
-                              <FormItem className="space-y-1 sm:space-y-2">
+                              <FormItem className="space-y-1 sm:space-y-2 ">
                                 <FormLabel className="text-slate-700 font-semibold text-xs sm:text-sm flex items-center gap-1.5">
                                   <Users className="size-3 sm:size-4" />
                                   Gender
                                   <span className="text-rose-500">*</span>
                                 </FormLabel>
                                 <FormControl>
-                                  <div className="grid grid-cols-2 gap-2">
-                                    {[
-                                      {
-                                        value: "male",
-                                        label: "Male",
-                                        icon: User,
-                                      },
-                                      {
-                                        value: "female",
-                                        label: "Female",
-                                        icon: User,
-                                      },
-                                      {
-                                        value: "prefer-not-to-say",
-                                        label: "Prefer not to say",
-                                        icon: Shield,
-                                      },
-                                      {
-                                        value: "others",
-                                        label: "Others",
-                                        icon: Users,
-                                      },
-                                    ].map(({ value, label, icon: Icon }) => {
-                                      const isSelected = field.value === value;
-                                      return (
-                                        <button
-                                          type="button"
-                                          key={value}
-                                          onClick={() => field.onChange(value)}
-                                          className={`
-                                            relative flex items-center p-2 sm:p-3 rounded-lg border-2 cursor-pointer transition-all duration-300 hover:scale-[1.02]
-                                            ${
-                                              isSelected
-                                                ? "bg-gradient-to-r from-primary-blue-500 to-primary-blue-600 text-white border-primary-blue-200 shadow-lg shadow-blue-500/25"
-                                                : "bg-white hover:bg-primary-blue-50 border-slate-200 hover:border-primary-blue-300 text-slate-700"
-                                            }
-                                          `}
-                                        >
-                                          {isSelected && (
-                                            <div className="absolute flex items-center justify-center bg-white rounded-full -top-1 -right-1 size-4">
-                                              <CheckCircle className="size-2.5 text-green-500" />
-                                            </div>
-                                          )}
-                                          <Icon
-                                            className={`size-3 sm:size-4 ${
-                                              isSelected
-                                                ? "text-white"
-                                                : "text-primary-blue-600"
-                                            }`}
-                                          />
-                                          <span
-                                            className={`font-medium text-xs ml-1.5 sm:ml-2 ${
-                                              isSelected
-                                                ? "text-white"
-                                                : "text-slate-700"
-                                            }`}
-                                          >
-                                            {label}
-                                          </span>
-                                        </button>
-                                      );
-                                    })}
-                                  </div>
+                                  <Select
+                                    onValueChange={field.onChange}
+                                    value={field.value}
+                                  >
+                                    <SelectTrigger
+                                      className={`
+                                          h-10 sm:h-12 border-2 rounded-lg transition-all duration-200 bg-white/70 text-sm font-medium outline-none focus:outline-none 
+                                          focus-visible:ring-0 focus-visible:ring-offset-0
+                                          ${
+                                            fieldState.error
+                                              ? "border-rose-300 bg-rose-50/50"
+                                              : "border-slate-200 focus:border-primary-blue-400 focus:ring-primary-blue-400/20"
+                                          }
+                                        `}
+                                    >
+                                      <SelectValue placeholder="Select gender" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="male">Male</SelectItem>
+                                      <SelectItem value="female">
+                                        Female
+                                      </SelectItem>
+                                      <SelectItem value="prefer-not-to-say">
+                                        Prefer not to say
+                                      </SelectItem>
+                                      <SelectItem value="others">
+                                        Others
+                                      </SelectItem>
+                                    </SelectContent>
+                                  </Select>
                                 </FormControl>
+                                <div className="h-4">
+                                  <FormMessage className="text-xs font-medium text-rose-500" />
+                                </div>
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="phoneNumber"
+                            render={({ field, fieldState }) => (
+                              // phoneNumber
+                              <FormItem className="space-y-1 sm:space-y-2 md:col-span-2">
+                                <FormLabel className="text-slate-700 font-semibold text-xs sm:text-sm flex items-center gap-1.5">
+                                  <Phone className="size-3 sm:size-4" />
+                                  Phone Number
+                                  <span className="text-rose-500">*</span>
+                                </FormLabel>
+                                <div className="relative">
+                                  <FormControl>
+                                    <Input
+                                      type="tel"
+                                      placeholder="+91 9000900090"
+                                      {...field}
+                                      className={`
+                                      h-10 sm:h-12 border-2 focus:border-primary-blue-400 focus:ring-primary-blue-400/20 rounded-lg transition-all duration-200 bg-white/70 text-sm font-medium pl-3 placeholder:text-slate-400 outline-none focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0
+                                      ${
+                                        fieldState.error
+                                          ? "border-rose-300 bg-rose-50/50"
+                                          : "border-slate-200"
+                                      }
+                                    `}
+                                    />
+                                  </FormControl>
+                                  {field.value && !fieldState.error && (
+                                    <CheckCircle className="absolute text-green-500 -translate-y-1/2 right-3 top-1/2 size-4" />
+                                  )}
+                                </div>
                                 <div className="h-4">
                                   <FormMessage className="text-xs font-medium text-rose-500" />
                                 </div>
