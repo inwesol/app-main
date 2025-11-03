@@ -10,6 +10,12 @@ import {
   Brain,
   Activity,
   BookOpen,
+  User,
+  MapPin,
+  Briefcase,
+  Award,
+  MessageSquare,
+  Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -28,6 +34,17 @@ interface ProsConsData {
   };
 }
 
+interface SummaryPortraitData {
+  selfStatement: string;
+  settingStatement: string;
+  plotDescription: string;
+  plotActivities: string;
+  ableToBeStatement: string;
+  placesWhereStatement: string;
+  soThatStatement: string;
+  mottoStatement: string;
+}
+
 export function SimpleViewDialog({ isOpen, onClose }: SimpleViewDialogProps) {
   const [values, setValues] = useState<string[]>([]);
   const [strengths, setStrengths] = useState<string[]>([]);
@@ -40,6 +57,16 @@ export function SimpleViewDialog({ isOpen, onClose }: SimpleViewDialogProps) {
     },
   });
   const [rewrittenStory, setRewrittenStory] = useState<string>("");
+  const [summaryPortrait, setSummaryPortrait] = useState<SummaryPortraitData>({
+    selfStatement: "",
+    settingStatement: "",
+    plotDescription: "",
+    plotActivities: "",
+    ableToBeStatement: "",
+    placesWhereStatement: "",
+    soThatStatement: "",
+    mottoStatement: "",
+  });
   const [isLoading, setIsLoading] = useState(false);
 
   const loadValues = useCallback(async () => {
@@ -104,6 +131,27 @@ export function SimpleViewDialog({ isOpen, onClose }: SimpleViewDialogProps) {
     }
   }, []);
 
+  const loadSummaryPortrait = useCallback(async () => {
+    try {
+      const response = await fetch(`/api/journey/sessions/4/a/career-story-3`);
+      if (response.ok) {
+        const data = await response.json();
+        setSummaryPortrait({
+          selfStatement: data.selfStatement || "",
+          settingStatement: data.settingStatement || "",
+          plotDescription: data.plotDescription || "",
+          plotActivities: data.plotActivities || "",
+          ableToBeStatement: data.ableToBeStatement || "",
+          placesWhereStatement: data.placesWhereStatement || "",
+          soThatStatement: data.soThatStatement || "",
+          mottoStatement: data.mottoStatement || "",
+        });
+      }
+    } catch (error) {
+      console.error("Error loading summary portrait:", error);
+    }
+  }, []);
+
   // Load existing data when dialog opens
   useEffect(() => {
     if (isOpen) {
@@ -113,11 +161,19 @@ export function SimpleViewDialog({ isOpen, onClose }: SimpleViewDialogProps) {
         loadStrengths(),
         loadProsCons(),
         loadRewrittenStory(),
+        loadSummaryPortrait(),
       ]).finally(() => {
         setIsLoading(false);
       });
     }
-  }, [isOpen, loadValues, loadStrengths, loadProsCons, loadRewrittenStory]);
+  }, [
+    isOpen,
+    loadValues,
+    loadStrengths,
+    loadProsCons,
+    loadRewrittenStory,
+    loadSummaryPortrait,
+  ]);
 
   if (!isOpen) return null;
 
@@ -144,6 +200,367 @@ export function SimpleViewDialog({ isOpen, onClose }: SimpleViewDialogProps) {
             </div>
           ) : (
             <>
+              {/* My Summary Portrait Section */}
+              <div>
+                <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                  <Sparkles className="size-5 text-indigo-600" />
+                  My Summary Portrait
+                </h3>
+                {!summaryPortrait.selfStatement &&
+                !summaryPortrait.settingStatement &&
+                !summaryPortrait.plotDescription &&
+                !summaryPortrait.plotActivities &&
+                !summaryPortrait.ableToBeStatement &&
+                !summaryPortrait.placesWhereStatement &&
+                !summaryPortrait.soThatStatement &&
+                !summaryPortrait.mottoStatement ? (
+                  <div className="py-6 text-center text-slate-500 bg-slate-50 rounded-lg border border-slate-200">
+                    <p className="text-sm">
+                      No summary portrait available yet.
+                    </p>
+                    <p className="mt-1 text-xs text-slate-400">
+                      Complete the career story-3 activity to add your summary
+                      portrait.
+                    </p>
+                  </div>
+                ) : (
+                  <>
+                    {/* Desktop Radial Mind Map View */}
+                    <div className="hidden md:flex relative w-full min-h-[200px] py-2 items-center justify-center">
+                      <div className="relative w-full max-w-3xl aspect-square mx-auto">
+                        {/* Center Card - Motto Statement */}
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
+                          <Card className="w-[280px] bg-gradient-to-br from-indigo-500 to-purple-600 border-2 border-indigo-600 shadow-xl hover:shadow-2xl transition-shadow">
+                            <CardContent className="p-5">
+                              <div className="flex items-center gap-2 mb-3">
+                                <Sparkles className="size-6 text-white" />
+                                <h4 className="text-base font-bold text-white">
+                                  Motto Statement
+                                </h4>
+                              </div>
+                              <p className="text-sm text-white/95 leading-relaxed whitespace-pre-wrap">
+                                {summaryPortrait.mottoStatement || "Your motto"}
+                              </p>
+                            </CardContent>
+                          </Card>
+                        </div>
+
+                        {/* Surrounding Cards - Radial Layout using angles with larger radius */}
+                        {/* Top (0°) - Self Statement */}
+                        {summaryPortrait.selfStatement && (
+                          <div
+                            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+                            style={{
+                              transform:
+                                "translate(-50%, -50%) rotate(0deg) translateY(-260px) rotate(0deg)",
+                            }}
+                          >
+                            <Card className="w-[280px] bg-gradient-to-br from-blue-50 to-cyan-50 border-2 border-blue-300 shadow-lg hover:shadow-xl transition-all hover:scale-105">
+                              <CardContent className="p-4">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <User className="size-5 text-blue-600" />
+                                  <h5 className="text-sm font-semibold text-blue-800">
+                                    Self Statement
+                                  </h5>
+                                </div>
+                                <p className="text-xs text-slate-700 leading-relaxed whitespace-pre-wrap">
+                                  {summaryPortrait.selfStatement}
+                                </p>
+                              </CardContent>
+                            </Card>
+                          </div>
+                        )}
+
+                        {/* Top-Right (51.4°) - Setting */}
+                        {summaryPortrait.settingStatement && (
+                          <div
+                            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+                            style={{
+                              transform:
+                                "translate(-50%, -50%) rotate(45deg) translateY(-380px) rotate(-45deg)",
+                            }}
+                          >
+                            <Card className="w-[220px] bg-gradient-to-br from-emerald-50 to-teal-50 border-2 border-emerald-300 shadow-lg hover:shadow-xl transition-all hover:scale-105">
+                              <CardContent className="p-4">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <MapPin className="size-5 text-emerald-600" />
+                                  <h5 className="text-sm font-semibold text-emerald-800">
+                                    Setting
+                                  </h5>
+                                </div>
+                                <p className="text-xs text-slate-700 leading-relaxed whitespace-pre-wrap">
+                                  {summaryPortrait.settingStatement}
+                                </p>
+                              </CardContent>
+                            </Card>
+                          </div>
+                        )}
+
+                        {/* Right (90°) - Plot Description */}
+                        {summaryPortrait.plotDescription && (
+                          <div
+                            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+                            style={{
+                              transform:
+                                "translate(-50%, -50%) rotate(90deg) translateX(20px) translateY(-280px) rotate(-90deg)",
+                            }}
+                          >
+                            <Card className="w-[220px] bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-300 shadow-lg hover:shadow-xl transition-all hover:scale-105">
+                              <CardContent className="p-4">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <BookOpen className="size-5 text-amber-600" />
+                                  <h5 className="text-sm font-semibold text-amber-800">
+                                    Plot Description
+                                  </h5>
+                                </div>
+                                <p className="text-xs text-slate-700 leading-relaxed whitespace-pre-wrap">
+                                  {summaryPortrait.plotDescription}
+                                </p>
+                              </CardContent>
+                            </Card>
+                          </div>
+                        )}
+
+                        {/* Bottom-Right (128.6°) - Plot Activities */}
+                        {summaryPortrait.plotActivities && (
+                          <div
+                            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+                            style={{
+                              transform:
+                                "translate(-50%, -50%) rotate(135deg) translateX(60px) translateY(-360px) rotate(-135deg)",
+                            }}
+                          >
+                            <Card className="w-[260px] bg-gradient-to-br from-rose-50 to-pink-50 border-2 border-rose-300 shadow-lg hover:shadow-xl transition-all hover:scale-105">
+                              <CardContent className="p-4">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <Briefcase className="size-5 text-rose-600" />
+                                  <h5 className="text-sm font-semibold text-rose-800">
+                                    Plot Activities
+                                  </h5>
+                                </div>
+                                <p className="text-xs text-slate-700 leading-relaxed whitespace-pre-wrap">
+                                  {summaryPortrait.plotActivities}
+                                </p>
+                              </CardContent>
+                            </Card>
+                          </div>
+                        )}
+
+                        {/* Bottom (180°) - Able To Be Statement */}
+                        {summaryPortrait.ableToBeStatement && (
+                          <div
+                            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+                            style={{
+                              transform:
+                                "translate(-50%, -50%) rotate(180deg) translateX(60px) translateY(-290px) rotate(-180deg)",
+                            }}
+                          >
+                            <Card className="w-[240px] bg-gradient-to-br from-violet-50 to-purple-50 border-2 border-violet-300 shadow-lg hover:shadow-xl transition-all hover:scale-105">
+                              <CardContent className="p-4">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <Award className="size-5 text-violet-600" />
+                                  <h5 className="text-sm font-semibold text-violet-800">
+                                    Able To Be
+                                  </h5>
+                                </div>
+                                <p className="text-xs text-slate-700 leading-relaxed whitespace-pre-wrap">
+                                  {summaryPortrait.ableToBeStatement}
+                                </p>
+                              </CardContent>
+                            </Card>
+                          </div>
+                        )}
+
+                        {/* Bottom-Left (231.4°) - Places Where Statement */}
+                        {summaryPortrait.placesWhereStatement && (
+                          <div
+                            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+                            style={{
+                              transform:
+                                "translate(-50%, -50%) rotate(245deg) translateX(30px) translateY(-320px) rotate(-245deg)",
+                            }}
+                          >
+                            <Card className="w-[220px] bg-gradient-to-br from-sky-50 to-blue-50 border-2 border-sky-300 shadow-lg hover:shadow-xl transition-all hover:scale-105">
+                              <CardContent className="p-4">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <MapPin className="size-5 text-sky-600" />
+                                  <h5 className="text-sm font-semibold text-sky-800">
+                                    Places Where
+                                  </h5>
+                                </div>
+                                <p className="text-xs text-slate-700 leading-relaxed whitespace-pre-wrap">
+                                  {summaryPortrait.placesWhereStatement}
+                                </p>
+                              </CardContent>
+                            </Card>
+                          </div>
+                        )}
+
+                        {/* Left (270°) - So That Statement */}
+                        {summaryPortrait.soThatStatement && (
+                          <div
+                            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+                            style={{
+                              transform:
+                                "translate(-50%, -50%) rotate(300deg) translateX(40px) translateY(-340px) rotate(-300deg)",
+                            }}
+                          >
+                            <Card className="w-[220px] bg-gradient-to-br from-teal-50 to-cyan-50 border-2 border-teal-300 shadow-lg hover:shadow-xl transition-all hover:scale-105">
+                              <CardContent className="p-4">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <MessageSquare className="size-5 text-teal-600" />
+                                  <h5 className="text-sm font-semibold text-teal-800">
+                                    So That
+                                  </h5>
+                                </div>
+                                <p className="text-xs text-slate-700 leading-relaxed whitespace-pre-wrap">
+                                  {summaryPortrait.soThatStatement}
+                                </p>
+                              </CardContent>
+                            </Card>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Mobile View - Stack Layout */}
+                    <div className="md:hidden w-full space-y-3">
+                      {/* Center Card - Motto Statement */}
+                      {summaryPortrait.mottoStatement && (
+                        <Card className="w-full bg-gradient-to-br from-indigo-500 to-purple-600 border-2 border-indigo-600 shadow-xl">
+                          <CardContent className="p-4">
+                            <div className="flex items-center gap-2 mb-2">
+                              <Sparkles className="size-5 text-white" />
+                              <h4 className="text-sm font-bold text-white">
+                                Motto Statement
+                              </h4>
+                            </div>
+                            <p className="text-xs text-white/95 leading-relaxed whitespace-pre-wrap">
+                              {summaryPortrait.mottoStatement}
+                            </p>
+                          </CardContent>
+                        </Card>
+                      )}
+
+                      {/* Surrounding Cards - Grid Layout for Mobile */}
+                      <div className="grid grid-cols-1 gap-3">
+                        {summaryPortrait.selfStatement && (
+                          <Card className="bg-gradient-to-br from-blue-50 to-cyan-50 border-2 border-blue-300 shadow-lg">
+                            <CardContent className="p-3">
+                              <div className="flex items-center gap-1.5 mb-1.5">
+                                <User className="size-4 text-blue-600" />
+                                <h5 className="text-xs font-semibold text-blue-800">
+                                  Self Statement
+                                </h5>
+                              </div>
+                              <p className="text-xs text-slate-700 leading-relaxed whitespace-pre-wrap">
+                                {summaryPortrait.selfStatement}
+                              </p>
+                            </CardContent>
+                          </Card>
+                        )}
+
+                        {summaryPortrait.settingStatement && (
+                          <Card className="bg-gradient-to-br from-emerald-50 to-teal-50 border-2 border-emerald-300 shadow-lg">
+                            <CardContent className="p-3">
+                              <div className="flex items-center gap-1.5 mb-1.5">
+                                <MapPin className="size-4 text-emerald-600" />
+                                <h5 className="text-xs font-semibold text-emerald-800">
+                                  Setting
+                                </h5>
+                              </div>
+                              <p className="text-xs text-slate-700 leading-relaxed whitespace-pre-wrap">
+                                {summaryPortrait.settingStatement}
+                              </p>
+                            </CardContent>
+                          </Card>
+                        )}
+
+                        {summaryPortrait.plotDescription && (
+                          <Card className="bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-300 shadow-lg">
+                            <CardContent className="p-3">
+                              <div className="flex items-center gap-1.5 mb-1.5">
+                                <BookOpen className="size-4 text-amber-600" />
+                                <h5 className="text-xs font-semibold text-amber-800">
+                                  Plot Description
+                                </h5>
+                              </div>
+                              <p className="text-xs text-slate-700 leading-relaxed whitespace-pre-wrap">
+                                {summaryPortrait.plotDescription}
+                              </p>
+                            </CardContent>
+                          </Card>
+                        )}
+
+                        {summaryPortrait.plotActivities && (
+                          <Card className="bg-gradient-to-br from-rose-50 to-pink-50 border-2 border-rose-300 shadow-lg">
+                            <CardContent className="p-3">
+                              <div className="flex items-center gap-1.5 mb-1.5">
+                                <Briefcase className="size-4 text-rose-600" />
+                                <h5 className="text-xs font-semibold text-rose-800">
+                                  Plot Activities
+                                </h5>
+                              </div>
+                              <p className="text-xs text-slate-700 leading-relaxed whitespace-pre-wrap">
+                                {summaryPortrait.plotActivities}
+                              </p>
+                            </CardContent>
+                          </Card>
+                        )}
+
+                        {summaryPortrait.ableToBeStatement && (
+                          <Card className="bg-gradient-to-br from-violet-50 to-purple-50 border-2 border-violet-300 shadow-lg">
+                            <CardContent className="p-3">
+                              <div className="flex items-center gap-1.5 mb-1.5">
+                                <Award className="size-4 text-violet-600" />
+                                <h5 className="text-xs font-semibold text-violet-800">
+                                  Able To Be
+                                </h5>
+                              </div>
+                              <p className="text-xs text-slate-700 leading-relaxed whitespace-pre-wrap">
+                                {summaryPortrait.ableToBeStatement}
+                              </p>
+                            </CardContent>
+                          </Card>
+                        )}
+
+                        {summaryPortrait.placesWhereStatement && (
+                          <Card className="bg-gradient-to-br from-sky-50 to-blue-50 border-2 border-sky-300 shadow-lg">
+                            <CardContent className="p-3">
+                              <div className="flex items-center gap-1.5 mb-1.5">
+                                <MapPin className="size-4 text-sky-600" />
+                                <h5 className="text-xs font-semibold text-sky-800">
+                                  Places Where
+                                </h5>
+                              </div>
+                              <p className="text-xs text-slate-700 leading-relaxed whitespace-pre-wrap">
+                                {summaryPortrait.placesWhereStatement}
+                              </p>
+                            </CardContent>
+                          </Card>
+                        )}
+
+                        {summaryPortrait.soThatStatement && (
+                          <Card className="bg-gradient-to-br from-teal-50 to-cyan-50 border-2 border-teal-300 shadow-lg">
+                            <CardContent className="p-3">
+                              <div className="flex items-center gap-1.5 mb-1.5">
+                                <MessageSquare className="size-4 text-teal-600" />
+                                <h5 className="text-xs font-semibold text-teal-800">
+                                  So That
+                                </h5>
+                              </div>
+                              <p className="text-xs text-slate-700 leading-relaxed whitespace-pre-wrap">
+                                {summaryPortrait.soThatStatement}
+                              </p>
+                            </CardContent>
+                          </Card>
+                        )}
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+
               {/* My Values Section */}
               <div>
                 <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
