@@ -3,7 +3,6 @@ import { NextResponse } from "next/server";
 import { auth } from "@/app/(auth)/auth";
 import {
   completeUserSessionFormProgress,
-  updateJourneyProgressAfterForm,
   getUserDemographics,
   deleteUserDemographics,
   softDeleteUserDemographics,
@@ -757,9 +756,6 @@ export async function POST(
           qId,
         });
 
-        // Update journey progress
-        await updateJourneyProgressAfterForm(session.user.id, sessionIdNum);
-
         return NextResponse.json({
           success: true,
           message: "Demographics data saved successfully",
@@ -809,10 +805,6 @@ export async function POST(
           sessionId: Number(sessionId),
           qId,
         });
-        await updateJourneyProgressAfterForm(
-          session.user.id,
-          Number(sessionId)
-        );
         return NextResponse.json({ success: true });
       } catch (err) {
         console.error("Error inserting pre-assessment:", err);
@@ -938,10 +930,6 @@ export async function POST(
             score: categoryScores,
           },
         });
-        await updateJourneyProgressAfterForm(
-          session.user.id,
-          Number(sessionId)
-        );
 
         return NextResponse.json({ success: true });
       } catch (error) {
@@ -1063,10 +1051,6 @@ export async function POST(
           sessionId: Number(sessionId),
           qId,
         });
-        await updateJourneyProgressAfterForm(
-          session.user.id,
-          Number(sessionId)
-        );
         return NextResponse.json({
           success: true,
           overallScore,
@@ -1159,10 +1143,6 @@ export async function POST(
           sessionId: Number(sessionId),
           qId,
         });
-        await updateJourneyProgressAfterForm(
-          session.user.id,
-          Number(sessionId)
-        );
         return NextResponse.json({
           success: true,
           subscaleSums,
@@ -1243,10 +1223,6 @@ export async function POST(
           sessionId: Number(sessionId),
           qId,
         });
-        await updateJourneyProgressAfterForm(
-          session.user.id,
-          Number(sessionId)
-        );
         return NextResponse.json({
           success: true,
           categoryCounts,
@@ -1376,10 +1352,6 @@ export async function POST(
             score: categoryScores,
           },
         });
-        await updateJourneyProgressAfterForm(
-          session.user.id,
-          Number(sessionId)
-        );
 
         return NextResponse.json({ success: true });
       } catch (error) {
@@ -1463,10 +1435,6 @@ export async function POST(
           sessionId: Number(sessionId),
           qId,
         });
-        await updateJourneyProgressAfterForm(
-          session.user.id,
-          Number(sessionId)
-        );
         return NextResponse.json({
           success: true,
           subscaleSums,
@@ -1516,10 +1484,6 @@ export async function POST(
           sessionId: Number(sessionId),
           qId,
         });
-        await updateJourneyProgressAfterForm(
-          session.user.id,
-          Number(sessionId)
-        );
 
         return NextResponse.json({ success: true });
       } catch (err) {
@@ -1592,10 +1556,6 @@ export async function POST(
           sessionId: Number(sessionId),
           qId,
         });
-        await updateJourneyProgressAfterForm(
-          session.user.id,
-          Number(sessionId)
-        );
 
         return NextResponse.json({ success: true });
       } catch (err) {
@@ -1668,10 +1628,6 @@ export async function POST(
           sessionId: Number(sessionId),
           qId,
         });
-        await updateJourneyProgressAfterForm(
-          session.user.id,
-          Number(sessionId)
-        );
 
         return NextResponse.json({ success: true });
       } catch (err) {

@@ -22,7 +22,6 @@ import {
   getMyLifeCollage,
   upsertMyLifeCollage,
   completeUserSessionFormProgress,
-  updateJourneyProgressAfterForm,
 } from "@/lib/db/queries";
 import { careerStoryOneSchema } from "@/lib/form-validation-schemas/activity-schemas/career-story-one-schema";
 import { careerStoryTwoSchema } from "@/lib/form-validation-schemas/activity-schemas/career-story-two-schema";
@@ -427,8 +426,6 @@ export async function POST(
           qId: aId, // Using aId as the identifier for activities
         });
 
-        await updateJourneyProgressAfterForm(session.user.id, sessionIdNum);
-
         return NextResponse.json({ success: true });
       } catch (err) {
         console.error("Error saving career story 1:", err);
@@ -458,8 +455,6 @@ export async function POST(
           qId: aId, // Using aId as the identifier for activities
         });
 
-        await updateJourneyProgressAfterForm(session.user.id, sessionIdNum);
-
         return NextResponse.json({ success: true });
       } catch (err) {
         console.error("Error saving career story five:", err);
@@ -486,8 +481,6 @@ export async function POST(
           sessionId: sessionIdNum,
           qId: aId, // Using aId as the identifier for activities
         });
-
-        await updateJourneyProgressAfterForm(session.user.id, sessionIdNum);
 
         return NextResponse.json({ success: true });
       } catch (err) {
@@ -523,8 +516,6 @@ export async function POST(
           qId: aId, // Using aId as the identifier for activities
         });
 
-        await updateJourneyProgressAfterForm(session.user.id, sessionIdNum);
-
         return NextResponse.json({ success: true });
       } catch (err) {
         console.error("Error saving career story 2:", err);
@@ -558,8 +549,6 @@ export async function POST(
           sessionId: sessionIdNum,
           qId: aId, // Using aId as the identifier for activities
         });
-
-        await updateJourneyProgressAfterForm(session.user.id, sessionIdNum);
 
         return NextResponse.json({ success: true });
       } catch (err) {
@@ -595,8 +584,6 @@ export async function POST(
           qId: aId, // Using aId as the identifier for activities
         });
 
-        await updateJourneyProgressAfterForm(session.user.id, sessionIdNum);
-
         return NextResponse.json({ success: true });
       } catch (err) {
         console.error("Error saving career story 4:", err);
@@ -630,8 +617,6 @@ export async function POST(
           sessionId: sessionIdNum,
           qId: aId, // Using aId as the identifier for activities
         });
-
-        await updateJourneyProgressAfterForm(session.user.id, sessionIdNum);
 
         return NextResponse.json({ success: true });
       } catch (err) {
@@ -667,8 +652,6 @@ export async function POST(
           qId: aId, // Using aId as the identifier for activities
         });
 
-        await updateJourneyProgressAfterForm(session.user.id, sessionIdNum);
-
         return NextResponse.json({ success: true });
       } catch (err) {
         console.error("Error saving letter from future self:", err);
@@ -703,8 +686,6 @@ export async function POST(
           qId: aId, // Using aId as the identifier for activities
         });
 
-        await updateJourneyProgressAfterForm(session.user.id, sessionIdNum);
-
         return NextResponse.json({ success: true });
       } catch (err) {
         console.error("Error saving career options matrix:", err);
@@ -738,8 +719,6 @@ export async function POST(
           sessionId: sessionIdNum,
           qId: aId, // Using aId as the identifier for activities
         });
-
-        await updateJourneyProgressAfterForm(session.user.id, sessionIdNum);
 
         return NextResponse.json({ success: true });
       } catch (err) {
