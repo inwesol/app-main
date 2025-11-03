@@ -17,6 +17,7 @@ import {
   Briefcase,
   FileText,
   Info,
+  ExternalLink,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -732,6 +733,23 @@ export default function CareerStory3() {
                         Exploring Occupations
                       </h2>
                     </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      asChild
+                      className="px-3 py-1.5 text-sm font-medium text-slate-600 bg-gradient-to-br from-teal-50 to-teal-100 hover:text-slate-700 hover:bg-slate-50 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md border-slate-300"
+                    >
+                      <a
+                        href="https://www.inwesol.com/explorer/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2"
+                      >
+                        Explorer Page
+                        <ExternalLink className="size-4" />
+                      </a>
+                    </Button>
                   </div>
 
                   {/* Section Description */}
@@ -891,7 +909,7 @@ export default function CareerStory3() {
                               type="button"
                               onClick={handleAddCustomOccupation}
                               disabled={!customOccupation.trim()}
-                              className="px-4 py-2 text-sm font-medium text-white bg-teal-600 rounded-md hover:bg-teal-700 disabled:bg-teal-300 disabled:cursor-not-allowed transition-colors duration-200"
+                              className="px-4 py-2 text-sm font-medium  bg-teal-600 rounded-md hover:bg-teal-700 disabled:bg-teal-300 disabled:cursor-not-allowed transition-colors duration-200"
                             >
                               Add
                             </button>

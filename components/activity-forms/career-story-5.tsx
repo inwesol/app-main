@@ -64,7 +64,7 @@ export default function CareerStory5({ className = "" }: CareerStory5Props) {
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   // Set breadcrumbs on component mount
   useEffect(() => {
-    setQuestionnaireBreadcrumbs(sessionId, "Story Boarding Activity");
+    setQuestionnaireBreadcrumbs(sessionId, "My Story-5 Activity");
   }, [sessionId, setQuestionnaireBreadcrumbs]);
 
   const createDefaultCells = useCallback((): StoryCell[] => {

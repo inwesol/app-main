@@ -57,7 +57,10 @@ export default function CareerStory6({ className = "" }: CareerStory6Props) {
   const [saving, setSaving] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [isLoadingData, setIsLoadingData] = useState(false);
-  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [hasSelectedStoryboard, setHasSelectedStoryboard] = useState(false);
+  const [previewStoryboardId, setPreviewStoryboardId] = useState<string | null>(
+    null
+  );
   const currentStoryboardRef = useRef<Storyboard | null>(null);
   const selectedStoryboardIdRef = useRef<string | null>(null);
   const isLoadingDataRef = useRef<boolean>(false);
@@ -65,23 +68,36 @@ export default function CareerStory6({ className = "" }: CareerStory6Props) {
   useEffect(() => {
     setQuestionnaireBreadcrumbs(sessionId, "My Story-5 Activity [Final]");
   }, [sessionId, setQuestionnaireBreadcrumbs]);
-  const handleStoryboardSelect = useCallback(
+  const handleStoryboardPreview = useCallback(
     (storyboardId: string) => {
-      const selectedStoryboard = availableStoryboards.find(
+      const previewStoryboard = availableStoryboards.find(
         (sb) => sb.id === storyboardId
       );
-      if (selectedStoryboard) {
-        setSelectedStoryboardId(storyboardId);
-        setCurrentStoryboard(selectedStoryboard);
+      if (previewStoryboard) {
+        setPreviewStoryboardId(storyboardId);
+        setCurrentStoryboard(previewStoryboard);
         setShowDropdown(false);
-
-        // Update refs
-        selectedStoryboardIdRef.current = storyboardId;
-        currentStoryboardRef.current = selectedStoryboard;
       }
     },
     [availableStoryboards]
   );
+
+  const handleConfirmSelection = useCallback(() => {
+    if (!previewStoryboardId) return;
+
+    const selectedStoryboard = availableStoryboards.find(
+      (sb) => sb.id === previewStoryboardId
+    );
+    if (selectedStoryboard) {
+      setSelectedStoryboardId(previewStoryboardId);
+      setHasSelectedStoryboard(true);
+
+      // Update refs
+      selectedStoryboardIdRef.current = previewStoryboardId;
+      currentStoryboardRef.current = selectedStoryboard;
+      setPreviewStoryboardId(null);
+    }
+  }, [previewStoryboardId, availableStoryboards]);
 
   // Load data on component mount - only run once when sessionId is available
   useEffect(() => {
@@ -120,24 +136,27 @@ export default function CareerStory6({ className = "" }: CareerStory6Props) {
 
         let selectedStoryboardId: string | null = null;
         let currentStoryboard: Storyboard | null = null;
+        let hasSelected = false;
 
         if (selectedResponse.ok) {
           const selectedData = await selectedResponse.json();
           selectedStoryboardId = selectedData.selected_storyboard_id;
+          hasSelected = !!selectedData.selected_storyboard_id;
 
           if (selectedData.storyboard_data) {
             currentStoryboard = selectedData.storyboard_data;
           } else if (parsedStoryboards.length > 0) {
-            // If no selected storyboard, use the first available one
+            // If no selected storyboard, use the first available one for preview
             const firstStoryboard = parsedStoryboards[0];
-            selectedStoryboardId = firstStoryboard.id;
+            // Don't set selectedStoryboardId here - it's just a preview
             currentStoryboard = firstStoryboard;
           }
         } else if (selectedResponse.status === 404) {
-          // No selected storyboard, use first available if any
+          // No selected storyboard, use first available if any for preview
+          hasSelected = false;
           if (parsedStoryboards.length > 0) {
             const firstStoryboard = parsedStoryboards[0];
-            selectedStoryboardId = firstStoryboard.id;
+            // Don't set selectedStoryboardId here - it's just a preview
             currentStoryboard = firstStoryboard;
           }
         }
@@ -146,8 +165,13 @@ export default function CareerStory6({ className = "" }: CareerStory6Props) {
         setAvailableStoryboards(parsedStoryboards);
         setSelectedStoryboardId(selectedStoryboardId);
         setCurrentStoryboard(currentStoryboard);
+        setHasSelectedStoryboard(hasSelected);
+        // Initialize preview with the current storyboard if not selected yet
+        if (!hasSelected && currentStoryboard) {
+          setPreviewStoryboardId(currentStoryboard.id);
+        }
 
-        // Update refs for debounced save
+        // Update refs
         currentStoryboardRef.current = currentStoryboard;
         selectedStoryboardIdRef.current = selectedStoryboardId;
       } catch (error) {
@@ -174,15 +198,6 @@ export default function CareerStory6({ className = "" }: CareerStory6Props) {
   useEffect(() => {
     selectedStoryboardIdRef.current = selectedStoryboardId;
   }, [selectedStoryboardId]);
-
-  // Cleanup timeout on unmount
-  useEffect(() => {
-    return () => {
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current);
-      }
-    };
-  }, []);
 
   const saveStoryboard = useCallback(async () => {
     if (!currentStoryboard || !selectedStoryboardId) return;
@@ -246,17 +261,6 @@ export default function CareerStory6({ className = "" }: CareerStory6Props) {
     });
   }, [currentStoryboard]);
 
-  const debouncedSave = useCallback(() => {
-    if (saveTimeoutRef.current) {
-      clearTimeout(saveTimeoutRef.current);
-    }
-    saveTimeoutRef.current = setTimeout(() => {
-      if (currentStoryboardRef.current && selectedStoryboardIdRef.current) {
-        saveStoryboard();
-      }
-    }, 2000); // Save after 2 seconds of inactivity
-  }, [saveStoryboard]);
-
   const updateCellContent = useCallback(
     (cellId: string, content: string) => {
       if (!currentStoryboard) return;
@@ -276,11 +280,8 @@ export default function CareerStory6({ className = "" }: CareerStory6Props) {
         currentStoryboardRef.current = updatedStoryboard;
         return updatedStoryboard;
       });
-
-      // Trigger debounced save
-      debouncedSave();
     },
-    [currentStoryboard, debouncedSave]
+    [currentStoryboard]
   );
 
   const deleteCell = useCallback(
@@ -362,53 +363,63 @@ export default function CareerStory6({ className = "" }: CareerStory6Props) {
           {/* Storyboard Selection and Grid */}
           {memoizedCurrentStoryboard && (
             <Card className="overflow-hidden border shadow-lg bg-white/90 backdrop-blur-sm border-slate-200/60 rounded-2xl">
-              <CardHeader className="border-b bg-gradient-to-r from-primary-blue-50/80 to-primary-green-50/80 border-primary-blue-100/30">
-                <div className="space-y-4">
-                  {/* Storyboard Selection Dropdown */}
-                  <div className="flex items-center justify-between gap-4">
-                    <div className="flex items-center gap-4">
-                      <span className="text-sm font-semibold text-primary-blue-700">
-                        Select Storyboard:
-                      </span>
-                      <div className="relative dropdown-container">
-                        <button
-                          type="button"
-                          onClick={() => setShowDropdown(!showDropdown)}
-                          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white transition-all duration-200 bg-gradient-to-r from-primary-blue-500 to-primary-green-500 hover:from-primary-blue-600 hover:to-primary-green-600 rounded-lg shadow-md hover:shadow-lg min-w-[200px] justify-between"
-                        >
-                          <span>{memoizedCurrentStoryboard.name}</span>
-                          <ChevronDown
-                            className={`size-4 transition-transform duration-200 ${
-                              showDropdown ? "rotate-180" : ""
-                            }`}
-                          />
-                        </button>
+              {!hasSelectedStoryboard && (
+                <CardHeader className="border-b bg-gradient-to-r from-primary-blue-50/80 to-primary-green-50/80 border-primary-blue-100/30">
+                  <div className="space-y-4">
+                    {/* Storyboard Selection Dropdown - Only show if not selected yet */}
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="flex items-center gap-4">
+                        <span className="text-sm font-semibold text-primary-blue-700">
+                          Select Storyboard:
+                        </span>
+                        <div className="relative dropdown-container">
+                          <button
+                            type="button"
+                            onClick={() => setShowDropdown(!showDropdown)}
+                            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white transition-all duration-200 bg-gradient-to-r from-primary-blue-500 to-primary-green-500 hover:from-primary-blue-600 hover:to-primary-green-600 rounded-lg shadow-md hover:shadow-lg min-w-[200px] justify-between"
+                          >
+                            <span>{memoizedCurrentStoryboard.name}</span>
+                            <ChevronDown
+                              className={`size-4 transition-transform duration-200 ${
+                                showDropdown ? "rotate-180" : ""
+                              }`}
+                            />
+                          </button>
 
-                        {showDropdown && (
-                          <div className="absolute top-full left-0 z-50 mt-1 w-full bg-white border border-slate-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                            {availableStoryboards.map((storyboard) => (
-                              <button
-                                key={storyboard.id}
-                                type="button"
-                                onClick={() =>
-                                  handleStoryboardSelect(storyboard.id)
-                                }
-                                className={`w-full px-4 py-2 text-left text-sm hover:bg-slate-50 transition-colors duration-200 ${
-                                  selectedStoryboardId === storyboard.id
-                                    ? "bg-primary-blue-50 text-primary-blue-700 font-medium"
-                                    : "text-slate-700"
-                                }`}
-                              >
-                                {storyboard.name}
-                              </button>
-                            ))}
-                          </div>
-                        )}
+                          {showDropdown && (
+                            <div className="absolute top-full left-0 z-50 mt-1 w-full bg-white border border-slate-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                              {availableStoryboards.map((storyboard) => (
+                                <button
+                                  key={storyboard.id}
+                                  type="button"
+                                  onClick={() =>
+                                    handleStoryboardPreview(storyboard.id)
+                                  }
+                                  className={`w-full px-4 py-2 text-left text-sm hover:bg-slate-50 transition-colors duration-200 ${
+                                    previewStoryboardId === storyboard.id
+                                      ? "bg-primary-blue-50 text-primary-blue-700 font-medium"
+                                      : "text-slate-700"
+                                  }`}
+                                >
+                                  {storyboard.name}
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                        <Button
+                          type="button"
+                          onClick={handleConfirmSelection}
+                          disabled={!previewStoryboardId}
+                          className="px-4 py-2 text-sm font-medium text-white transition-all duration-200 bg-gradient-to-r from-primary-green-500 to-primary-green-600 hover:from-primary-green-600 hover:to-primary-green-700 rounded-lg shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          Confirm
+                        </Button>
                       </div>
                     </div>
                   </div>
-                </div>
-              </CardHeader>
+                </CardHeader>
+              )}
               <CardContent className="p-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {memoizedCurrentStoryboard.cells.map((cell) => (
@@ -456,29 +467,31 @@ export default function CareerStory6({ className = "" }: CareerStory6Props) {
             </Card>
           )}
 
-          {/* Save Button */}
-          <div className="flex justify-end mt-8">
-            <Button
-              onClick={saveStoryboard}
-              disabled={saving}
-              className="relative px-10 py-3 font-semibold text-white transition-all duration-300 shadow-xl group bg-gradient-to-r from-primary-green-500 to-primary-blue-500 rounded-xl hover:from-primary-green-600 hover:to-primary-blue-600 hover:shadow-2xl hover:-translate-y-1"
-            >
-              <div className="absolute inset-0 transition-opacity duration-300 bg-gradient-to-r from-primary-green-400 to-primary-blue-400 rounded-2xl blur opacity-30 group-hover:opacity-50" />
-              <div className="relative flex items-center gap-3">
-                {saving ? (
-                  <>
-                    <Loader2 className="size-5 animate-spin" />
-                    <span>Saving Progress...</span>
-                  </>
-                ) : (
-                  <>
-                    <span>Save Story Board</span>
-                    <ArrowRight className="transition-transform duration-200 size-5 group-hover:translate-x-1" />
-                  </>
-                )}
-              </div>
-            </Button>
-          </div>
+          {/* Save Button - Only show after confirming storyboard selection */}
+          {hasSelectedStoryboard && (
+            <div className="flex justify-end mt-8">
+              <Button
+                onClick={saveStoryboard}
+                disabled={saving}
+                className="relative px-10 py-3 font-semibold text-white transition-all duration-300 shadow-xl group bg-gradient-to-r from-primary-green-500 to-primary-blue-500 rounded-xl hover:from-primary-green-600 hover:to-primary-blue-600 hover:shadow-2xl hover:-translate-y-1"
+              >
+                <div className="absolute inset-0 transition-opacity duration-300 bg-gradient-to-r from-primary-green-400 to-primary-blue-400 rounded-2xl blur opacity-30 group-hover:opacity-50" />
+                <div className="relative flex items-center gap-3">
+                  {saving ? (
+                    <>
+                      <Loader2 className="size-5 animate-spin" />
+                      <span>Saving Progress...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>Save Story Board</span>
+                      <ArrowRight className="transition-transform duration-200 size-5 group-hover:translate-x-1" />
+                    </>
+                  )}
+                </div>
+              </Button>
+            </div>
+          )}
         </JourneyBreadcrumbLayout>
       </div>
     </div>

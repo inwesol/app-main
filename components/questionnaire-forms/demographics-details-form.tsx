@@ -837,7 +837,8 @@ export function DemographicsDetailsForm({
                               Wellness Assessment
                             </h3>
                             <p className="text-xs text-slate-500 sm:text-sm">
-                              Your current state and goals
+                              Rate your current stress levels related to work
+                              and personal life
                             </p>
                           </div>
                         </div>
@@ -889,10 +890,6 @@ export function DemographicsDetailsForm({
                                   </div>
                                 </div>
                               </FormControl>
-                              <FormDescription className="mt-2 text-xs text-slate-500">
-                                Rate your current stress levels related to work
-                                and personal life
-                              </FormDescription>
                               <div className="h-4">
                                 <FormMessage className="text-xs font-medium text-rose-500" />
                               </div>

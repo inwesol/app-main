@@ -10,7 +10,6 @@ import {
   Heart,
   Briefcase,
   FileText,
-  BarChart3,
   Award,
   Loader2,
   ArrowRight,
@@ -415,7 +414,7 @@ export default function RiasecTest({ sessionId }: { sessionId: string }) {
           </div> */}
 
           {/* Instructions Card */}
-          <div className="p-4 mb-6 border shadow-sm bg-gradient-to-r from-primary-blue-50 to-primary-green-50 rounded-2xl sm:p-6 border-slate-200/60">
+          {/* <div className="p-4 mb-6 border shadow-sm bg-gradient-to-r from-primary-blue-50 to-primary-green-50 rounded-2xl sm:p-6 border-slate-200/60">
             <div className="flex items-center gap-3 mb-4">
               <div className="flex items-center justify-center rounded-lg shadow-md size-10 bg-gradient-to-r from-primary-blue-500 to-primary-green-500">
                 <BarChart3 className="text-white size-5" />
@@ -460,7 +459,7 @@ export default function RiasecTest({ sessionId }: { sessionId: string }) {
                 </p>
               </div>
             </div>
-          </div>
+          </div> */}
 
           {/* Page Navigation Dots with Reset Button */}
           <div className="relative flex items-center justify-center mb-4">
@@ -652,13 +651,6 @@ export default function RiasecTest({ sessionId }: { sessionId: string }) {
               </div>
             </form>
           </Form>
-
-          {/* Muted footer text without div wrapper */}
-          <p className="mt-6 text-xs italic font-light text-center text-slate-500">
-            The RIASEC model was developed by psychologist John Holland to help
-            people understand their career interests and find suitable work
-            environments.
-          </p>
         </JourneyBreadcrumbLayout>
       </div>
     </div>
