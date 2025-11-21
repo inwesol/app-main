@@ -10,6 +10,7 @@ import {
   Sparkles,
   LayoutDashboard,
   Route,
+  MapIcon,
 } from "lucide-react";
 import { SidebarHistory } from "@/components/sidebar-history";
 import { SidebarUserNav } from "@/components/sidebar-user-nav";
@@ -43,6 +44,12 @@ const data = {
       title: "Dashboard",
       url: "/",
       icon: LayoutDashboard,
+      isActive: false,
+    },
+    {
+      title: "Explorer",
+      url: "https://www.inwesol.com/explorer/",
+      icon: MapIcon,
       isActive: false,
     },
     {
