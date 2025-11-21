@@ -52,9 +52,19 @@ const MeetingScheduler = () => {
   const [isTimeSlotsLoaded, setIsTimeSlotsLoaded] = useState(false);
 
   // Generate time slots - moved to useEffect to prevent hydration mismatch
-  const generateTimeSlots = () => {
+  const generateTimeSlots = (date: Date | null) => {
     const slots = [];
     const now = new Date();
+    const today = new Date(now);
+    today.setHours(0, 0, 0, 0);
+
+    // If no date is selected, use current date
+    const selectedDate = date || now;
+    const selectedDateOnly = new Date(selectedDate);
+    selectedDateOnly.setHours(0, 0, 0, 0);
+
+    // Only check if time is past if the selected date is today
+    const isToday = selectedDateOnly.getTime() === today.getTime();
     const currentHour = now.getHours();
     const currentMinute = now.getMinutes();
 
@@ -70,9 +80,11 @@ const MeetingScheduler = () => {
           .padStart(2, "0")} ${period}`;
 
         // Check if this time slot is in the past
+        // Only mark as past if the selected date is today and the time has passed
         const isPast =
-          hour < currentHour ||
-          (hour === currentHour && minute <= currentMinute);
+          isToday &&
+          (hour < currentHour ||
+            (hour === currentHour && minute <= currentMinute));
 
         slots.push({
           value: time,
@@ -154,15 +166,28 @@ const MeetingScheduler = () => {
   }, [sessionId, calculateTimeUntilSession]);
 
   // Generate time slots on client side to prevent hydration mismatch
+  // Regenerate when selectedDate changes
   useEffect(() => {
-    const slots = generateTimeSlots();
+    const slots = generateTimeSlots(selectedDate);
     setTimeSlots(slots);
     setIsTimeSlotsLoaded(true);
-  }, []);
+  }, [selectedDate]);
 
-  // Set default time slot on component mount
+  // Reset selectedTime if it's now in the past when timeSlots change
   useEffect(() => {
-    if (!selectedTime && isTimeSlotsLoaded) {
+    if (selectedTime && isTimeSlotsLoaded) {
+      const currentSlot = timeSlots.find(
+        (slot) => slot.value === selectedTime.value
+      );
+      if (currentSlot?.isPast) {
+        setSelectedTime(null);
+      }
+    }
+  }, [timeSlots, selectedTime, isTimeSlotsLoaded]);
+
+  // Set default time slot when timeSlots change or when no time is selected
+  useEffect(() => {
+    if (!selectedTime && isTimeSlotsLoaded && timeSlots.length > 0) {
       const nearestSlot = timeSlots.find((slot) => !slot.isPast);
       if (nearestSlot) {
         setSelectedTime({
