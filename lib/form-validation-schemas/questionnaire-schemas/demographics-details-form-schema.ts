@@ -27,13 +27,23 @@ export const demographicsDetailsSchema = z.object({
       return !Number.isNaN(num) && num >= 1 && num <= 100;
     }, "Please enter a valid age between 1 and 100")
     .transform((val) => (typeof val === "string" ? val : val.toString())),
-  gender: z.enum(["male", "female", "prefer-not-to-say", "others"], {
-    required_error: "Please select your gender",
-  }),
+  gender: z.enum(
+    [
+      "male",
+      "female",
+      "non-binary",
+      "transgender",
+      "prefer-not-to-say",
+      "others",
+    ],
+    {
+      required_error: "Please select your gender",
+    }
+  ),
   profession: z.enum(
     [
       "student-pursuing",
-      "student-passed",
+      "seeking-employment",
       "working-business",
       "working-employee",
     ],

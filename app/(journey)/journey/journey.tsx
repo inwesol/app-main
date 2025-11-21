@@ -6,7 +6,6 @@ import {
   Trophy,
   ArrowRight,
   BarChart3,
-  Rocket,
   Download,
   Eye,
   FileText,
@@ -110,8 +109,8 @@ export const JourneyPage: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
         <Header
           headerIcon={Trophy}
-          headerText="Your Career Journey"
-          headerDescription="Navigate through personalized sessions to unlock your career potential"
+          headerText="Your Self-discovery Journey"
+          headerDescription="Navigate through personalized sessions to cultivate a learning mindset"
         />
 
         {/* progress dashboard */}
@@ -145,7 +144,7 @@ export const JourneyPage: React.FC = () => {
               <div className="flex items-center justify-between text-xs text-primary-green-700 mt-1 pt-1">
                 <span className="">
                   {userProgress.currentSession > 8
-                    ? "All Sessions is completed"
+                    ? "All Sessions are completed"
                     : `Active Session #${userProgress.currentSession + 1}`}
                 </span>
                 <span className="">
@@ -332,8 +331,22 @@ export const JourneyPage: React.FC = () => {
                       >
                         <div className="p-3 sm:p-4">
                           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 mb-1.5">
+                            <div className="flex-1 min-w-0 relative">
+                              {/* Free Session Tag - Centered on card */}
+                              {session.id === 0 && (
+                                <div className="absolute top-0 left-1/2 -translate-x-1/2 z-20">
+                                  <div className="relative">
+                                    <Badge className="bg-gradient-to-r from-amber-400 via-amber-300 to-amber-400 text-amber-900 border-2 shadow-lg text-xs font-bold px-3 py-1 rounded-lg shine-animation">
+                                      <span className="relative z-10">
+                                        Free Session
+                                      </span>
+                                    </Badge>
+                                    {/* Glow effect */}
+                                    <div className="absolute inset-0 bg-amber-300 rounded-lg blur-md opacity-50 -z-10 animate-pulse" />
+                                  </div>
+                                </div>
+                              )}
+                              <div className="flex items-center gap-2 mb-1.5 flex-wrap">
                                 <div
                                   className={`rounded-md px-2 py-1 flex items-center justify-center text-xs font-bold ${
                                     isCompleted
@@ -347,17 +360,17 @@ export const JourneyPage: React.FC = () => {
                                 </div>
                                 <div className="flex items-center gap-1.5">
                                   {isCompleted && (
-                                    <Badge className="bg-primary-green-100 text-primary-green-700 border-primary-green-300 text-xs px-1.5 py-0.5">
+                                    <Badge className="bg-primary-green-100 text-primary-green-700 border-primary-green-300 hover:bg-primary-green-200 text-xs px-1.5 py-0.5">
                                       ✓ Completed
                                     </Badge>
                                   )}
                                   {isCurrent && (
-                                    <Badge className="bg-primary-blue-100 text-primary-blue-700 border-primary-blue-300 text-xs px-1.5 py-0.5">
+                                    <Badge className="bg-primary-blue-100 text-primary-blue-700 border-primary-blue-300 hover:bg-primary-blue-200 text-xs px-1.5 py-0.5">
                                       ▶ Current
                                     </Badge>
                                   )}
                                   {isLocked && (
-                                    <Badge className="bg-slate-100 text-slate-500 border-slate-300 text-xs px-1.5 py-0.5">
+                                    <Badge className="bg-slate-100 text-slate-500 border-slate-300 hover:bg-slate-200 text-xs px-1.5 py-0.5">
                                       🔒 Locked
                                     </Badge>
                                   )}
@@ -444,7 +457,7 @@ export const JourneyPage: React.FC = () => {
         </div>
 
         {/* Responsive Footer for check-in session book */}
-        <Card className="my-8 p-4 sm:p-6 bg-gradient-to-r from-primary-green-50/80 via-primary-blue-50/80 to-slate-50/80 border border-slate-200/50 shadow-sm">
+        {/* <Card className="my-8 p-4 sm:p-6 bg-gradient-to-r from-primary-green-50/80 via-primary-blue-50/80 to-slate-50/80 border border-slate-200/50 shadow-sm">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
             <div className="hidden sm:block bg-gradient-to-r from-primary-green-500 to-primary-blue-500 rounded-xl p-3 shadow-sm shrink-0">
               <Rocket className="size-6 text-white" />
@@ -467,7 +480,7 @@ export const JourneyPage: React.FC = () => {
               <p className="text-slate-600 text-xs font-medium">Complete</p>
             </div>
           </div>
-        </Card>
+        </Card> */}
       </div>
 
       {/* Simple View Dialog */}

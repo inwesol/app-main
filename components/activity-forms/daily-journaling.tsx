@@ -349,7 +349,7 @@ export default function DailyJournaling() {
         <BreadcrumbUI
           items={[
             { label: "Home", href: "/" },
-            { label: "Career Journey", href: "/journey" },
+            { label: "Journey", href: "/journey" },
             {
               label: `Session ${Number(sessionId) + 1}`,
               href: `/journey/sessions/${sessionId}`,

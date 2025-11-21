@@ -349,7 +349,7 @@ export function ReportDialog({ isOpen, onClose }: ReportDialogProps) {
       <Card className="w-full max-w-5xl mx-4 max-h-[90vh] overflow-hidden">
         <CardHeader className="flex flex-row items-center justify-between pb-4 space-y-0">
           <CardTitle className="text-xl font-semibold text-slate-800">
-            Career Journey Report
+            Journey Report
           </CardTitle>
           <Button
             variant="ghost"
@@ -373,7 +373,7 @@ export function ReportDialog({ isOpen, onClose }: ReportDialogProps) {
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                   <div>
                     <h2 className="text-2xl font-bold text-slate-800 mb-2">
-                      Your Career Journey Report
+                      Your Journey Report
                     </h2>
                   </div>
                 </div>

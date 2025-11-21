@@ -560,6 +560,12 @@ export function DemographicsDetailsForm({
                                       <SelectItem value="female">
                                         Female
                                       </SelectItem>
+                                      <SelectItem value="non-binary">
+                                        Non-binary
+                                      </SelectItem>
+                                      <SelectItem value="transgender">
+                                        Transgender
+                                      </SelectItem>
                                       <SelectItem value="prefer-not-to-say">
                                         Prefer not to say
                                       </SelectItem>
@@ -654,9 +660,10 @@ export function DemographicsDetailsForm({
                                       icon: GraduationCap,
                                     },
                                     {
-                                      value: "student-passed",
-                                      title: "Student (Recently Graduated)",
-                                      description: "Recently completed studies",
+                                      value: "seeking-employment",
+                                      title: "Seeking Employment",
+                                      description:
+                                        "Looking for work opportunities",
                                       icon: Award,
                                     },
                                     {
@@ -837,8 +844,8 @@ export function DemographicsDetailsForm({
                               Wellness Assessment
                             </h3>
                             <p className="text-xs text-slate-500 sm:text-sm">
-                              Rate your current stress levels related to work
-                              and personal life
+                              Rate your current stress levels related to
+                              work/education and personal life
                             </p>
                           </div>
                         </div>
