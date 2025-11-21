@@ -5,8 +5,15 @@ import {
   CardTitle,
   CardDescription,
   CardContent,
+  CardFooter,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import {
   Play,
   Pause,
@@ -14,6 +21,7 @@ import {
   SkipForward,
   Volume2,
   VolumeX,
+  Info,
 } from "lucide-react";
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { SidebarToggle } from "@/components/sidebar-toggle";
@@ -97,12 +105,12 @@ export default function Dashboard() {
         duration: "04:36",
         url: "/musics/breathing-exercise.mp3",
       },
-      // {
-      //   id: 2,
-      //   title: "🌙 Evening Relax",
-      //   duration: "01:57",
-      //   url: "/musics/dawn-of-change.mp3",
-      // },
+      {
+        id: 2,
+        title: "🌙 Evening Relax",
+        duration: "01:57",
+        url: "/musics/dawn-of-change.mp3",
+      },
       // {
       //   id: 3,
       //   title: "☀️ Focus Boost",
@@ -129,6 +137,17 @@ export default function Dashboard() {
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
     return `${mins}:${secs.toString().padStart(2, "0")}`;
+  };
+
+  const getTimeBasedGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) {
+      return "Good Morning";
+    } else if (hour < 17) {
+      return "Good Afternoon";
+    } else {
+      return "Good Evening";
+    }
   };
 
   const handlePlayPause = async () => {
@@ -542,6 +561,31 @@ export default function Dashboard() {
   return (
     <div className="p-2 md:p-4 lg:p-6 space-y-6 md:space-y-8">
       {isMobile ? <SidebarToggle /> : <div />}
+
+      {/* Greeting Card */}
+      <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
+        <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-4">
+              <div className="size-14 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center shrink-0">
+                <span className="text-white text-2xl">👋</span>
+              </div>
+              <div className="flex-1">
+                <h2 className="text-2xl md:text-3xl font-semibold text-foreground">
+                  {authStatus.user?.name
+                    ? `Hi ${authStatus.user.name}, ${getTimeBasedGreeting()}!`
+                    : `Hi there, ${getTimeBasedGreeting()}!`}
+                </h2>
+                <p className="text-sm md:text-base font-medium text-foreground mt-1 leading-relaxed">
+                  Welcome to your space to find clarity, gain confidence, and
+                  build a mindset for growth. 🚀
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
       {/* Row 1: Feature Introduction Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-4 md:gap-6 max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
         {/* CoCo AI Coach Feature Card */}
@@ -558,45 +602,85 @@ export default function Dashboard() {
                   <span className="text-white text-lg font-bold">🤖</span>
                 </div>
                 <div className="flex-1">
-                  <CardTitle className="text-lg">CoCo AI Coach</CardTitle>
+                  <CardTitle className="text-lg">
+                    CoCo: AI Mindset Coach
+                  </CardTitle>
                   <CardDescription className="text-sm text-muted-foreground">
-                    Your personal AI career and wellness companion
+                    Everyday ally for your journey
                   </CardDescription>
                 </div>
               </div>
-              <Button
-                size="sm"
-                className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 ml-3"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  window.location.href = "/chat";
-                }}
-              >
-                Chat Now
-              </Button>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      className="ml-3 size-8"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                      }}
+                    >
+                      <Info className="size-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent
+                    side="left"
+                    className="w-80 p-4"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                    }}
+                  >
+                    <div className="space-y-2">
+                      <h4 className="text-sm font-semibold text-foreground">
+                        How CoCo can help you:
+                      </h4>
+                      <ul className="text-xs text-muted-foreground space-y-1">
+                        <li>
+                          • Helps you pause, reflect, and think with clarity.
+                        </li>
+                        <li>
+                          • Guides you with thoughtful questions instead of
+                          quick, generic answers.
+                        </li>
+                        <li>
+                          • Provides you with reliable and relevant information
+                          for your career exploration.
+                        </li>
+                        <li>
+                          • Supports you in managing your priorities and
+                          wellbeing.
+                        </li>
+                        <li>
+                          • Available 24/7 to support you as an everyday ally on
+                          your journey.
+                        </li>
+                      </ul>
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </div>
           </CardHeader>
           <CardContent className="space-y-3">
             <p className="text-sm text-muted-foreground leading-relaxed">
-              Get instant, personalized guidance from your AI coach. Whether
-              you&apos;re exploring career paths, seeking wellness advice, or
-              need support with life decisions, CoCo is here to help you
-              navigate your journey with intelligent, empathetic conversations.
+              Get personalized support from CoCo, your AI Mindset Coach. Whether
+              you&apos;re exploring career paths, managing your well-being, or
+              making everyday decisions, CoCo is your everyday ally. CoCo helps
+              you pause, reflect, and think clearly in a fast-paced world.
             </p>
-
-            <div className="space-y-2">
-              <h4 className="text-sm font-semibold text-foreground">
-                How CoCo can help you:
-              </h4>
-              <ul className="text-xs text-muted-foreground space-y-1">
-                <li>• Provide 24/7 career guidance and mentorship</li>
-                <li>• Offer personalized wellness and mental health support</li>
-                <li>• Help with decision-making and problem-solving</li>
-                <li>• Answer questions about your career journey and goals</li>
-                <li>• Provide motivation and accountability for your growth</li>
-              </ul>
-            </div>
           </CardContent>
+          <CardFooter>
+            <Button
+              onClick={(e) => {
+                e.stopPropagation();
+                window.location.href = "/chat";
+              }}
+              className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
+            >
+              Say Hi to CoCo
+            </Button>
+          </CardFooter>
         </Card>
 
         {/* Human Coach Journey Feature Card */}
@@ -613,45 +697,89 @@ export default function Dashboard() {
                   <span className="text-white text-lg font-bold">👨‍🏫</span>
                 </div>
                 <div className="flex-1">
-                  <CardTitle className="text-lg">Human Coach Journey</CardTitle>
+                  <CardTitle className="text-lg">
+                    Self-discovery Journey
+                  </CardTitle>
                   <CardDescription className="text-sm text-muted-foreground">
-                    Get personalized guidance from certified human coaches
+                    Personalized and holistic support
                   </CardDescription>
                 </div>
               </div>
-              <Button
-                size="sm"
-                className="bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700 ml-3"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  window.location.href = "/journey";
-                }}
-              >
-                Start Journey
-              </Button>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      className="ml-3 size-8"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                      }}
+                    >
+                      <Info className="size-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent
+                    side="left"
+                    className="w-80 p-4"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                    }}
+                  >
+                    <div className="space-y-2">
+                      <h4 className="text-sm font-semibold text-foreground">
+                        What Self-discovery Journey offers:
+                      </h4>
+                      <ul className="text-xs text-muted-foreground space-y-1">
+                        <li>
+                          • 1:1 reflective coaching sessions conducted online at
+                          your convenience.
+                        </li>
+                        <li>
+                          • Coaching facilitated by a psychologist to help you
+                          understand yourself better.
+                        </li>
+                        <li>
+                          • Exploratory activities, tools to discover your
+                          values, strengths, and interests.
+                        </li>
+                        <li>
+                          • Guided action planning to help you make informed
+                          decisions.
+                        </li>
+                        <li>
+                          • Career clarity, well-being management and confident
+                          actions.
+                        </li>
+                      </ul>
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </div>
           </CardHeader>
           <CardContent className="space-y-3">
             <p className="text-sm text-muted-foreground leading-relaxed">
-              Connect with experienced human coaches who provide personalized,
-              one-on-one guidance tailored to your unique career and wellness
-              goals. Get expert insights, accountability, and support throughout
-              your personal and professional development journey.
+              Connect with experienced coaches who provide personalized,
+              one-on-one guidance tailored to your goals.{" "}
+              <span className="px-1 bg-amber-200 text-amber-900 font-semibold shine-animation">
+                Book your first session for FREE
+              </span>{" "}
+              and begin your journey towards a learning mindset that helps you
+              build a meaningful career and a fulfilling life.
             </p>
-
-            <div className="space-y-2">
-              <h4 className="text-sm font-semibold text-foreground">
-                How human coaches can help you:
-              </h4>
-              <ul className="text-xs text-muted-foreground space-y-1">
-                <li>• Provide personalized career guidance and mentorship</li>
-                <li>• Offer emotional support and wellness coaching</li>
-                <li>• Create custom action plans for your goals</li>
-                <li>• Give real-time feedback and accountability</li>
-                <li>• Share professional insights and industry knowledge</li>
-              </ul>
-            </div>
           </CardContent>
+          <CardFooter>
+            <Button
+              onClick={(e) => {
+                e.stopPropagation();
+                window.location.href = "/journey";
+              }}
+              className="w-full bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700"
+            >
+              Begin your Journey
+            </Button>
+          </CardFooter>
         </Card>
       </div>
 
@@ -662,11 +790,22 @@ export default function Dashboard() {
           {/* Meditation Music Player - 40% */}
           <div className="lg:col-span-4">
             <Card className="h-full">
-              <CardHeader className="pb-4 text-center">
-                <CardTitle className="text-lg">Meditation Playlist</CardTitle>
-                <CardDescription className="text-sm">
-                  Relax and focus with guided meditations
-                </CardDescription>
+              <CardHeader className="space-y-3">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center space-x-3 flex-1">
+                    <div className="size-10 bg-gradient-to-br from-indigo-500 to-pink-600 rounded-lg flex items-center justify-center">
+                      <span className="text-white text-lg font-bold">🧘</span>
+                    </div>
+                    <div className="flex-1">
+                      <CardTitle className="text-lg">
+                        Guided Meditation
+                      </CardTitle>
+                      <CardDescription className="text-sm text-muted-foreground">
+                        Take a moment to pause, breathe deep, and reset
+                      </CardDescription>
+                    </div>
+                  </div>
+                </div>
               </CardHeader>
               <CardContent className="space-y-4">
                 {/* Playlist Display */}
@@ -776,11 +915,22 @@ export default function Dashboard() {
           {/* Daily Journaling Section - 60% */}
           <div className="lg:col-span-6">
             <Card className="h-full">
-              <CardHeader className="pb-4">
-                <CardTitle className="text-lg">Daily Journaling</CardTitle>
-                <CardDescription className="text-sm">
-                  Reflect, grow, and track your personal journey
-                </CardDescription>
+              <CardHeader className="space-y-3">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center space-x-3 flex-1">
+                    <div className="size-10 bg-gradient-to-br from-amber-500 to-orange-600 rounded-lg flex items-center justify-center">
+                      <span className="text-white text-lg font-bold">📔</span>
+                    </div>
+                    <div className="flex-1">
+                      <CardTitle className="text-lg">
+                        Daily Journaling
+                      </CardTitle>
+                      <CardDescription className="text-sm text-muted-foreground">
+                        Reflect, grow, and track your personal journey
+                      </CardDescription>
+                    </div>
+                  </div>
+                </div>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-3">
@@ -791,36 +941,36 @@ export default function Dashboard() {
                     <li className="flex items-start gap-2">
                       <span className="text-blue-500 mt-1">•</span>
                       <span>
-                        <strong>Self-Reflection:</strong> Process your thoughts
-                        and emotions to gain deeper self-awareness
-                      </span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-blue-500 mt-1">•</span>
-                      <span>
-                        <strong>Stress Relief:</strong> Release pent-up emotions
-                        and reduce mental clutter
+                        <strong>Self-Reflection:</strong> Pause, reflect, and
+                        think about your day.
                       </span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-blue-500 mt-1">•</span>
                       <span>
                         <strong>Goal Tracking:</strong> Monitor your progress
-                        and celebrate achievements
+                        and celebrate small wins.
                       </span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-blue-500 mt-1">•</span>
                       <span>
-                        <strong>Pattern Recognition:</strong> Identify recurring
-                        themes in your life and behavior
+                        <strong>Habits and Patterns:</strong> Identify recurring
+                        patterns in your behavior.
                       </span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-blue-500 mt-1">•</span>
                       <span>
-                        <strong>Mental Clarity:</strong> Organize your thoughts
-                        and improve decision-making
+                        <strong>Clarity:</strong> Organize your thoughts and
+                        improve decision-making.
+                      </span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-blue-500 mt-1">•</span>
+                      <span>
+                        <strong>Positivity:</strong> Prepare for the next day
+                        with a positive mindset.
                       </span>
                     </li>
                   </ul>
@@ -836,14 +986,14 @@ export default function Dashboard() {
                     }
                     className="w-full bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700"
                   >
-                    Start Your Journaling Journey
+                    Begin Journaling Now
                   </Button>
                 </div>
 
                 <div className="text-xs text-muted-foreground text-center">
                   <p>
-                    Take just 5-10 minutes daily to transform your mental
-                    well-being
+                    Spend 10 minutes each day to journal, practice gratitude,
+                    and reflect on your journey.
                   </p>
                 </div>
               </CardContent>
