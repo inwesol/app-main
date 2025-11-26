@@ -222,10 +222,22 @@ export default function LifeCollage() {
                         My Present Life
                       </CardTitle>
                     </div>
-                    <p className="text-sm text-slate-600">
-                      Create a collage representing your life right now using
-                      images, words, photographs, or drawings
-                    </p>
+                    <div className="text-sm text-slate-600">
+                      <p className="mb-2">
+                        Create a collage that represents your life as it is
+                        right now. <br /> Use images, words, photographs,
+                        drawings, colored paper, or even bits of fabric from
+                        newspapers, magazines, or personal collections. <br />{" "}
+                        Focus on capturing what feels most significant to you in
+                        your current life, such as:
+                      </p>
+                      <ul className="list-disc list-inside">
+                        <li>Your routines</li>
+                        <li>Your emotions</li>
+                        <li>Your relationships</li>
+                        <li>Your environment</li>
+                      </ul>
+                    </div>
                   </CardHeader>
                   <CardContent className="pt-0">
                     <FormField
@@ -266,10 +278,21 @@ export default function LifeCollage() {
                         My Future Life (3-5 Years)
                       </CardTitle>
                     </div>
-                    <p className="text-sm text-slate-600">
-                      Visualize your ideal life three to five years from now -
-                      your career, relationships, and lifestyle
-                    </p>
+                    <div className="text-sm text-slate-600">
+                      <p className="mb-2">
+                        Create a collage that visualizes your ideal life three
+                        or five years from now. <br /> Gather images, words,
+                        photographs, drawings, or materials like colored paper
+                        and fabric from newspapers, magazines, or other sources.
+                        <br /> Think about:
+                      </p>
+                      <ul className="list-disc list-inside">
+                        <li>Where do you want to be?</li>
+                        <li>The people you want around you</li>
+                        <li>Your career</li>
+                        <li>The lifestyle you aspire to have</li>
+                      </ul>
+                    </div>
                   </CardHeader>
                   <CardContent className="pt-0">
                     <FormField

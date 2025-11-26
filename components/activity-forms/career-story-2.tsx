@@ -421,10 +421,10 @@ export default function CareerStory2() {
           <div className="p-4 mb-6 border shadow-lg bg-white/90 backdrop-blur-sm border-slate-200/60 rounded-3xl sm:p-6 sm:mb-8">
             <div className="text-center">
               <p className="text-sm leading-relaxed text-slate-700 sm:text-base">
-                This activity is a continuation to the previous My Story-1
-                Activity you have completed. It contains related questions, so
-                please refer your previous document while working on the below
-                activities.
+                This activity is a continuation of the previous{" "}
+                <b>My Story-1 Activity</b> you have completed. It contains
+                related questions, so please refer to <b>My Story-1 Activity</b>{" "}
+                in <b>Reference</b> while working on the below steps.
               </p>
             </div>
           </div>
@@ -558,9 +558,10 @@ export default function CareerStory2() {
                                     setIsHeroSheetOpen(true);
                                     fetchHeroData();
                                   }}
-                                  className="ml-auto p-2 size-10 text-primary-green-600 hover:text-primary-green-700 hover:bg-primary-green-50 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md"
+                                  className="ml-auto p-2 w-fit text-primary-green-600 hover:text-primary-green-700 hover:bg-primary-green-50 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md"
                                 >
                                   <FileText className="size-4" />
+                                  Reference
                                 </Button>
                               </TooltipTrigger>
                               <TooltipContent side="left" sideOffset={16}>

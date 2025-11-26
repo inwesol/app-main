@@ -15,6 +15,7 @@ import {
   ArrowRight,
   ArrowLeft,
   CheckCircle,
+  BarChart3,
 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -414,52 +415,23 @@ export default function RiasecTest({ sessionId }: { sessionId: string }) {
           </div> */}
 
           {/* Instructions Card */}
-          {/* <div className="p-4 mb-6 border shadow-sm bg-gradient-to-r from-primary-blue-50 to-primary-green-50 rounded-2xl sm:p-6 border-slate-200/60">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="flex items-center justify-center rounded-lg shadow-md size-10 bg-gradient-to-r from-primary-blue-500 to-primary-green-500">
-                <BarChart3 className="text-white size-5" />
+          <div className="p-5 mb-6 border shadow-lg bg-gradient-to-br from-primary-blue-50 via-white to-primary-green-50 rounded-2xl sm:p-6 border-slate-200/60 backdrop-blur-sm">
+            <div className="flex items-start gap-2">
+              <div className="flex items-center justify-center rounded-xl shadow-lg size-14 bg-gradient-to-br from-primary-blue-500 to-primary-green-500 shrink-0">
+                <BarChart3 className="text-white size-6" />
               </div>
-              <h3 className="text-lg font-bold text-slate-800">Instructions</h3>
-            </div>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 text-slate-700">
-              <div className="flex items-center gap-3">
-                <div className="flex items-center justify-center text-sm font-bold text-white rounded-full size-6 bg-primary-blue-500 shrink-0">
-                  1
-                </div>
-                <p className="text-sm leading-relaxed">
-                  <span className="font-semibold">Read</span> each statement
-                  carefully
-                </p>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="flex items-center justify-center text-sm font-bold text-white rounded-full size-6 bg-primary-blue-500 shrink-0">
-                  2
-                </div>
-                <p className="text-sm leading-relaxed">
-                  <span className="font-semibold">Click</span> to select what
-                  resonates
-                </p>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="flex items-center justify-center text-sm font-bold text-white rounded-full size-6 bg-primary-blue-500 shrink-0">
-                  3
-                </div>
-                <p className="text-sm leading-relaxed">
-                  <span className="font-semibold">Be honest</span> about your
-                  interests
-                </p>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="flex items-center justify-center text-sm font-bold text-white rounded-full size-6 bg-primary-blue-500 shrink-0">
-                  4
-                </div>
-                <p className="text-sm leading-relaxed">
-                  <span className="font-semibold">View results</span> and
-                  explore careers
+              <div className="flex-1 space-y-1">
+                <h3 className="text-xl font-bold text-slate-800">
+                  Instructions
+                </h3>
+                <p className="text-base leading-relaxed text-slate-700">
+                  Read each statement and select it if you agree. There are no
+                  right or wrong answers. Select as many statements as you agree
+                  with.
                 </p>
               </div>
             </div>
-          </div> */}
+          </div>
 
           {/* Page Navigation Dots with Reset Button */}
           <div className="relative flex items-center justify-center mb-4">

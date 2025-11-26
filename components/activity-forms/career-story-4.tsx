@@ -131,7 +131,7 @@ export default function CareerStory4() {
             .then((response) => (response.ok ? response.json() : null))
             .then((data) => data && setCareerStoryOneData(data))
             .catch((error) =>
-              console.error("Error fetching Career Story 1 data:", error)
+              console.error("Error fetching My Story 1 data:", error)
             ),
 
           // Fetch Career Story 3 data
@@ -139,7 +139,7 @@ export default function CareerStory4() {
             .then((response) => (response.ok ? response.json() : null))
             .then((data) => data && setCareerStoryThreeData(data))
             .catch((error) =>
-              console.error("Error fetching Career Story 3 data:", error)
+              console.error("Error fetching My Story 3 data:", error)
             ),
         ]);
       } catch (err) {
@@ -186,7 +186,7 @@ export default function CareerStory4() {
         throw new Error(errorData.message || "Failed to save career story");
       }
 
-      console.log("Career Story 4 saved successfully");
+      console.log("My Story 4 saved successfully");
       setIsSubmitted(true);
 
       // Redirect to session page after 2 seconds
@@ -210,7 +210,7 @@ export default function CareerStory4() {
           <div className="px-6 py-8 text-center">
             <Loader2 className="mx-auto mb-4 size-8 text-primary-green-600 animate-spin" />
             <h2 className="mb-2 text-xl font-semibold text-slate-700">
-              Loading Career Story 4
+              Loading My Story 4
             </h2>
             <p className="text-slate-500">
               Please wait while we load your data...
@@ -289,13 +289,11 @@ export default function CareerStory4() {
             </h4>
             <div className="space-y-3 text-xs text-emerald-700">
               <div className="p-3 border rounded-md bg-white/60 border-emerald-200/40">
-                <p className="mb-1 font-semibold">
-                  1. Revisit Your Career Story
-                </p>
+                <p className="mb-1 font-semibold">1. Revisit Your My Story</p>
                 <p className="text-slate-600">
-                  Revisit the career story you wrote in My Career Story-1, about
-                  the changes you&apos;re facing and the decisions you may need
-                  to make.
+                  Revisit the career story you wrote in My Story-1, about the
+                  changes you&apos;re facing and the decisions you may need to
+                  make.
                 </p>
               </div>
               <div className="p-3 border rounded-md bg-white/60 border-emerald-200/40">
@@ -304,16 +302,16 @@ export default function CareerStory4() {
                 </p>
                 <p className="text-slate-600">
                   Next, reflect on your excellence formula and the advice you
-                  gave yourself in My Career Story-3 to consider this as
-                  direction for yourself.
+                  gave yourself in My Story-3 to consider this as direction for
+                  yourself.
                 </p>
               </div>
               <div className="p-3 border rounded-md bg-white/60 border-emerald-200/40">
                 <p className="mb-1 font-semibold">3. Revise Your Essay</p>
                 <p className="text-slate-600">
-                  Now, using these insights, revise the essay from My Career
-                  Story-1 and describe how you plan to navigate this transition
-                  and the choices ahead.
+                  Now, using these insights, revise the essay from My Story-1
+                  and describe how you plan to navigate this transition and the
+                  choices ahead.
                 </p>
               </div>
             </div>

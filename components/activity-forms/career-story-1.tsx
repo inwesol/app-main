@@ -30,11 +30,19 @@ import { useParams, useRouter } from "next/navigation";
 import { JourneyBreadcrumbLayout } from "@/components/layouts/JourneyBreadcrumbLayout";
 import { useBreadcrumb } from "@/hooks/useBreadcrumb";
 import { ValuesDialog } from "@/components/values-dialog";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 const questions = [
   {
     title: "Current Transition",
-    text: "You are probably using this workbook because you are facing some change or transition in your life, maybe from high school to college, from college to work, or from job to job. To bridge transitions, or end one chapter and begin the next, and clarify choices, people look within themselves to their own life story for guidance. Below, write a brief essay about the transition you are now facing.",
+    text: `
+You may be experiencing an important change right now, whether it’s starting college, beginning your career, or shifting to a new job. During these moments, it helps to look at your own experiences to understand what you want next. Write a short essay in the space below, about the change you’re currently facing.
+
+Feel free to write about:
+a) How you’re feeling right now
+b) What your daily routine looks like, and
+c) Your thoughts about the change you’re facing`,
     icon: PenTool,
     color: "primary-green",
     fieldName: "transitionEssay",
@@ -44,7 +52,7 @@ const questions = [
   },
   {
     title: "Career Aspirations",
-    text: "Now, list all of the occupations you have thought about doing. List the occupations or jobs you are thinking about doing now and those occupations or jobs you have ever thought about doing in the past. You might have several, just one or two, or none at all.",
+    text: "List down all the occupations/careers/jobs you’re interested in today, and any you’ve considered at any point in your life. You can list as many as you like.",
     icon: Users,
     color: "primary-blue",
     fieldName: "occupations",
@@ -54,7 +62,13 @@ const questions = [
   },
   {
     title: "Childhood Heroes",
-    text: "Who did you admire when you were growing up? Who were your heroes or heroines (role models)? List three people, other than your mom and dad, who you admired when you were a child of about six, seven, or eight years old. These can be real people you know or don't know personally, make-believe people like superheroes and cartoon characters, or anybody else you can think of.",
+    text: `Take a moment to think about who you admired when you were growing up. List three role models (do not include your parents). They can be real people, or even fictional characters.
+
+For each one, write a few lines about what you liked or admired about them in the description box. Think about:
+a) What made them special to you
+b) What inspired you and 
+c) Why you looked up to them
+`,
     icon: Star,
     color: "purple",
     fieldName: "heroes",
@@ -75,7 +89,14 @@ const questions = [
   // },
   {
     title: "Media Preferences",
-    text: "Do you read any magazines or watch any web series/television shows regularly? Which ones? What do you like about these magazines/web series/television shows?",
+    text: `
+Think about your favorite comics, magazines, sports, web series, or TV shows. In the space below, describe your favourites. 
+
+Think about:
+a) What you watch or read,
+b) Why you enjoy it (Is it funny, inspiring, relaxing, dramatic, or educational)
+c) Does it relate to you in any way? (For example, do you like mysteries, comedy, fashion etc)
+`,
     icon: Tv,
     color: "primary-green",
     fieldName: "mediaPreferences",
@@ -85,7 +106,15 @@ const questions = [
   },
   {
     title: "Favorite Story",
-    text: "What is your current favourite story? Think of a book that you read a lot or may have read over and over again. Tell the story of the book. What is the book about? Describe your favourite character in the story. If you don't have a favourite book, what is your favourite movie? Think of a movie that you watch a lot or have seen over and over again. Then, tell the story of the movie.",
+    text: `
+Think of a book that you read a lot or may have read over and over again. If you don’t have a
+favourite book, think about your favourite movie. In the space below, describe the story.
+
+Think about:
+a) What is the story about?
+b) Your favourite character in the story and
+c) Why do you like the character
+`,
     icon: Book,
     color: "primary-blue",
     fieldName: "favoriteStory",
@@ -95,7 +124,11 @@ const questions = [
   },
   {
     title: "Favorite Saying",
-    text: "What is your favourite saying? Think about a motto you live by or a saying that you have heard and really like. Maybe you've seen some words on a car bumper sticker or have a poster or plaque in your room or house that has words to live by. You might even have more than one saying or motto that you can list here. If you can't think of a saying, you might even create your own and write it down here.",
+    text: `
+Think about your favourite saying, a motto that inspired you, or a saying that you really like. Think of the words you have seen or heard anywhere. You can list more than one saying or motto in the space below. 
+
+If you can’t think of a saying, you can create your own and write it here.
+`,
     icon: Quote,
     color: "purple",
     fieldName: "favoriteSaying",
@@ -501,10 +534,42 @@ export default function CareerStory1() {
                         </div> */}
 
                         {/* Question Text */}
-                        <div className="mb-4">
-                          <p className="text-lg font-medium leading-relaxed text-slate-700">
-                            {currentQuestionData.text}
-                          </p>
+                        <div className="mb-4 prose prose-slate max-w-none">
+                          <ReactMarkdown
+                            remarkPlugins={[remarkGfm]}
+                            components={{
+                              p: ({ children }) => (
+                                <p className="text-lg font-medium text-slate-700 ">
+                                  {children}
+                                </p>
+                              ),
+                              ul: ({ children }) => (
+                                <ul className="list-disc list-outside ml-2 ">
+                                  {children}
+                                </ul>
+                              ),
+                              li: ({ children }) => (
+                                <li className="text-lg font-medium text-slate-700">
+                                  {children}
+                                </li>
+                              ),
+                              ol: ({ children }) => (
+                                <ol className="list-decimal list-outside ml-6 mb-3 space-y-1">
+                                  {children}
+                                </ol>
+                              ),
+                              // br: () => <br className="my-1" />,
+                            }}
+                          >
+                            {(() => {
+                              // Convert single newlines to markdown line breaks (two spaces + newline)
+                              // while preserving double newlines for paragraph breaks
+                              return currentQuestionData.text.replace(
+                                /([^\n])\n(?!\n)(?!-)/g,
+                                "$1  \n"
+                              );
+                            })()}
+                          </ReactMarkdown>
                         </div>
 
                         {/* Textarea Input Section */}
@@ -611,7 +676,7 @@ export default function CareerStory1() {
                           </>
                         ) : (
                           <>
-                            Complete Story
+                            Complete Activity
                             <Award className="transition-transform duration-200 size-4 group-hover:rotate-12" />
                           </>
                         )}

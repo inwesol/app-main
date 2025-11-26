@@ -746,7 +746,7 @@ const MeetingScheduler = () => {
                     </h3>
                     <p className="text-slate-600 text-sm sm:text-base">
                       Your schedule request has been submitted. We&apos;re
-                      working on assigning a coach for your session.
+                      working on confirming your session.
                     </p>
                   </div>
 
@@ -754,11 +754,11 @@ const MeetingScheduler = () => {
                     <div className="flex items-center justify-center gap-2 mb-3">
                       <div className="size-2 bg-amber-500 rounded-full animate-pulse" />
                       <p className="text-amber-700 font-semibold text-sm sm:text-base">
-                        We&apos;ll notify you once a coach is assigned!
+                        We&apos;ll notify you once the session is booked!
                       </p>
                     </div>
                     <p className="text-slate-600 text-xs sm:text-sm leading-relaxed">
-                      📅 Your session is scheduled for{" "}
+                      📅 Your session request for{" "}
                       {insights.session_datetime
                         ? new Date(
                             insights.session_datetime
@@ -770,7 +770,8 @@ const MeetingScheduler = () => {
                             hour: "2-digit",
                             minute: "2-digit",
                           })
-                        : "TBD"}
+                        : "TBD"}{" "}
+                      is submitted.
                     </p>
                   </div>
 

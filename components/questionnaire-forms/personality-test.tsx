@@ -18,6 +18,7 @@ import {
   ArrowRight,
   ArrowLeft,
   CheckCircle,
+  BarChart3,
 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -586,6 +587,26 @@ function PersonalityTest({ sessionId }: { sessionId: string }) {
               </div>
             </div>
           </div> */}
+
+          {/* Instructions Card */}
+          <div className="p-5 mb-6 border shadow-lg bg-gradient-to-br from-primary-blue-50 via-white to-primary-green-50 rounded-2xl sm:p-6 border-slate-200/60 backdrop-blur-sm">
+            <div className="flex items-start gap-2">
+              <div className="flex items-center justify-center rounded-xl shadow-lg size-14 bg-gradient-to-br from-primary-blue-500 to-primary-green-500 shrink-0">
+                <BarChart3 className="text-white size-6" />
+              </div>
+              <div className="flex-1 space-y-1">
+                <h3 className="text-xl font-bold text-slate-800">
+                  Instructions
+                </h3>
+                <p className="text-sm leading-relaxed text-slate-700">
+                  Read each statement carefully and select the option that best
+                  indicates the extent to which you agree or disagree with the
+                  statement. <br /> Note: There are no right or wrong answers;
+                  respond honestly.
+                </p>
+              </div>
+            </div>
+          </div>
 
           {/* Compact Page Navigation Dots */}
           <div className="flex flex-wrap gap-1.5 justify-center mb-4">

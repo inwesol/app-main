@@ -464,7 +464,7 @@ export default function CareerStory3() {
         setIsCompleted(true);
         toast({
           type: "success",
-          description: "Career Story 3 saved successfully!",
+          description: "My Story 3 saved successfully!",
         });
         setTimeout(() => {
           router.push(`/journey/sessions/${sessionId}`);
@@ -513,7 +513,7 @@ export default function CareerStory3() {
               <CheckCircle className="text-white size-8" />
             </div>
             <h2 className="mb-2 text-2xl font-bold text-slate-800">
-              Career Story Complete!
+              My Story Complete!
             </h2>
             <p className="text-slate-600">
               Thank you for completing your career story exploration.
@@ -746,7 +746,7 @@ export default function CareerStory3() {
                         rel="noopener noreferrer"
                         className="flex items-center gap-2"
                       >
-                        Explorer Page
+                        Explorer
                         <ExternalLink className="size-4" />
                       </a>
                     </Button>
@@ -756,10 +756,10 @@ export default function CareerStory3() {
                   <div className="mb-6">
                     <p className="text-slate-600">
                       If you want to explore careers that best match your
-                      interests, please revisit My Career Story-1 (Step 2).
-                      Review the occupations you listed there and, based on your
-                      summary above, identify the ones that now seem like good
-                      options for you.
+                      interests, please revisit My Story-1 (Step 2). Review the
+                      occupations you listed there and, based on your summary
+                      above, identify the ones that now seem like good options
+                      for you.
                     </p>
                   </div>
 
@@ -1026,15 +1026,15 @@ export default function CareerStory3() {
                 </SheetTitle>
                 <SheetDescription className="text-base leading-relaxed text-slate-600 mt-2">
                   {currentGroupData?.title === "SELF" &&
-                    "Reference your self-analysis from Career Story 2"}
+                    "Reference your self-analysis from My Story 2"}
                   {currentGroupData?.title === "SETTING" &&
-                    "Reference your setting analysis from Career Story 2"}
+                    "Reference your setting analysis from My Story 2"}
                   {currentGroupData?.title === "SCRIPT" &&
-                    "Reference your favorite story from Career Story 1"}
+                    "Reference your favorite story from My Story 1"}
                   {currentGroupData?.title === "EXCELLENCE FORMULA" &&
                     "Guidance for creating your personal mission statement"}
                   {currentGroupData?.title === "SELF ADVICE" &&
-                    "Reference your favorite story and saying from Career Story 1"}
+                    "Reference your favorite story and saying from My Story 1"}
                 </SheetDescription>
               </SheetHeader>
 

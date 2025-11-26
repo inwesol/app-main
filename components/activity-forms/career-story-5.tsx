@@ -356,19 +356,23 @@ export default function CareerStory5({ className = "" }: CareerStory5Props) {
     <div className="p-3 sm:p-6">
       <div className="max-w-7xl mx-auto">
         <JourneyBreadcrumbLayout>
-          {/* Header */}
-          <div className="mb-8">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="p-3 shadow-lg bg-gradient-to-br from-primary-blue-500 to-primary-green-500 rounded-2xl">
+          {/* Instructions Card */}
+          <div className="p-5 mb-6 border shadow-lg bg-gradient-to-br from-primary-blue-50 via-white to-primary-green-50 rounded-2xl sm:p-6 border-slate-200/60 backdrop-blur-sm">
+            <div className="flex items-start gap-2">
+              <div className="flex items-center justify-center rounded-xl shadow-lg size-14 bg-gradient-to-br from-primary-blue-500 to-primary-green-500 shrink-0">
                 <Grid3X3 className="text-white size-6" />
               </div>
-              <div>
-                <h1 className="text-2xl font-bold text-transparent bg-gradient-to-r from-primary-blue-700 to-primary-green-700 bg-clip-text">
+              <div className="flex-1 space-y-1">
+                <h3 className="text-xl font-bold text-slate-800">
                   Story Boarding
-                </h1>
-                <p className="text-primary-blue-600/80">
-                  Create and organize your story elements using interactive
-                  storyboards
+                </h3>
+                <p className="text-sm leading-relaxed text-slate-700">
+                  Start with Cell 1 to describe where you are today. Then, in
+                  each following cell (add as many as you need), list specific,
+                  actionable next steps that will move you closer to your goal.{" "}
+                  <br /> Tip: Treat the final cell as your goal, and use each
+                  earlier cell to outline the steps that will lead you toward
+                  achieving it.
                 </p>
               </div>
             </div>

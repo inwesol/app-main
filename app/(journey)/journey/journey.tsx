@@ -244,7 +244,7 @@ export const JourneyPage: React.FC = () => {
                 <div className="flex items-center gap-2">
                   <Eye className="size-4 text-primary-blue-600" />
                   <span className="text-sm font-medium text-primary-blue-800">
-                    View
+                    Highlights
                   </span>
                 </div>
                 <ArrowRight className="size-4 text-primary-blue-600" />

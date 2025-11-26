@@ -357,7 +357,7 @@ export function DemographicsDetailsForm({
                   2
                 </div>
                 <div className="hidden sm:block">
-                  <div className="text-sm font-bold">Wellness & Goals</div>
+                  <div className="text-sm font-bold">Wellbeing & Goals</div>
                   <div className="text-xs text-slate-500">Your objectives</div>
                 </div>
               </div>
@@ -378,12 +378,12 @@ export function DemographicsDetailsForm({
               <CardTitle className="relative z-10 text-base font-bold sm:text-lg lg:text-xl text-slate-800">
                 {currentPage === 1
                   ? "Personal & Professional Information"
-                  : "Wellness & Coaching Goals"}
+                  : "Wellbeing & Coaching Goals"}
               </CardTitle>
               <CardDescription className="relative z-10 text-xs text-slate-600 sm:text-sm lg:text-base">
                 {currentPage === 1
                   ? "Let's start with some basic information about you and your professional background"
-                  : "Help us understand your wellness needs and coaching objectives to create your personalized plan"}
+                  : "Help us understand your current stress levels and what you hope to achieve through coaching."}
               </CardDescription>
             </CardHeader>
 
@@ -808,7 +808,7 @@ export function DemographicsDetailsForm({
                         >
                           <div className="absolute inset-0 transition-transform duration-700 -translate-x-full bg-gradient-to-r from-white/0 via-white/20 to-white/0 group-hover:translate-x-full" />
                           <span className="relative z-10 flex items-center justify-center">
-                            Continue to Wellness & Goals
+                            Continue to Wellbeing & Goals
                             <ArrowRight className="ml-2 transition-transform duration-200 size-4 sm:size-5 group-hover:translate-x-1" />
                           </span>
                         </Button>
@@ -841,7 +841,7 @@ export function DemographicsDetailsForm({
                           </div>
                           <div>
                             <h3 className="text-sm font-bold sm:text-base lg:text-lg text-slate-800">
-                              Wellness Assessment
+                              Stress Level
                             </h3>
                             <p className="text-xs text-slate-500 sm:text-sm">
                               Rate your current stress levels related to
@@ -1022,7 +1022,7 @@ export function DemographicsDetailsForm({
                               </>
                             ) : (
                               <>
-                                Complete Assessment
+                                Submit Now
                                 <Award className="transition-transform duration-200 size-4 group-hover:rotate-12" />
                               </>
                             )}
