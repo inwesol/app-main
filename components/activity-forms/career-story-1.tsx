@@ -406,7 +406,7 @@ export default function CareerStory1() {
         <div className="text-center">
           <div className="mx-auto mb-4 border-b-2 rounded-full animate-spin size-12 border-primary-blue-600" />
           <p className="text-sm text-slate-600 sm:text-base">
-            Loading your career story...
+            Loading your My Story-1...
           </p>
         </div>
       </div>
@@ -422,10 +422,10 @@ export default function CareerStory1() {
               <CheckCircle className="text-white size-8" />
             </div>
             <h2 className="mb-2 text-2xl font-bold text-slate-800">
-              Career Story Complete!
+              My Story-1 Complete!
             </h2>
             <p className="text-slate-600">
-              Thank you for sharing your career story with us.
+              Thank you for sharing your My Story-1 with us.
             </p>
           </CardContent>
         </Card>

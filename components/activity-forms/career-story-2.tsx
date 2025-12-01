@@ -322,7 +322,7 @@ export default function CareerStory2() {
           setIsStrengthEnabled(enableByCoach?.["cs-2:strengths"] === true);
         }
       } catch (error) {
-        console.error("Error loading career story 2 data:", error);
+        console.error("Error loading My Story-2 data:", error);
         toast.error("Failed to load existing data");
       } finally {
         setIsLoading(false);
@@ -361,7 +361,7 @@ export default function CareerStory2() {
 
       if (response.ok) {
         setIsCompleted(true);
-        toast.success("Career Story 2 saved successfully!");
+        toast.success("My Story-2 saved successfully!");
       } else {
         throw new Error("Failed to save progress");
       }
@@ -385,7 +385,7 @@ export default function CareerStory2() {
         <div className="text-center">
           <div className="mx-auto mb-4 border-b-2 rounded-full animate-spin size-12 border-primary-blue-600" />
           <p className="text-sm text-slate-600 sm:text-base">
-            Loading your career story...
+            Loading your My Story-2...
           </p>
         </div>
       </div>
@@ -401,10 +401,10 @@ export default function CareerStory2() {
               <CheckCircle className="text-white size-8" />
             </div>
             <h2 className="mb-2 text-2xl font-bold text-slate-800">
-              Career Story Complete!
+              My Story-2 Complete!
             </h2>
             <p className="text-slate-600">
-              Thank you for completing your career story exploration.
+              Thank you for completing your My Story-2 exploration.
             </p>
           </CardContent>
         </Card>

@@ -109,7 +109,7 @@ export const JourneyPage: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
         <Header
           headerIcon={Trophy}
-          headerText="Your Self-discovery Journey"
+          headerText="Your Coaching Journey"
           headerDescription="Navigate through personalized sessions to cultivate a learning mindset"
         />
 
@@ -123,10 +123,10 @@ export const JourneyPage: React.FC = () => {
               </div>
               <div className="min-w-0">
                 <h3 className="font-semibold text-primary-green-800 text-sm">
-                  Journey Progress
+                  Coaching Progress
                 </h3>
                 <p className="text-xs text-primary-green-700">
-                  Get snippet of your Journey Status
+                  Get snippet of your coaching status
                 </p>
               </div>
             </div>
@@ -162,10 +162,10 @@ export const JourneyPage: React.FC = () => {
               </div>
               <div className="min-w-0">
                 <h3 className="font-semibold text-primary-green-800 text-sm">
-                  Journey Insights
+                  Coaching Insights
                 </h3>
                 <p className="text-xs text-primary-green-700">
-                  Download and view your journey insights
+                  Download and view your coaching insights
                 </p>
               </div>
             </div>

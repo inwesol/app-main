@@ -577,8 +577,8 @@ export default function Dashboard() {
                     : `Hi there, ${getTimeBasedGreeting()}!`}
                 </h2>
                 <p className="text-sm md:text-base font-medium text-foreground mt-1 leading-relaxed">
-                  Welcome to your space to find clarity, gain confidence, and
-                  build a mindset for growth. 🚀
+                  Welcome to your Self-discovery Journey, your space to find
+                  clarity, gain confidence and build a mindset for growth! 🚀
                 </p>
               </div>
             </div>
@@ -697,9 +697,7 @@ export default function Dashboard() {
                   <span className="text-white text-lg font-bold">👨‍🏫</span>
                 </div>
                 <div className="flex-1">
-                  <CardTitle className="text-lg">
-                    Self-discovery Journey
-                  </CardTitle>
+                  <CardTitle className="text-lg">1:1 Coaching</CardTitle>
                   <CardDescription className="text-sm text-muted-foreground">
                     Personalized and holistic support
                   </CardDescription>
@@ -728,7 +726,7 @@ export default function Dashboard() {
                   >
                     <div className="space-y-2">
                       <h4 className="text-sm font-semibold text-foreground">
-                        What Self-discovery Journey offers:
+                        What Coaching offers:
                       </h4>
                       <ul className="text-xs text-muted-foreground space-y-1">
                         <li>

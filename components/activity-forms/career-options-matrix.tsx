@@ -82,10 +82,7 @@ export default function CareerOptionsMatrix() {
         }
       }
     } catch (error) {
-      console.error(
-        "Error loading career options from career story three:",
-        error
-      );
+      console.error("Error loading career options from My Story 3:", error);
     }
     return false; // Failed to load career options
   }, []);

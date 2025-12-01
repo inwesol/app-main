@@ -55,7 +55,7 @@ export function CareerStorySummary({
     setIsExpanded(!isExpanded);
   };
 
-  const defaultTitle = `Career Story ${storyNumber}`;
+  const defaultTitle = `My Story ${storyNumber}`;
   const displayTitle = title || defaultTitle;
 
   const getSummaryPreview = () => {

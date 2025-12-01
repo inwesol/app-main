@@ -219,7 +219,7 @@ export function SimpleViewDialog({ isOpen, onClose }: SimpleViewDialogProps) {
                       No summary portrait available yet.
                     </p>
                     <p className="mt-1 text-xs text-slate-400">
-                      Complete the career story-3 activity to add your summary
+                      Complete the My Story-3 activity to add your summary
                       portrait.
                     </p>
                   </div>
@@ -571,7 +571,7 @@ export function SimpleViewDialog({ isOpen, onClose }: SimpleViewDialogProps) {
                   <div className="py-6 text-center text-slate-500 bg-slate-50 rounded-lg border border-slate-200">
                     <p className="text-sm">No values available yet.</p>
                     <p className="mt-1 text-xs text-slate-400">
-                      Complete the career story activity to add your values.
+                      Complete the My Story-1 activity to add your values.
                     </p>
                   </div>
                 ) : (
@@ -601,8 +601,7 @@ export function SimpleViewDialog({ isOpen, onClose }: SimpleViewDialogProps) {
                   <div className="py-6 text-center text-slate-500 bg-slate-50 rounded-lg border border-slate-200">
                     <p className="text-sm">No strengths available yet.</p>
                     <p className="mt-1 text-xs text-slate-400">
-                      Complete the career story-2 activity to add your
-                      strengths.
+                      Complete the My Story-2 activity to add your strengths.
                     </p>
                   </div>
                 ) : (
@@ -735,7 +734,7 @@ export function SimpleViewDialog({ isOpen, onClose }: SimpleViewDialogProps) {
                   <div className="py-6 text-center text-slate-500 bg-slate-50 rounded-lg border border-slate-200">
                     <p className="text-sm">No rewritten story available yet.</p>
                     <p className="mt-1 text-xs text-slate-400">
-                      Complete the career story-4 activity to add your rewritten
+                      Complete the My Story-4 activity to add your rewritten
                       story.
                     </p>
                   </div>

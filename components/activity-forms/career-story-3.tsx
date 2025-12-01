@@ -219,6 +219,14 @@ export default function CareerStory3() {
   const [referenceData, setReferenceData] = useState<any>(null);
   const [isLoadingReference, setIsLoadingReference] = useState(false);
   const [referenceError, setReferenceError] = useState<string | null>(null);
+  const [isSection2ReferenceSheetOpen, setIsSection2ReferenceSheetOpen] =
+    useState(false);
+  const [careerStoryOneData, setCareerStoryOneData] = useState<any>(null);
+  const [isLoadingSection2Reference, setIsLoadingSection2Reference] =
+    useState(false);
+  const [section2ReferenceError, setSection2ReferenceError] = useState<
+    string | null
+  >(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [customOccupation, setCustomOccupation] = useState("");
   const [occupationOptions, setOccupationOptions] = useState<string[]>([]);
@@ -337,6 +345,34 @@ export default function CareerStory3() {
       });
     } finally {
       setIsLoadingReference(false);
+    }
+  };
+
+  // Function to fetch career-story-1 data for Section 2 reference
+  const fetchSection2ReferenceData = async () => {
+    setIsLoadingSection2Reference(true);
+    setSection2ReferenceError(null);
+
+    try {
+      const response = await fetch("/api/journey/sessions/1/a/career-story-1");
+
+      if (response.ok) {
+        const data = await response.json();
+        setCareerStoryOneData(data);
+      } else {
+        throw new Error("Failed to fetch My Story-1 data");
+      }
+    } catch (error) {
+      console.error("Error fetching My Story-1 data:", error);
+      setSection2ReferenceError(
+        "Failed to load reference data. Please try again."
+      );
+      toast({
+        type: "error",
+        description: "Failed to load My Story-1 reference data",
+      });
+    } finally {
+      setIsLoadingSection2Reference(false);
     }
   };
 
@@ -497,7 +533,7 @@ export default function CareerStory3() {
         <div className="text-center">
           <div className="mx-auto mb-4 border-b-2 rounded-full animate-spin size-12 border-primary-blue-600" />
           <p className="text-sm text-slate-600 sm:text-base">
-            Loading your career story...
+            Loading your My Story-3 Activity...
           </p>
         </div>
       </div>
@@ -516,7 +552,7 @@ export default function CareerStory3() {
               My Story Complete!
             </h2>
             <p className="text-slate-600">
-              Thank you for completing your career story exploration.
+              Thank you for completing your My Story-3 exploration.
             </p>
           </CardContent>
         </Card>
@@ -733,23 +769,38 @@ export default function CareerStory3() {
                         Exploring Occupations
                       </h2>
                     </div>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      asChild
-                      className="px-3 py-1.5 text-sm font-medium text-slate-600 bg-gradient-to-br from-teal-50 to-teal-100 hover:text-slate-700 hover:bg-slate-50 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md border-slate-300"
-                    >
-                      <a
-                        href="https://www.inwesol.com/explorer/"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-2"
+                    <div className="flex items-center gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setIsSection2ReferenceSheetOpen(true);
+                          fetchSection2ReferenceData();
+                        }}
+                        className="px-3 py-1.5 text-sm font-medium text-slate-600 hover:text-slate-700 hover:bg-slate-50 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md border-slate-300"
                       >
-                        Explorer
-                        <ExternalLink className="size-4" />
-                      </a>
-                    </Button>
+                        <FileText className="mr-1 size-4" />
+                        Reference
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        asChild
+                        className="px-3 py-1.5 text-sm font-medium text-slate-600 bg-gradient-to-br from-teal-50 to-teal-100 hover:text-slate-700 hover:bg-slate-50 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md border-slate-300"
+                      >
+                        <a
+                          href="https://www.inwesol.com/explorer/"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2"
+                        >
+                          Explorer
+                          <ExternalLink className="size-4" />
+                        </a>
+                      </Button>
+                    </div>
                   </div>
 
                   {/* Section Description */}
@@ -767,7 +818,7 @@ export default function CareerStory3() {
                   <div className="space-y-4">
                     <p className="text-sm text-slate-600">
                       Select the occupations you are now considering based on
-                      your career story analysis:
+                      your My Story analysis:
                     </p>
 
                     {/* Side by Side Layout */}
@@ -1327,6 +1378,168 @@ export default function CareerStory3() {
                         </Card>
                       </div>
                     )}
+                  </div>
+                )}
+              </div>
+            </SheetContent>
+          </Sheet>
+
+          {/* Section 2 Reference Sheet - My Story-1 Activity Reference */}
+          <Sheet
+            open={isSection2ReferenceSheetOpen}
+            onOpenChange={setIsSection2ReferenceSheetOpen}
+          >
+            <SheetContent className="min-w-[340px] sm:min-w-[600px] overflow-y-scroll bg-gradient-to-r from-primary-blue-100 to-white">
+              <SheetHeader>
+                <SheetTitle className="text-xl font-bold text-primary-blue-600">
+                  My Story-1 Activity - Your Original Transition Essay
+                </SheetTitle>
+                <SheetDescription>
+                  Review your original transition essay and career aspirations
+                </SheetDescription>
+              </SheetHeader>
+
+              <div className="space-y-6 flex-1 p-4 overflow-y-auto">
+                {isLoadingSection2Reference ? (
+                  <div className="flex items-center justify-center py-12">
+                    <div className="text-center">
+                      <div className="mx-auto mb-4 border-b-2 rounded-full animate-spin size-10 border-primary-blue-600" />
+                      <p className="text-base text-slate-600 font-medium">
+                        Loading reference data...
+                      </p>
+                    </div>
+                  </div>
+                ) : section2ReferenceError ? (
+                  <div className="p-6 text-center bg-gradient-to-br from-red-50 to-red-100 border border-red-200 rounded-xl shadow-sm">
+                    <div className="mx-auto mb-4 size-12 bg-red-100 rounded-full flex items-center justify-center">
+                      <Info className="size-6 text-red-600" />
+                    </div>
+                    <p className="text-base text-red-700 font-medium mb-4">
+                      {section2ReferenceError}
+                    </p>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={fetchSection2ReferenceData}
+                      className="bg-white hover:bg-red-50 border-red-300 text-red-700 hover:text-red-800"
+                    >
+                      Try Again
+                    </Button>
+                  </div>
+                ) : !careerStoryOneData ? (
+                  <div className="p-6 text-center bg-gradient-to-br from-slate-50 to-slate-100 border border-slate-200 rounded-xl shadow-sm">
+                    <div className="mx-auto mb-4 size-12 bg-slate-100 rounded-full flex items-center justify-center">
+                      <FileText className="size-6 text-slate-400" />
+                    </div>
+                    <p className="text-base text-slate-600 font-medium">
+                      No reference data available.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    {/* Original Transition Essay */}
+                    <div className="mt-6">
+                      <div className="flex items-center gap-3 mb-4">
+                        <h4 className="text-sm font-medium text-slate-600">
+                          Your Original Transition Essay
+                        </h4>
+                      </div>
+                      <div className="p-4 border shadow-md bg-white/90 rounded-xl border-primary-blue-200/60">
+                        <h5 className="mb-2 font-semibold text-primary-blue-600">
+                          Transition Challenge
+                        </h5>
+                        <p className="text-sm leading-relaxed text-slate-600 whitespace-pre-wrap">
+                          {careerStoryOneData?.transitionEssay ||
+                            "No transition essay available"}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Occupations */}
+                    <div className="mt-6">
+                      <div className="flex items-center gap-3 mb-4">
+                        <h4 className="text-sm font-medium text-slate-600">
+                          Occupations You Listed
+                        </h4>
+                      </div>
+                      <div className="p-4 border shadow-md bg-white/90 rounded-xl border-primary-blue-200/60">
+                        <h5 className="mb-2 font-semibold text-primary-blue-600">
+                          Career Interests
+                        </h5>
+                        <p className="text-sm leading-relaxed text-slate-600 whitespace-pre-wrap">
+                          {careerStoryOneData?.occupations ||
+                            "No occupations listed"}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Heroes */}
+                    {careerStoryOneData?.heroes &&
+                      careerStoryOneData.heroes.length > 0 && (
+                        <div className="mt-6">
+                          <div className="flex items-center gap-3 mb-4">
+                            <h4 className="text-sm font-medium text-slate-600">
+                              Your Heroes & Role Models
+                            </h4>
+                          </div>
+                          <div className="space-y-4">
+                            {careerStoryOneData.heroes.map(
+                              (hero: any, index: number) => (
+                                <div
+                                  key={hero.id || index}
+                                  className="p-4 border shadow-md bg-white/90 rounded-xl border-primary-blue-200/60"
+                                >
+                                  <div className="flex items-start gap-4">
+                                    <div className="flex items-center justify-center rounded-full shadow-md shrink-0 size-6 bg-primary-blue-600">
+                                      <span className="text-xs font-bold text-white">
+                                        {index + 1}
+                                      </span>
+                                    </div>
+                                    <div className="flex-1">
+                                      <h5 className="font-semibold text-primary-blue-600">
+                                        {hero.title}
+                                      </h5>
+                                      <p className="text-sm leading-relaxed text-slate-600 whitespace-pre-wrap">
+                                        {hero.description}
+                                      </p>
+                                    </div>
+                                  </div>
+                                </div>
+                              )
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                    {/* Favorite Story & Saying */}
+                    <div className="mt-6">
+                      <div className="flex items-center gap-3 mb-4">
+                        <h4 className="text-sm font-medium text-slate-600">
+                          Your Favorite Story & Saying
+                        </h4>
+                      </div>
+                      <div className="space-y-4">
+                        <div className="p-4 border shadow-md bg-white/90 rounded-xl border-primary-blue-200/60">
+                          <h5 className="mb-2 font-semibold text-primary-blue-600">
+                            Favorite Story
+                          </h5>
+                          <p className="text-sm leading-relaxed text-slate-600 whitespace-pre-wrap">
+                            {careerStoryOneData?.favoriteStory ||
+                              "No favorite story available"}
+                          </p>
+                        </div>
+                        <div className="p-4 border shadow-md bg-white/90 rounded-xl border-primary-blue-200/60">
+                          <h5 className="mb-2 font-semibold text-primary-blue-600">
+                            Favorite Saying
+                          </h5>
+                          <p className="text-sm leading-relaxed text-slate-600 whitespace-pre-wrap">
+                            {careerStoryOneData?.favoriteSaying ||
+                              "No favorite saying available"}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>

@@ -183,10 +183,10 @@ export default function CareerStory4() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to save career story");
+        throw new Error(errorData.message || "Failed to save My Story-4");
       }
 
-      console.log("My Story 4 saved successfully");
+      console.log("My Story-4 saved successfully");
       setIsSubmitted(true);
 
       // Redirect to session page after 2 seconds
@@ -334,7 +334,7 @@ export default function CareerStory4() {
                     </div>
                     <p className="text-sm text-slate-600 mb-3">
                       {isLoadingReferences
-                        ? "Loading your career story..."
+                        ? "Loading your My Story-1..."
                         : "Review your original transition essay and career aspirations"}
                     </p>
                     <div className="p-3 border bg-gradient-to-r from-primary-blue-100/50 to-cyan-100/50 rounded-lg border-primary-blue-200/40">
@@ -483,7 +483,7 @@ export default function CareerStory4() {
                     </p>
                     <div className="p-3 border bg-gradient-to-r from-primary-green-100/50 to-emerald-100/50 rounded-lg border-primary-green-200/40">
                       <h4 className="text-sm font-semibold text-primary-green-600 mb-1">
-                        Success Formula
+                        Excellence Formula
                       </h4>
                       <p className="text-xs text-primary-green-700 line-clamp-2">
                         {careerStoryThreeData?.ableToBeStatement
@@ -500,10 +500,10 @@ export default function CareerStory4() {
               <SheetContent className="min-w-[340px] sm:min-w-[600px] overflow-y-scroll bg-gradient-to-r from-primary-green-100 to-white">
                 <SheetHeader>
                   <SheetTitle className="text-xl font-bold text-primary-green-600">
-                    My Story-3 Activity - Your Success Formula & Advice
+                    My Story-3 Activity - Your Excellence Formula & Advice
                   </SheetTitle>
                   <SheetDescription>
-                    Review your excellence formula and personal motto from My
+                    Review your Excellence formula and personal motto from My
                     Story-3 Activity
                   </SheetDescription>
                 </SheetHeader>
@@ -518,8 +518,8 @@ export default function CareerStory4() {
                   <div className="space-y-4">
                     <div className="p-4 border shadow-md bg-white/90 rounded-xl border-primary-green-200/60">
                       <h5 className="mb-2 font-semibold text-primary-green-600">
-                        &quot;I will be most happy and successful when I am able
-                        to be...&quot;
+                        &quot;I will be most happy and excel when I am able to
+                        be...&quot;
                       </h5>
                       <p className="text-sm leading-relaxed text-slate-600 whitespace-pre-wrap">
                         {careerStoryThreeData?.ableToBeStatement ||
@@ -528,8 +528,8 @@ export default function CareerStory4() {
                     </div>
                     <div className="p-4 border shadow-md bg-white/90 rounded-xl border-primary-green-200/60">
                       <h5 className="mb-2 font-semibold text-primary-green-600">
-                        &quot;I will be most happy and successful in places
-                        where people...&quot;
+                        &quot;I will be most happy and excel in places where
+                        people...&quot;
                       </h5>
                       <p className="text-sm leading-relaxed text-slate-600 whitespace-pre-wrap">
                         {careerStoryThreeData?.placesWhereStatement ||
@@ -538,7 +538,7 @@ export default function CareerStory4() {
                     </div>
                     <div className="p-4 border shadow-md bg-white/90 rounded-xl border-primary-green-200/60">
                       <h5 className="mb-2 font-semibold text-primary-green-600">
-                        &quot;I will be most happy and successful so that I
+                        &quot;I will be most happy and excel so that I
                         can...&quot;
                       </h5>
                       <p className="text-sm leading-relaxed text-slate-600 whitespace-pre-wrap">
