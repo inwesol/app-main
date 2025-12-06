@@ -564,7 +564,9 @@ const SidebarMenuButton = React.forwardRef<
     ref
   ) => {
     const Comp = asChild ? Slot : "button";
-    const { isMobile, state } = useSidebar();
+    // Make sidebar context optional for backward compatibility
+    const sidebarContext = React.useContext(SidebarContext);
+    const { isMobile = false, state = "expanded" } = sidebarContext || {};
 
     const button = (
       <Comp

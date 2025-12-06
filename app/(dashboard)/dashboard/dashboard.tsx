@@ -25,7 +25,7 @@ import {
 } from "lucide-react";
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { SidebarToggle } from "@/components/sidebar-toggle";
-import { useSidebar } from "@/components/ui/sidebar";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface User {
   id: string;
@@ -76,7 +76,7 @@ export default function Dashboard() {
   const [isLoadingEntries, setIsLoadingEntries] = useState(false);
   const [authStatus, setAuthStatus] = useState<AuthStatus | null>(null);
   const [isLoadingAuth, setIsLoadingAuth] = useState(true);
-  const { isMobile } = useSidebar();
+  const isMobile = useIsMobile();
 
   // Check authentication status
   const checkAuthStatus = useCallback(async () => {

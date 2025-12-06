@@ -1,13 +1,13 @@
-'use client';
-import { useRouter } from 'next/navigation';
-import { useWindowSize } from 'usehooks-ts';
-import { SidebarToggle } from '@/components/sidebar-toggle';
-import { Button } from '@/components/ui/button';
-import { PlusIcon } from './icons';
-import { useSidebar } from './ui/sidebar';
-import { memo, useEffect, useState } from 'react';
-import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
-import type { VisibilityType } from './visibility-selector';
+"use client";
+import { useRouter } from "next/navigation";
+import { useWindowSize } from "usehooks-ts";
+import { Button } from "@/components/ui/button";
+import { PlusIcon } from "./icons";
+import { useSidebarContext } from "./ui/aceternity-sidebar";
+import { memo, useEffect, useState } from "react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
+import type { VisibilityType } from "./visibility-selector";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 function PureChatHeader({
   chatId,
@@ -21,35 +21,35 @@ function PureChatHeader({
   isReadonly: boolean;
 }) {
   const router = useRouter();
-  const { open } = useSidebar();
+  const { open } = useSidebarContext();
   const agentId = process.env.NEXT_PUBLIC_CONVAI_AGENT_ID;
   const { width: windowWidth } = useWindowSize();
   const [isClient, setIsClient] = useState(false);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     setIsClient(true);
   }, []);
 
   return (
-    <header className="flex sticky top-0 bg-background py-1.5 items-center px-2 md:px-2 gap-2">
-      <SidebarToggle />
-
-      {(!open || (isClient && windowWidth < 768)) && (
+    <header className="flex sticky top-4 bg-background py-1.5 items-center px-2 md:px-2 gap-2">
+      {/* New Chat button - Only show on desktop, hidden on mobile (moved to app-sidebar) */}
+      {!isMobile && (!open || (isClient && windowWidth < 768)) && (
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
               variant="outline"
-              className="order-2 md:order-1 md:px-2 hidden md:flex px-2 md:h-fit"
+              className="order-2 md:order-1 md:px-3 flex px-3 size-10"
               onClick={() => {
-                router.push('/');
+                router.push("/chat");
                 router.refresh();
               }}
             >
-              <PlusIcon />
+              <PlusIcon size={18} />
               {/* <span className="md:sr-only">New Chat</span> */}
             </Button>
           </TooltipTrigger>
-          <TooltipContent>New Chat</TooltipContent>
+          <TooltipContent side="right">New Chat</TooltipContent>
         </Tooltip>
       )}
 

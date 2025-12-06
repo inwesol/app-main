@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 
 import { AppSidebar } from "@/components/app-sidebar";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { SidebarProvider } from "@/components/ui/aceternity-sidebar";
 import { BreadcrumbProvider } from "@/contexts/BreadcrumbContext";
 import { auth } from "../(auth)/auth";
 import Script from "next/script";
@@ -13,8 +13,7 @@ export default async function Layout({
 }: {
   children: React.ReactNode;
 }) {
-  const [session, cookieStore] = await Promise.all([auth(), cookies()]);
-  const isCollapsed = cookieStore.get("sidebar:state")?.value !== "true";
+  const [session] = await Promise.all([auth(), cookies()]);
 
   return (
     <>
@@ -23,14 +22,16 @@ export default async function Layout({
         strategy="beforeInteractive"
       />
       <BreadcrumbProvider>
-        <SidebarProvider
-          defaultOpen={false}
-          className="relative z-10 h-screen w-full overflow-hidden"
-        >
-          <AppSidebar user={session?.user} />
-          <SidebarInset className="!bg-transparent size-full overflow-y-auto overflow-x-hidden">
-            {children}
-          </SidebarInset>
+        <SidebarProvider>
+          <div className="flex h-screen w-full overflow-hidden">
+            <AppSidebar user={session?.user} />
+            <main
+              className="flex-1 overflow-y-auto overflow-x-hidden transition-all duration-300"
+              style={{ marginLeft: "var(--sidebar-width, 64px)" }}
+            >
+              {children}
+            </main>
+          </div>
         </SidebarProvider>
       </BreadcrumbProvider>
     </>

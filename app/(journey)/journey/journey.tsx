@@ -27,7 +27,7 @@ import Header from "@/components/form-components/header";
 import { useRouter } from "next/navigation";
 import { SESSION_TEMPLATES } from "@/lib/constants";
 import { SidebarToggle } from "@/components/sidebar-toggle";
-import { useSidebar } from "@/components/ui/sidebar";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { SimpleViewDialog } from "@/components/simple-view-dialog";
 import { ReportDialog } from "@/components/report-dialog";
 
@@ -47,7 +47,7 @@ export const JourneyPage: React.FC = () => {
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
   const router = useRouter();
-  const { isMobile } = useSidebar();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     console.log("in journey");

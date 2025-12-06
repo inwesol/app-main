@@ -1,30 +1,19 @@
-import { Chat } from '@/lib/db/schema';
+import type { Chat } from "@/lib/db/schema";
 import {
   SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
-} from './ui/sidebar';
-import Link from 'next/link';
+} from "./ui/sidebar";
+import Link from "next/link";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuPortal,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
-} from './ui/dropdown-menu';
-import {
-  CheckCircleFillIcon,
-  GlobeIcon,
-  LockIcon,
-  MoreHorizontalIcon,
-  ShareIcon,
-  TrashIcon,
-} from './icons';
-import { memo } from 'react';
-import { useChatVisibility } from '@/hooks/use-chat-visibility';
+} from "./ui/dropdown-menu";
+import { MoreHorizontalIcon, TrashIcon } from "./icons";
+import { memo } from "react";
+import { useChatVisibility } from "@/hooks/use-chat-visibility";
 
 const PureChatItem = ({
   chat,
@@ -35,7 +24,7 @@ const PureChatItem = ({
   chat: Chat;
   isActive: boolean;
   onDelete: (chatId: string) => void;
-  setOpenMobile: (open: boolean) => void;
+  setOpenMobile?: (open: boolean) => void;
 }) => {
   const { visibilityType, setVisibilityType } = useChatVisibility({
     chatId: chat.id,
@@ -45,7 +34,7 @@ const PureChatItem = ({
   return (
     <SidebarMenuItem>
       <SidebarMenuButton asChild isActive={isActive}>
-        <Link href={`/chat/${chat.id}`} onClick={() => setOpenMobile(false)}>
+        <Link href={`/chat/${chat.id}`} onClick={() => setOpenMobile?.(false)}>
           <span>{chat.title}</span>
         </Link>
       </SidebarMenuButton>

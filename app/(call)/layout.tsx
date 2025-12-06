@@ -1,9 +1,9 @@
-import { cookies } from 'next/headers';
+import { cookies } from "next/headers";
 
-import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
-import { auth } from '../(auth)/auth';
-import Script from 'next/script';
-import { ConversationSidebar } from "@/components/conversation-sidebar";
+import { AppSidebar } from "@/components/app-sidebar";
+import { SidebarProvider } from "@/components/ui/aceternity-sidebar";
+import { auth } from "../(auth)/auth";
+import Script from "next/script";
 
 export const experimental_ppr = true;
 
@@ -12,8 +12,7 @@ export default async function Layout({
 }: {
   children: React.ReactNode;
 }) {
-  const [session, cookieStore] = await Promise.all([auth(), cookies()]);
-  const isCollapsed = cookieStore.get('sidebar:state')?.value !== 'true';
+  const [session] = await Promise.all([auth(), cookies()]);
 
   return (
     <>
@@ -21,10 +20,17 @@ export default async function Layout({
         src="https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js"
         strategy="beforeInteractive"
       />
-      <SidebarProvider defaultOpen={!isCollapsed}>
-        <ConversationSidebar user={session?.user} />
-        <SidebarInset>{children}</SidebarInset>
+      <SidebarProvider>
+        <div className="flex h-screen w-full overflow-hidden">
+          <AppSidebar user={session?.user} />
+          <main
+            className="flex-1 overflow-y-auto overflow-x-hidden transition-all duration-300"
+            style={{ marginLeft: "var(--sidebar-width, 64px)" }}
+          >
+            {children}
+          </main>
+        </div>
       </SidebarProvider>
     </>
   );
-} 
+}

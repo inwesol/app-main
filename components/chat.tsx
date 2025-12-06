@@ -15,6 +15,8 @@ import { useArtifactSelector } from "@/hooks/use-artifact";
 import { toast } from "sonner";
 import { unstable_serialize } from "swr/infinite";
 import { getChatHistoryPaginationKey } from "./sidebar-history";
+import { SidebarToggle } from "./sidebar-toggle";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export function Chat({
   id,
@@ -63,10 +65,12 @@ export function Chat({
 
   const [attachments, setAttachments] = useState<Array<Attachment>>([]);
   const isArtifactVisible = useArtifactSelector((state) => state.isVisible);
+  const isMobile = useIsMobile();
 
   return (
     <>
       <div className="flex flex-col min-w-0 h-dvh bg-background">
+        <div className="p-2">{isMobile ? <SidebarToggle /> : <div />}</div>
         <ChatHeader
           chatId={id}
           selectedModelId={selectedChatModel}
