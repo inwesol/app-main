@@ -154,7 +154,7 @@ export const JourneyPage: React.FC = () => {
               </div>
             </div>
           </Card>
-          {/* revise your journey */}
+          {/* revise your journey. */}
           <Card className="p-4 bg-white border-primary-green-200/50 shadow-sm hover:shadow-md transition-all duration-300">
             <div className="flex items-center gap-3 mb-3">
               <div className="bg-primary-green-500 rounded-lg p-2 shrink-0">
