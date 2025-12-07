@@ -17,7 +17,7 @@ export const SESSION_TEMPLATES = [
       {
         id: "demographics-details",
         title: "Demographics Details",
-        description: "Tell us about yourself and your career aspirations",
+        description: "Tell us about yourself and your background",
         status: "not-completed",
         icon: "User",
         route: "/journey/sessions/0/q/demographics-details",

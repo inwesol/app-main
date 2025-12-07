@@ -43,7 +43,7 @@ const navMain = [
     icon: Sparkles,
   },
   {
-    title: "Journey",
+    title: "1:1 Coaching",
     url: "/journey",
     icon: Route,
   },

@@ -357,8 +357,8 @@ export function DemographicsDetailsForm({
                   2
                 </div>
                 <div className="hidden sm:block">
-                  <div className="text-sm font-bold">Wellbeing & Goals</div>
-                  <div className="text-xs text-slate-500">Your objectives</div>
+                  <div className="text-sm font-bold">Wellbeing Info</div>
+                  <div className="text-xs text-slate-500">Your goals </div>
                 </div>
               </div>
             </div>
@@ -382,8 +382,8 @@ export function DemographicsDetailsForm({
               </CardTitle>
               <CardDescription className="relative z-10 text-xs text-slate-600 sm:text-sm lg:text-base">
                 {currentPage === 1
-                  ? "Let's start with some basic information about you and your professional background"
-                  : "Help us understand your current stress levels and what you hope to achieve through coaching."}
+                  ? "Let's start with some basic information about you"
+                  : "Help us understand your current stress levels and what you hope to achieve through coaching"}
               </CardDescription>
             </CardHeader>
 

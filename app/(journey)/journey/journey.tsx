@@ -126,7 +126,7 @@ export const JourneyPage: React.FC = () => {
                   Coaching Progress
                 </h3>
                 <p className="text-xs text-primary-green-700">
-                  Get snippet of your coaching status
+                  Get a snippet of your coaching status
                 </p>
               </div>
             </div>
@@ -144,7 +144,7 @@ export const JourneyPage: React.FC = () => {
               <div className="flex items-center justify-between text-xs text-primary-green-700 mt-1 pt-1">
                 <span className="">
                   {userProgress.currentSession > 8
-                    ? "All Sessions are completed"
+                    ? "All sessions are completed"
                     : `Active Session #${userProgress.currentSession + 1}`}
                 </span>
                 <span className="">
@@ -165,7 +165,7 @@ export const JourneyPage: React.FC = () => {
                   Coaching Insights
                 </h3>
                 <p className="text-xs text-primary-green-700">
-                  Download and view your coaching insights
+                  Download and view insights
                 </p>
               </div>
             </div>

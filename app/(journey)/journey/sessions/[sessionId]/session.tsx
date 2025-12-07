@@ -598,7 +598,7 @@ export function SessionDetail() {
                   </h2>
                   <p className="text-sm text-slate-600">
                     Book a one-on-one session, give feedback and receive your
-                    session summaries
+                    session summary
                   </p>
                 </div>
               </div>
@@ -620,7 +620,7 @@ export function SessionDetail() {
                 </div>
                 <div>
                   <h2 className="text-lg font-bold text-slate-800">
-                    Post Session Activity
+                    Progress Reflection Assessment
                   </h2>
                   <p className="text-sm text-slate-600">
                     Complete these assessments to track your progress and growth

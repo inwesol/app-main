@@ -6,8 +6,8 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://app.inwesol.com"),
-  title: "CoCo - AI Mindset Coach",
-  description: "AI Mindset Coach from Inwesol.",
+  title: "Self Discovery Journey - Inwesol",
+  description: "Cultivating a Learning Mindset through Self Discovery Journey",
 };
 
 export const viewport = {

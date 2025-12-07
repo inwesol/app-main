@@ -65,7 +65,7 @@ const sections = [
       "Focus on the positive aspects of your journey and how they contribute to your growth.",
   },
   {
-    title: "Forward",
+    title: "Way Forward",
     icon: ArrowRight,
     color: "blue",
     description:

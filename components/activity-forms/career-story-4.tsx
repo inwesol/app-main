@@ -287,13 +287,12 @@ export default function CareerStory4() {
               <RefreshCw className="size-4" />
               Story Transformation Guide
             </h4>
-            <div className="space-y-3 text-xs text-emerald-700">
+            <div className="space-y-3 text-sm text-emerald-700">
               <div className="p-3 border rounded-md bg-white/60 border-emerald-200/40">
                 <p className="mb-1 font-semibold">1. Revisit Your My Story</p>
                 <p className="text-slate-600">
-                  Revisit the career story you wrote in My Story-1, about the
-                  changes you&apos;re facing and the decisions you may need to
-                  make.
+                  Revisit the story you wrote in My Story-1, about the changes
+                  you&apos;re facing and the decisions you may need to make.
                 </p>
               </div>
               <div className="p-3 border rounded-md bg-white/60 border-emerald-200/40">
@@ -335,11 +334,11 @@ export default function CareerStory4() {
                     <p className="text-sm text-slate-600 mb-3">
                       {isLoadingReferences
                         ? "Loading your My Story-1..."
-                        : "Review your original transition essay and career aspirations"}
+                        : "Review your transition essay"}
                     </p>
                     <div className="p-3 border bg-gradient-to-r from-primary-blue-100/50 to-cyan-100/50 rounded-lg border-primary-blue-200/40">
                       <h4 className="text-sm font-semibold text-primary-blue-600 mb-1">
-                        Original Challenge
+                        Transition Essay
                       </h4>
                       <p className="text-xs text-primary-blue-700 line-clamp-2">
                         {careerStoryOneData?.transitionEssay
@@ -356,10 +355,10 @@ export default function CareerStory4() {
               <SheetContent className="min-w-[340px] sm:min-w-[600px] overflow-y-scroll bg-gradient-to-r from-primary-blue-100 to-white">
                 <SheetHeader>
                   <SheetTitle className="text-xl font-bold text-primary-blue-600">
-                    My Story-1 Activity - Your Original Transition Essay
+                    My Story-1 Activity
                   </SheetTitle>
                   <SheetDescription>
-                    Review your original transition essay and career aspirations
+                    Review your transition essay
                   </SheetDescription>
                 </SheetHeader>
 
@@ -367,7 +366,7 @@ export default function CareerStory4() {
                 <div className="mt-6">
                   <div className="flex items-center gap-3 mb-4">
                     <h4 className="text-sm font-medium text-slate-600">
-                      Your Original Transition Essay
+                      Transition Essay
                     </h4>
                   </div>
                   <div className="p-4 border shadow-md bg-white/90 rounded-xl border-primary-blue-200/60">
@@ -403,7 +402,7 @@ export default function CareerStory4() {
                 <div className="mt-6">
                   <div className="flex items-center gap-3 mb-4">
                     <h4 className="text-sm font-medium text-slate-600">
-                      Your Heroes & Role Models
+                      Your Role Models
                     </h4>
                   </div>
                   <div className="space-y-4">
@@ -479,7 +478,7 @@ export default function CareerStory4() {
                     <p className="text-sm text-slate-600 mb-3">
                       {isLoadingReferences
                         ? "Loading your success formula..."
-                        : "Review your success formula and personal motto"}
+                        : "Review your excellence formula"}
                     </p>
                     <div className="p-3 border bg-gradient-to-r from-primary-green-100/50 to-emerald-100/50 rounded-lg border-primary-green-200/40">
                       <h4 className="text-sm font-semibold text-primary-green-600 mb-1">
@@ -500,11 +499,10 @@ export default function CareerStory4() {
               <SheetContent className="min-w-[340px] sm:min-w-[600px] overflow-y-scroll bg-gradient-to-r from-primary-green-100 to-white">
                 <SheetHeader>
                   <SheetTitle className="text-xl font-bold text-primary-green-600">
-                    My Story-3 Activity - Your Excellence Formula & Advice
+                    My Story-3 Activity
                   </SheetTitle>
                   <SheetDescription>
-                    Review your Excellence formula and personal motto from My
-                    Story-3 Activity
+                    Review your excellence formula
                   </SheetDescription>
                 </SheetHeader>
 
@@ -553,7 +551,7 @@ export default function CareerStory4() {
                 <div className="mt-6">
                   <div className="flex items-center gap-3 mb-4">
                     <h4 className="text-sm font-medium text-slate-600">
-                      Your Personal Career Motto
+                      Your Favorite Saying
                     </h4>
                   </div>
                   <div className="p-4 border shadow-md bg-white/90 rounded-xl border-primary-green-200/60">

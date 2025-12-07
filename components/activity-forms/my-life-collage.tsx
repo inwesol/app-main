@@ -222,7 +222,7 @@ export default function LifeCollage() {
                         My Present Life
                       </CardTitle>
                     </div>
-                    <div className="text-sm text-slate-600">
+                    <div className="text-base text-slate-600">
                       <p className="mb-2">
                         Create a collage that represents your life as it is
                         right now. <br /> Use images, words, photographs,
@@ -278,7 +278,7 @@ export default function LifeCollage() {
                         My Future Life (3-5 Years)
                       </CardTitle>
                     </div>
-                    <div className="text-sm text-slate-600">
+                    <div className="text-base text-slate-600">
                       <p className="mb-2">
                         Create a collage that visualizes your ideal life three
                         or five years from now. <br /> Gather images, words,

@@ -580,7 +580,7 @@ export default function CareerStory3() {
                     : "bg-white text-slate-600 hover:bg-slate-100"
                 }`}
               >
-                Section 1: Self Analysis
+                Section 1: Summary Portrait
               </Button>
               <Button
                 onClick={() => {
@@ -1077,7 +1077,7 @@ export default function CareerStory3() {
                 </SheetTitle>
                 <SheetDescription className="text-base leading-relaxed text-slate-600 mt-2">
                   {currentGroupData?.title === "SELF" &&
-                    "Reference your self-analysis from My Story 2"}
+                    "Review 'The Self' from My Story-2 Activity"}
                   {currentGroupData?.title === "SETTING" &&
                     "Reference your setting analysis from My Story 2"}
                   {currentGroupData?.title === "SCRIPT" &&
@@ -1133,7 +1133,7 @@ export default function CareerStory3() {
                       <Card className="border-slate-200 shadow-sm bg-gradient-to-br from-white to-slate-50/30">
                         <CardContent className="p-4">
                           <h3 className="text-lg font-bold text-slate-800 mb-3">
-                            Self Analysis Summary
+                            The Self: Who am I? Who am I becoming?
                           </h3>
                           <div className="space-y-3">
                             <div>
@@ -1155,7 +1155,7 @@ export default function CareerStory3() {
                             </div>
                             <div>
                               <h4 className="text-sm font-semibold text-slate-700 mb-1">
-                                Common Traits:
+                                Common Qualities:
                               </h4>
                               <p className="text-sm text-slate-600 whitespace-pre-wrap">
                                 {referenceData.commonTraits || "Not available"}

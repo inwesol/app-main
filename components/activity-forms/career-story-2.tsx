@@ -53,7 +53,7 @@ const sections = [
     icon: User,
     color: "primary-green",
     description1:
-      "Take a look at the words you used to describe your heroes or heroines (role models) question in the previous My Story-1 Activity.",
+      "Take a look at the words you used to describe your heroes or heroines (role models) step in the My Story-1 Activity.",
     questions1: [
       {
         question:
@@ -85,7 +85,7 @@ const sections = [
       },
     ],
     description2:
-      "This is you - your true self. Observe the words you used to describe your heroes or heroines (role models). Those words also describe you. You choose qualities you admire in others and make them a part of who you are.",
+      "This is you - your true self. Observe the words you used to describe your heroes or heroines (role models). Those words also describe you. You choose qualities you admire in others and you aspire to make them a part of who you are.",
     questions2: [
       {
         question:
@@ -421,10 +421,11 @@ export default function CareerStory2() {
           <div className="p-4 mb-6 border shadow-lg bg-white/90 backdrop-blur-sm border-slate-200/60 rounded-3xl sm:p-6 sm:mb-8">
             <div className="text-center">
               <p className="text-sm leading-relaxed text-slate-700 sm:text-base">
-                This activity is a continuation of the previous{" "}
-                <b>My Story-1 Activity</b> you have completed. It contains
-                related questions, so please refer to <b>My Story-1 Activity</b>{" "}
-                in <b>Reference</b> while working on the below steps.
+                This activity is a continuation of the{" "}
+                <b>My Story-1 Activity</b>. It contains related questions,{" "}
+                <br />
+                so please refer to <b>My Story-1 Activity</b> in{" "}
+                <b>Reference</b> while working on the below steps.
               </p>
             </div>
           </div>
@@ -596,7 +597,7 @@ export default function CareerStory2() {
                               }
                               render={({ field }) => (
                                 <FormItem className="space-y-2">
-                                  <FormLabel className="block text-sm font-medium text-slate-700">
+                                  <FormLabel className="block text-base font-medium text-slate-700">
                                     {question.question}
                                   </FormLabel>
                                   <FormControl>
@@ -634,7 +635,7 @@ export default function CareerStory2() {
                               }
                               render={({ field }) => (
                                 <FormItem className="space-y-2">
-                                  <FormLabel className="block text-sm font-medium text-slate-700">
+                                  <FormLabel className="block text-base font-medium text-slate-700">
                                     {question.question}
                                   </FormLabel>
                                   <FormControl>
@@ -687,7 +688,7 @@ export default function CareerStory2() {
                               }
                               render={({ field }) => (
                                 <FormItem className="space-y-2">
-                                  <FormLabel className="block text-sm font-medium text-slate-700">
+                                  <FormLabel className="block text-base font-medium text-slate-700">
                                     {question.question}
                                   </FormLabel>
                                   <FormControl>
@@ -898,7 +899,7 @@ export default function CareerStory2() {
                               }
                               render={({ field }) => (
                                 <FormItem className="space-y-2">
-                                  <FormLabel className="block text-sm font-medium text-slate-700">
+                                  <FormLabel className="block text-base font-medium text-slate-700">
                                     {question.question}
                                   </FormLabel>
                                   <FormControl>

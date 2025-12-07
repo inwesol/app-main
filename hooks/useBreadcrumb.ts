@@ -16,7 +16,7 @@ export function useBreadcrumb() {
     (sessionId: string, currentPage?: string) => {
       const breadcrumbs: BreadcrumbItem[] = [
         { label: "Home", href: "/" },
-        { label: "Journey", href: "/journey" },
+        { label: "Coaching", href: "/journey" },
         {
           label: `Session ${Number(sessionId) + 1}`,
           href: `/journey/sessions/${sessionId}`,

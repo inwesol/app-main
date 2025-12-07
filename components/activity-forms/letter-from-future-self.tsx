@@ -192,21 +192,20 @@ export default function LetterFromFutureSelf() {
                       Letter from the Future Self
                     </h1>
                     <p className="text-sm text-slate-600">
-                      In this workbook, you will write a letter to yourself from
-                      the future. This activity helps you connect with your
-                      future dreams and goals. It also gives you a chance to
-                      think about the steps you need to take and how to overcome
-                      difficulties with confidence.
+                      This activity helps you connect with your future dreams
+                      and goals. It also gives you a chance to think about the
+                      steps you need to take and how to overcome difficulties
+                      with confidence.
                     </p>
                   </div>
                 </div>
 
                 {/* Instruction Section */}
                 <div className="p-3 border rounded-lg bg-gradient-to-br from-primary-blue-50 to-primary-green-50 border-primary-blue-200">
-                  <h2 className="mb-2 text-base font-semibold text-slate-800">
+                  {/* <h2 className="mb-2 text-base font-semibold text-slate-800">
                     Instructions
-                  </h2>
-                  <p className="text-sm text-slate-700">
+                  </h2> */}
+                  <p className="text-base text-slate-700">
                     Imagine your life 3 or 5 years in the future. You have gone
                     through the change you&apos;re currently facing. You&apos;ve
                     achieved your goals and grown through various challenges.
@@ -243,7 +242,7 @@ export default function LetterFromFutureSelf() {
                 {/* Text Area Section */}
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold text-slate-800">
-                    Write Your Letter
+                    Your Letter
                   </h3>
                   <div className="relative p-1.5 space-y-1 border shadow-sm bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl border-slate-200">
                     <Textarea
