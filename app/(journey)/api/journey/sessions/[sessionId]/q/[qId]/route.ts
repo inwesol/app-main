@@ -48,7 +48,7 @@ function personalityTestScore() {
   };
 
   const reverseScoredQuestions = new Set([
-    2, 6, 8, 9, 12, 18, 21, 23, 24, 27, 30, 31, 43, 37, 34, 35, 41,
+    2, 6, 8, 9, 12, 18, 21, 23, 24, 27, 30, 31, 34, 35, 37, 41, 43,
   ]);
 
   const subscaleMap: Record<string, number[]> = {
@@ -60,50 +60,50 @@ function personalityTestScore() {
   };
 
   const questionTextToNumber: Record<string, number> = {
-    "Is talkative": 1,
-    "Tends to find fault with others": 2,
-    "Does a thorough job": 3,
-    "Is depressed, blue": 4,
-    "Is original, comes up with new ideas": 5,
-    "Is reserved": 6,
-    "Is helpful and unselfish with others": 7,
-    "Can be somewhat careless": 8,
-    "Is relaxed, handles stress well": 9,
-    "Is curious about many different things": 10,
-    "Is full of energy": 11,
-    "Starts quarrels with others": 12,
-    "Is a reliable worker": 13,
-    "Can be tense": 14,
-    "Is ingenious, a deep thinker": 15,
-    "Generates a lot of enthusiasm": 16,
-    "Has a forgiving nature": 17,
-    "Tends to be disorganized": 18,
-    "Worries a lot": 19,
-    "Has an active imagination": 20,
-    "Tends to be quiet": 21,
-    "Is generally trusting": 22,
-    "Tends to be lazy": 23,
-    "Is emotionally stable, not easily upset": 24,
-    "Is inventive": 25,
-    "Has an assertive personality": 26,
-    "Can be cold and aloof": 27,
-    "Perseveres until the task is finished": 28,
-    "Can be moody": 29,
-    "Values artistic, aesthetic experiences": 30,
-    "Is sometimes shy, inhibited": 31,
-    "Is considerate and kind to almost everyone": 32,
-    "Does things efficiently": 33,
-    "Remains calm in tense situations": 34,
-    "Prefers work that is routine": 35,
-    "Is outgoing, sociable": 36,
-    "Is sometimes rude to others": 37,
-    "Makes plans and follows through with them": 38,
-    "Gets nervous easily": 39,
-    "Likes to reflect, play with ideas": 40,
-    "Has few artistic interests": 41,
-    "Likes to cooperate with others": 42,
-    "Is easily distracted": 43,
-    "Is sophisticated in art, music, or literature": 44,
+    "is talkative": 1,
+    "tends to find fault with others": 2,
+    "does a thorough job": 3,
+    "is depressed, blue": 4,
+    "is original, comes up with new ideas": 5,
+    "is reserved": 6,
+    "is helpful and unselfish with others": 7,
+    "can be somewhat careless": 8,
+    "is relaxed, handles stress well": 9,
+    "is curious about many different things": 10,
+    "is full of energy": 11,
+    "starts quarrels with others": 12,
+    "is a reliable worker": 13,
+    "can be tense": 14,
+    "is ingenious, a deep thinker": 15,
+    "generates a lot of enthusiasm": 16,
+    "has a forgiving nature": 17,
+    "tends to be disorganized": 18,
+    "worries a lot": 19,
+    "has an active imagination": 20,
+    "tends to be quiet": 21,
+    "is generally trusting": 22,
+    "tends to be lazy": 23,
+    "is emotionally stable, not easily upset": 24,
+    "is inventive": 25,
+    "has an assertive personality": 26,
+    "can be cold and aloof": 27,
+    "perseveres until the task is finished": 28,
+    "can be moody": 29,
+    "values artistic, aesthetic experiences": 30,
+    "is sometimes shy, inhibited": 31,
+    "is considerate and kind to almost everyone": 32,
+    "does things efficiently": 33,
+    "remains calm in tense situations": 34,
+    "prefers work that is routine": 35,
+    "is outgoing, sociable": 36,
+    "is sometimes rude to others": 37,
+    "makes plans and follows through with them": 38,
+    "gets nervous easily": 39,
+    "likes to reflect, play with ideas": 40,
+    "has few artistic interests": 41,
+    "likes to cooperate with others": 42,
+    "is easily distracted": 43,
+    "is sophisticated in art, music, or literature": 44,
   };
 
   function reverseScore(value: number, maxScore = 5) {
@@ -1010,7 +1010,7 @@ export async function POST(
           if (val === undefined) continue;
 
           const rev = reverseScoredQuestions.has(qNum)
-            ? reverseScore(val, 7)
+            ? reverseScore(val, 5)
             : val;
 
           // Find the subscale to which this question belongs and accumulate
@@ -1025,12 +1025,19 @@ export async function POST(
           }
         }
 
-        // Calculate average scores per subscale
+        // Calculate percentage scores per subscale
+        const subscaleMaxSums: Record<string, number> = {
+          extraversion: 8 * 5, // 8 questions * max score 5
+          agreeableness: 9 * 5, // 9 questions * max score 5
+          conscientiousness: 9 * 5, // 9 questions * max score 5
+          neuroticism: 8 * 5, // 8 questions * max score 5
+          openness: 10 * 5, // 10 questions * max score 5
+        };
         const subscaleScores: Record<string, number> = {};
         for (const subscale in subscaleSums) {
-          const count = subscaleCounts[subscale];
+          const maxSum = subscaleMaxSums[subscale];
           subscaleScores[subscale] =
-            count > 0 ? subscaleSums[subscale] / count : 0;
+            maxSum > 0 ? (subscaleSums[subscale] / maxSum) * 100 : 0;
         }
 
         // Calculate overall score as average of subscales
