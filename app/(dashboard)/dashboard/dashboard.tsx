@@ -1,19 +1,12 @@
-"use client";
+'use client';
 import {
   Card,
   CardHeader,
   CardTitle,
   CardDescription,
   CardContent,
-  CardFooter,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import {
   Play,
   Pause,
@@ -21,11 +14,14 @@ import {
   SkipForward,
   Volume2,
   VolumeX,
-  Info,
-} from "lucide-react";
-import { useState, useEffect, useCallback, useMemo } from "react";
-import { SidebarToggle } from "@/components/sidebar-toggle";
-import { useIsMobile } from "@/hooks/use-mobile";
+  BookOpen,
+  Sparkles,
+  RouteIcon,
+} from 'lucide-react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { SidebarToggle } from '@/components/sidebar-toggle';
+import { useIsMobile } from '@/hooks/use-mobile';
+import GradientCard from '@/components/gradient-card';
 
 interface User {
   id: string;
@@ -51,8 +47,8 @@ export default function Dashboard() {
   const [tasks, setTasks] = useState<{
     [key: string]: Array<{ id: string; text: string; time: string }>;
   }>({});
-  const [newTask, setNewTask] = useState("");
-  const [newTaskTime, setNewTaskTime] = useState("");
+  const [newTask, setNewTask] = useState('');
+  const [newTaskTime, setNewTaskTime] = useState('');
   const [journalEntries, setJournalEntries] = useState<
     Array<{
       id: string;
@@ -64,13 +60,13 @@ export default function Dashboard() {
       updatedAt: string;
     }>
   >([]);
-  const [todayEntry, setTodayEntry] = useState({ title: "", content: "" });
-  const [searchTerm, setSearchTerm] = useState("");
+  const [todayEntry, setTodayEntry] = useState({ title: '', content: '' });
+  const [searchTerm, setSearchTerm] = useState('');
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [currentDateTime, setCurrentDateTime] = useState(new Date());
   const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(
-    null
+    null,
   );
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingEntries, setIsLoadingEntries] = useState(false);
@@ -81,7 +77,7 @@ export default function Dashboard() {
   // Check authentication status
   const checkAuthStatus = useCallback(async () => {
     try {
-      const response = await fetch("/api/dashboard");
+      const response = await fetch('/api/dashboard');
       if (response.ok) {
         const data: AuthStatus = await response.json();
         setAuthStatus(data);
@@ -89,7 +85,7 @@ export default function Dashboard() {
         setAuthStatus({ authenticated: false, user: null });
       }
     } catch (error) {
-      console.error("Error checking auth status:", error);
+      console.error('Error checking auth status:', error);
       setAuthStatus({ authenticated: false, user: null });
     } finally {
       setIsLoadingAuth(false);
@@ -101,15 +97,15 @@ export default function Dashboard() {
     () => [
       {
         id: 1,
-        title: "🧘 Breathing Exercise",
-        duration: "04:36",
-        url: "/musics/breathing-exercise.mp3",
+        title: '🧘 Breathing Exercise',
+        duration: '04:36',
+        url: '/musics/breathing-exercise.mp3',
       },
       {
         id: 2,
-        title: "🌙 Evening Relax",
-        duration: "01:57",
-        url: "/musics/dawn-of-change.mp3",
+        title: '🌙 Evening Relax',
+        duration: '01:57',
+        url: '/musics/dawn-of-change.mp3',
       },
       // {
       //   id: 3,
@@ -130,23 +126,23 @@ export default function Dashboard() {
       //   url: "/musics/dawn-of-change.mp3",
       // },
     ],
-    []
+    [],
   );
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, "0")}`;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
   const getTimeBasedGreeting = () => {
     const hour = new Date().getHours();
     if (hour < 12) {
-      return "Good Morning";
+      return 'Good Morning';
     } else if (hour < 17) {
-      return "Good Afternoon";
+      return 'Good Afternoon';
     } else {
-      return "Good Evening";
+      return 'Good Evening';
     }
   };
 
@@ -163,11 +159,11 @@ export default function Dashboard() {
           setIsLoading(false);
         }
       } catch (error) {
-        console.error("Error playing audio:", error);
+        console.error('Error playing audio:', error);
         setIsPlaying(false);
         setIsLoading(false);
         alert(
-          "Unable to play audio. Please check your internet connection or try a different track."
+          'Unable to play audio. Please check your internet connection or try a different track.',
         );
       }
     }
@@ -179,7 +175,7 @@ export default function Dashboard() {
 
   const handlePrevious = () => {
     setCurrentTrack(
-      (prev) => (prev - 1 + meditationTracks.length) % meditationTracks.length
+      (prev) => (prev - 1 + meditationTracks.length) % meditationTracks.length,
     );
   };
 
@@ -198,7 +194,7 @@ export default function Dashboard() {
 
     return () => {
       audio.pause();
-      audio.src = "";
+      audio.src = '';
     };
   }, []);
 
@@ -206,10 +202,10 @@ export default function Dashboard() {
   useEffect(() => {
     if (audioElement && meditationTracks[currentTrack]) {
       console.log(
-        "Loading track:",
+        'Loading track:',
         meditationTracks[currentTrack].title,
-        "URL:",
-        meditationTracks[currentTrack].url
+        'URL:',
+        meditationTracks[currentTrack].url,
       );
       setIsLoading(true);
       audioElement.src = meditationTracks[currentTrack].url;
@@ -217,23 +213,23 @@ export default function Dashboard() {
 
       // Add error handling for audio loading
       const handleError = (e: Event) => {
-        console.error("Audio loading error:", e);
-        console.error("Failed to load:", meditationTracks[currentTrack].url);
+        console.error('Audio loading error:', e);
+        console.error('Failed to load:', meditationTracks[currentTrack].url);
         setIsLoading(false);
-        alert("Failed to load audio. Please try a different track.");
+        alert('Failed to load audio. Please try a different track.');
       };
 
       const handleCanPlay = () => {
-        console.log("Audio can play:", meditationTracks[currentTrack].title);
+        console.log('Audio can play:', meditationTracks[currentTrack].title);
         setIsLoading(false);
       };
 
-      audioElement.addEventListener("error", handleError);
-      audioElement.addEventListener("canplay", handleCanPlay);
+      audioElement.addEventListener('error', handleError);
+      audioElement.addEventListener('canplay', handleCanPlay);
 
       return () => {
-        audioElement.removeEventListener("error", handleError);
-        audioElement.removeEventListener("canplay", handleCanPlay);
+        audioElement.removeEventListener('error', handleError);
+        audioElement.removeEventListener('canplay', handleCanPlay);
       };
     }
   }, [currentTrack, audioElement, meditationTracks]);
@@ -255,18 +251,18 @@ export default function Dashboard() {
       setDuration(audioElement.duration);
     };
 
-    audioElement.addEventListener("play", handlePlay);
-    audioElement.addEventListener("pause", handlePause);
-    audioElement.addEventListener("ended", handleEnded);
-    audioElement.addEventListener("timeupdate", handleTimeUpdate);
-    audioElement.addEventListener("loadedmetadata", handleLoadedMetadata);
+    audioElement.addEventListener('play', handlePlay);
+    audioElement.addEventListener('pause', handlePause);
+    audioElement.addEventListener('ended', handleEnded);
+    audioElement.addEventListener('timeupdate', handleTimeUpdate);
+    audioElement.addEventListener('loadedmetadata', handleLoadedMetadata);
 
     return () => {
-      audioElement.removeEventListener("play", handlePlay);
-      audioElement.removeEventListener("pause", handlePause);
-      audioElement.removeEventListener("ended", handleEnded);
-      audioElement.removeEventListener("timeupdate", handleTimeUpdate);
-      audioElement.removeEventListener("loadedmetadata", handleLoadedMetadata);
+      audioElement.removeEventListener('play', handlePlay);
+      audioElement.removeEventListener('pause', handlePause);
+      audioElement.removeEventListener('ended', handleEnded);
+      audioElement.removeEventListener('timeupdate', handleTimeUpdate);
+      audioElement.removeEventListener('loadedmetadata', handleLoadedMetadata);
     };
   }, [audioElement, handleNext]);
 
@@ -298,13 +294,13 @@ export default function Dashboard() {
 
     setIsLoadingEntries(true);
     try {
-      const response = await fetch("/api/journal/entries");
+      const response = await fetch('/api/journal/entries');
       if (response.ok) {
         const { entries } = await response.json();
         setJournalEntries(entries);
       }
     } catch (error) {
-      console.error("Error loading journal entries:", error);
+      console.error('Error loading journal entries:', error);
     } finally {
       setIsLoadingEntries(false);
     }
@@ -314,13 +310,13 @@ export default function Dashboard() {
   const loadTodayEntry = useCallback(async () => {
     if (!authStatus?.authenticated || !authStatus?.user?.id) return;
 
-    const today = new Date().toISOString().split("T")[0];
+    const today = new Date().toISOString().split('T')[0];
     try {
       const response = await fetch(`/api/journal/entries/${today}`);
       if (response.ok) {
         const { entry } = await response.json();
         setTodayEntry({
-          title: entry.title || "",
+          title: entry.title || '',
           content: entry.content,
         });
       }
@@ -330,32 +326,32 @@ export default function Dashboard() {
   }, [authStatus?.authenticated, authStatus?.user?.id]);
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
     });
   };
 
   const formatLastSaved = (date: Date) => {
     const diffInSeconds = Math.floor(
-      (currentDateTime.getTime() - date.getTime()) / 1000
+      (currentDateTime.getTime() - date.getTime()) / 1000,
     );
 
     if (diffInSeconds < 60) {
-      return "Just now";
+      return 'Just now';
     } else if (diffInSeconds < 3600) {
       const minutes = Math.floor(diffInSeconds / 60);
-      return `${minutes} minute${minutes > 1 ? "s" : ""} ago`;
+      return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
     } else if (diffInSeconds < 86400) {
       const hours = Math.floor(diffInSeconds / 3600);
-      return `${hours} hour${hours > 1 ? "s" : ""} ago`;
+      return `${hours} hour${hours > 1 ? 's' : ''} ago`;
     } else {
-      return date.toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
+      return date.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
       });
     }
   };
@@ -367,17 +363,17 @@ export default function Dashboard() {
     setDate(new Date());
 
     // Load tasks from localStorage (keeping this for now)
-    const savedTasks = localStorage.getItem("dashboard-tasks");
+    const savedTasks = localStorage.getItem('dashboard-tasks');
     if (savedTasks) {
       try {
         setTasks(JSON.parse(savedTasks));
       } catch (error) {
-        console.error("Error loading tasks from localStorage:", error);
+        console.error('Error loading tasks from localStorage:', error);
       }
     }
 
     // Load music player state from localStorage (keeping this for now)
-    const savedMusicState = localStorage.getItem("dashboard-music-state");
+    const savedMusicState = localStorage.getItem('dashboard-music-state');
     if (savedMusicState) {
       try {
         const musicState = JSON.parse(savedMusicState);
@@ -385,7 +381,7 @@ export default function Dashboard() {
         setVolume(musicState.volume || 80);
         setIsMuted(musicState.isMuted || false);
       } catch (error) {
-        console.error("Error loading music state from localStorage:", error);
+        console.error('Error loading music state from localStorage:', error);
       }
     }
   }, []);
@@ -396,36 +392,36 @@ export default function Dashboard() {
 
     try {
       const savedJournalEntries = localStorage.getItem(
-        "dashboard-journal-entries"
+        'dashboard-journal-entries',
       );
       if (savedJournalEntries) {
         const entries = JSON.parse(savedJournalEntries);
         const entriesArray = Object.values(entries);
 
         if (entriesArray.length > 0) {
-          const response = await fetch("/api/journal/migrate", {
-            method: "POST",
+          const response = await fetch('/api/journal/migrate', {
+            method: 'POST',
             headers: {
-              "Content-Type": "application/json",
+              'Content-Type': 'application/json',
             },
             body: JSON.stringify({ entries: entriesArray }),
           });
 
           if (response.ok) {
             // Clear localStorage after successful migration
-            localStorage.removeItem("dashboard-journal-entries");
-            localStorage.removeItem("dashboard-today-entry");
+            localStorage.removeItem('dashboard-journal-entries');
+            localStorage.removeItem('dashboard-today-entry');
 
             // Reload entries from database
             loadJournalEntries();
             loadTodayEntry();
 
-            console.log("Successfully migrated journal entries to database");
+            console.log('Successfully migrated journal entries to database');
           }
         }
       }
     } catch (error) {
-      console.error("Error migrating localStorage data:", error);
+      console.error('Error migrating localStorage data:', error);
     }
   }, [
     authStatus?.authenticated,
@@ -460,7 +456,7 @@ export default function Dashboard() {
 
   // Save tasks to localStorage whenever tasks change
   useEffect(() => {
-    localStorage.setItem("dashboard-tasks", JSON.stringify(tasks));
+    localStorage.setItem('dashboard-tasks', JSON.stringify(tasks));
   }, [tasks]);
 
   // Save music player state to localStorage
@@ -470,7 +466,7 @@ export default function Dashboard() {
       volume,
       isMuted,
     };
-    localStorage.setItem("dashboard-music-state", JSON.stringify(musicState));
+    localStorage.setItem('dashboard-music-state', JSON.stringify(musicState));
   }, [currentTrack, volume, isMuted]);
 
   // Auto-save functionality
@@ -482,12 +478,12 @@ export default function Dashboard() {
         authStatus?.user?.id
       ) {
         // Auto-save without clearing the form
-        const today = new Date().toISOString().split("T")[0];
+        const today = new Date().toISOString().split('T')[0];
         try {
           const response = await fetch(`/api/journal/entries/${today}`, {
-            method: "PUT",
+            method: 'PUT',
             headers: {
-              "Content-Type": "application/json",
+              'Content-Type': 'application/json',
             },
             body: JSON.stringify({
               title: todayEntry.title.trim() || null,
@@ -499,7 +495,7 @@ export default function Dashboard() {
             setLastSaved(new Date());
           }
         } catch (error) {
-          console.error("Auto-save failed:", error);
+          console.error('Auto-save failed:', error);
         }
       }
     }, 30000); // Auto-save every 30 seconds
@@ -589,7 +585,18 @@ export default function Dashboard() {
       {/* Row 1: Feature Introduction Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-4 md:gap-6 max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
         {/* CoCo AI Coach Feature Card */}
-        <Card
+        <GradientCard
+          icon={<Sparkles className="size-5 sm:size-8" />}
+          title="CoCo"
+          description="CoCo is AI mindset coach. CoCo helps you pause, reflect, and think clearly in a fast-paced world."
+          internalUrl="/chat"
+          gradientColors={{
+            from: "from-blue-500",
+            via: "via-indigo-500",
+            to: "to-purple-600",
+          }}
+        />
+        {/* <Card
           className="cursor-pointer hover:shadow-lg transition-all duration-300 hover:scale-[1.02]"
           onClick={() => {
             window.location.href = "/chat";
@@ -681,10 +688,21 @@ export default function Dashboard() {
               Say Hi to CoCo
             </Button>
           </CardFooter>
-        </Card>
+        </Card> */}
 
         {/* Human Coach Journey Feature Card */}
-        <Card
+        <GradientCard
+          icon={<RouteIcon className="size-5 sm:size-8" />}
+          title="1:1 Coaching"
+          description="Connect with experienced coaches who provide personalized, one-on-one guidance tailored to your goals."
+          internalUrl="/journey"
+          gradientColors={{
+            from: "from-green-500",
+            via: "via-teal-500",
+            to: "to-teal-600",
+          }}
+        />
+        {/* <Card
           className="cursor-pointer hover:shadow-lg transition-all duration-300 hover:scale-[1.02]"
           onClick={() => {
             window.location.href = "/journey";
@@ -778,7 +796,7 @@ export default function Dashboard() {
               Begin your Journey
             </Button>
           </CardFooter>
-        </Card>
+        </Card> */}
       </div>
 
       {/* Bento Grid Layout */}
@@ -814,8 +832,8 @@ export default function Dashboard() {
                       type="button"
                       className={`w-full p-2 rounded-lg cursor-pointer transition-colors text-left ${
                         index === currentTrack
-                          ? "bg-blue-500 text-white"
-                          : "bg-muted hover:bg-muted/80"
+                          ? 'bg-blue-500 text-white'
+                          : 'bg-muted hover:bg-muted/80'
                       }`}
                       onClick={() => handleTrackSelect(index)}
                     >
@@ -978,8 +996,8 @@ export default function Dashboard() {
                   <Button
                     onClick={() =>
                       window.open(
-                        "/journey/sessions/8/a/daily-journaling",
-                        "_blank"
+                        '/journey/sessions/8/a/daily-journaling',
+                        '_blank',
                       )
                     }
                     className="w-full bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700"
@@ -998,6 +1016,15 @@ export default function Dashboard() {
             </Card>
           </div>
         </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
+        <GradientCard
+          icon={<BookOpen className="size-5 sm:size-8" />}
+          title="Be Future-Ready"
+          description="Discover how ready you are for life after school. Understand yourself better through our assessments and guides."
+          externalUrl="https://inwesol.com/be-future-ready"
+        />
       </div>
     </div>
   );

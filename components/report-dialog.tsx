@@ -347,19 +347,21 @@ export function ReportDialog({ isOpen, onClose }: ReportDialogProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
       <Card className="w-full max-w-5xl mx-4 max-h-[90vh] overflow-hidden">
-        <CardHeader className="flex flex-row items-center justify-between pb-4 space-y-0">
-          <CardTitle className="text-xl font-semibold text-slate-800">
-            Journey Report
-          </CardTitle>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onClose}
-            className="p-0 size-8 hover:bg-slate-100"
-          >
-            <X className="size-4" />
-          </Button>
-        </CardHeader>
+        <div className="bg-gradient-to-r from-primary-green-50 to-primary-blue-50 rounded-t-lg mb-4">
+          <CardHeader className="flex flex-row items-center justify-between pb-4 space-y-0">
+            <CardTitle className="text-xl font-semibold text-slate-800">
+              Your Journey Report
+            </CardTitle>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onClose}
+              className="p-0 size-8 hover:bg-slate-100"
+            >
+              <X className="size-4" />
+            </Button>
+          </CardHeader>
+        </div>
         <CardContent className="space-y-8 overflow-y-auto max-h-[calc(90vh-120px)]">
           {isLoading ? (
             <div className="py-8 text-center text-slate-500">
@@ -368,17 +370,6 @@ export function ReportDialog({ isOpen, onClose }: ReportDialogProps) {
             </div>
           ) : reportData ? (
             <>
-              {/* Report Header */}
-              <div className="bg-gradient-to-r from-primary-green-50 to-primary-blue-50 rounded-lg p-6 border border-slate-200">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                  <div>
-                    <h2 className="text-2xl font-bold text-slate-800 mb-2">
-                      Your Journey Report
-                    </h2>
-                  </div>
-                </div>
-              </div>
-
               {/* RIASEC Interest Profile */}
               <div>
                 <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
