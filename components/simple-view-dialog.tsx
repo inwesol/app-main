@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import {
   X,
   Heart,
@@ -16,9 +16,12 @@ import {
   Award,
   MessageSquare,
   Sparkles,
+  Grid3X3,
+  Download,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import html2pdf from "html2pdf.js";
 
 interface SimpleViewDialogProps {
   isOpen: boolean;
@@ -45,6 +48,19 @@ interface SummaryPortraitData {
   mottoStatement: string;
 }
 
+interface StoryCell {
+  id: string;
+  content: string;
+  createdAt: Date | string;
+}
+
+interface Storyboard {
+  id: string;
+  name: string;
+  cells: StoryCell[];
+  createdAt: Date | string;
+}
+
 export function SimpleViewDialog({ isOpen, onClose }: SimpleViewDialogProps) {
   const [values, setValues] = useState<string[]>([]);
   const [strengths, setStrengths] = useState<string[]>([]);
@@ -67,7 +83,9 @@ export function SimpleViewDialog({ isOpen, onClose }: SimpleViewDialogProps) {
     soThatStatement: "",
     mottoStatement: "",
   });
+  const [storyboard, setStoryboard] = useState<Storyboard | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
 
   const loadValues = useCallback(async () => {
     try {
@@ -152,6 +170,31 @@ export function SimpleViewDialog({ isOpen, onClose }: SimpleViewDialogProps) {
     }
   }, []);
 
+  const loadStoryboard = useCallback(async () => {
+    try {
+      const response = await fetch(`/api/journey/sessions/7/a/career-story-6`);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.storyboard_data) {
+          // Parse dates if they come as strings
+          const parsedStoryboard: Storyboard = {
+            ...data.storyboard_data,
+            createdAt: data.storyboard_data.createdAt
+              ? new Date(data.storyboard_data.createdAt)
+              : new Date(),
+            cells: (data.storyboard_data.cells || []).map((cell: any) => ({
+              ...cell,
+              createdAt: cell.createdAt ? new Date(cell.createdAt) : new Date(),
+            })),
+          };
+          setStoryboard(parsedStoryboard);
+        }
+      }
+    } catch (error) {
+      console.error("Error loading storyboard:", error);
+    }
+  }, []);
+
   // Load existing data when dialog opens
   useEffect(() => {
     if (isOpen) {
@@ -162,6 +205,7 @@ export function SimpleViewDialog({ isOpen, onClose }: SimpleViewDialogProps) {
         loadProsCons(),
         loadRewrittenStory(),
         loadSummaryPortrait(),
+        loadStoryboard(),
       ]).finally(() => {
         setIsLoading(false);
       });
@@ -173,29 +217,104 @@ export function SimpleViewDialog({ isOpen, onClose }: SimpleViewDialogProps) {
     loadProsCons,
     loadRewrittenStory,
     loadSummaryPortrait,
+    loadStoryboard,
   ]);
+
+  const handleDownloadPDF = useCallback(() => {
+    if (!cardRef.current) return;
+
+    const cardElement = cardRef.current;
+    const contentElement = document.getElementById('journey-insights-content');
+    
+    if (!contentElement) return;
+
+    // Store original styles
+    const originalCardMaxHeight = cardElement.style.maxHeight;
+    const originalCardOverflow = cardElement.style.overflow;
+    const originalContentMaxHeight = contentElement.style.maxHeight;
+    const originalContentOverflow = contentElement.style.overflow;
+    
+    // Temporarily remove height constraints to show full content
+    cardElement.style.maxHeight = 'none';
+    cardElement.style.overflow = 'visible';
+    contentElement.style.maxHeight = 'none';
+    contentElement.style.overflow = 'visible';
+
+    // Wait a moment for styles to apply and content to expand
+    setTimeout(() => {
+      // Configure html2pdf options - matching the reference snippet
+      const opt = {
+        margin: 10,
+        filename: 'your-journey-insights.pdf',
+        image: { type: 'jpeg' as const, quality: 0.98 },
+        html2canvas: { 
+          scale: 2,
+          scrollY: 0,
+          scrollX: 0,
+          windowHeight: contentElement.scrollHeight, // KEY: Use full scroll height
+        },
+        jsPDF: { 
+          unit: 'mm', 
+          format: 'a4', 
+          orientation: 'portrait' as const
+        },
+      };
+
+      // Generate PDF
+      html2pdf()
+        .set(opt as any)
+        .from(contentElement)
+        .save()
+        .then(() => {
+          // Restore original styles
+          cardElement.style.maxHeight = originalCardMaxHeight;
+          cardElement.style.overflow = originalCardOverflow;
+          contentElement.style.maxHeight = originalContentMaxHeight;
+          contentElement.style.overflow = originalContentOverflow;
+        })
+        .catch((error) => {
+          console.error('Error generating PDF:', error);
+          // Restore original styles even on error
+          cardElement.style.maxHeight = originalCardMaxHeight;
+          cardElement.style.overflow = originalCardOverflow;
+          contentElement.style.maxHeight = originalContentMaxHeight;
+          contentElement.style.overflow = originalContentOverflow;
+        });
+    }, 100);
+  }, []);
 
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <Card className="w-full max-w-4xl mx-4 max-h-[90vh] overflow-hidden">
+      <Card ref={cardRef} className="w-full max-w-4xl mx-4 max-h-[90vh] overflow-hidden">
         <div className="bg-gradient-to-r from-primary-green-50 to-primary-blue-50 rounded-t-lg mb-4">
         <CardHeader className="flex flex-row items-center justify-between pb-4 space-y-0">
           <CardTitle className="text-xl font-semibold text-slate-800">
             Your Journey Insights
           </CardTitle>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onClose}
-            className="p-0 size-8 hover:bg-slate-100"
-          >
+          <div className="flex items-center gap-2">
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={handleDownloadPDF}
+              className="flex items-center gap-2 px-3 py-2 bg-white text-slate-700 border border-slate-200 hover:bg-slate-100"
+            >
+              <Download className="size-4" />
+              <span>Download Insights</span>
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onClose}
+              className="p-0 size-8 hover:bg-slate-100"
+            >
               <X className="size-4" />
             </Button>
+          </div>
           </CardHeader>
         </div>
-        <CardContent className="space-y-8 overflow-y-auto max-h-[calc(90vh-120px)]">
+        <CardContent id="journey-insights-content" className="space-y-8 overflow-y-auto max-h-[calc(90vh-120px)]">
           {isLoading ? (
             <div className="py-8 text-center text-slate-500">
               Loading your insights...
@@ -363,6 +482,45 @@ export function SimpleViewDialog({ isOpen, onClose }: SimpleViewDialogProps) {
                       </Card>
                     )}
                   </div>
+                )}
+              </div>
+
+              {/* My Story Board Section */}
+              <div>
+                <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                  <Grid3X3 className="size-5 text-indigo-600" />
+                  My Story Board
+                </h3>
+                {!storyboard || !storyboard.cells || storyboard.cells.length === 0 ? (
+                  <div className="py-6 text-center text-slate-500 bg-slate-50 rounded-lg border border-slate-200">
+                    <p className="text-sm">No storyboard available yet.</p>
+                    <p className="mt-1 text-xs text-slate-400">
+                      Complete the My Story-5 Final activity in session 8 to add your storyboard.
+                    </p>
+                  </div>
+                ) : (
+                  <Card className="bg-slate-50 border border-slate-100 shadow-lg">
+                    <CardContent className="p-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {storyboard.cells.map((cell: StoryCell) => (
+                          <Card
+                            key={cell.id}
+                            className="bg-gradient-to-br from-indigo-50 to-purple-50 border-2 border-indigo-200 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]"
+                          >
+                            <CardContent className="p-4">
+                              <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap min-h-[100px]">
+                                {cell.content || (
+                                  <span className="text-slate-400 italic">
+                                    Empty cell
+                                  </span>
+                                )}
+                              </p>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
                 )}
               </div>
 
