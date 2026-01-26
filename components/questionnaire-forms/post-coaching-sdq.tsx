@@ -675,7 +675,9 @@ export default function PostCoachingSDQ({ sessionId }: { sessionId: string }) {
     if (data.q26 === "No" || !data.q26) return 0;
 
     const impactQuestions = ["q26b", "q26c", "q26d", "q26e", "q26f"];
-    return impactQuestions.reduce((score, questionId) => {
+    const maxImpactScore = 10; // 5 questions × 2 points max each
+    
+    const rawScore = impactQuestions.reduce((score, questionId) => {
       const answer = data[questionId as keyof FormData];
       if (
         answer &&
@@ -691,6 +693,10 @@ export default function PostCoachingSDQ({ sessionId }: { sessionId: string }) {
       }
       return score;
     }, 0);
+    
+    // Convert to percentage (0-100)
+    const percentage = (rawScore / maxImpactScore) * 100;
+    return Math.round(percentage * 100) / 100; // Round to 2 decimal places
   };
 
   const calculateSdqScores = (data: FormData) => {
@@ -702,12 +708,15 @@ export default function PostCoachingSDQ({ sessionId }: { sessionId: string }) {
       prosocialBehavior: 0,
     };
 
-    let totalScore = 0;
+    const maxSubscaleScore = 10; // 5 questions × 2 points max each
+    const maxTotalScore = 40; // 4 subscales (excluding prosocialBehavior) × 10 points max each
 
-    // Calculate subscale scores
+    let rawTotalScore = 0;
+
+    // Calculate raw subscale scores
     Object.entries(sdqScoringConfig.subscales).forEach(
       ([subscale, questionIds]) => {
-        let subscaleScore = 0;
+        let rawSubscaleScore = 0;
         questionIds.forEach((questionId) => {
           const answer = data[`q${questionId}` as keyof FormData];
           if (answer) {
@@ -725,17 +734,23 @@ export default function PostCoachingSDQ({ sessionId }: { sessionId: string }) {
               score = 2 - score; // Reverse: 0->2, 1->1, 2->0
             }
 
-            subscaleScore += score;
+            rawSubscaleScore += score;
 
             // Don't add prosocialBehavior subscale to total score
             if (subscale !== "prosocialBehavior") {
-              totalScore += score;
+              rawTotalScore += score;
             }
           }
         });
-        subscaleScores[subscale] = subscaleScore;
+        // Convert subscale score to percentage (0-100)
+        const percentage = (rawSubscaleScore / maxSubscaleScore) * 100;
+        subscaleScores[subscale] = Math.round(percentage * 100) / 100; // Round to 2 decimal places
       }
     );
+
+    // Convert total score to percentage (0-100)
+    const totalScorePercentage = (rawTotalScore / maxTotalScore) * 100;
+    const totalScore = Math.round(totalScorePercentage * 100) / 100; // Round to 2 decimal places
 
     // Only add impact score if Q26 is not "No"
     if (data.q26 && data.q26 !== "No") {
