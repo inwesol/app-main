@@ -530,7 +530,7 @@ export function ReportDialog({ isOpen, onClose }: ReportDialogProps) {
                         Personality Assessment Not Completed
                       </h4>
                       <p className="text-sm text-slate-500 mb-4">
-                        Complete the Big Five personality assessment to view
+                        Complete the personality assessment to view
                         your overall and subscale scores.
                       </p>
                     </div>
@@ -545,7 +545,7 @@ export function ReportDialog({ isOpen, onClose }: ReportDialogProps) {
                   Career Maturity Progress
                 </h3>
 
-                {careerMaturityPre?.insights?.score ||
+                {careerMaturityPre?.insights?.score &&
                 careerMaturityPost?.insights?.score ? (
                   <Card className="p-6 bg-gradient-to-r from-blue-50 to-blue-60 border-blue-200">
                     {/* <h4 className="text-sm font-semibold text-slate-800 mb-4">
@@ -612,8 +612,8 @@ export function ReportDialog({ isOpen, onClose }: ReportDialogProps) {
                         Career Maturity Assessments Not Completed
                       </h4>
                       <p className="text-sm text-slate-500">
-                        Complete both pre and post career maturity assessments
-                        to view progress by scale.
+                        Complete both Career Maturity Assessment-1 and Career Maturity Assessment-2
+                        to view your career maturity progress.
                       </p>
                     </div>
                   </Card>
@@ -627,7 +627,7 @@ export function ReportDialog({ isOpen, onClose }: ReportDialogProps) {
                   Psychological Wellbeing Progress
                 </h3>
 
-                {wellbeingPre || wellbeingPost ? (
+                {wellbeingPre && wellbeingPost ? (
                   <Card className="p-6 bg-gradient-to-r from-pink-50 to-pink-60 border-pink-200">
                     {/* <div className="p-4 rounded-lg border border-pink-200 bg-white/80"> */}
                     {/* <h4 className="text-sm font-semibold text-slate-800 mb-3">
@@ -749,8 +749,8 @@ export function ReportDialog({ isOpen, onClose }: ReportDialogProps) {
                         Psychological Wellbeing Assessments Not Completed
                       </h4>
                       <p className="text-sm text-slate-500">
-                        Complete both pre and post wellbeing assessments to view
-                        progress by dimension.
+                        Complete both Psychological Wellbeing Assessment-1 and Psychological Wellbeing Assessment-2 to view
+                        your psychological wellbeing progress.
                       </p>
                     </div>
                   </Card>
@@ -764,7 +764,7 @@ export function ReportDialog({ isOpen, onClose }: ReportDialogProps) {
                   Strengths & Difficulties Progress
                 </h3>
 
-                {sdqPre || sdqPost ? (
+                {sdqPre && sdqPost ? (
                   <Card className="p-6 bg-gradient-to-r from-amber-50 to-yellow-50 border-amber-200">
                     <div className="space-y-2">
                       {Array.from(
@@ -881,8 +881,8 @@ export function ReportDialog({ isOpen, onClose }: ReportDialogProps) {
                         Strengths & Difficulties Assessments Not Completed
                       </h4>
                       <p className="text-sm text-slate-500">
-                        Complete both pre and post SDQ assessments to view
-                        progress by subscale.
+                        Complete both Strengths & Difficulties Assessment-1 and Strengths & Difficulties Assessment-2 to view
+                        your strengths & difficulties progress.
                       </p>
                     </div>
                   </Card>
@@ -942,8 +942,8 @@ export function ReportDialog({ isOpen, onClose }: ReportDialogProps) {
                         Intervention Comparison Not Available
                       </h4>
                       <p className="text-sm text-slate-500">
-                        Complete both pre-assessment and post-coaching to view
-                        side-by-side ratings.
+                        Complete both Base-line Assessment and Finish-line Assessment to view
+                        your intervention progress.
                       </p>
                     </div>
                   </Card>
