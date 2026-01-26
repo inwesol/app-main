@@ -483,10 +483,11 @@ export function ReportDialog({ isOpen, onClose }: ReportDialogProps) {
                             ([trait, rawScore]) => {
                               const maxItems =
                                 personalitySubscaleMax[trait] || 10;
-                              const pct = Math.max(
-                                0,
-                                Math.min(100, (rawScore / maxItems) * 100)
-                              );
+                              // const pct = Math.max(
+                              //   0,
+                              //   Math.min(100, (rawScore / maxItems) * 100)
+                              // );
+                              const pct = Math.round(rawScore);
                               return (
                                 <div key={trait}>
                                   <div className="flex justify-between text-sm mb-1">
@@ -494,7 +495,7 @@ export function ReportDialog({ isOpen, onClose }: ReportDialogProps) {
                                       {trait}
                                     </span>
                                     <span className="text-slate-900 font-semibold">
-                                      {Math.round(pct)}%
+                                      {pct}%
                                     </span>
                                   </div>
                                   <div className="w-full bg-slate-200 rounded-full h-2">
