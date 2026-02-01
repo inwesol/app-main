@@ -241,7 +241,7 @@ export function SessionDetail() {
     "post-coaching",
     "post-career-maturity",
     "post-psychological-wellbeing",
-    "post-strength-difficulty",
+    "post-coaching-strength-difficulty",
   ];
 
   let activityForms: FormData[];

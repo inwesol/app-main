@@ -584,13 +584,13 @@ export const SESSION_TEMPLATES = [
         prerequisites: ["feedback"],
       },
       {
-        id: "post-strength-difficulty",
+        id: "post-coaching-strength-difficulty",
         title: "Strengths & Difficulties Assessment-2",
         description:
           "To understand your strengths and challenges in emotions, behavior, and relationships",
         status: "not-completed",
         icon: "Activity",
-        route: "/journey/sessions/8/q/post-strength-difficulty",
+        route: "/journey/sessions/8/q/post-coaching-strength-difficulty",
         prerequisites: ["feedback"],
       },
       {
