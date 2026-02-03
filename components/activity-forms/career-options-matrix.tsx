@@ -535,7 +535,7 @@ export default function CareerOptionsMatrix() {
                         <td className="sticky left-0 z-10 p-2 border-r-2 bg-white border-slate-200">
                           <div className="flex flex-col items-center h-full min-h-[140px]">
                             <div className="flex-1 flex items-center justify-center">
-                              <div className="text-sm font-semibold text-slate-800 text-center">
+                              <div className="text-sm font-semibold text-slate-800 text-center max-w-[140px] break-words">
                                 {row.name}
                               </div>
                             </div>
