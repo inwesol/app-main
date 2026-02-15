@@ -1,6 +1,14 @@
 "use client";
 import React, { useState, useEffect, useCallback } from "react";
-import { Plus, X, Target, Save, Loader2 } from "lucide-react";
+import {
+  Plus,
+  X,
+  Target,
+  Save,
+  Loader2,
+  ClipboardList,
+  ChevronDown,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -10,6 +18,11 @@ import { toast } from "sonner";
 import { useParams, useRouter } from "next/navigation";
 import { JourneyBreadcrumbLayout } from "@/components/layouts/JourneyBreadcrumbLayout";
 import { useBreadcrumb } from "@/hooks/useBreadcrumb";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
 interface MatrixCell {
   rowId: string;
@@ -75,7 +88,7 @@ export default function CareerOptionsMatrix() {
             (occupation: string, index: number) => ({
               id: (index + 1).toString(),
               name: occupation,
-            })
+            }),
           );
           setRows(careerOptions);
           return true; // Successfully loaded career options
@@ -97,7 +110,7 @@ export default function CareerOptionsMatrix() {
 
       // Then load matrix data
       const response = await fetch(
-        `/api/journey/sessions/${sessionId}/a/${aId}`
+        `/api/journey/sessions/${sessionId}/a/${aId}`,
       );
 
       if (response.ok) {
@@ -175,7 +188,7 @@ export default function CareerOptionsMatrix() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify(dataToSave),
-        }
+        },
       );
 
       if (response.ok) {
@@ -232,7 +245,7 @@ export default function CareerOptionsMatrix() {
   // Update column name (criteria)
   const updateColumnName = (colId: string, name: string) => {
     setColumns(
-      columns.map((col) => (col.id === colId ? { ...col, name } : col))
+      columns.map((col) => (col.id === colId ? { ...col, name } : col)),
     );
   };
 
@@ -240,8 +253,8 @@ export default function CareerOptionsMatrix() {
   const toggleColumnDisabled = (colId: string) => {
     setColumns(
       columns.map((col) =>
-        col.id === colId ? { ...col, disabled: !col.disabled } : col
-      )
+        col.id === colId ? { ...col, disabled: !col.disabled } : col,
+      ),
     );
     const column = columns.find((col) => col.id === colId);
     if (column) {
@@ -252,7 +265,7 @@ export default function CareerOptionsMatrix() {
         {
           className:
             "bg-primary-green-100 text-primary-green-600 border-primary-green-600",
-        }
+        },
       );
     }
   };
@@ -262,10 +275,10 @@ export default function CareerOptionsMatrix() {
     rowId: string,
     colId: string,
     value: number,
-    comment?: string
+    comment?: string,
   ) => {
     const existingCell = cells.find(
-      (cell) => cell.rowId === rowId && cell.colId === colId
+      (cell) => cell.rowId === rowId && cell.colId === colId,
     );
 
     if (existingCell) {
@@ -277,8 +290,8 @@ export default function CareerOptionsMatrix() {
                 value,
                 comment: comment !== undefined ? comment : cell.comment,
               }
-            : cell
-        )
+            : cell,
+        ),
       );
     } else {
       setCells([...cells, { rowId, colId, value, comment: comment || "" }]);
@@ -288,7 +301,7 @@ export default function CareerOptionsMatrix() {
   // Update cell comment
   const updateCellComment = (rowId: string, colId: string, comment: string) => {
     const existingCell = cells.find(
-      (cell) => cell.rowId === rowId && cell.colId === colId
+      (cell) => cell.rowId === rowId && cell.colId === colId,
     );
 
     if (existingCell) {
@@ -296,8 +309,8 @@ export default function CareerOptionsMatrix() {
         cells.map((cell) =>
           cell.rowId === rowId && cell.colId === colId
             ? { ...cell, comment }
-            : cell
-        )
+            : cell,
+        ),
       );
     } else {
       setCells([...cells, { rowId, colId, value: 0, comment }]);
@@ -307,7 +320,7 @@ export default function CareerOptionsMatrix() {
   // Get cell value
   const getCellValue = (rowId: string, colId: string): number => {
     const cell = cells.find(
-      (cell) => cell.rowId === rowId && cell.colId === colId
+      (cell) => cell.rowId === rowId && cell.colId === colId,
     );
     return cell?.value || 0;
   };
@@ -315,7 +328,7 @@ export default function CareerOptionsMatrix() {
   // Get cell comment
   const getCellComment = (rowId: string, colId: string): string => {
     const cell = cells.find(
-      (cell) => cell.rowId === rowId && cell.colId === colId
+      (cell) => cell.rowId === rowId && cell.colId === colId,
     );
     return cell?.comment || "";
   };
@@ -435,6 +448,48 @@ export default function CareerOptionsMatrix() {
     <div className="relative ">
       <div className="relative z-10 p-3 mx-auto max-w-7xl">
         <JourneyBreadcrumbLayout>
+          {/* Instructions Accordion */}
+          <Collapsible
+            defaultOpen={true}
+            className="p-5 mb-6 border shadow-lg bg-gradient-to-br from-primary-blue-50 via-white to-primary-green-50 rounded-2xl sm:p-6 border-slate-200/60 backdrop-blur-sm"
+          >
+            <CollapsibleTrigger className="group flex w-full items-center gap-3 text-left hover:opacity-90 transition-opacity">
+              <div className="flex items-center justify-center rounded-xl shadow-lg size-10 bg-gradient-to-br from-primary-blue-500 to-primary-green-500 shrink-0">
+                <ClipboardList className="text-white size-5" />
+              </div>
+              <h3 className="text-xl font-bold text-slate-800 flex-1">
+                Instructions
+              </h3>
+              <ChevronDown className="size-6 shrink-0 text-slate-600 transition-transform duration-200 group-data-[state=open]:rotate-180" />
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <div className="mt-4 pt-4 border-t border-slate-200/60 space-y-3">
+                <p className="text-base  leading-relaxed text-slate-700">
+                  <span className="font-bold">On the left side,</span> you will
+                  see the occupations you selected in the My Story-3 activity,
+                  Section 2.
+                </p>
+                <p className="text-base leading-relaxed text-slate-700">
+                  <span className="font-bold">On the top row,</span> add the
+                  criteria that are most important to you when making this
+                  decision. Some common criteria are already provided. You may
+                  add more based on your personal circumstances and discussions
+                  with your coach.
+                </p>
+                <p className="text-base leading-relaxed text-slate-700">
+                  <span className="font-bold">In each cell,</span> conduct
+                  thorough research and enter relevant information for each
+                  occupation against the selected criteria.
+                </p>
+                <p className="text-base leading-relaxed text-slate-700">
+                  <span className="font-bold">Example:</span> Occupation:
+                  Graphic Designer; Criteria: Finances; Input:{" "}
+                  <em>Entry-level salary range</em>
+                </p>
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
+
           {/* matrix container with add criteria button */}
           <div className="relative mb-4">
             {/* add column button - Add Criteria */}
@@ -618,7 +673,7 @@ export default function CareerOptionsMatrix() {
                                     updateCellComment(
                                       row.id,
                                       column.id,
-                                      e.target.value
+                                      e.target.value,
                                     )
                                   }
                                   disabled={column.disabled}
@@ -656,7 +711,7 @@ export default function CareerOptionsMatrix() {
                                             updateCellValue(
                                               row.id,
                                               column.id,
-                                              option.value
+                                              option.value,
                                             )
                                           }
                                           disabled={column.disabled}
@@ -664,8 +719,8 @@ export default function CareerOptionsMatrix() {
                                             column.disabled
                                               ? "bg-slate-200 text-slate-400 border-slate-300 cursor-not-allowed"
                                               : cellValue === option.value
-                                              ? `bg-gradient-to-r ${option.color} text-white border-transparent`
-                                              : "bg-white text-slate-600 border-slate-300 hover:bg-slate-50"
+                                                ? `bg-gradient-to-r ${option.color} text-white border-transparent`
+                                                : "bg-white text-slate-600 border-slate-300 hover:bg-slate-50"
                                           }`}
                                           title={
                                             column.disabled

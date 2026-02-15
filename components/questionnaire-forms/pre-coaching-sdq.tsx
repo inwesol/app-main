@@ -14,6 +14,7 @@ import {
   CheckCircle,
   Sparkles,
   Award,
+  ClipboardList,
 } from "lucide-react";
 import { JourneyBreadcrumbLayout } from "@/components/layouts/JourneyBreadcrumbLayout";
 import { useBreadcrumb } from "@/hooks/useBreadcrumb";
@@ -838,6 +839,27 @@ export default function PreCoachingSDQ({ sessionId }: { sessionId: string }) {
     <div className="p-3 sm:p-6">
       <div className="max-w-4xl mx-auto mb-6 sm:mb-12">
         <JourneyBreadcrumbLayout>
+          {/* Instructions Card */}
+          <div className="p-5 mb-6 border shadow-lg bg-gradient-to-br from-primary-blue-50 via-white to-primary-green-50 rounded-2xl sm:p-6 border-slate-200/60 backdrop-blur-sm">
+            <div className="flex flex-col gap-3">
+              <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center rounded-xl shadow-lg size-10 bg-gradient-to-br from-primary-blue-500 to-primary-green-500 shrink-0">
+                  <ClipboardList className="text-white size-5" />
+                </div>
+                <h3 className="text-xl font-bold text-slate-800">
+                  Instructions
+                </h3>
+              </div>
+              <p className="text-base leading-relaxed text-slate-700">
+                Below are some statements about how you think, and behave in
+                different situations. Read each statement carefully and select
+                the option that best indicates the extent to which you agree or
+                disagree with the statement. There are no right or wrong
+                answers, respond honestly.
+              </p>
+            </div>
+          </div>
+
           {/* Section Navigation */}
           <div className="flex gap-3 justify-center mb-6">
             {mainSections.map((section, sectionIndex) => {

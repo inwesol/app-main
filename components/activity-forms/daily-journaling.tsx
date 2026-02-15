@@ -23,6 +23,7 @@ import {
   X,
   Save,
   Loader2,
+  ClipboardList,
 } from "lucide-react";
 
 interface BulletPoint {
@@ -385,6 +386,24 @@ export default function DailyJournaling() {
             </div>
           </Card>
         )}
+
+        {/* Instructions Card */}
+        <div className="p-5 mb-6 border shadow-lg bg-gradient-to-br from-primary-blue-50 via-white to-primary-green-50 rounded-2xl sm:p-6 border-slate-200/60 backdrop-blur-sm">
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center justify-center rounded-xl shadow-lg size-10 bg-gradient-to-br from-primary-blue-500 to-primary-green-500 shrink-0">
+                <ClipboardList className="text-white size-5" />
+              </div>
+              <h3 className="text-xl font-bold text-slate-800">
+                Instructions
+              </h3>
+            </div>
+            <p className="text-base leading-relaxed text-slate-700">
+              This is your daily journal to reflect on your progress, note what
+              you&apos;re grateful for, and set small goals for tomorrow.
+            </p>
+          </div>
+        </div>
 
         {/* Date Selection */}
         <Card className="bg-gradient-to-r from-slate-50/80 to-slate-100/80 border-slate-200/60 shadow-sm mb-4">

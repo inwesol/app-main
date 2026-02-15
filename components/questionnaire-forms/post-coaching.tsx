@@ -31,6 +31,7 @@ import {
   ThumbsUp,
   BarChart,
   ArrowUpRight,
+  ClipboardList,
 } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { JourneyBreadcrumbLayout } from "@/components/layouts/JourneyBreadcrumbLayout";
@@ -420,6 +421,26 @@ export function PostCoachingTest({ sessionId }: { sessionId: string }) {
     <div className="min-h-screen p-3 bg-gradient-to-br from-primary-blue-50 via-white to-primary-green-50 sm:p-6">
       <div className="max-w-3xl mx-auto">
         <JourneyBreadcrumbLayout>
+          {/* Instructions Card */}
+          <div className="p-5 mb-6 border shadow-lg bg-gradient-to-br from-primary-blue-50 via-white to-primary-green-50 rounded-2xl sm:p-6 border-slate-200/60 backdrop-blur-sm">
+            <div className="flex flex-col gap-3">
+              <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center rounded-xl shadow-lg size-10 bg-gradient-to-br from-primary-blue-500 to-primary-green-500 shrink-0">
+                  <ClipboardList className="text-white size-5" />
+                </div>
+                <h3 className="text-xl font-bold text-slate-800">
+                  Instructions
+                </h3>
+              </div>
+              <p className="text-base leading-relaxed text-slate-700">
+                As you completed your 1:1 coaching journey, the following
+                statements are about how you are currently feeling regarding
+                your education/work, career goals, and overall well-being.
+                Please read each statement carefully and respond honestly.
+              </p>
+            </div>
+          </div>
+
           {/* Compact Question Navigation Dots */}
           <div className="flex flex-wrap gap-1.5 justify-center mb-4">
             {questions.map((question, index) => (

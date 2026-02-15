@@ -2,8 +2,8 @@ export const isProductionEnvironment = process.env.NODE_ENV === "production";
 
 export const isTestEnvironment = Boolean(
   process.env.PLAYWRIGHT_TEST_BASE_URL ||
-    process.env.PLAYWRIGHT ||
-    process.env.CI_PLAYWRIGHT
+  process.env.PLAYWRIGHT ||
+  process.env.CI_PLAYWRIGHT,
 );
 
 export const SESSION_TEMPLATES = [
@@ -26,7 +26,7 @@ export const SESSION_TEMPLATES = [
         id: "schedule-call",
         title: "Book a Session",
         description:
-          "Book a personalized coaching session to meet your coach, discuss your concerns, and begin your journey",
+          "Book your next session with the coach and keep moving closer to your goal.",
         status: "not-completed",
         icon: "Video",
         route: "/journey/sessions/0/schedule",
@@ -118,7 +118,7 @@ export const SESSION_TEMPLATES = [
         id: "schedule-call",
         title: "Book a Session",
         description:
-          "Book a personalized coaching session to meet your coach, discuss your concerns, and begin your journey",
+          "Book your next session with the coach and keep moving closer to your goal.",
         status: "not-completed",
         icon: "Video",
         route: "/journey/sessions/1/schedule",
@@ -208,7 +208,7 @@ export const SESSION_TEMPLATES = [
         id: "schedule-call",
         title: "Book a Session",
         description:
-          "Book a personalized coaching session to meet your coach, discuss your concerns, and begin your journey",
+          "Book your next session with the coach and keep moving closer to your goal.",
         status: "not-completed",
         icon: "Video",
         route: "/journey/sessions/2/schedule",
@@ -272,7 +272,7 @@ export const SESSION_TEMPLATES = [
         id: "schedule-call",
         title: "Book a Session",
         description:
-          "Book a personalized coaching session to meet your coach, discuss your concerns, and begin your journey",
+          "Book your next session with the coach and keep moving closer to your goal.",
         status: "not-completed",
         icon: "Video",
         route: "/journey/sessions/3/schedule",
@@ -334,7 +334,7 @@ export const SESSION_TEMPLATES = [
         id: "schedule-call",
         title: "Book a Session",
         description:
-          "Book a personalized coaching session to meet your coach, discuss your concerns, and begin your journey",
+          "Book your next session with the coach and keep moving closer to your goal.",
         status: "not-completed",
         icon: "Video",
         route: "/journey/sessions/4/schedule",
@@ -398,7 +398,7 @@ export const SESSION_TEMPLATES = [
         id: "schedule-call",
         title: "Book a Session",
         description:
-          "Book a personalized coaching session to meet your coach, discuss your concerns, and begin your journey",
+          "Book your next session with the coach and keep moving closer to your goal.",
         status: "not-completed",
         icon: "Video",
         route: "/journey/sessions/5/schedule",
@@ -453,7 +453,7 @@ export const SESSION_TEMPLATES = [
         id: "schedule-call",
         title: "Book a Session",
         description:
-          "Book a personalized coaching session to meet your coach, discuss your concerns, and begin your journey",
+          "Book your next session with the coach and keep moving closer to your goal.",
         status: "not-completed",
         icon: "Video",
         route: "/journey/sessions/6/schedule",
@@ -505,7 +505,7 @@ export const SESSION_TEMPLATES = [
         id: "schedule-call",
         title: "Book a Session",
         description:
-          "Book a personalized coaching session to meet your coach, discuss your concerns, and begin your journey",
+          "Book your next session with the coach and keep moving closer to your goal.",
         status: "not-completed",
         icon: "Video",
         route: "/journey/sessions/7/schedule",
@@ -597,7 +597,7 @@ export const SESSION_TEMPLATES = [
         id: "schedule-call",
         title: "Book a Session",
         description:
-          "Book a personalized coaching session to meet your coach, discuss your concerns, and begin your journey",
+          "Book your next session with the coach and keep moving closer to your goal.",
         status: "not-completed",
         icon: "Video",
         route: "/journey/sessions/8/schedule",

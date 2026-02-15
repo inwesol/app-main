@@ -51,7 +51,7 @@ export default function CareerStory6({ className = "" }: CareerStory6Props) {
     string | null
   >(null);
   const [currentStoryboard, setCurrentStoryboard] = useState<Storyboard | null>(
-    null
+    null,
   );
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -59,7 +59,7 @@ export default function CareerStory6({ className = "" }: CareerStory6Props) {
   const [isLoadingData, setIsLoadingData] = useState(false);
   const [hasSelectedStoryboard, setHasSelectedStoryboard] = useState(false);
   const [previewStoryboardId, setPreviewStoryboardId] = useState<string | null>(
-    null
+    null,
   );
   const currentStoryboardRef = useRef<Storyboard | null>(null);
   const selectedStoryboardIdRef = useRef<string | null>(null);
@@ -71,7 +71,7 @@ export default function CareerStory6({ className = "" }: CareerStory6Props) {
   const handleStoryboardPreview = useCallback(
     (storyboardId: string) => {
       const previewStoryboard = availableStoryboards.find(
-        (sb) => sb.id === storyboardId
+        (sb) => sb.id === storyboardId,
       );
       if (previewStoryboard) {
         setPreviewStoryboardId(storyboardId);
@@ -79,14 +79,14 @@ export default function CareerStory6({ className = "" }: CareerStory6Props) {
         setShowDropdown(false);
       }
     },
-    [availableStoryboards]
+    [availableStoryboards],
   );
 
   const handleConfirmSelection = useCallback(() => {
     if (!previewStoryboardId) return;
 
     const selectedStoryboard = availableStoryboards.find(
-      (sb) => sb.id === previewStoryboardId
+      (sb) => sb.id === previewStoryboardId,
     );
     if (selectedStoryboard) {
       setSelectedStoryboardId(previewStoryboardId);
@@ -111,7 +111,7 @@ export default function CareerStory6({ className = "" }: CareerStory6Props) {
 
         // Load available session-6 storyboards from career-story-5
         const storyboardsResponse = await fetch(
-          `/api/journey/sessions/6/a/career-story-5`
+          `/api/journey/sessions/6/a/career-story-5`,
         );
 
         let parsedStoryboards: Storyboard[] = [];
@@ -131,7 +131,7 @@ export default function CareerStory6({ className = "" }: CareerStory6Props) {
 
         // Load selected storyboard from career-story-6
         const selectedResponse = await fetch(
-          `/api/journey/sessions/${sessionId}/a/career-story-6`
+          `/api/journey/sessions/${sessionId}/a/career-story-6`,
         );
 
         let selectedStoryboardId: string | null = null;
@@ -215,7 +215,7 @@ export default function CareerStory6({ className = "" }: CareerStory6Props) {
             selected_storyboard_id: selectedStoryboardId,
             storyboard_data: currentStoryboard,
           }),
-        }
+        },
       );
 
       if (response.ok) {
@@ -226,7 +226,7 @@ export default function CareerStory6({ className = "" }: CareerStory6Props) {
       } else {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(
-          errorData.errors ? "Validation failed" : "Failed to save"
+          errorData.errors ? "Validation failed" : "Failed to save",
         );
       }
     } catch (error) {
@@ -273,7 +273,7 @@ export default function CareerStory6({ className = "" }: CareerStory6Props) {
         const updatedStoryboard = {
           ...prev,
           cells: prev.cells.map((cell) =>
-            cell.id === cellId ? { ...cell, content } : cell
+            cell.id === cellId ? { ...cell, content } : cell,
           ),
         };
         // Update ref immediately
@@ -281,7 +281,7 @@ export default function CareerStory6({ className = "" }: CareerStory6Props) {
         return updatedStoryboard;
       });
     },
-    [currentStoryboard]
+    [currentStoryboard],
   );
 
   const deleteCell = useCallback(
@@ -299,7 +299,7 @@ export default function CareerStory6({ className = "" }: CareerStory6Props) {
         return updatedStoryboard;
       });
     },
-    [currentStoryboard]
+    [currentStoryboard],
   );
 
   // Close dropdown when clicking outside
@@ -322,7 +322,7 @@ export default function CareerStory6({ className = "" }: CareerStory6Props) {
   // Memoize current storyboard to prevent unnecessary re-renders
   const memoizedCurrentStoryboard = useMemo(
     () => currentStoryboard,
-    [currentStoryboard]
+    [currentStoryboard],
   );
 
   if (loading) {
@@ -352,9 +352,9 @@ export default function CareerStory6({ className = "" }: CareerStory6Props) {
                 <h1 className="text-2xl font-bold text-transparent bg-gradient-to-r from-primary-blue-700 to-primary-green-700 bg-clip-text">
                   Story Boarding
                 </h1>
-                <p className="text-primary-blue-600/80">
-                  Create and organize your story elements using interactive
-                  storyboards
+                <p className="text-slate-700">
+                  Finalize your storyboard with clear, detailed steps and get
+                  ready to put your plan into action to move toward your goal.
                 </p>
               </div>
             </div>

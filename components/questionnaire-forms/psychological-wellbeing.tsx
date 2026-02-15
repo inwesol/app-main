@@ -19,6 +19,7 @@ import {
   Users,
   Compass,
   Smile,
+  ClipboardList,
 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -557,26 +558,27 @@ function PsychologicalWellbeing({ sessionId }: { sessionId: string }) {
     <div className="p-3 bg-gradient-to-br from-primary-blue-50 via-white to-primary-green-50 sm:p-6">
       <div className="max-w-5xl mx-auto mb-6 sm:mb-12">
         <JourneyBreadcrumbLayout>
-          {/* Header Card */}
-          {/* <div className="p-4 mb-6 border shadow-lg bg-white/90 backdrop-blur-sm border-slate-200/60 rounded-3xl sm:p-6 sm:mb-8">
-            <div className="flex flex-col items-center gap-3 sm:flex-row sm:gap-4">
-              <div className="shrink-0">
-                <div className="inline-flex items-center justify-center shadow-lg size-12 sm:size-16 bg-gradient-to-br from-primary-blue-500 to-primary-green-600 rounded-2xl">
-                  <Brain className="text-white size-6 sm:size-8" />
+          {/* Instructions Card */}
+          <div className="p-5 mb-6 border shadow-lg bg-gradient-to-br from-primary-blue-50 via-white to-primary-green-50 rounded-2xl sm:p-6 border-slate-200/60 backdrop-blur-sm">
+            <div className="flex flex-col gap-3">
+              <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center rounded-xl shadow-lg size-10 bg-gradient-to-br from-primary-blue-500 to-primary-green-500 shrink-0">
+                  <ClipboardList className="text-white size-5" />
                 </div>
+                <h3 className="text-xl font-bold text-slate-800">
+                  Instructions
+                </h3>
               </div>
-              <div className="flex-1 text-center sm:text-left">
-                <h1 className="mb-1 text-xl font-bold sm:text-2xl lg:text-3xl text-slate-800">
-                  Psychological Well-being Assessment
-                </h1>
-                <p className="max-w-2xl text-sm text-slate-600 sm:text-base">
-                  Explore your psychological well-being across six key
-                  dimensions. Rate how much you agree with each statement about
-                  yourself.
-                </p>
-              </div>
+              <p className="text-base leading-relaxed text-slate-700">
+                Below are a few statements about your well-being, including how
+                you&apos;ve been feeling emotionally, mentally, and in your
+                daily life. Read each statement carefully and select the option
+                that best indicates the extent to which you agree or disagree
+                with the statement. There are no right or wrong answers, respond
+                honestly.
+              </p>
             </div>
-          </div> */}
+          </div>
 
           {/* Compact Page Navigation Dots */}
           <div className="flex flex-wrap gap-1.5 justify-center mb-4">

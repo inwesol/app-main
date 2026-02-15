@@ -18,6 +18,8 @@ import {
   FileText,
   Info,
   ExternalLink,
+  ClipboardList,
+  ChevronDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -42,6 +44,11 @@ import {
   SheetTitle,
   SheetDescription,
 } from "@/components/ui/sheet";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
 const careerStoryThreeDataSchema = z.object({
   selfStatement: z
@@ -268,7 +275,7 @@ export default function CareerStory3() {
         console.error("API Error Response:", errorData);
         throw new Error(
           errorData.error ||
-            `API returned ${response.status}: ${response.statusText}`
+            `API returned ${response.status}: ${response.statusText}`,
         );
       }
     } catch (error) {
@@ -365,7 +372,7 @@ export default function CareerStory3() {
     } catch (error) {
       console.error("Error fetching My Story-1 data:", error);
       setSection2ReferenceError(
-        "Failed to load reference data. Please try again."
+        "Failed to load reference data. Please try again.",
       );
       toast({
         type: "error",
@@ -400,7 +407,7 @@ export default function CareerStory3() {
       const aId = "career-story-3";
       try {
         const response = await fetch(
-          `/api/journey/sessions/${sessionId}/a/${aId}`
+          `/api/journey/sessions/${sessionId}/a/${aId}`,
         );
         if (response.ok) {
           const data = await response.json();
@@ -477,7 +484,7 @@ export default function CareerStory3() {
 
   // Filter occupations based on search query
   const filteredOccupations = occupationOptions.filter((occupation) =>
-    occupation.toLowerCase().includes(searchQuery.toLowerCase())
+    occupation.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   const handleSubmitAssessment = async (data: CareerStory3Data) => {
@@ -493,7 +500,7 @@ export default function CareerStory3() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify(data),
-        }
+        },
       );
 
       if (response.ok) {
@@ -580,7 +587,7 @@ export default function CareerStory3() {
                     : "bg-white text-slate-600 hover:bg-slate-100"
                 }`}
               >
-                Section 1: Summary Portrait
+                Section 1: The Self-Summary
               </Button>
               <Button
                 onClick={() => {
@@ -598,6 +605,74 @@ export default function CareerStory3() {
             </div>
           </div>
 
+          {/* Section 1 Instructions - shown when Section 1 is active */}
+          {currentSection === 1 && (
+            <div className="p-5 mb-6 border shadow-lg bg-gradient-to-br from-primary-blue-50 via-white to-primary-green-50 rounded-2xl sm:p-6 border-slate-200/60 backdrop-blur-sm">
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center justify-center rounded-xl shadow-lg size-10 bg-gradient-to-br from-primary-blue-500 to-primary-green-500 shrink-0">
+                    <ClipboardList className="text-white size-5" />
+                  </div>
+                  <h3 className="text-xl font-bold text-slate-800">
+                    Instructions
+                  </h3>
+                </div>
+                <p className="text-base leading-relaxed text-slate-700">
+                  This is a summary of your My Story-1 and My Story-2
+                  activities. Review the Reference section and bring in content
+                  from each step, creating &apos;The Self&apos; summary with
+                  your key insights.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Section 2 Instructions - accordion, shown when Section 2 is active */}
+          {currentSection === 2 && (
+            <Collapsible
+              defaultOpen={true}
+              className="p-5 mb-6 border shadow-lg bg-gradient-to-br from-primary-blue-50 via-white to-primary-green-50 rounded-2xl sm:p-6 border-slate-200/60 backdrop-blur-sm"
+            >
+              <CollapsibleTrigger className="group flex w-full items-center gap-3 text-left hover:opacity-90 transition-opacity">
+                <div className="flex items-center justify-center rounded-xl shadow-lg size-10 bg-gradient-to-br from-primary-blue-500 to-primary-green-500 shrink-0">
+                  <ClipboardList className="text-white size-5" />
+                </div>
+                <h3 className="text-xl font-bold text-slate-800 flex-1">
+                  Instructions
+                </h3>
+                <ChevronDown className="size-6 shrink-0 text-slate-600 transition-transform duration-200 group-data-[state=open]:rotate-180" />
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <div className="mt-4 pt-4 border-t border-slate-200/60">
+                  <p className="text-base leading-relaxed text-slate-700 mb-4">
+                    Start exploring careers that align with your interests.
+                  </p>
+                  <ol className="list-decimal list-inside space-y-2 text-base leading-relaxed text-slate-700">
+                    <li>
+                      Revisit My Story - 1 and review the occupations you
+                      previously listed.
+                    </li>
+                    <li>
+                      Revisit The Self Summary and the career interests you
+                      identified.
+                    </li>
+                    <li>
+                      Using these insights, go to &quot;Explorer&quot; and
+                      search for occupations that align with your interests.
+                      Carefully read the description of each occupation to
+                      understand the role.
+                    </li>
+                    <li>
+                      Based on your exploration, select 15-20 occupations that
+                      you are genuinely interested in exploring further. Enter
+                      them in the section below.
+                    </li>
+                  </ol>
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
+          )}
+
           {/* Section 1: Self Analysis Questions */}
           {currentSection === 1 && (
             <>
@@ -613,8 +688,8 @@ export default function CareerStory3() {
                       index === currentGroup
                         ? "bg-gradient-to-r from-primary-blue-500 to-primary-green-500 text-white shadow-md"
                         : index < currentGroup
-                        ? "bg-primary-green-100 text-primary-green-700 hover:bg-primary-green-200"
-                        : "bg-white text-slate-500 hover:bg-slate-200"
+                          ? "bg-primary-green-100 text-primary-green-700 hover:bg-primary-green-200"
+                          : "bg-white text-slate-500 hover:bg-slate-200"
                     }
                   `}
                   >
@@ -709,7 +784,7 @@ export default function CareerStory3() {
                                 </FormItem>
                               )}
                             />
-                          )
+                          ),
                         )}
                       </div>
 
@@ -803,24 +878,8 @@ export default function CareerStory3() {
                     </div>
                   </div>
 
-                  {/* Section Description */}
-                  <div className="mb-6">
-                    <p className="text-slate-600">
-                      If you want to explore careers that best match your
-                      interests, please revisit My Story-1 (Step 2). Review the
-                      occupations you listed there and, based on your summary
-                      above, identify the ones that now seem like good options
-                      for you.
-                    </p>
-                  </div>
-
                   {/* Occupation Selection */}
                   <div className="space-y-4">
-                    <p className="text-sm text-slate-600">
-                      Select the occupations you are now considering based on
-                      your My Story analysis:
-                    </p>
-
                     {/* Side by Side Layout */}
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                       {/* Available Occupations */}
@@ -1213,7 +1272,7 @@ export default function CareerStory3() {
                                     >
                                       {code}
                                     </span>
-                                  )
+                                  ),
                                 ) || (
                                   <span className="text-sm text-slate-600">
                                     Not available
@@ -1333,7 +1392,7 @@ export default function CareerStory3() {
                                             "No description available"}
                                         </p>
                                       </div>
-                                    )
+                                    ),
                                   )}
                                 </div>
                               </CardContent>
@@ -1506,7 +1565,7 @@ export default function CareerStory3() {
                                     </div>
                                   </div>
                                 </div>
-                              )
+                              ),
                             )}
                           </div>
                         </div>

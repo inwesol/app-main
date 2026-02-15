@@ -26,6 +26,7 @@ import {
   Lightbulb,
   ArrowRight,
   ArrowLeft,
+  ClipboardList,
 } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { JourneyBreadcrumbLayout } from "@/components/layouts/JourneyBreadcrumbLayout";
@@ -34,12 +35,12 @@ import { useRouter } from "next/navigation";
 
 // Helpers to map between verbose question-text keys and compact q1..qN keys
 const questionTexts = (
-  questionsArray: typeof questions
+  questionsArray: typeof questions,
 ): Array<(typeof questions)[number]["text"]> =>
   questionsArray.map((q) => q.text);
 
 function formToCompactAnswers(
-  data: Record<string, number>
+  data: Record<string, number>,
 ): Record<string, number> {
   const texts = questionTexts(questions);
   const compact: Record<string, number> = {};
@@ -52,7 +53,7 @@ function formToCompactAnswers(
 }
 
 function compactToFormAnswers(
-  compact: Record<string, number>
+  compact: Record<string, number>,
 ): PreAssessmentFormData {
   const texts = questionTexts(questions);
   const expanded = { ...defaultValues } as PreAssessmentFormData;
@@ -213,7 +214,7 @@ export function PreAssessment({ sessionId }: { sessionId: string }) {
       const qId = "pre-assessment";
       try {
         const response = await fetch(
-          `/api/journey/sessions/${sessionId}/q/${qId}`
+          `/api/journey/sessions/${sessionId}/q/${qId}`,
         );
 
         if (response.ok) {
@@ -284,7 +285,7 @@ export function PreAssessment({ sessionId }: { sessionId: string }) {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(compactAnswers),
-        }
+        },
       );
 
       if (response.ok) {
@@ -314,7 +315,7 @@ export function PreAssessment({ sessionId }: { sessionId: string }) {
     const qId = "pre-assessment";
     if (
       !confirm(
-        "Are you sure you want to clear your assessment? This action cannot be undone."
+        "Are you sure you want to clear your assessment? This action cannot be undone.",
       )
     ) {
       return;
@@ -327,7 +328,7 @@ export function PreAssessment({ sessionId }: { sessionId: string }) {
         `/api/journey/sessions/${sessionId}/q/${qId}`,
         {
           method: "DELETE",
-        }
+        },
       );
 
       if (response.ok) {
@@ -427,7 +428,7 @@ export function PreAssessment({ sessionId }: { sessionId: string }) {
             <div className="flex flex-col items-center gap-3 sm:flex-row sm:gap-4">
               <div className="shrink-0">
                 <div className="inline-flex items-center justify-center shadow-lg size-12 sm:size-16 bg-gradient-to-br from-primary-blue-500 to-primary-green-600 rounded-2xl">
-                  <BarChart3 className="text-white size-6 sm:size-8" />
+                  <Brain className="text-white size-6 sm:size-8" />
                 </div>
               </div>
               <div className="flex-1 text-center sm:text-left">
@@ -442,6 +443,26 @@ export function PreAssessment({ sessionId }: { sessionId: string }) {
             </div>
           </div> */}
 
+          {/* Instructions Card */}
+          <div className="p-5 mb-6 border shadow-lg bg-gradient-to-br from-primary-blue-50 via-white to-primary-green-50 rounded-2xl sm:p-6 border-slate-200/60 backdrop-blur-sm">
+            <div className="flex flex-col gap-3">
+              <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center rounded-xl shadow-lg size-10 bg-gradient-to-br from-primary-blue-500 to-primary-green-500 shrink-0">
+                  <ClipboardList className="text-white size-5" />
+                </div>
+                <h3 className="text-xl font-bold text-slate-800">
+                  Instructions
+                </h3>
+              </div>
+              <p className="text-base leading-relaxed text-slate-700">
+                Below are a few statements about how you are currently feeling
+                regarding your education/work, career goals, and overall
+                well-being. Please read each statement carefully and respond
+                honestly.
+              </p>
+            </div>
+          </div>
+
           {/* Compact Question Navigation Dots */}
           <div className="flex flex-wrap gap-1.5 justify-center mb-4">
             {questions.map((question, index) => (
@@ -454,8 +475,8 @@ export function PreAssessment({ sessionId }: { sessionId: string }) {
                   index === currentQuestion
                     ? "bg-gradient-to-r from-primary-blue-500 to-primary-green-500 text-white shadow-md"
                     : index < currentQuestion
-                    ? "bg-primary-green-100 text-primary-green-700 hover:bg-primary-green-200"
-                    : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+                      ? "bg-primary-green-100 text-primary-green-700 hover:bg-primary-green-200"
+                      : "bg-slate-100 text-slate-500 hover:bg-slate-200"
                 }
               `}
               >
@@ -528,7 +549,7 @@ export function PreAssessment({ sessionId }: { sessionId: string }) {
                                 value={getCurrentFieldValue()}
                                 onChange={(e) =>
                                   field.onChange(
-                                    Number.parseInt(e.target.value)
+                                    Number.parseInt(e.target.value),
                                   )
                                 }
                                 className="w-full h-3 rounded-lg appearance-none cursor-pointer bg-slate-200 slider"
