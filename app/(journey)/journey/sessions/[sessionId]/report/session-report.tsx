@@ -681,7 +681,7 @@ export default function SessionReport({ sessionId }: { sessionId: string }) {
                                 Personality Assessment
                               </h3>
                               <p className="text-sm text-emerald-100">
-                                Big Five personality traits analysis
+                                Personality traits analysis
                               </p>
                             </div>
                           </div>

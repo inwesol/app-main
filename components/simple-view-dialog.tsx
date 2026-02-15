@@ -26,6 +26,8 @@ import html2pdf from "html2pdf.js";
 interface SimpleViewDialogProps {
   isOpen: boolean;
   onClose: () => void;
+  /** When true, renders only the inner content (no overlay). Use when embedding inside another Dialog. */
+  contentOnly?: boolean;
 }
 
 interface ProsConsData {
@@ -61,7 +63,7 @@ interface Storyboard {
   createdAt: Date | string;
 }
 
-export function SimpleViewDialog({ isOpen, onClose }: SimpleViewDialogProps) {
+export function SimpleViewDialog({ isOpen, onClose, contentOnly }: SimpleViewDialogProps) {
   const [values, setValues] = useState<string[]>([]);
   const [strengths, setStrengths] = useState<string[]>([]);
   const [prosCons, setProsCons] = useState<ProsConsData>({
@@ -285,9 +287,15 @@ export function SimpleViewDialog({ isOpen, onClose }: SimpleViewDialogProps) {
 
   if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <Card ref={cardRef} className="w-full max-w-4xl mx-4 max-h-[90vh] overflow-hidden">
+  const cardContent = (
+    <Card
+      ref={cardRef}
+      className={
+        contentOnly
+          ? "w-full max-h-[90vh] overflow-hidden border-0 shadow-none rounded-none"
+          : "w-full max-w-4xl mx-4 max-h-[90vh] overflow-hidden"
+      }
+    >
         <div className="bg-gradient-to-r from-primary-green-50 to-primary-blue-50 rounded-t-lg mb-4">
         <CardHeader className="flex flex-row items-center justify-between pb-4 space-y-0">
           <CardTitle className="text-xl font-semibold text-slate-800">
@@ -713,6 +721,15 @@ export function SimpleViewDialog({ isOpen, onClose }: SimpleViewDialogProps) {
           )}
         </CardContent>
       </Card>
+  );
+
+  if (contentOnly) {
+    return cardContent;
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+      {cardContent}
     </div>
   );
 }

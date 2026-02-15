@@ -23,6 +23,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import * as VisuallyHidden from "@radix-ui/react-visually-hidden";
 import Header from "@/components/form-components/header";
 import { useRouter } from "next/navigation";
 import { SESSION_TEMPLATES } from "@/lib/constants";
@@ -170,20 +171,20 @@ export const JourneyPage: React.FC = () => {
               </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {/* Download Section */}
+              {/* Final Report Section */}
               <Dialog
                 open={isDownloadDialogOpen}
                 onOpenChange={setIsDownloadDialogOpen}
               >
                 <DialogTrigger asChild>
-                  <div className="flex items-center justify-between p-3 bg-primary-green-50/50 rounded-lg border border-primary-green-200/30 cursor-pointer hover:bg-primary-green-100/50 transition-colors duration-200">
+                  <div className="flex items-center justify-between p-3 bg-teal-50/50 rounded-lg border border-teal-200/30 cursor-pointer hover:bg-teal-100/50 transition-colors duration-200">
                     <div className="flex items-center gap-2">
-                      <Download className="size-4 text-primary-green-600" />
-                      <span className="text-sm font-medium text-primary-green-800">
-                        Download
+                      <Download className="size-4 text-teal-600" />
+                      <span className="text-sm font-medium text-teal-800">
+                        Final Report
                       </span>
                     </div>
-                    <ArrowRight className="size-4 text-primary-green-600" />
+                    <ArrowRight className="size-4 text-teal-600" />
                   </div>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-md">
@@ -234,38 +235,68 @@ export const JourneyPage: React.FC = () => {
               </Dialog>
 
               {/* View Section */}
-              <button
-                type="button"
-                className="flex items-center justify-between p-3 bg-primary-blue-50/50 rounded-lg border border-primary-blue-200/30 cursor-pointer hover:bg-primary-blue-100/50 transition-colors duration-200 w-full"
-                onClick={() => {
-                  setIsViewDialogOpen(true);
-                }}
+              <Dialog
+                open={isViewDialogOpen}
+                onOpenChange={setIsViewDialogOpen}
               >
-                <div className="flex items-center gap-2">
-                  <Eye className="size-4 text-primary-blue-600" />
-                  <span className="text-sm font-medium text-primary-blue-800">
-                    Highlights
-                  </span>
-                </div>
-                <ArrowRight className="size-4 text-primary-blue-600" />
-              </button>
+                <DialogTrigger asChild>
+                  <div className="flex items-center justify-between p-3 bg-primary-blue-50/50 rounded-lg border border-primary-blue-200/30 cursor-pointer hover:bg-primary-blue-100/50 transition-colors duration-200">
+                    <div className="flex items-center gap-2">
+                      <Eye className="size-4 text-primary-blue-600" />
+                      <span className="text-sm font-medium text-primary-blue-800">
+                        Highlights
+                      </span>
+                    </div>
+                    <ArrowRight className="size-4 text-primary-blue-600" />
+                  </div>
+                </DialogTrigger>
+                <DialogContent
+                  className="sm:max-w-4xl max-h-[90vh] overflow-hidden p-0 gap-0"
+                  hideCloseButton
+                >
+                  <VisuallyHidden.Root>
+                    <DialogTitle>
+                      Highlights – Your Journey Insights
+                    </DialogTitle>
+                  </VisuallyHidden.Root>
+                  <SimpleViewDialog
+                    isOpen={isViewDialogOpen}
+                    onClose={() => setIsViewDialogOpen(false)}
+                    contentOnly
+                  />
+                </DialogContent>
+              </Dialog>
 
               {/* Report Section */}
-              <button
-                type="button"
-                className="flex items-center justify-between p-3 bg-purple-50/50 rounded-lg border border-purple-200/30 cursor-pointer hover:bg-purple-100/50 transition-colors duration-200 w-full"
-                onClick={() => {
-                  setIsReportDialogOpen(true);
-                }}
+              <Dialog
+                open={isReportDialogOpen}
+                onOpenChange={setIsReportDialogOpen}
               >
-                <div className="flex items-center gap-2">
-                  <BarChart3 className="size-4 text-purple-600" />
-                  <span className="text-sm font-medium text-purple-800">
-                    Report
-                  </span>
-                </div>
-                <ArrowRight className="size-4 text-purple-600" />
-              </button>
+                <DialogTrigger asChild>
+                  <div className="flex items-center justify-between p-3 bg-purple-50/50 rounded-lg border border-purple-200/30 cursor-pointer hover:bg-purple-100/50 transition-colors duration-200">
+                    <div className="flex items-center gap-2">
+                      <BarChart3 className="size-4 text-purple-600" />
+                      <span className="text-sm font-medium text-purple-800">
+                        Report
+                      </span>
+                    </div>
+                    <ArrowRight className="size-4 text-purple-600" />
+                  </div>
+                </DialogTrigger>
+                <DialogContent
+                  className="sm:max-w-5xl max-h-[90vh] overflow-hidden p-0 gap-0"
+                  hideCloseButton
+                >
+                  <VisuallyHidden.Root>
+                    <DialogTitle>Report – Your Journey Report</DialogTitle>
+                  </VisuallyHidden.Root>
+                  <ReportDialog
+                    isOpen={isReportDialogOpen}
+                    onClose={() => setIsReportDialogOpen(false)}
+                    contentOnly
+                  />
+                </DialogContent>
+              </Dialog>
             </div>
           </Card>
         </div>
@@ -291,8 +322,8 @@ export const JourneyPage: React.FC = () => {
                         isCompleted
                           ? "bg-primary-green-500 border-primary-green-400 shadow-primary-green-200/50"
                           : isCurrent
-                          ? "bg-primary-blue-500 border-primary-blue-400 shadow-primary-blue-200/50"
-                          : "bg-white border-slate-300 shadow-slate-200/50"
+                            ? "bg-primary-blue-500 border-primary-blue-400 shadow-primary-blue-200/50"
+                            : "bg-white border-slate-300 shadow-slate-200/50"
                       }`}
                     >
                       {isCompleted ? (
@@ -324,8 +355,8 @@ export const JourneyPage: React.FC = () => {
                           isCompleted
                             ? "bg-white border-primary-green-200/50 shadow-sm"
                             : isCurrent
-                            ? "bg-primary-blue-50/80 border-primary-blue-200/50 shadow-sm ring-1 ring-primary-blue-200/50"
-                            : "bg-white/80 border-slate-200/50"
+                              ? "bg-primary-blue-50/80 border-primary-blue-200/50 shadow-sm ring-1 ring-primary-blue-200/50"
+                              : "bg-white/80 border-slate-200/50"
                         }`}
                         onClick={() => handleSessionClick(session.id)}
                       >
@@ -352,8 +383,8 @@ export const JourneyPage: React.FC = () => {
                                     isCompleted
                                       ? "bg-primary-green-500 text-white"
                                       : isCurrent
-                                      ? "bg-primary-blue-500 text-white"
-                                      : "bg-slate-100 text-slate-600"
+                                        ? "bg-primary-blue-500 text-white"
+                                        : "bg-slate-100 text-slate-600"
                                   }`}
                                 >
                                   Session {session.id + 1}
@@ -382,8 +413,8 @@ export const JourneyPage: React.FC = () => {
                                   isCompleted
                                     ? "text-primary-green-800"
                                     : isCurrent
-                                    ? "text-primary-blue-800"
-                                    : "text-slate-700"
+                                      ? "text-primary-blue-800"
+                                      : "text-slate-700"
                                 }`}
                               >
                                 {session.title}
@@ -406,8 +437,8 @@ export const JourneyPage: React.FC = () => {
                                       isCompleted
                                         ? "bg-primary-green-100 text-primary-green-700"
                                         : isCurrent
-                                        ? "bg-primary-blue-100 text-primary-blue-700"
-                                        : "bg-slate-100 text-slate-600"
+                                          ? "bg-primary-blue-100 text-primary-blue-700"
+                                          : "bg-slate-100 text-slate-600"
                                     }`}
                                   >
                                     {topic}
@@ -439,8 +470,8 @@ export const JourneyPage: React.FC = () => {
                                   {isCompleted
                                     ? "Review"
                                     : isCurrent
-                                    ? "Continue"
-                                    : "Start"}
+                                      ? "Continue"
+                                      : "Start"}
                                   <ArrowRight className="size-3" />
                                 </span>
                               </Button>
@@ -482,18 +513,6 @@ export const JourneyPage: React.FC = () => {
           </div>
         </Card> */}
       </div>
-
-      {/* Simple View Dialog */}
-      <SimpleViewDialog
-        isOpen={isViewDialogOpen}
-        onClose={() => setIsViewDialogOpen(false)}
-      />
-
-      {/* Report Dialog */}
-      <ReportDialog
-        isOpen={isReportDialogOpen}
-        onClose={() => setIsReportDialogOpen(false)}
-      />
     </div>
   );
 };

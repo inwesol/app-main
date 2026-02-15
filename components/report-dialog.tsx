@@ -82,9 +82,135 @@ const RIASEC_CATEGORIES = {
   },
 };
 
+// Personality (Big Five) trait descriptions for report
+const PERSONALITY_TRAITS: Record<
+  string,
+  { name: string; description: string }
+> = {
+  extraversion: {
+    name: "Extraversion",
+    description:
+      "The tendency to be outgoing, energetic, and seek social interaction and stimulation.",
+  },
+  agreeableness: {
+    name: "Agreeableness",
+    description: "The inclination to be cooperative, compassionate, and prioritize harmony in relationships.",
+  },
+  conscientiousness: {
+    name: "Conscientiousness",
+    description:
+      "The degree to which someone is organized, disciplined, and goal-oriented in their behavior.",
+  },
+  neuroticism: {
+    name: "Neuroticism",
+    description:
+      "The tendency to experience negative emotions like anxiety, worry, and emotional instability.",
+  },
+  openness: {
+    name: "Openness",
+    description:
+      "The extent to which someone is curious, imaginative, and receptive to new experiences and ideas.",
+  },
+};
+
+// Career Maturity scale descriptions (CMI: Concern, Curiosity, Confidence, Consultation)
+const CAREER_MATURITY_SCALES: Record<
+  string,
+  { name: string; description: string }
+> = {
+  Concern: {
+    name: "Concern",
+    description:
+      "Degree of involvement and care about career decision-making versus apathy or indifference about the future.",
+  },
+  Curiosity: {
+    name: "Curiosity",
+    description:
+      "Interest in exploring the world of work and understanding oneself in relation to career options.",
+  },
+  Confidence: {
+    name: "Confidence",
+    description:
+      "Belief in one's ability to make career decisions and solve career-related problems.",
+  },
+  Consultation: {
+    name: "Consultation",
+    description:
+      "Willingness to seek and use advice from others in career choices while maintaining independence.",
+  },
+};
+
+// Psychological Wellbeing (Ryff) subscale descriptions
+const WELLBEING_SUBSCALES: Record<
+  string,
+  { name: string; description: string }
+> = {
+  autonomy: {
+    name: "Autonomy",
+    description:
+      "Self-determination and independence; ability to resist social pressure and regulate behavior from within.",
+  },
+  environmentalMastery: {
+    name: "Environmental Mastery",
+    description:
+      "Sense of competence in managing everyday life, activities, and surrounding circumstances.",
+  },
+  personalGrowth: {
+    name: "Personal Growth",
+    description:
+      "Openness to new experiences and sense of continued development and potential.",
+  },
+  positiveRelations: {
+    name: "Positive Relations",
+    description:
+      "Warm, trusting relationships with others; capacity for empathy, affection, and intimacy.",
+  },
+  purposeInLife: {
+    name: "Purpose in Life",
+    description:
+      "Having goals and a sense of direction; feeling that life has meaning.",
+  },
+  selfAcceptance: {
+    name: "Self-Acceptance",
+    description:
+      "Positive attitude toward oneself; acceptance of multiple aspects of self, including past life.",
+  },
+};
+
+// SDQ (Strengths & Difficulties Questionnaire) subscale descriptions
+const SDQ_SUBSCALES: Record<string, { name: string; description: string }> = {
+  emotionalSymptoms: {
+    name: "Emotional Symptoms",
+    description:
+      "Anxiety, depression, somatic complaints, and emotional distress.",
+  },
+  conductProblems: {
+    name: "Conduct Problems",
+    description:
+      "Behavioral problems such as lying, stealing, fighting, and temper.",
+  },
+  hyperactivityInattention: {
+    name: "Hyperactivity/Inattention",
+    description:
+      "Restlessness, concentration difficulties, and impulsive behavior.",
+  },
+  peerProblems: {
+    name: "Peer Problems",
+    description:
+      "Difficulties in getting along with other young people and being liked.",
+  },
+  prosocialBehavior: {
+    name: "Prosocial Behavior",
+    description:
+      "Considerate behavior, sharing, and helping others; strengths in relationships.",
+  },
+};
+
 interface ReportDialogProps {
   isOpen: boolean;
   onClose: () => void;
+  /** When true, renders only the inner content (no overlay). Use when embedding inside another Dialog. */
+  contentOnly?: boolean;
 }
 
 interface ReportData {
@@ -120,7 +246,7 @@ interface ReportData {
   };
 }
 
-export function ReportDialog({ isOpen, onClose }: ReportDialogProps) {
+export function ReportDialog({ isOpen, onClose, contentOnly }: ReportDialogProps) {
   const [reportData, setReportData] = useState<ReportData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [personalityData, setPersonalityData] = useState<{
@@ -202,15 +328,6 @@ export function ReportDialog({ isOpen, onClose }: ReportDialogProps) {
       .join(" ")
       .trim();
   }
-
-  // Personality subscale maximum question counts for percentage conversion
-  const personalitySubscaleMax: Record<string, number> = {
-    extraversion: 8,
-    agreeableness: 9,
-    conscientiousness: 9,
-    neuroticism: 8,
-    openness: 10,
-  };
 
   const loadReportData = async () => {
     try {
@@ -344,9 +461,14 @@ export function ReportDialog({ isOpen, onClose }: ReportDialogProps) {
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <Card className="w-full max-w-5xl mx-4 max-h-[90vh] overflow-hidden">
+  const cardContent = (
+    <Card
+      className={
+        contentOnly
+          ? "w-full max-h-[90vh] overflow-hidden border-0 shadow-none rounded-none"
+          : "w-full max-w-5xl mx-4 max-h-[90vh] overflow-hidden"
+      }
+    >
         <div className="bg-gradient-to-r from-primary-green-50 to-primary-blue-50 rounded-t-lg mb-4">
           <CardHeader className="flex flex-row items-center justify-between pb-4 space-y-0">
             <CardTitle className="text-xl font-semibold text-slate-800">
@@ -472,55 +594,64 @@ export function ReportDialog({ isOpen, onClose }: ReportDialogProps) {
 
                 {personalityData ? (
                   <Card className="p-6 bg-gradient-to-r from-emerald-50 to-emerald-60 border-emerald-200">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 ">
-                      {/* Left: Subscale percentages */}
-                      <div>
-                        {/* <h4 className="text-sm font-semibold text-slate-800 mb-4">
-                          Subscale Scores
-                        </h4> */}
-                        <div className="space-y-3">
-                          {Object.entries(personalityData.subscaleScores).map(
-                            ([trait, rawScore]) => {
-                              const maxItems =
-                                personalitySubscaleMax[trait] || 10;
-                              // const pct = Math.max(
-                              //   0,
-                              //   Math.min(100, (rawScore / maxItems) * 100)
-                              // );
-                              const pct = Math.round(rawScore);
-                              return (
-                                <div key={trait}>
-                                  <div className="flex justify-between text-sm mb-1">
-                                    <span className="text-slate-700 capitalize">
-                                      {trait}
-                                    </span>
-                                    <span className="text-slate-900 font-semibold">
-                                      {pct}%
-                                    </span>
-                                  </div>
-                                  <div className="w-full bg-slate-200 rounded-full h-2">
-                                    <div
-                                      className="h-2 rounded-full bg-gradient-to-r from-emerald-500 to-emerald-600"
-                                      style={{ width: `${pct}%` }}
-                                    />
-                                  </div>
+                    {/* Trait cards in 3 rows (grid-cols-2 gives 2+2+1 for 5 traits) */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {Object.entries(personalityData.subscaleScores).map(
+                        ([trait, rawScore]) => {
+                          const pct = Math.round(rawScore);
+                          const traitInfo =
+                            PERSONALITY_TRAITS[trait] ?? {
+                              name: trait.charAt(0).toUpperCase() + trait.slice(1),
+                              description: "",
+                            };
+                          return (
+                            <Card
+                              key={trait}
+                              className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm"
+                            >
+                              <CardContent className="flex p-4">
+                                <div className="min-w-0 flex-[3] pr-4">
+                                  <h4 className="text-sm font-semibold text-slate-800">
+                                    {traitInfo.name}
+                                  </h4>
+                                  {traitInfo.description ? (
+                                    <p className="mt-0.5 text-[11px] font-normal leading-snug text-slate-500">
+                                      {traitInfo.description}
+                                    </p>
+                                  ) : null}
                                 </div>
-                              );
-                            }
-                          )}
-                        </div>
-                      </div>
+                                <div
+                                  className="w-px shrink-0 self-stretch bg-slate-200"
+                                  aria-hidden
+                                />
+                                <div className="flex shrink-0 items-center justify-center pl-4">
+                                  <span className="text-sm font-bold text-blue-600">
+                                    {pct}%
+                                  </span>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          );
+                        }
+                      )}
+                    </div>
 
-                      {/* Right: Overall percentage */}
-                      <div className="flex flex-col items-center justify-center">
-                        <div className="inline-flex items-center justify-center size-24 bg-gradient-to-r from-emerald-500 to-green-600 text-white text-3xl font-bold rounded-full shadow-lg mb-2">
-                          {Math.round(Number.parseFloat(personalityData.score))}
-                          %
-                        </div>
-                        <h4 className="text-sm font-semibold text-slate-800 mb-3">
-                          Overall Personality Score
-                        </h4>
-                      </div>
+                    {/* Horizontal separation */}
+                    <hr className="my-4 border-1 border-emerald-200" />
+
+                    {/* Overall personality score card - center aligned */}
+                    <div className="flex justify-center">
+                      <Card className="overflow-hidden rounded-lg border border-emerald-200 bg-white shadow-sm w-fit">
+                        <CardContent className="flex flex-row items-center justify-center gap-3 px-4 py-1.5">
+                          <h4 className="text-sm font-semibold text-slate-800">
+                            Overall Personality Score:
+                          </h4>
+                          <div className="inline-flex text-blue-600 items-center justify-center gap-0.5 size-16 text-base font-bold whitespace-nowrap">
+                            <span>{Math.round(Number.parseFloat(personalityData.score))}</span>
+                            <span>%</span>
+                          </div>
+                        </CardContent>
+                      </Card>
                     </div>
                   </Card>
                 ) : (
@@ -567,40 +698,52 @@ export function ReportDialog({ isOpen, onClose }: ReportDialogProps) {
                         );
                         const deltaPositive = delta >= 0;
 
+                        const scaleInfo =
+                          CAREER_MATURITY_SCALES[scale] ?? {
+                            name: scale,
+                            description: "",
+                          };
+
                         return (
-                          <div
+                          <Card
                             key={scale}
-                            className="flex items-center justify-between p-3 rounded-lg border border-slate-200 bg-white/80"
+                            className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm"
                           >
-                            {/* Scale name */}
-                            <div className="min-w-32 text-slate-800 font-medium">
-                              {scale}
-                            </div>
-
-                            {/* Before / After chips */}
-                            <div className="flex items-center gap-2">
-                              <span className="px-2 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">
-                                Before: {Math.round(before)}%
-                              </span>
-                              <span className="px-2 py-1 rounded-full text-xs font-semibold bg-primary-blue-50 text-primary-blue-800 border border-primary-blue-200">
-                                After: {Math.round(after)}%
-                              </span>
-                            </div>
-
-                            {/* Delta chip */}
-                            <div>
-                              <span
-                                className={`px-2 py-1 rounded-full text-xs font-bold border ${
-                                  deltaPositive
-                                    ? "bg-primary-green-100 text-primary-green-800 border-primary-green-200"
-                                    : "bg-orange-100 text-orange-800 border-orange-200"
-                                }`}
-                              >
-                                {deltaPositive ? "+" : ""}
-                                {delta}%
-                              </span>
-                            </div>
-                          </div>
+                            <CardContent className="flex p-4">
+                              <div className="min-w-0 flex-[6] pr-4">
+                                <h4 className="text-sm font-semibold text-slate-800">
+                                  {scaleInfo.name}
+                                </h4>
+                                {scaleInfo.description ? (
+                                  <p className="mt-0.5 text-[11px] font-normal leading-snug text-slate-500">
+                                    {scaleInfo.description}
+                                  </p>
+                                ) : null}
+                              </div>
+                              <div
+                                className="w-px shrink-0 self-stretch bg-slate-200"
+                                aria-hidden
+                              />
+                              <div className="flex min-w-0 flex-[4] flex-wrap items-center justify-end gap-2 pl-4">
+                                <span className="px-2 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+                                  Before: {Math.round(before)}%
+                                </span>
+                                <span className="px-2 py-1 rounded-full text-xs font-semibold bg-primary-blue-50 text-primary-blue-800 border border-primary-blue-200">
+                                  After: {Math.round(after)}%
+                                </span>
+                                <span
+                                  className={`px-2 py-1 rounded-full text-xs font-bold border ${
+                                    deltaPositive
+                                      ? "bg-primary-green-100 text-primary-green-800 border-primary-green-200"
+                                      : "bg-orange-100 text-orange-800 border-orange-200"
+                                  }`}
+                                >
+                                  {deltaPositive ? "+" : ""}
+                                  {delta}%
+                                </span>
+                              </div>
+                            </CardContent>
+                          </Card>
                         );
                       })}
                     </div>
@@ -630,10 +773,6 @@ export function ReportDialog({ isOpen, onClose }: ReportDialogProps) {
 
                 {wellbeingPre && wellbeingPost ? (
                   <Card className="p-6 bg-gradient-to-r from-pink-50 to-pink-60 border-pink-200">
-                    {/* <div className="p-4 rounded-lg border border-pink-200 bg-white/80"> */}
-                    {/* <h4 className="text-sm font-semibold text-slate-800 mb-3">
-                      Subscale Changes
-                    </h4> */}
                     <div className="space-y-2">
                       {Array.from(
                         new Set([
@@ -654,93 +793,114 @@ export function ReportDialog({ isOpen, onClose }: ReportDialogProps) {
                           (afterPct - beforePct).toFixed(2)
                         );
                         const deltaPositive = delta >= 0;
+                        const scaleInfo =
+                          WELLBEING_SUBSCALES[dim] ?? {
+                            name: toTitleCaseLabel(dim),
+                            description: "",
+                          };
 
                         return (
-                          <div
+                          <Card
                             key={dim}
-                            className="flex items-center justify-between p-3 rounded-lg border border-slate-200 bg-white/80"
+                            className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm"
                           >
-                            <div className="w-64 text-slate-800 font-medium">
-                              {toTitleCaseLabel(dim)}
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <span className="inline-flex items-center justify-center w-24 px-2 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200 text-center">
-                                Before: {beforePct}%
-                              </span>
-                              <span className="inline-flex items-center justify-center w-24 px-2 py-1 rounded-full text-xs font-semibold bg-primary-blue-50 text-primary-blue-800 border border-primary-blue-200 text-center">
-                                After: {afterPct}%
-                              </span>
-                            </div>
-                            <div>
-                              <span
-                                className={`px-2 py-1 rounded-full text-xs font-bold border ${
-                                  deltaPositive
-                                    ? "bg-primary-green-100 text-primary-green-800 border-primary-green-200"
-                                    : "bg-orange-100 text-orange-800 border-orange-200"
-                                }`}
-                              >
-                                {deltaPositive ? "+" : ""}
-                                {delta}%
-                              </span>
-                            </div>
-                          </div>
+                            <CardContent className="flex p-4">
+                              <div className="min-w-0 flex-[6] pr-4">
+                                <h4 className="text-sm font-semibold text-slate-800">
+                                  {scaleInfo.name}
+                                </h4>
+                                {scaleInfo.description ? (
+                                  <p className="mt-0.5 text-[11px] font-normal leading-snug text-slate-500">
+                                    {scaleInfo.description}
+                                  </p>
+                                ) : null}
+                              </div>
+                              <div
+                                className="w-px shrink-0 self-stretch bg-slate-200"
+                                aria-hidden
+                              />
+                              <div className="flex min-w-0 flex-[4] flex-wrap items-center justify-end gap-2 pl-4">
+                                <span className="px-2 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+                                  Before: {beforePct}%
+                                </span>
+                                <span className="px-2 py-1 rounded-full text-xs font-semibold bg-primary-blue-50 text-primary-blue-800 border border-primary-blue-200">
+                                  After: {afterPct}%
+                                </span>
+                                <span
+                                  className={`px-2 py-1 rounded-full text-xs font-bold border ${
+                                    deltaPositive
+                                      ? "bg-primary-green-100 text-primary-green-800 border-primary-green-200"
+                                      : "bg-orange-100 text-orange-800 border-orange-200"
+                                  }`}
+                                >
+                                  {deltaPositive ? "+" : ""}
+                                  {delta}%
+                                </span>
+                              </div>
+                            </CardContent>
+                          </Card>
                         );
                       })}
                     </div>
 
                     {/* Overall moved below subscales */}
                     <div className="mt-4 pt-4 border-t border-pink-200">
-                      <div className="flex items-center justify-between p-3 rounded-lg border border-slate-200 bg-white/80">
-                        <div className="w-64 text-slate-800 font-medium">
-                          Overall Wellbeing Score
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="inline-flex items-center justify-center w-24 px-2 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200 text-center">
-                            Before:{" "}
-                            {wellbeingPre
-                              ? Math.round(
-                                  Number.parseFloat(wellbeingPre.score)
-                                )
-                              : "—"}
-                            %
-                          </span>
-                          <span className="inline-flex items-center justify-center w-24 px-2 py-1 rounded-full text-xs font-semibold bg-primary-blue-50 text-primary-blue-800 border border-primary-blue-200 text-center">
-                            After:{" "}
-                            {wellbeingPost
-                              ? Math.round(
-                                  Number.parseFloat(wellbeingPost.score)
-                                )
-                              : "—"}
-                            %
-                          </span>
-                        </div>
-                        {(() => {
-                          const b = wellbeingPre
-                            ? Number.parseFloat(wellbeingPre.score)
-                            : 0;
-                          const a = wellbeingPost
-                            ? Number.parseFloat(wellbeingPost.score)
-                            : 0;
-                          const d = Number.parseFloat((a - b).toFixed(2));
-                          const pos = d >= 0;
-                          return (
-                            <div>
-                              <span
-                                className={`px-2 py-1 rounded-full text-xs font-bold border ${
-                                  pos
-                                    ? "bg-primary-green-100 text-primary-green-800 border-primary-green-200"
-                                    : "bg-orange-100 text-orange-800 border-orange-200"
-                                }`}
-                              >
-                                {pos ? "+" : ""}
-                                {d}%
-                              </span>
-                            </div>
-                          );
-                        })()}
-                      </div>
+                      <Card className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                        <CardContent className="flex p-4">
+                          <div className="min-w-0 flex-[6] pr-4">
+                            <h4 className="text-sm font-semibold text-slate-800">
+                              Overall Wellbeing Score
+                            </h4>
+                          </div>
+                          <div
+                            className="w-px shrink-0 self-stretch bg-slate-200"
+                            aria-hidden
+                          />
+                          <div className="flex min-w-0 flex-[4] flex-wrap items-center justify-end gap-2 pl-4">
+                            <span className="px-2 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+                              Before:{" "}
+                              {wellbeingPre
+                                ? Math.round(
+                                    Number.parseFloat(wellbeingPre.score)
+                                  )
+                                : "—"}
+                              %
+                            </span>
+                            <span className="px-2 py-1 rounded-full text-xs font-semibold bg-primary-blue-50 text-primary-blue-800 border border-primary-blue-200">
+                              After:{" "}
+                              {wellbeingPost
+                                ? Math.round(
+                                    Number.parseFloat(wellbeingPost.score)
+                                  )
+                                : "—"}
+                              %
+                            </span>
+                            {(() => {
+                              const b = wellbeingPre
+                                ? Number.parseFloat(wellbeingPre.score)
+                                : 0;
+                              const a = wellbeingPost
+                                ? Number.parseFloat(wellbeingPost.score)
+                                : 0;
+                              const d = Number.parseFloat((a - b).toFixed(2));
+                              const pos = d >= 0;
+                              return (
+                                <span
+                                  className={`px-2 py-1 rounded-full text-xs font-bold border ${
+                                    pos
+                                      ? "bg-primary-green-100 text-primary-green-800 border-primary-green-200"
+                                      : "bg-orange-100 text-orange-800 border-orange-200"
+                                  }`}
+                                >
+                                  {pos ? "+" : ""}
+                                  {d}%
+                                </span>
+                              );
+                            })()}
+                          </div>
+                        </CardContent>
+                      </Card>
                     </div>
-                    {/* </div> */}
                   </Card>
                 ) : (
                   <Card className="p-6 bg-slate-50 border-slate-200">
@@ -787,91 +947,113 @@ export function ReportDialog({ isOpen, onClose }: ReportDialogProps) {
                           (afterPct - beforePct).toFixed(2)
                         );
                         const deltaPositive = delta >= 0;
+                        const scaleInfo =
+                          SDQ_SUBSCALES[dim] ?? {
+                            name: toTitleCaseLabel(dim),
+                            description: "",
+                          };
 
                         return (
-                          <div
+                          <Card
                             key={dim}
-                            className="flex items-center justify-between p-3 rounded-lg border border-slate-200 bg-white/80"
+                            className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm"
                           >
-                            <div className="w-64 text-slate-800 font-medium">
-                              {toTitleCaseLabel(dim)}
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <span className="inline-flex items-center justify-center w-24 px-2 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200 text-center">
-                                Before: {beforePct}%
-                              </span>
-                              <span className="inline-flex items-center justify-center w-24 px-2 py-1 rounded-full text-xs font-semibold bg-primary-blue-50 text-primary-blue-800 border border-primary-blue-200 text-center">
-                                After: {afterPct}%
-                              </span>
-                            </div>
-                            <div>
-                              <span
-                                className={`px-2 py-1 rounded-full text-xs font-bold border ${
-                                  deltaPositive
-                                    ? "bg-primary-green-100 text-primary-green-800 border-primary-green-200"
-                                    : "bg-orange-100 text-orange-800 border-orange-200"
-                                }`}
-                              >
-                                {deltaPositive ? "+" : ""}
-                                {delta}%
-                              </span>
-                            </div>
-                          </div>
+                            <CardContent className="flex p-4">
+                              <div className="min-w-0 flex-[6] pr-4">
+                                <h4 className="text-sm font-semibold text-slate-800">
+                                  {scaleInfo.name}
+                                </h4>
+                                {scaleInfo.description ? (
+                                  <p className="mt-0.5 text-[11px] font-normal leading-snug text-slate-500">
+                                    {scaleInfo.description}
+                                  </p>
+                                ) : null}
+                              </div>
+                              <div
+                                className="w-px shrink-0 self-stretch bg-slate-200"
+                                aria-hidden
+                              />
+                              <div className="flex min-w-0 flex-[4] flex-wrap items-center justify-end gap-2 pl-4">
+                                <span className="px-2 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+                                  Before: {beforePct}%
+                                </span>
+                                <span className="px-2 py-1 rounded-full text-xs font-semibold bg-primary-blue-50 text-primary-blue-800 border border-primary-blue-200">
+                                  After: {afterPct}%
+                                </span>
+                                <span
+                                  className={`px-2 py-1 rounded-full text-xs font-bold border ${
+                                    deltaPositive
+                                      ? "bg-primary-green-100 text-primary-green-800 border-primary-green-200"
+                                      : "bg-orange-100 text-orange-800 border-orange-200"
+                                  }`}
+                                >
+                                  {deltaPositive ? "+" : ""}
+                                  {delta}%
+                                </span>
+                              </div>
+                            </CardContent>
+                          </Card>
                         );
                       })}
                     </div>
 
                     {/* Overall moved below subscales */}
                     <div className="mt-4 pt-4 border-t border-amber-200">
-                      <div className="flex items-center justify-between p-3 rounded-lg border border-slate-200 bg-white/80">
-                        <div className="w-64 text-slate-800 font-medium">
-                          Overall SDQ Score
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="inline-flex items-center justify-center w-24 px-2 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200 text-center">
-                            Before:{" "}
-                            {sdqPre
-                              ? Math.round(
-                                  Math.min((sdqPre.score / 40) * 100, 100)
-                                )
-                              : "—"}
-                            %
-                          </span>
-                          <span className="inline-flex items-center justify-center w-24 px-2 py-1 rounded-full text-xs font-semibold bg-primary-blue-50 text-primary-blue-800 border border-primary-blue-200 text-center">
-                            After:{" "}
-                            {sdqPost
-                              ? Math.round(
-                                  Math.min((sdqPost.score / 40) * 100, 100)
-                                )
-                              : "—"}
-                            %
-                          </span>
-                        </div>
-                        {(() => {
-                          const b = sdqPre
-                            ? Math.min((sdqPre.score / 40) * 100, 100)
-                            : 0;
-                          const a = sdqPost
-                            ? Math.min((sdqPost.score / 40) * 100, 100)
-                            : 0;
-                          const d = Number.parseFloat((a - b).toFixed(2));
-                          const pos = d >= 0;
-                          return (
-                            <div>
-                              <span
-                                className={`px-2 py-1 rounded-full text-xs font-bold border ${
-                                  pos
-                                    ? "bg-primary-green-100 text-primary-green-800 border-primary-green-200"
-                                    : "bg-orange-100 text-orange-800 border-orange-200"
-                                }`}
-                              >
-                                {pos ? "+" : ""}
-                                {d}%
-                              </span>
-                            </div>
-                          );
-                        })()}
-                      </div>
+                      <Card className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                        <CardContent className="flex p-4">
+                          <div className="min-w-0 flex-[6] pr-4">
+                            <h4 className="text-sm font-semibold text-slate-800">
+                              Overall SDQ Score
+                            </h4>
+                          </div>
+                          <div
+                            className="w-px shrink-0 self-stretch bg-slate-200"
+                            aria-hidden
+                          />
+                          <div className="flex min-w-0 flex-[4] flex-wrap items-center justify-end gap-2 pl-4">
+                            <span className="px-2 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+                              Before:{" "}
+                              {sdqPre
+                                ? Math.round(
+                                    Math.min((sdqPre.score / 40) * 100, 100)
+                                  )
+                                : "—"}
+                              %
+                            </span>
+                            <span className="px-2 py-1 rounded-full text-xs font-semibold bg-primary-blue-50 text-primary-blue-800 border border-primary-blue-200">
+                              After:{" "}
+                              {sdqPost
+                                ? Math.round(
+                                    Math.min((sdqPost.score / 40) * 100, 100)
+                                  )
+                                : "—"}
+                              %
+                            </span>
+                            {(() => {
+                              const b = sdqPre
+                                ? Math.min((sdqPre.score / 40) * 100, 100)
+                                : 0;
+                              const a = sdqPost
+                                ? Math.min((sdqPost.score / 40) * 100, 100)
+                                : 0;
+                              const d = Number.parseFloat((a - b).toFixed(2));
+                              const pos = d >= 0;
+                              return (
+                                <span
+                                  className={`px-2 py-1 rounded-full text-xs font-bold border ${
+                                    pos
+                                      ? "bg-primary-green-100 text-primary-green-800 border-primary-green-200"
+                                      : "bg-orange-100 text-orange-800 border-orange-200"
+                                  }`}
+                                >
+                                  {pos ? "+" : ""}
+                                  {d}%
+                                </span>
+                              );
+                            })()}
+                          </div>
+                        </CardContent>
+                      </Card>
                     </div>
                   </Card>
                 ) : (
@@ -951,69 +1133,6 @@ export function ReportDialog({ isOpen, onClose }: ReportDialogProps) {
                 )}
               </div>
 
-              {/* Key Insights */}
-              {/* <div>
-                <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
-                  <TrendingUp className="size-5 text-purple-600" />
-                  Key Insights
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <Card className="p-4 bg-gradient-to-br from-purple-50 to-pink-50 border-purple-200">
-                    <h4 className="font-semibold text-slate-800 mb-3 flex items-center gap-2">
-                      <Target className="size-4 text-purple-600" />
-                      Your Strengths
-                    </h4>
-                    {reportData.overallInsights.strengths.length > 0 ? (
-                      <div className="space-y-2">
-                        {reportData.overallInsights.strengths.map(
-                          (strength) => (
-                            <div
-                              key={`strength-${strength}`}
-                              className="flex items-center gap-2 p-2 bg-white/50 rounded-md"
-                            >
-                              <div className="size-2 bg-purple-500 rounded-full" />
-                              <span className="text-sm text-slate-700">
-                                {strength}
-                              </span>
-                            </div>
-                          )
-                        )}
-                      </div>
-                    ) : (
-                      <p className="text-sm text-slate-500 italic">
-                        Complete more sessions to discover your strengths
-                      </p>
-                    )}
-                  </Card>
-
-                  <Card className="p-4 bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
-                    <h4 className="font-semibold text-slate-800 mb-3 flex items-center gap-2">
-                      <User className="size-4 text-green-600" />
-                      Your Values
-                    </h4>
-                    {reportData.overallInsights.values.length > 0 ? (
-                      <div className="space-y-2">
-                        {reportData.overallInsights.values.map((value) => (
-                          <div
-                            key={`value-${value}`}
-                            className="flex items-center gap-2 p-2 bg-white/50 rounded-md"
-                          >
-                            <div className="size-2 bg-green-500 rounded-full" />
-                            <span className="text-sm text-slate-700">
-                              {value}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className="text-sm text-slate-500 italic">
-                        Complete more sessions to identify your values
-                      </p>
-                    )}
-                  </Card>
-                </div>
-              </div> */}
-
               {/* Download Actions */}
               {/* <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-slate-200">
                 <Button className="flex-1 bg-primary-green-600 hover:bg-primary-green-700 text-white">
@@ -1033,6 +1152,15 @@ export function ReportDialog({ isOpen, onClose }: ReportDialogProps) {
           )}
         </CardContent>
       </Card>
+  );
+
+  if (contentOnly) {
+    return cardContent;
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+      {cardContent}
     </div>
   );
 }
