@@ -11,6 +11,7 @@ import {
   MapIcon,
   Sparkles,
   HistoryIcon,
+  Lightbulb,
 } from "lucide-react";
 import {
   Sidebar,
@@ -46,6 +47,11 @@ const navMain = [
     title: "1:1 Coaching",
     url: "/journey",
     icon: Route,
+  },
+  {
+    title: "Behavioural Tools",
+    url: "/tools",
+    icon: Lightbulb,
   },
 ];
 

@@ -1,27 +1,16 @@
-'use client';
+"use client";
+import { Card, CardContent } from "@/components/ui/card";
 import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import {
-  Play,
-  Pause,
-  SkipBack,
-  SkipForward,
-  Volume2,
-  VolumeX,
   BookOpen,
   Sparkles,
   RouteIcon,
-} from 'lucide-react';
-import { useState, useEffect, useCallback, useMemo } from 'react';
-import { SidebarToggle } from '@/components/sidebar-toggle';
-import { useIsMobile } from '@/hooks/use-mobile';
-import GradientCard from '@/components/gradient-card';
+  Lightbulb,
+  MapIcon,
+} from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { SidebarToggle } from "@/components/sidebar-toggle";
+import { useIsMobile } from "@/hooks/use-mobile";
+import GradientCard from "@/components/gradient-card";
 
 interface User {
   id: string;
@@ -38,17 +27,11 @@ interface AuthStatus {
 export default function Dashboard() {
   const [date, setDate] = useState<Date | undefined>(undefined);
   const [isClient, setIsClient] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTrack, setCurrentTrack] = useState(0);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
-  const [volume, setVolume] = useState(80);
-  const [isMuted, setIsMuted] = useState(false);
   const [tasks, setTasks] = useState<{
     [key: string]: Array<{ id: string; text: string; time: string }>;
   }>({});
-  const [newTask, setNewTask] = useState('');
-  const [newTaskTime, setNewTaskTime] = useState('');
+  const [newTask, setNewTask] = useState("");
+  const [newTaskTime, setNewTaskTime] = useState("");
   const [journalEntries, setJournalEntries] = useState<
     Array<{
       id: string;
@@ -60,15 +43,11 @@ export default function Dashboard() {
       updatedAt: string;
     }>
   >([]);
-  const [todayEntry, setTodayEntry] = useState({ title: '', content: '' });
-  const [searchTerm, setSearchTerm] = useState('');
+  const [todayEntry, setTodayEntry] = useState({ title: "", content: "" });
+  const [searchTerm, setSearchTerm] = useState("");
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [currentDateTime, setCurrentDateTime] = useState(new Date());
-  const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(
-    null,
-  );
-  const [isLoading, setIsLoading] = useState(false);
   const [isLoadingEntries, setIsLoadingEntries] = useState(false);
   const [authStatus, setAuthStatus] = useState<AuthStatus | null>(null);
   const [isLoadingAuth, setIsLoadingAuth] = useState(true);
@@ -77,7 +56,7 @@ export default function Dashboard() {
   // Check authentication status
   const checkAuthStatus = useCallback(async () => {
     try {
-      const response = await fetch('/api/dashboard');
+      const response = await fetch("/api/dashboard");
       if (response.ok) {
         const data: AuthStatus = await response.json();
         setAuthStatus(data);
@@ -85,206 +64,21 @@ export default function Dashboard() {
         setAuthStatus({ authenticated: false, user: null });
       }
     } catch (error) {
-      console.error('Error checking auth status:', error);
+      console.error("Error checking auth status:", error);
       setAuthStatus({ authenticated: false, user: null });
     } finally {
       setIsLoadingAuth(false);
     }
   }, []);
 
-  // Sample meditation tracks with working audio URLs
-  const meditationTracks = useMemo(
-    () => [
-      {
-        id: 1,
-        title: '🧘 Breathing Exercise',
-        duration: '04:36',
-        url: '/musics/breathing-exercise.mp3',
-      },
-      {
-        id: 2,
-        title: '🌙 Evening Relax',
-        duration: '01:57',
-        url: '/musics/dawn-of-change.mp3',
-      },
-      // {
-      //   id: 3,
-      //   title: "☀️ Focus Boost",
-      //   duration: "01:57",
-      //   url: "/musics/dawn-of-change.mp3",
-      // },
-      // {
-      //   id: 4,
-      //   title: "🌸 Spring Meditation",
-      //   duration: "12:20",
-      //   url: "/musics/dawn-of-change.mp3",
-      // },
-      // {
-      //   id: 5,
-      //   title: "🌊 Ocean Waves",
-      //   duration: "20:00",
-      //   url: "/musics/dawn-of-change.mp3",
-      // },
-    ],
-    [],
-  );
-
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
-
   const getTimeBasedGreeting = () => {
     const hour = new Date().getHours();
     if (hour < 12) {
-      return 'Good Morning';
+      return "Good Morning";
     } else if (hour < 17) {
-      return 'Good Afternoon';
+      return "Good Afternoon";
     } else {
-      return 'Good Evening';
-    }
-  };
-
-  const handlePlayPause = async () => {
-    if (audioElement) {
-      try {
-        if (isPlaying) {
-          audioElement.pause();
-          setIsPlaying(false);
-        } else {
-          setIsLoading(true);
-          await audioElement.play();
-          setIsPlaying(true);
-          setIsLoading(false);
-        }
-      } catch (error) {
-        console.error('Error playing audio:', error);
-        setIsPlaying(false);
-        setIsLoading(false);
-        alert(
-          'Unable to play audio. Please check your internet connection or try a different track.',
-        );
-      }
-    }
-  };
-
-  const handleNext = useCallback(() => {
-    setCurrentTrack((prev) => (prev + 1) % meditationTracks.length);
-  }, [meditationTracks.length]);
-
-  const handlePrevious = () => {
-    setCurrentTrack(
-      (prev) => (prev - 1 + meditationTracks.length) % meditationTracks.length,
-    );
-  };
-
-  const handleTrackSelect = (index: number) => {
-    setCurrentTrack(index);
-    if (audioElement) {
-      audioElement.pause();
-    }
-    setIsPlaying(false);
-  };
-
-  // Initialize audio element when component mounts
-  useEffect(() => {
-    const audio = new Audio();
-    setAudioElement(audio);
-
-    return () => {
-      audio.pause();
-      audio.src = '';
-    };
-  }, []);
-
-  // Update audio source when track changes
-  useEffect(() => {
-    if (audioElement && meditationTracks[currentTrack]) {
-      console.log(
-        'Loading track:',
-        meditationTracks[currentTrack].title,
-        'URL:',
-        meditationTracks[currentTrack].url,
-      );
-      setIsLoading(true);
-      audioElement.src = meditationTracks[currentTrack].url;
-      audioElement.load();
-
-      // Add error handling for audio loading
-      const handleError = (e: Event) => {
-        console.error('Audio loading error:', e);
-        console.error('Failed to load:', meditationTracks[currentTrack].url);
-        setIsLoading(false);
-        alert('Failed to load audio. Please try a different track.');
-      };
-
-      const handleCanPlay = () => {
-        console.log('Audio can play:', meditationTracks[currentTrack].title);
-        setIsLoading(false);
-      };
-
-      audioElement.addEventListener('error', handleError);
-      audioElement.addEventListener('canplay', handleCanPlay);
-
-      return () => {
-        audioElement.removeEventListener('error', handleError);
-        audioElement.removeEventListener('canplay', handleCanPlay);
-      };
-    }
-  }, [currentTrack, audioElement, meditationTracks]);
-
-  // Handle audio events
-  useEffect(() => {
-    if (!audioElement) return;
-
-    const handlePlay = () => setIsPlaying(true);
-    const handlePause = () => setIsPlaying(false);
-    const handleEnded = () => {
-      setIsPlaying(false);
-      handleNext();
-    };
-    const handleTimeUpdate = () => {
-      setCurrentTime(audioElement.currentTime);
-    };
-    const handleLoadedMetadata = () => {
-      setDuration(audioElement.duration);
-    };
-
-    audioElement.addEventListener('play', handlePlay);
-    audioElement.addEventListener('pause', handlePause);
-    audioElement.addEventListener('ended', handleEnded);
-    audioElement.addEventListener('timeupdate', handleTimeUpdate);
-    audioElement.addEventListener('loadedmetadata', handleLoadedMetadata);
-
-    return () => {
-      audioElement.removeEventListener('play', handlePlay);
-      audioElement.removeEventListener('pause', handlePause);
-      audioElement.removeEventListener('ended', handleEnded);
-      audioElement.removeEventListener('timeupdate', handleTimeUpdate);
-      audioElement.removeEventListener('loadedmetadata', handleLoadedMetadata);
-    };
-  }, [audioElement, handleNext]);
-
-  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newVolume = Number.parseInt(e.target.value);
-    setVolume(newVolume);
-    setIsMuted(newVolume === 0);
-
-    if (audioElement) {
-      audioElement.volume = newVolume / 100;
-    }
-  };
-
-  const handleMute = () => {
-    if (audioElement) {
-      if (isMuted) {
-        audioElement.volume = volume / 100;
-        setIsMuted(false);
-      } else {
-        audioElement.volume = 0;
-        setIsMuted(true);
-      }
+      return "Good Evening";
     }
   };
 
@@ -294,13 +88,13 @@ export default function Dashboard() {
 
     setIsLoadingEntries(true);
     try {
-      const response = await fetch('/api/journal/entries');
+      const response = await fetch("/api/journal/entries");
       if (response.ok) {
         const { entries } = await response.json();
         setJournalEntries(entries);
       }
     } catch (error) {
-      console.error('Error loading journal entries:', error);
+      console.error("Error loading journal entries:", error);
     } finally {
       setIsLoadingEntries(false);
     }
@@ -310,13 +104,13 @@ export default function Dashboard() {
   const loadTodayEntry = useCallback(async () => {
     if (!authStatus?.authenticated || !authStatus?.user?.id) return;
 
-    const today = new Date().toISOString().split('T')[0];
+    const today = new Date().toISOString().split("T")[0];
     try {
       const response = await fetch(`/api/journal/entries/${today}`);
       if (response.ok) {
         const { entry } = await response.json();
         setTodayEntry({
-          title: entry.title || '',
+          title: entry.title || "",
           content: entry.content,
         });
       }
@@ -326,10 +120,10 @@ export default function Dashboard() {
   }, [authStatus?.authenticated, authStatus?.user?.id]);
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
     });
   };
 
@@ -339,19 +133,19 @@ export default function Dashboard() {
     );
 
     if (diffInSeconds < 60) {
-      return 'Just now';
+      return "Just now";
     } else if (diffInSeconds < 3600) {
       const minutes = Math.floor(diffInSeconds / 60);
-      return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+      return `${minutes} minute${minutes > 1 ? "s" : ""} ago`;
     } else if (diffInSeconds < 86400) {
       const hours = Math.floor(diffInSeconds / 3600);
-      return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+      return `${hours} hour${hours > 1 ? "s" : ""} ago`;
     } else {
-      return date.toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
+      return date.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
       });
     }
   };
@@ -363,25 +157,12 @@ export default function Dashboard() {
     setDate(new Date());
 
     // Load tasks from localStorage (keeping this for now)
-    const savedTasks = localStorage.getItem('dashboard-tasks');
+    const savedTasks = localStorage.getItem("dashboard-tasks");
     if (savedTasks) {
       try {
         setTasks(JSON.parse(savedTasks));
       } catch (error) {
-        console.error('Error loading tasks from localStorage:', error);
-      }
-    }
-
-    // Load music player state from localStorage (keeping this for now)
-    const savedMusicState = localStorage.getItem('dashboard-music-state');
-    if (savedMusicState) {
-      try {
-        const musicState = JSON.parse(savedMusicState);
-        setCurrentTrack(musicState.currentTrack || 0);
-        setVolume(musicState.volume || 80);
-        setIsMuted(musicState.isMuted || false);
-      } catch (error) {
-        console.error('Error loading music state from localStorage:', error);
+        console.error("Error loading tasks from localStorage:", error);
       }
     }
   }, []);
@@ -392,36 +173,36 @@ export default function Dashboard() {
 
     try {
       const savedJournalEntries = localStorage.getItem(
-        'dashboard-journal-entries',
+        "dashboard-journal-entries",
       );
       if (savedJournalEntries) {
         const entries = JSON.parse(savedJournalEntries);
         const entriesArray = Object.values(entries);
 
         if (entriesArray.length > 0) {
-          const response = await fetch('/api/journal/migrate', {
-            method: 'POST',
+          const response = await fetch("/api/journal/migrate", {
+            method: "POST",
             headers: {
-              'Content-Type': 'application/json',
+              "Content-Type": "application/json",
             },
             body: JSON.stringify({ entries: entriesArray }),
           });
 
           if (response.ok) {
             // Clear localStorage after successful migration
-            localStorage.removeItem('dashboard-journal-entries');
-            localStorage.removeItem('dashboard-today-entry');
+            localStorage.removeItem("dashboard-journal-entries");
+            localStorage.removeItem("dashboard-today-entry");
 
             // Reload entries from database
             loadJournalEntries();
             loadTodayEntry();
 
-            console.log('Successfully migrated journal entries to database');
+            console.log("Successfully migrated journal entries to database");
           }
         }
       }
     } catch (error) {
-      console.error('Error migrating localStorage data:', error);
+      console.error("Error migrating localStorage data:", error);
     }
   }, [
     authStatus?.authenticated,
@@ -456,18 +237,8 @@ export default function Dashboard() {
 
   // Save tasks to localStorage whenever tasks change
   useEffect(() => {
-    localStorage.setItem('dashboard-tasks', JSON.stringify(tasks));
+    localStorage.setItem("dashboard-tasks", JSON.stringify(tasks));
   }, [tasks]);
-
-  // Save music player state to localStorage
-  useEffect(() => {
-    const musicState = {
-      currentTrack,
-      volume,
-      isMuted,
-    };
-    localStorage.setItem('dashboard-music-state', JSON.stringify(musicState));
-  }, [currentTrack, volume, isMuted]);
 
   // Auto-save functionality
   useEffect(() => {
@@ -478,12 +249,12 @@ export default function Dashboard() {
         authStatus?.user?.id
       ) {
         // Auto-save without clearing the form
-        const today = new Date().toISOString().split('T')[0];
+        const today = new Date().toISOString().split("T")[0];
         try {
           const response = await fetch(`/api/journal/entries/${today}`, {
-            method: 'PUT',
+            method: "PUT",
             headers: {
-              'Content-Type': 'application/json',
+              "Content-Type": "application/json",
             },
             body: JSON.stringify({
               title: todayEntry.title.trim() || null,
@@ -495,7 +266,7 @@ export default function Dashboard() {
             setLastSaved(new Date());
           }
         } catch (error) {
-          console.error('Auto-save failed:', error);
+          console.error("Auto-save failed:", error);
         }
       }
     }, 30000); // Auto-save every 30 seconds
@@ -798,232 +569,39 @@ export default function Dashboard() {
           </CardFooter>
         </Card> */}
       </div>
-
-      {/* Bento Grid Layout */}
-      <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
-        {/* Row 2: Meditation Playlist (40%) + Time Management (60%) */}
-        <div className="grid grid-cols-1 lg:grid-cols-10 gap-4 md:gap-6 mb-6">
-          {/* Meditation Music Player - 40% */}
-          <div className="lg:col-span-4">
-            <Card className="h-full">
-              <CardHeader className="space-y-3">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center space-x-3 flex-1">
-                    <div className="size-10 bg-gradient-to-br from-indigo-500 to-pink-600 rounded-lg flex items-center justify-center">
-                      <span className="text-white text-lg font-bold">🧘</span>
-                    </div>
-                    <div className="flex-1">
-                      <CardTitle className="text-lg">
-                        Guided Meditation
-                      </CardTitle>
-                      <CardDescription className="text-sm text-muted-foreground">
-                        Take a moment to pause, breathe deep, and reset
-                      </CardDescription>
-                    </div>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Playlist Display */}
-                <div className="space-y-2 max-h-40 overflow-y-auto border border-gray-200 rounded-lg p-2">
-                  {meditationTracks.map((track, index) => (
-                    <button
-                      key={track.id}
-                      type="button"
-                      className={`w-full p-2 rounded-lg cursor-pointer transition-colors text-left ${
-                        index === currentTrack
-                          ? 'bg-blue-500 text-white'
-                          : 'bg-muted hover:bg-muted/80'
-                      }`}
-                      onClick={() => handleTrackSelect(index)}
-                    >
-                      <div className="flex justify-between items-center">
-                        <div className="flex-1 min-w-0 min-h-5">
-                          <p className="font-medium text-sm truncate">
-                            {track.title}
-                          </p>
-                        </div>
-                        <span className="text-xs opacity-70 ml-2">
-                          {track.duration}
-                        </span>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-
-                {/* Current Track Display */}
-                <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                  <p className="font-medium text-sm truncate text-green-800">
-                    {meditationTracks[currentTrack]?.title}
-                  </p>
-                  {/* <p className="text-xs text-green-600 truncate">
-                    {meditationTracks[currentTrack]?.artist}
-                  </p> */}
-                </div>
-
-                {/* Progress Bar */}
-                <div className="space-y-2">
-                  <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>{formatTime(currentTime)}</span>
-                    <span>{formatTime(duration)}</span>
-                  </div>
-                  <div className="w-full bg-muted rounded-full h-2">
-                    <div
-                      className="bg-blue-500 h-2 rounded-full transition-all duration-300"
-                      style={{
-                        width: `${
-                          duration > 0 ? (currentTime / duration) * 100 : 0
-                        }%`,
-                      }}
-                    />
-                  </div>
-                </div>
-
-                {/* Music Controls */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={handlePrevious}
-                    >
-                      <SkipBack size={14} />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={handlePlayPause}
-                      className="size-10"
-                      disabled={isLoading}
-                    >
-                      {isLoading ? (
-                        <div className="animate-spin rounded-full size-4 border-b-2 border-gray-900" />
-                      ) : isPlaying ? (
-                        <Pause size={16} />
-                      ) : (
-                        <Play size={16} />
-                      )}
-                    </Button>
-                    <Button variant="outline" size="icon" onClick={handleNext}>
-                      <SkipForward size={14} />
-                    </Button>
-                  </div>
-
-                  {/* Volume Control */}
-                  <div className="flex items-center gap-2">
-                    <Button variant="outline" size="icon" onClick={handleMute}>
-                      {isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
-                    </Button>
-                    <input
-                      type="range"
-                      min="0"
-                      max="100"
-                      value={isMuted ? 0 : volume}
-                      onChange={handleVolumeChange}
-                      className="w-20 h-2 bg-muted rounded-lg appearance-none cursor-pointer"
-                    />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Daily Journaling Section - 60% */}
-          <div className="lg:col-span-6">
-            <Card className="h-full">
-              <CardHeader className="space-y-3">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center space-x-3 flex-1">
-                    <div className="size-10 bg-gradient-to-br from-amber-500 to-orange-600 rounded-lg flex items-center justify-center">
-                      <span className="text-white text-lg font-bold">📔</span>
-                    </div>
-                    <div className="flex-1">
-                      <CardTitle className="text-lg">
-                        Daily Journaling
-                      </CardTitle>
-                      <CardDescription className="text-sm text-muted-foreground">
-                        Reflect, grow, and track your personal journey
-                      </CardDescription>
-                    </div>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-3">
-                  <h4 className="text-sm font-semibold text-foreground">
-                    Why Daily Journaling Matters:
-                  </h4>
-                  <ul className="text-xs text-muted-foreground space-y-2">
-                    <li className="flex items-start gap-2">
-                      <span className="text-blue-500 mt-1">•</span>
-                      <span>
-                        <strong>Self-Reflection:</strong> Pause, reflect, and
-                        think about your day.
-                      </span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-blue-500 mt-1">•</span>
-                      <span>
-                        <strong>Goal Tracking:</strong> Monitor your progress
-                        and celebrate small wins.
-                      </span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-blue-500 mt-1">•</span>
-                      <span>
-                        <strong>Habits and Patterns:</strong> Identify recurring
-                        patterns in your behavior.
-                      </span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-blue-500 mt-1">•</span>
-                      <span>
-                        <strong>Clarity:</strong> Organize your thoughts and
-                        improve decision-making.
-                      </span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-blue-500 mt-1">•</span>
-                      <span>
-                        <strong>Positivity:</strong> Prepare for the next day
-                        with a positive mindset.
-                      </span>
-                    </li>
-                  </ul>
-                </div>
-
-                <div className="pt-2">
-                  <Button
-                    onClick={() =>
-                      window.open(
-                        '/journey/sessions/8/a/daily-journaling',
-                        '_blank',
-                      )
-                    }
-                    className="w-full bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700"
-                  >
-                    Begin Journaling Now
-                  </Button>
-                </div>
-
-                <div className="text-xs text-muted-foreground text-center">
-                  <p>
-                    Spend 10 minutes each day to journal, practice gratitude,
-                    and reflect on your journey.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </div>
-
+      {/* Row 2: Be Future-Ready Card */}
       <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
         <GradientCard
           icon={<BookOpen className="size-5 sm:size-8" />}
           title="Be Future-Ready"
           description="Discover how ready you are for life after school. Understand yourself better through our assessments and guides."
           externalUrl="https://inwesol.com/be-future-ready"
+        />
+      </div>
+      {/* Row 3: Explorer and Behavioural Tools Card */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-4 md:gap-6 max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
+        <GradientCard
+          icon={<MapIcon className="size-5 sm:size-8" />}
+          title="Explorer"
+          description="Discover how ready you are for life after school. Understand yourself better through our assessments and guides."
+          externalUrl="https://inwesol.com/explorer"
+          gradientColors={{
+            from: "from-cyan-500",
+            via: "via-sky-500",
+            to: "to-blue-600",
+          }}
+        />
+
+        <GradientCard
+          icon={<Lightbulb className="size-5 sm:size-8" />}
+          title="Behavioural Tools"
+          description="Discover how ready you are for life after school. Understand yourself better through our assessments and guides."
+          internalUrl="/tools"
+          gradientColors={{
+            from: "from-amber-500",
+            via: "via-orange-500",
+            to: "to-rose-600",
+          }}
         />
       </div>
     </div>
