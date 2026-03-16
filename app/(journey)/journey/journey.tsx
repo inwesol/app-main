@@ -6,11 +6,13 @@ import {
   Trophy,
   ArrowRight,
   BarChart3,
+  Rocket,
   Download,
   Eye,
   FileText,
   Mail,
   ImageIcon,
+  Lock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -102,6 +104,14 @@ export const JourneyPage: React.FC = () => {
 
   const getProgressPercentage = () => {
     return (userProgress.completedSessions.length / sessions.length) * 100;
+  };
+
+  const allSessionsCompleted =
+    userProgress.completedSessions.length >= sessions.length;
+
+  const handleCheckInClick = () => {
+    if (!allSessionsCompleted) return;
+    router.push("journey/check-in");
   };
 
   return (
@@ -256,7 +266,7 @@ export const JourneyPage: React.FC = () => {
                 >
                   <VisuallyHidden.Root>
                     <DialogTitle>
-                      Highlights – Your Journey Insights
+                      Highlights - Your Journey Insights
                     </DialogTitle>
                   </VisuallyHidden.Root>
                   <SimpleViewDialog
@@ -487,31 +497,60 @@ export const JourneyPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Responsive Footer for check-in session book */}
-        {/* <Card className="my-8 p-4 sm:p-6 bg-gradient-to-r from-primary-green-50/80 via-primary-blue-50/80 to-slate-50/80 border border-slate-200/50 shadow-sm">
+        {/* Responsive Footer to book check-in sessions */}
+        <Card
+          className={`my-8 p-4 sm:p-6 border shadow-sm transition-all duration-300 ${
+            allSessionsCompleted
+              ? "bg-gradient-to-r from-primary-green-50/80 via-primary-blue-50/80 to-slate-50/80 border-slate-200/50 cursor-pointer hover:shadow-md hover:scale-[1.01]"
+              : "bg-slate-50/80 border-slate-200/50 opacity-80 cursor-not-allowed"
+          }`}
+          onClick={handleCheckInClick}
+        >
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-            <div className="hidden sm:block bg-gradient-to-r from-primary-green-500 to-primary-blue-500 rounded-xl p-3 shadow-sm shrink-0">
-              <Rocket className="size-6 text-white" />
+            <div
+              className={`hidden sm:flex rounded-xl p-3 shadow-sm shrink-0 ${
+                allSessionsCompleted
+                  ? "bg-gradient-to-r from-primary-green-500 to-primary-blue-500"
+                  : "bg-slate-400"
+              }`}
+            >
+              {allSessionsCompleted ? (
+                <Rocket className="size-6 text-white" />
+              ) : (
+                <Lock className="size-6 text-white" />
+              )}
             </div>
             <div className="flex-1 min-w-0">
               <h3 className="font-bold text-slate-800 text-lg mb-1">
-                Keep Moving Forward! 🚀
+                {allSessionsCompleted
+                  ? "Keep Moving Forward! 🚀"
+                  : "Book Check-in Sessions 🔒"}
               </h3>
               <p className="text-slate-600 text-sm leading-relaxed">
-                You&apos;re making great progress on your career journey!
-                {userProgress.currentSession < 9
-                  ? ` Complete Session ${userProgress.currentSession} to unlock the next step.`
-                  : " You're almost at the finish line!"}
+                {allSessionsCompleted
+                  ? "You've completed all sessions! Book a check-in to stay on track and keep your momentum going."
+                  : `Complete all ${sessions.length} sessions above to unlock check-in booking. You've completed ${userProgress.completedSessions.length} of ${sessions.length}.`}
               </p>
             </div>
-            <div className="text-center sm:text-right shrink-0">
-              <div className="text-2xl font-bold bg-gradient-to-r from-primary-green-600 to-primary-blue-600 bg-clip-text text-transparent">
-                {Math.round(getProgressPercentage())}%
-              </div>
-              <p className="text-slate-600 text-xs font-medium">Complete</p>
+            <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0">
+              {allSessionsCompleted && (
+                <Button
+                  size="sm"
+                  className="bg-gradient-to-r from-primary-green-500 to-primary-blue-500 hover:from-primary-green-600 hover:to-primary-blue-600 text-white border-0 shadow-sm hover:shadow-md"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    router.push("journey/check-in");
+                  }}
+                >
+                  <span className="flex items-center gap-1">
+                    Book Check-in
+                    <ArrowRight className="size-3" />
+                  </span>
+                </Button>
+              )}
             </div>
           </div>
-        </Card> */}
+        </Card>
       </div>
     </div>
   );
