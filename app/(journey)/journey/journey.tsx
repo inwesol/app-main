@@ -31,6 +31,7 @@ import { SidebarToggle } from "@/components/sidebar-toggle";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { SimpleViewDialog } from "@/components/simple-view-dialog";
 import { ReportDialog } from "@/components/report-dialog";
+import { FinalReport } from "./final-report";
 
 interface UserProgress {
   userId: string;
@@ -40,7 +41,11 @@ interface UserProgress {
   lastActiveDate: string;
 }
 
-export const JourneyPage: React.FC = () => {
+interface JourneyPageProps {
+  fullName: string;
+}
+
+export const JourneyPage: React.FC<JourneyPageProps> = ({ fullName }) => {
   const [userProgress, setUserProgress] = useState<UserProgress | null>(null);
   const [sessions, setSessions] = useState(SESSION_TEMPLATES);
   const [loading, setLoading] = useState(true);
@@ -104,8 +109,48 @@ export const JourneyPage: React.FC = () => {
     return (userProgress.completedSessions.length / sessions.length) * 100;
   };
 
+  const allSessionsCompleted =
+    userProgress.completedSessions.length === sessions.length;
+
+  const generatePdfReport = async () => {
+    console.log("Generating PDF report");
+    if (!fullName) return;
+    const element = document.getElementById("pdf-content");
+    if (!element) return;
+
+    // Clone the content to avoid modifying the live DOM
+    const clone = element.cloneNode(true) as HTMLElement;
+
+    // Show the header and footer in the clone only
+    const header = clone.querySelector("#pdf-header") as HTMLElement;
+    if (header) header.classList.remove("hidden");
+    const footer = clone.querySelector("#pdf-footer") as HTMLElement;
+    if (footer) footer.classList.remove("hidden");
+
+    // Dynamically import html2pdf.js only when needed (client-side)
+    const html2pdf = (await import("html2pdf.js")).default;
+
+    const options = {
+      margin: 0.2,
+      filename: `${fullName || "career"}-final-report.pdf`,
+      image: { type: "jpeg", quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: "in", format: "a4", orientation: "portrait" },
+    };
+
+    html2pdf()
+      .set(options as any)
+      .from(clone)
+      .save();
+  };
+
   return (
     <div className="p-2">
+      {/* Hidden report template used by generatePdfReport */}
+      <div className="sr-only pointer-events-none" aria-hidden>
+        <FinalReport fullName={fullName} />
+      </div>
+
       {isMobile ? <SidebarToggle /> : <div />}
       <div className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
         <Header
@@ -155,7 +200,7 @@ export const JourneyPage: React.FC = () => {
               </div>
             </div>
           </Card>
-          {/* revise your journey. */}
+          {/* journey Insights */}
           <Card className="p-4 bg-white border-primary-green-200/50 shadow-sm hover:shadow-md transition-all duration-300">
             <div className="flex items-center gap-3 mb-3">
               <div className="bg-primary-green-500 rounded-lg p-2 shrink-0">
@@ -174,17 +219,39 @@ export const JourneyPage: React.FC = () => {
               {/* Final Report Section */}
               <Dialog
                 open={isDownloadDialogOpen}
-                onOpenChange={setIsDownloadDialogOpen}
+                onOpenChange={(open) => {
+                  if (!allSessionsCompleted) return;
+                  setIsDownloadDialogOpen(open);
+                }}
               >
-                <DialogTrigger asChild>
-                  <div className="flex items-center justify-between p-3 bg-teal-50/50 rounded-lg border border-teal-200/30 cursor-pointer hover:bg-teal-100/50 transition-colors duration-200">
+                <DialogTrigger asChild disabled={!allSessionsCompleted}>
+                  <div
+                    className={`flex items-center justify-between p-3 rounded-lg border transition-colors duration-200 ${
+                      allSessionsCompleted
+                        ? "bg-teal-50/50 border-teal-200/30 cursor-pointer hover:bg-teal-100/50"
+                        : "bg-slate-100/50 border-slate-200/30 cursor-not-allowed opacity-80"
+                    }`}
+                    title={
+                      allSessionsCompleted
+                        ? undefined
+                        : "Complete all sessions to unlock the Final Report"
+                    }
+                  >
                     <div className="flex items-center gap-2">
-                      <Download className="size-4 text-teal-600" />
-                      <span className="text-sm font-medium text-teal-800">
+                      <Download
+                        className={`size-4 ${allSessionsCompleted ? "text-teal-600" : "text-slate-600"}`}
+                      />
+                      <span
+                        className={`text-sm font-medium ${allSessionsCompleted ? "text-teal-800" : "text-slate-600"}`}
+                      >
                         Final Report
                       </span>
                     </div>
-                    <ArrowRight className="size-4 text-teal-600" />
+                    {allSessionsCompleted ? (
+                      <ArrowRight className="size-4 text-teal-600" />
+                    ) : (
+                      <LucideIcons.Lock className="size-4 text-slate-600" />
+                    )}
                   </div>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-md">
@@ -195,13 +262,14 @@ export const JourneyPage: React.FC = () => {
                   </DialogHeader>
                   <div className="space-y-3 py-4">
                     <Button
-                      disabled
-                      className="w-full justify-start gap-3 p-4 h-auto bg-slate-100 text-slate-500 border-slate-200"
+                      onClick={generatePdfReport}
+                      aria-label="Download PDF of report"
+                      className="w-full justify-start gap-3 p-4 h-auto bg-teal-50 text-teal-600 border border-teal-200 hover:bg-teal-100 hover:text-teal-700"
                     >
                       <FileText className="size-5" />
                       <div className="text-left">
                         <div className="font-medium">Self Analysis Report</div>
-                        <div className="text-xs text-slate-400">
+                        <div className="text-xs text-teal-500">
                           Comprehensive self-assessment
                         </div>
                       </div>
@@ -212,9 +280,9 @@ export const JourneyPage: React.FC = () => {
                     >
                       <Mail className="size-5" />
                       <div className="text-left">
-                        <div className="font-medium">Letter from Future</div>
+                        <div className="font-medium">Matrix Activity</div>
                         <div className="text-xs text-slate-400">
-                          Your future self&apos;s perspective
+                          Your career options matrix
                         </div>
                       </div>
                     </Button>
@@ -224,9 +292,9 @@ export const JourneyPage: React.FC = () => {
                     >
                       <ImageIcon className="size-5" />
                       <div className="text-left">
-                        <div className="font-medium">Final Story Board</div>
+                        <div className="font-medium">Life Collage Activity</div>
                         <div className="text-xs text-slate-400">
-                          Visual journey representation
+                          Your life collage representation
                         </div>
                       </div>
                     </Button>
