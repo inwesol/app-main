@@ -362,6 +362,70 @@ const WELLBEING_DESCRIPTIONS: Array<{
   },
 ];
 
+const SDQ_DESCRIPTIONS: Array<{
+  key: string;
+  name: string;
+  definition: string;
+  highScore: string;
+}> = [
+  {
+    key: "emotionalSymptoms",
+    name: "Emotional Symptoms Score",
+    definition:
+      "Emotional Problems reflect feelings of worry, sadness, fear, or being easily upset.",
+    highScore:
+      "A high score indicates a tendency to feel anxious, nervous, or sad, whereas a low score suggests a tendency to be emotionally stable and generally content.",
+  },
+  {
+    key: "conductProblems",
+    name: "Conduct Problems Score",
+    definition:
+      "Conduct Problems indicate behavioral challenges such as aggression, temper issues, or rule-breaking.",
+    highScore:
+      "A high score suggests a tendency to struggle with managing anger or following rules, while a low score reflects a tendency to be well-behaved, cooperative, and able to control impulses.",
+  },
+  {
+    key: "hyperactivityInattention",
+    name: "Hyperactivity/Inattention Score",
+    definition:
+      "Hyperactivity reflects restlessness, impulsivity, and attention span.",
+    highScore:
+      "A high score indicates a tendency to be easily distracted or restless, whereas a low score suggests a tendency to stay focused, calm, and complete tasks.",
+  },
+  {
+    key: "peerProblems",
+    name: "Peer Problems Score",
+    definition:
+      "Peer Problems reflect relationships and interactions with peers.",
+    highScore:
+      "A high score indicates a tendency to feel isolated or have difficulty forming and maintaining friendships, while a low score suggests a tendency to get along well with others, feel accepted, and maintain positive peer relationships.",
+  },
+  {
+    key: "prosocialBehavior",
+    name: "Prosocial Behaviour Score",
+    definition:
+      "Prosocial measures kindness, empathy, and helpfulness toward others.",
+    highScore:
+      "A high score indicates a tendency to be caring, considerate, and cooperative, while a low score suggests a tendency to show less empathy or be less inclined to help others.",
+  },
+  {
+    key: "impact",
+    name: "Impact Score",
+    definition:
+      "The Impact score reflects how much an individual's difficulties affect daily life across home, school, and social settings.",
+    highScore:
+      "A high score indicates that these difficulties may impact functioning or relationships, whereas a low score suggests that such difficulties have little or no impact on day-to-day life.",
+  },
+  {
+    key: "overall",
+    name: "Overall SDQ Score",
+    definition:
+      "This indicates the overall level of emotional and behavioral difficulties.",
+    highScore:
+      "A high score suggests a tendency to experience emotional, behavioral, or attention-related challenges that may need support, while a low score reflects a tendency to be well-adjusted without major emotional or behavioral concerns.",
+  },
+];
+
 const SDQ_SUBSCALES: Record<string, { name: string; description: string }> = {
   emotionalSymptoms: {
     name: "Emotional Symptoms",
@@ -1608,6 +1672,87 @@ export const FinalReport: React.FC<FinalReportProps> = ({
               note="Complete both SDQ Assessment-1 and Assessment-2 to view your progress."
             />
           )}
+
+          {/* ── SDQ dimension descriptions ── */}
+          <div className="html2pdf__page-break" />
+          <div
+            style={{
+              marginTop: "20px",
+              breakInside: "avoid",
+              pageBreakInside: "avoid",
+              border: "1px solid #e2e8f0",
+              borderRadius: "8px",
+              overflow: "hidden",
+            }}
+          >
+            <div
+              style={{
+                background: "#f8fafc",
+                borderBottom: "1px solid #e2e8f0",
+                padding: "10px 16px",
+              }}
+            >
+              <h3
+                style={{
+                  margin: 0,
+                  fontSize: "13px",
+                  fontWeight: "700",
+                  color: "#0f4c75",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.6px",
+                }}
+              >
+                Explanation of Dimensions
+              </h3>
+            </div>
+
+            <div style={{ padding: "0 16px" }}>
+              {SDQ_DESCRIPTIONS.map((dim, idx) => {
+                const isLast = idx === SDQ_DESCRIPTIONS.length - 1;
+                return (
+                  <div
+                    key={dim.key}
+                    style={{
+                      padding: "12px 0",
+                      borderBottom: isLast ? "none" : "1px solid #f1f5f9",
+                    }}
+                  >
+                    <div
+                      style={{
+                        fontWeight: "700",
+                        fontSize: "13px",
+                        color: "#1a202c",
+                        marginBottom: "5px",
+                      }}
+                    >
+                      {dim.name}
+                    </div>
+                    <p
+                      style={{
+                        margin: "0 0 4px",
+                        fontSize: "12px",
+                        color: "#374151",
+                        lineHeight: "1.55",
+                      }}
+                    >
+                      {dim.definition}
+                    </p>
+                    <p
+                      style={{
+                        margin: 0,
+                        fontSize: "12px",
+                        color: "#4b5563",
+                        lineHeight: "1.55",
+                        fontStyle: "italic",
+                      }}
+                    >
+                      {dim.highScore}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         </PdfSection>
 
         <PdfDivider />
