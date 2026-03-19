@@ -19,6 +19,7 @@ import { Progress } from "@/components/ui/progress";
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -299,6 +300,12 @@ export const JourneyPage: React.FC<JourneyPageProps> = ({ fullName }) => {
                       </div>
                     </Button>
                   </div>
+                  <DialogFooter>
+                    <div className="w-full flex items-center justify-center gap-1.5 text-xs text-slate-600">
+                      <LucideIcons.Chrome className="size-3.5" />
+                      <p>Use Google Chrome for better download experience.</p>
+                    </div>
+                  </DialogFooter>
                 </DialogContent>
               </Dialog>
 

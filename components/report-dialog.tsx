@@ -94,7 +94,8 @@ const PERSONALITY_TRAITS: Record<
   },
   agreeableness: {
     name: "Agreeableness",
-    description: "The inclination to be cooperative, compassionate, and prioritize harmony in relationships.",
+    description:
+      "The inclination to be cooperative, compassionate, and prioritize harmony in relationships.",
   },
   conscientiousness: {
     name: "Conscientiousness",
@@ -177,6 +178,47 @@ const WELLBEING_SUBSCALES: Record<
   },
 };
 
+// Pre-assessment intervention questions (q1–q8)
+// reverseScored: true means a higher raw answer is a worse outcome (e.g. stress)
+const PRE_ASSESSMENT_QUESTIONS: Record<
+  string,
+  { text: string; topic: string; reverseScored?: boolean }
+> = {
+  q1: {
+    text: "How clear are your current career goals?",
+    topic: "Career Goal Clarity",
+  },
+  q2: {
+    text: "How confident are you that you will achieve your career goals?",
+    topic: "Goal Achievement Confidence",
+  },
+  q3: {
+    text: "How confident are you in your ability to overcome obstacles in your career?",
+    topic: "Career Resilience",
+  },
+  q4: {
+    text: "How would you rate your current level of stress related to work or personal life?",
+    topic: "Work-Life Stress",
+    reverseScored: true,
+  },
+  q5: {
+    text: "How well do you understand your own thought patterns and behaviors?",
+    topic: "Self-Awareness",
+  },
+  q6: {
+    text: "How satisfied are you with your current work-life balance?",
+    topic: "Work-Life Balance",
+  },
+  q7: {
+    text: "How satisfied are you with your current job and overall well-being?",
+    topic: "Job Satisfaction & Wellbeing",
+  },
+  q8: {
+    text: "How ready are you to make changes in your professional or personal life?",
+    topic: "Readiness for Change",
+  },
+};
+
 // SDQ (Strengths & Difficulties Questionnaire) subscale descriptions
 const SDQ_SUBSCALES: Record<string, { name: string; description: string }> = {
   emotionalSymptoms: {
@@ -246,7 +288,11 @@ interface ReportData {
   };
 }
 
-export function ReportDialog({ isOpen, onClose, contentOnly }: ReportDialogProps) {
+export function ReportDialog({
+  isOpen,
+  onClose,
+  contentOnly,
+}: ReportDialogProps) {
   const [reportData, setReportData] = useState<ReportData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [personalityData, setPersonalityData] = useState<{
@@ -289,32 +335,16 @@ export function ReportDialog({ isOpen, onClose, contentOnly }: ReportDialogProps
     number | string
   > | null>(null);
 
-  // Pre-assessment question texts to map compact keys (q1..qN) → human-readable labels
-  const preAssessmentQuestionTexts: string[] = [
-    "How clear are your current career goals?",
-    "How confident are you that you will achieve your career goals?",
-    "How confident are you in your ability to overcome obstacles in your career?",
-    "How would you rate your current level of stress related to work or personal life?",
-    "How well do you understand your own thought patterns and behaviors?",
-    "How satisfied are you with your current work-life balance?",
-    "How satisfied are you with your current job and overall well-being?",
-    "How ready are you to make changes in your professional or personal life?",
-  ];
-
   function getPreQuestionLabelFromKey(key: string): string {
-    if (key.startsWith("q")) {
-      const idx = Number.parseInt(key.slice(1), 10) - 1;
-      if (!Number.isNaN(idx) && preAssessmentQuestionTexts[idx]) {
-        return preAssessmentQuestionTexts[idx];
-      }
-    }
-    return key; // fallback if already descriptive
+    return PRE_ASSESSMENT_QUESTIONS[key]?.text ?? key;
   }
 
   function getCorrespondingPostKeyFromPreKey(key: string): string | null {
     if (key.startsWith("q")) return key;
-    const idx = preAssessmentQuestionTexts.findIndex((t) => t === key);
-    return idx >= 0 ? `q${idx + 1}` : null;
+    const entry = Object.entries(PRE_ASSESSMENT_QUESTIONS).find(
+      ([, v]) => v.text === key,
+    );
+    return entry ? entry[0] : null;
   }
 
   function toTitleCaseLabel(key: string): string {
@@ -469,672 +499,741 @@ export function ReportDialog({ isOpen, onClose, contentOnly }: ReportDialogProps
           : "w-full max-w-5xl mx-4 max-h-[90vh] overflow-hidden"
       }
     >
-        <div className="bg-gradient-to-r from-primary-green-50 to-primary-blue-50 rounded-t-lg mb-4">
-          <CardHeader className="flex flex-row items-center justify-between pb-4 space-y-0">
-            <CardTitle className="text-xl font-semibold text-slate-800">
-              Your Journey Report
-            </CardTitle>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onClose}
-              className="p-0 size-8 hover:bg-slate-100"
-            >
-              <X className="size-4" />
-            </Button>
-          </CardHeader>
-        </div>
-        <CardContent className="space-y-8 overflow-y-auto max-h-[calc(90vh-120px)]">
-          {isLoading ? (
-            <div className="py-8 text-center text-slate-500">
-              <div className="animate-spin rounded-full size-8 border-b-2 border-primary-blue-600 mx-auto mb-4" />
-              <p>Generating your report...</p>
-            </div>
-          ) : reportData ? (
-            <>
-              {/* RIASEC Interest Profile */}
-              <div>
-                <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
-                  <Award className="size-5 text-indigo-600" />
-                  Career Interest Profile
-                </h3>
+      <div className="bg-gradient-to-r from-primary-green-50 to-primary-blue-50 rounded-t-lg mb-4">
+        <CardHeader className="flex flex-row items-center justify-between pb-4 space-y-0">
+          <CardTitle className="text-xl font-semibold text-slate-800">
+            Your Journey Report
+          </CardTitle>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onClose}
+            className="p-0 size-8 hover:bg-slate-100"
+          >
+            <X className="size-4" />
+          </Button>
+        </CardHeader>
+      </div>
+      <CardContent className="space-y-8 overflow-y-auto max-h-[calc(90vh-120px)]">
+        {isLoading ? (
+          <div className="py-8 text-center text-slate-500">
+            <div className="animate-spin rounded-full size-8 border-b-2 border-primary-blue-600 mx-auto mb-4" />
+            <p>Generating your report...</p>
+          </div>
+        ) : reportData ? (
+          <>
+            {/* RIASEC Interest Profile */}
+            <div>
+              <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                <Award className="size-5 text-indigo-600" />
+                Career Interest Profile
+              </h3>
 
-                {reportData.riasecData ? (
-                  <>
-                    {/* Top Categories Breakdown */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      {reportData.riasecData.topCategories.map(
-                        (category, index) => {
-                          const categoryInfo =
-                            RIASEC_CATEGORIES[
-                              category.code as keyof typeof RIASEC_CATEGORIES
-                            ];
-                          const IconComponent = categoryInfo.icon;
+              {reportData.riasecData ? (
+                <>
+                  {/* Top Categories Breakdown */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {reportData.riasecData.topCategories.map(
+                      (category, index) => {
+                        const categoryInfo =
+                          RIASEC_CATEGORIES[
+                            category.code as keyof typeof RIASEC_CATEGORIES
+                          ];
+                        const IconComponent = categoryInfo.icon;
 
-                          return (
-                            <Card
-                              key={category.code}
-                              className={`p-4 ${categoryInfo.bgColor} ${categoryInfo.borderColor} border transition-all duration-200 hover:shadow-md`}
-                            >
-                              <div className="flex items-center gap-3 mb-3">
-                                <div
-                                  className={`p-2 rounded-lg ${categoryInfo.iconBg} text-white`}
+                        return (
+                          <Card
+                            key={category.code}
+                            className={`p-4 ${categoryInfo.bgColor} ${categoryInfo.borderColor} border transition-all duration-200 hover:shadow-md`}
+                          >
+                            <div className="flex items-center gap-3 mb-3">
+                              <div
+                                className={`p-2 rounded-lg ${categoryInfo.iconBg} text-white`}
+                              >
+                                <IconComponent className="size-4" />
+                              </div>
+                              <div>
+                                <h4
+                                  className={`font-semibold ${categoryInfo.textColor}`}
                                 >
-                                  <IconComponent className="size-4" />
-                                </div>
-                                <div>
-                                  <h4
-                                    className={`font-semibold ${categoryInfo.textColor}`}
-                                  >
-                                    {category.name}
-                                  </h4>
-                                </div>
+                                  {category.name}
+                                </h4>
                               </div>
+                            </div>
 
-                              <p className="text-sm text-slate-600 mb-3">
-                                {category.description}
-                              </p>
+                            <p className="text-sm text-slate-600 mb-3">
+                              {category.description}
+                            </p>
 
-                              <div className="space-y-2">
-                                <div className="flex justify-between text-sm">
-                                  <span className="text-slate-600">
-                                    Percentage
-                                  </span>
-                                  <span
-                                    className={`font-medium ${categoryInfo.textColor}`}
-                                  >
-                                    {category.percentage}%
-                                  </span>
-                                </div>
-                                <div className="w-full bg-slate-200 rounded-full h-2">
-                                  <div
-                                    className={`h-2 rounded-full ${categoryInfo.iconBg}`}
-                                    style={{ width: `${category.percentage}%` }}
-                                  />
-                                </div>
+                            <div className="space-y-2">
+                              <div className="flex justify-between text-sm">
+                                <span className="text-slate-600">
+                                  Percentage
+                                </span>
+                                <span
+                                  className={`font-medium ${categoryInfo.textColor}`}
+                                >
+                                  {category.percentage}%
+                                </span>
                               </div>
-                            </Card>
-                          );
-                        }
-                      )}
-                    </div>
-                  </>
-                ) : (
-                  <Card className="p-6 bg-slate-50 border-slate-200">
-                    <div className="text-center">
-                      <Award className="size-12 text-slate-400 mx-auto mb-4" />
-                      <h4 className="text-lg font-semibold text-slate-600 mb-2">
-                        Interest Assessment Not Completed
-                      </h4>
-                      <p className="text-sm text-slate-500 mb-4">
-                        Complete the RIASEC interest assessment to discover your
-                        career interest profile and get personalized insights.
-                      </p>
-                      <Button
-                        variant="outline"
-                        className="text-slate-600 border-slate-300 hover:bg-slate-100"
-                        onClick={() => {
-                          // You can add navigation to the assessment here
-                          console.log("Navigate to RIASEC assessment");
-                        }}
-                      >
-                        Take Assessment
-                      </Button>
-                    </div>
-                  </Card>
-                )}
-              </div>
-
-              {/* Personality Assessment */}
-              <div>
-                <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
-                  <User className="size-5 text-emerald-600" />
-                  Personality Assessment
-                </h3>
-
-                {personalityData ? (
-                  <Card className="p-6 bg-gradient-to-r from-emerald-50 to-emerald-60 border-emerald-200">
-                    {/* Trait cards in 3 rows (grid-cols-2 gives 2+2+1 for 5 traits) */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      {Object.entries(personalityData.subscaleScores).map(
-                        ([trait, rawScore]) => {
-                          const pct = Math.round(rawScore);
-                          const traitInfo =
-                            PERSONALITY_TRAITS[trait] ?? {
-                              name: trait.charAt(0).toUpperCase() + trait.slice(1),
-                              description: "",
-                            };
-                          return (
-                            <Card
-                              key={trait}
-                              className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm"
-                            >
-                              <CardContent className="flex p-4">
-                                <div className="min-w-0 flex-[3] pr-4">
-                                  <h4 className="text-sm font-semibold text-slate-800">
-                                    {traitInfo.name}
-                                  </h4>
-                                  {traitInfo.description ? (
-                                    <p className="mt-0.5 text-[11px] font-normal leading-snug text-slate-500">
-                                      {traitInfo.description}
-                                    </p>
-                                  ) : null}
-                                </div>
+                              <div className="w-full bg-slate-200 rounded-full h-2">
                                 <div
-                                  className="w-px shrink-0 self-stretch bg-slate-200"
-                                  aria-hidden
+                                  className={`h-2 rounded-full ${categoryInfo.iconBg}`}
+                                  style={{ width: `${category.percentage}%` }}
                                 />
-                                <div className="flex shrink-0 items-center justify-center pl-4">
-                                  <span className="text-sm font-bold text-blue-600">
-                                    {pct}%
-                                  </span>
-                                </div>
-                              </CardContent>
-                            </Card>
-                          );
-                        }
-                      )}
-                    </div>
+                              </div>
+                            </div>
+                          </Card>
+                        );
+                      },
+                    )}
+                  </div>
+                </>
+              ) : (
+                <Card className="p-6 bg-slate-50 border-slate-200">
+                  <div className="text-center">
+                    <Award className="size-12 text-slate-400 mx-auto mb-4" />
+                    <h4 className="text-lg font-semibold text-slate-600 mb-2">
+                      Interest Assessment Not Completed
+                    </h4>
+                    <p className="text-sm text-slate-500 mb-4">
+                      Complete the RIASEC interest assessment to discover your
+                      career interest profile and get personalized insights.
+                    </p>
+                    <Button
+                      variant="outline"
+                      className="text-slate-600 border-slate-300 hover:bg-slate-100"
+                      onClick={() => {
+                        // You can add navigation to the assessment here
+                        console.log("Navigate to RIASEC assessment");
+                      }}
+                    >
+                      Take Assessment
+                    </Button>
+                  </div>
+                </Card>
+              )}
+            </div>
 
-                    {/* Horizontal separation */}
-                    <hr className="my-4 border-1 border-emerald-200" />
+            {/* Personality Assessment */}
+            <div>
+              <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                <User className="size-5 text-emerald-600" />
+                Personality Assessment
+              </h3>
 
-                    {/* Overall personality score card - center aligned */}
-                    <div className="flex justify-center">
-                      <Card className="overflow-hidden rounded-lg border border-emerald-200 bg-white shadow-sm w-fit">
-                        <CardContent className="flex flex-row items-center justify-center gap-3 px-4 py-1.5">
-                          <h4 className="text-sm font-semibold text-slate-800">
-                            Overall Personality Score:
-                          </h4>
-                          <div className="inline-flex text-blue-600 items-center justify-center gap-0.5 size-16 text-base font-bold whitespace-nowrap">
-                            <span>{Math.round(Number.parseFloat(personalityData.score))}</span>
-                            <span>%</span>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </div>
-                  </Card>
-                ) : (
-                  <Card className="p-6 bg-slate-50 border-slate-200">
-                    <div className="text-center">
-                      <User className="size-12 text-slate-400 mx-auto mb-4" />
-                      <h4 className="text-lg font-semibold text-slate-600 mb-2">
-                        Personality Assessment Not Completed
-                      </h4>
-                      <p className="text-sm text-slate-500 mb-4">
-                        Complete the personality assessment to view
-                        your overall and subscale scores.
-                      </p>
-                    </div>
-                  </Card>
-                )}
-              </div>
+              {personalityData ? (
+                <Card className="p-6 bg-gradient-to-r from-emerald-50 to-emerald-60 border-emerald-200">
+                  {/* Trait cards in 3 rows (grid-cols-2 gives 2+2+1 for 5 traits) */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {Object.entries(personalityData.subscaleScores).map(
+                      ([trait, rawScore]) => {
+                        const pct = Math.round(rawScore);
+                        const traitInfo = PERSONALITY_TRAITS[trait] ?? {
+                          name: trait.charAt(0).toUpperCase() + trait.slice(1),
+                          description: "",
+                        };
+                        return (
+                          <Card
+                            key={trait}
+                            className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm"
+                          >
+                            <CardContent className="flex p-4">
+                              <div className="min-w-0 flex-[3] pr-4">
+                                <h4 className="text-sm font-semibold text-slate-800">
+                                  {traitInfo.name}
+                                </h4>
+                                {traitInfo.description ? (
+                                  <p className="mt-0.5 text-[11px] font-normal leading-snug text-slate-500">
+                                    {traitInfo.description}
+                                  </p>
+                                ) : null}
+                              </div>
+                              <div
+                                className="w-px shrink-0 self-stretch bg-slate-200"
+                                aria-hidden
+                              />
+                              <div className="flex shrink-0 items-center justify-center pl-4">
+                                <span className="text-sm font-bold text-blue-600">
+                                  {pct}%
+                                </span>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        );
+                      },
+                    )}
+                  </div>
 
-              {/* Career Maturity: Before vs After */}
-              <div>
-                <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
-                  <BarChart3 className="size-5 text-blue-600" />
-                  Career Maturity Progress
-                </h3>
+                  {/* Horizontal separation */}
+                  <hr className="my-4 border-1 border-emerald-200" />
 
-                {careerMaturityPre?.insights?.score &&
-                careerMaturityPost?.insights?.score ? (
-                  <Card className="p-6 bg-gradient-to-r from-blue-50 to-blue-60 border-blue-200">
-                    {/* <h4 className="text-sm font-semibold text-slate-800 mb-4">
+                  {/* Overall personality score card - center aligned */}
+                  <div className="flex justify-center">
+                    <Card className="overflow-hidden rounded-lg border border-emerald-200 bg-white shadow-sm w-fit">
+                      <CardContent className="flex flex-row items-center justify-center gap-3 px-4 py-1.5">
+                        <h4 className="text-sm font-semibold text-slate-800">
+                          Overall Personality Score:
+                        </h4>
+                        <div className="inline-flex text-blue-600 items-center justify-center gap-0.5 size-16 text-base font-bold whitespace-nowrap">
+                          <span>
+                            {Math.round(
+                              Number.parseFloat(personalityData.score),
+                            )}
+                          </span>
+                          <span>%</span>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </Card>
+              ) : (
+                <Card className="p-6 bg-slate-50 border-slate-200">
+                  <div className="text-center">
+                    <User className="size-12 text-slate-400 mx-auto mb-4" />
+                    <h4 className="text-lg font-semibold text-slate-600 mb-2">
+                      Personality Assessment Not Completed
+                    </h4>
+                    <p className="text-sm text-slate-500 mb-4">
+                      Complete the personality assessment to view your overall
+                      and subscale scores.
+                    </p>
+                  </div>
+                </Card>
+              )}
+            </div>
+
+            {/* Career Maturity: Before vs After */}
+            <div>
+              <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                <BarChart3 className="size-5 text-blue-600" />
+                Career Maturity Progress
+              </h3>
+
+              {careerMaturityPre?.insights?.score &&
+              careerMaturityPost?.insights?.score ? (
+                <Card className="p-6 bg-gradient-to-r from-blue-50 to-blue-60 border-blue-200">
+                  {/* <h4 className="text-sm font-semibold text-slate-800 mb-4">
                       Scale Changes (Before vs After)
                     </h4> */}
-                    <div className="space-y-2">
-                      {Object.keys(
-                        careerMaturityPre?.insights?.score ||
-                          careerMaturityPost?.insights?.score ||
-                          {}
-                      ).map((scale) => {
-                        const before =
-                          careerMaturityPre?.insights?.score?.[scale] ?? 0;
-                        const after =
-                          careerMaturityPost?.insights?.score?.[scale] ?? 0;
-                        const delta = Number.parseFloat(
-                          (after - before).toFixed(2)
-                        );
-                        const deltaPositive = delta >= 0;
+                  <div className="space-y-2">
+                    {Object.keys(
+                      careerMaturityPre?.insights?.score ||
+                        careerMaturityPost?.insights?.score ||
+                        {},
+                    ).map((scale) => {
+                      const before =
+                        careerMaturityPre?.insights?.score?.[scale] ?? 0;
+                      const after =
+                        careerMaturityPost?.insights?.score?.[scale] ?? 0;
+                      const delta = Number.parseFloat(
+                        (after - before).toFixed(2),
+                      );
+                      const deltaPositive = delta >= 0;
 
-                        const scaleInfo =
-                          CAREER_MATURITY_SCALES[scale] ?? {
-                            name: scale,
-                            description: "",
-                          };
+                      const scaleInfo = CAREER_MATURITY_SCALES[scale] ?? {
+                        name: scale,
+                        description: "",
+                      };
 
-                        return (
-                          <Card
-                            key={scale}
-                            className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm"
-                          >
-                            <CardContent className="flex p-4">
-                              <div className="min-w-0 flex-[6] pr-4">
-                                <h4 className="text-sm font-semibold text-slate-800">
-                                  {scaleInfo.name}
-                                </h4>
-                                {scaleInfo.description ? (
-                                  <p className="mt-0.5 text-[11px] font-normal leading-snug text-slate-500">
-                                    {scaleInfo.description}
-                                  </p>
-                                ) : null}
-                              </div>
-                              <div
-                                className="w-px shrink-0 self-stretch bg-slate-200"
-                                aria-hidden
-                              />
-                              <div className="flex min-w-0 flex-[4] flex-wrap items-center justify-end gap-2 pl-4">
-                                <span className="px-2 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">
-                                  Before: {Math.round(before)}%
-                                </span>
-                                <span className="px-2 py-1 rounded-full text-xs font-semibold bg-primary-blue-50 text-primary-blue-800 border border-primary-blue-200">
-                                  After: {Math.round(after)}%
-                                </span>
-                                <span
-                                  className={`px-2 py-1 rounded-full text-xs font-bold border ${
-                                    deltaPositive
-                                      ? "bg-primary-green-100 text-primary-green-800 border-primary-green-200"
-                                      : "bg-orange-100 text-orange-800 border-orange-200"
-                                  }`}
-                                >
-                                  {deltaPositive ? "+" : ""}
-                                  {delta}%
-                                </span>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        );
-                      })}
-                    </div>
-                  </Card>
-                ) : (
-                  <Card className="p-6 bg-slate-50 border-slate-200">
-                    <div className="text-center">
-                      <BarChart3 className="size-12 text-slate-400 mx-auto mb-4" />
-                      <h4 className="text-lg font-semibold text-slate-600 mb-2">
-                        Career Maturity Assessments Not Completed
-                      </h4>
-                      <p className="text-sm text-slate-500">
-                        Complete both Career Maturity Assessment-1 and Career Maturity Assessment-2
-                        to view your career maturity progress.
-                      </p>
-                    </div>
-                  </Card>
-                )}
-              </div>
+                      return (
+                        <Card
+                          key={scale}
+                          className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm"
+                        >
+                          <CardContent className="flex p-4">
+                            <div className="min-w-0 flex-[6] pr-4">
+                              <h4 className="text-sm font-semibold text-slate-800">
+                                {scaleInfo.name}
+                              </h4>
+                              {scaleInfo.description ? (
+                                <p className="mt-0.5 text-[11px] font-normal leading-snug text-slate-500">
+                                  {scaleInfo.description}
+                                </p>
+                              ) : null}
+                            </div>
+                            <div
+                              className="w-px shrink-0 self-stretch bg-slate-200"
+                              aria-hidden
+                            />
+                            <div className="flex min-w-0 flex-[4] flex-wrap items-center justify-end gap-2 pl-4">
+                              <span className="px-2 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+                                Before: {Math.round(before)}%
+                              </span>
+                              <span className="px-2 py-1 rounded-full text-xs font-semibold bg-primary-blue-50 text-primary-blue-800 border border-primary-blue-200">
+                                After: {Math.round(after)}%
+                              </span>
+                              <span
+                                className={`px-2 py-1 rounded-full text-xs font-bold border ${
+                                  deltaPositive
+                                    ? "bg-primary-green-100 text-primary-green-800 border-primary-green-200"
+                                    : "bg-orange-100 text-orange-800 border-orange-200"
+                                }`}
+                              >
+                                {deltaPositive ? "+" : ""}
+                                {delta}%
+                              </span>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
+                  </div>
+                </Card>
+              ) : (
+                <Card className="p-6 bg-slate-50 border-slate-200">
+                  <div className="text-center">
+                    <BarChart3 className="size-12 text-slate-400 mx-auto mb-4" />
+                    <h4 className="text-lg font-semibold text-slate-600 mb-2">
+                      Career Maturity Assessments Not Completed
+                    </h4>
+                    <p className="text-sm text-slate-500">
+                      Complete both Career Maturity Assessment-1 and Career
+                      Maturity Assessment-2 to view your career maturity
+                      progress.
+                    </p>
+                  </div>
+                </Card>
+              )}
+            </div>
 
-              {/* Psychological Wellbeing: Before vs After */}
-              <div>
-                <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
-                  <Heart className="size-5 text-pink-600" />
-                  Psychological Wellbeing Progress
-                </h3>
+            {/* Psychological Wellbeing: Before vs After */}
+            <div>
+              <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                <Heart className="size-5 text-pink-600" />
+                Psychological Wellbeing Progress
+              </h3>
 
-                {wellbeingPre && wellbeingPost ? (
-                  <Card className="p-6 bg-gradient-to-r from-pink-50 to-pink-60 border-pink-200">
-                    <div className="space-y-2">
-                      {Array.from(
-                        new Set([
-                          ...Object.keys(wellbeingPre?.subscaleScores || {}),
-                          ...Object.keys(wellbeingPost?.subscaleScores || {}),
-                        ])
-                      ).map((dim) => {
-                        const before = wellbeingPre?.subscaleScores?.[dim] ?? 0;
-                        const after = wellbeingPost?.subscaleScores?.[dim] ?? 0;
-                        const maxRaw = 49;
-                        const beforePct = Math.round(
-                          Math.max(0, Math.min(100, (before / maxRaw) * 100))
-                        );
-                        const afterPct = Math.round(
-                          Math.max(0, Math.min(100, (after / maxRaw) * 100))
-                        );
-                        const delta = Number.parseFloat(
-                          (afterPct - beforePct).toFixed(2)
-                        );
-                        const deltaPositive = delta >= 0;
-                        const scaleInfo =
-                          WELLBEING_SUBSCALES[dim] ?? {
-                            name: toTitleCaseLabel(dim),
-                            description: "",
-                          };
+              {wellbeingPre && wellbeingPost ? (
+                <Card className="p-6 bg-gradient-to-r from-pink-50 to-pink-60 border-pink-200">
+                  <div className="space-y-2">
+                    {Array.from(
+                      new Set([
+                        ...Object.keys(wellbeingPre?.subscaleScores || {}),
+                        ...Object.keys(wellbeingPost?.subscaleScores || {}),
+                      ]),
+                    ).map((dim) => {
+                      const before = wellbeingPre?.subscaleScores?.[dim] ?? 0;
+                      const after = wellbeingPost?.subscaleScores?.[dim] ?? 0;
+                      const maxRaw = 49;
+                      const beforePct = Math.round(
+                        Math.max(0, Math.min(100, (before / maxRaw) * 100)),
+                      );
+                      const afterPct = Math.round(
+                        Math.max(0, Math.min(100, (after / maxRaw) * 100)),
+                      );
+                      const delta = Number.parseFloat(
+                        (afterPct - beforePct).toFixed(2),
+                      );
+                      const deltaPositive = delta >= 0;
+                      const scaleInfo = WELLBEING_SUBSCALES[dim] ?? {
+                        name: toTitleCaseLabel(dim),
+                        description: "",
+                      };
 
-                        return (
-                          <Card
-                            key={dim}
-                            className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm"
-                          >
-                            <CardContent className="flex p-4">
-                              <div className="min-w-0 flex-[6] pr-4">
-                                <h4 className="text-sm font-semibold text-slate-800">
-                                  {scaleInfo.name}
-                                </h4>
-                                {scaleInfo.description ? (
-                                  <p className="mt-0.5 text-[11px] font-normal leading-snug text-slate-500">
-                                    {scaleInfo.description}
-                                  </p>
-                                ) : null}
-                              </div>
-                              <div
-                                className="w-px shrink-0 self-stretch bg-slate-200"
-                                aria-hidden
-                              />
-                              <div className="flex min-w-0 flex-[4] flex-wrap items-center justify-end gap-2 pl-4">
-                                <span className="px-2 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">
-                                  Before: {beforePct}%
-                                </span>
-                                <span className="px-2 py-1 rounded-full text-xs font-semibold bg-primary-blue-50 text-primary-blue-800 border border-primary-blue-200">
-                                  After: {afterPct}%
-                                </span>
-                                <span
-                                  className={`px-2 py-1 rounded-full text-xs font-bold border ${
-                                    deltaPositive
-                                      ? "bg-primary-green-100 text-primary-green-800 border-primary-green-200"
-                                      : "bg-orange-100 text-orange-800 border-orange-200"
-                                  }`}
-                                >
-                                  {deltaPositive ? "+" : ""}
-                                  {delta}%
-                                </span>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        );
-                      })}
-                    </div>
+                      return (
+                        <Card
+                          key={dim}
+                          className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm"
+                        >
+                          <CardContent className="flex p-4">
+                            <div className="min-w-0 flex-[6] pr-4">
+                              <h4 className="text-sm font-semibold text-slate-800">
+                                {scaleInfo.name}
+                              </h4>
+                              {scaleInfo.description ? (
+                                <p className="mt-0.5 text-[11px] font-normal leading-snug text-slate-500">
+                                  {scaleInfo.description}
+                                </p>
+                              ) : null}
+                            </div>
+                            <div
+                              className="w-px shrink-0 self-stretch bg-slate-200"
+                              aria-hidden
+                            />
+                            <div className="flex min-w-0 flex-[4] flex-wrap items-center justify-end gap-2 pl-4">
+                              <span className="px-2 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+                                Before: {beforePct}%
+                              </span>
+                              <span className="px-2 py-1 rounded-full text-xs font-semibold bg-primary-blue-50 text-primary-blue-800 border border-primary-blue-200">
+                                After: {afterPct}%
+                              </span>
+                              <span
+                                className={`px-2 py-1 rounded-full text-xs font-bold border ${
+                                  deltaPositive
+                                    ? "bg-primary-green-100 text-primary-green-800 border-primary-green-200"
+                                    : "bg-orange-100 text-orange-800 border-orange-200"
+                                }`}
+                              >
+                                {deltaPositive ? "+" : ""}
+                                {delta}%
+                              </span>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
+                  </div>
 
-                    {/* Overall moved below subscales */}
-                    <div className="mt-4 pt-4 border-t border-pink-200">
-                      <Card className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-                        <CardContent className="flex p-4">
-                          <div className="min-w-0 flex-[6] pr-4">
-                            <h4 className="text-sm font-semibold text-slate-800">
-                              Overall Wellbeing Score
-                            </h4>
-                          </div>
-                          <div
-                            className="w-px shrink-0 self-stretch bg-slate-200"
-                            aria-hidden
-                          />
-                          <div className="flex min-w-0 flex-[4] flex-wrap items-center justify-end gap-2 pl-4">
-                            <span className="px-2 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">
-                              Before:{" "}
-                              {wellbeingPre
-                                ? Math.round(
-                                    Number.parseFloat(wellbeingPre.score)
-                                  )
-                                : "—"}
-                              %
-                            </span>
-                            <span className="px-2 py-1 rounded-full text-xs font-semibold bg-primary-blue-50 text-primary-blue-800 border border-primary-blue-200">
-                              After:{" "}
-                              {wellbeingPost
-                                ? Math.round(
-                                    Number.parseFloat(wellbeingPost.score)
-                                  )
-                                : "—"}
-                              %
-                            </span>
-                            {(() => {
-                              const b = wellbeingPre
-                                ? Number.parseFloat(wellbeingPre.score)
-                                : 0;
-                              const a = wellbeingPost
-                                ? Number.parseFloat(wellbeingPost.score)
-                                : 0;
-                              const d = Number.parseFloat((a - b).toFixed(2));
-                              const pos = d >= 0;
-                              return (
-                                <span
-                                  className={`px-2 py-1 rounded-full text-xs font-bold border ${
-                                    pos
-                                      ? "bg-primary-green-100 text-primary-green-800 border-primary-green-200"
-                                      : "bg-orange-100 text-orange-800 border-orange-200"
-                                  }`}
-                                >
-                                  {pos ? "+" : ""}
-                                  {d}%
-                                </span>
-                              );
-                            })()}
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </div>
-                  </Card>
-                ) : (
-                  <Card className="p-6 bg-slate-50 border-slate-200">
-                    <div className="text-center">
-                      <Heart className="size-12 text-slate-400 mx-auto mb-4" />
-                      <h4 className="text-lg font-semibold text-slate-600 mb-2">
-                        Psychological Wellbeing Assessments Not Completed
-                      </h4>
-                      <p className="text-sm text-slate-500">
-                        Complete both Psychological Wellbeing Assessment-1 and Psychological Wellbeing Assessment-2 to view
-                        your psychological wellbeing progress.
-                      </p>
-                    </div>
-                  </Card>
-                )}
-              </div>
-
-              {/* Strengths & Difficulties Questionnaire (SDQ): Before vs After */}
-              <div>
-                <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
-                  <Award className="size-5 text-amber-600" />
-                  Strengths & Difficulties Progress
-                </h3>
-
-                {sdqPre && sdqPost ? (
-                  <Card className="p-6 bg-gradient-to-r from-amber-50 to-yellow-50 border-amber-200">
-                    <div className="space-y-2">
-                      {Array.from(
-                        new Set([
-                          ...Object.keys(sdqPre?.subscaleScores || {}),
-                          ...Object.keys(sdqPost?.subscaleScores || {}),
-                        ])
-                      ).map((dim) => {
-                        const before = sdqPre?.subscaleScores?.[dim] ?? 0;
-                        const after = sdqPost?.subscaleScores?.[dim] ?? 0;
-                        const maxRaw = 10;
-                        const beforePct = Math.round(
-                          Math.max(0, Math.min(100, (before / maxRaw) * 100))
-                        );
-                        const afterPct = Math.round(
-                          Math.max(0, Math.min(100, (after / maxRaw) * 100))
-                        );
-                        const delta = Number.parseFloat(
-                          (afterPct - beforePct).toFixed(2)
-                        );
-                        const deltaPositive = delta >= 0;
-                        const scaleInfo =
-                          SDQ_SUBSCALES[dim] ?? {
-                            name: toTitleCaseLabel(dim),
-                            description: "",
-                          };
-
-                        return (
-                          <Card
-                            key={dim}
-                            className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm"
-                          >
-                            <CardContent className="flex p-4">
-                              <div className="min-w-0 flex-[6] pr-4">
-                                <h4 className="text-sm font-semibold text-slate-800">
-                                  {scaleInfo.name}
-                                </h4>
-                                {scaleInfo.description ? (
-                                  <p className="mt-0.5 text-[11px] font-normal leading-snug text-slate-500">
-                                    {scaleInfo.description}
-                                  </p>
-                                ) : null}
-                              </div>
-                              <div
-                                className="w-px shrink-0 self-stretch bg-slate-200"
-                                aria-hidden
-                              />
-                              <div className="flex min-w-0 flex-[4] flex-wrap items-center justify-end gap-2 pl-4">
-                                <span className="px-2 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">
-                                  Before: {beforePct}%
-                                </span>
-                                <span className="px-2 py-1 rounded-full text-xs font-semibold bg-primary-blue-50 text-primary-blue-800 border border-primary-blue-200">
-                                  After: {afterPct}%
-                                </span>
-                                <span
-                                  className={`px-2 py-1 rounded-full text-xs font-bold border ${
-                                    deltaPositive
-                                      ? "bg-primary-green-100 text-primary-green-800 border-primary-green-200"
-                                      : "bg-orange-100 text-orange-800 border-orange-200"
-                                  }`}
-                                >
-                                  {deltaPositive ? "+" : ""}
-                                  {delta}%
-                                </span>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        );
-                      })}
-                    </div>
-
-                    {/* Overall moved below subscales */}
-                    <div className="mt-4 pt-4 border-t border-amber-200">
-                      <Card className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-                        <CardContent className="flex p-4">
-                          <div className="min-w-0 flex-[6] pr-4">
-                            <h4 className="text-sm font-semibold text-slate-800">
-                              Overall SDQ Score
-                            </h4>
-                          </div>
-                          <div
-                            className="w-px shrink-0 self-stretch bg-slate-200"
-                            aria-hidden
-                          />
-                          <div className="flex min-w-0 flex-[4] flex-wrap items-center justify-end gap-2 pl-4">
-                            <span className="px-2 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">
-                              Before:{" "}
-                              {sdqPre
-                                ? Math.round(
-                                    Math.min((sdqPre.score / 40) * 100, 100)
-                                  )
-                                : "—"}
-                              %
-                            </span>
-                            <span className="px-2 py-1 rounded-full text-xs font-semibold bg-primary-blue-50 text-primary-blue-800 border border-primary-blue-200">
-                              After:{" "}
-                              {sdqPost
-                                ? Math.round(
-                                    Math.min((sdqPost.score / 40) * 100, 100)
-                                  )
-                                : "—"}
-                              %
-                            </span>
-                            {(() => {
-                              const b = sdqPre
-                                ? Math.min((sdqPre.score / 40) * 100, 100)
-                                : 0;
-                              const a = sdqPost
-                                ? Math.min((sdqPost.score / 40) * 100, 100)
-                                : 0;
-                              const d = Number.parseFloat((a - b).toFixed(2));
-                              const pos = d >= 0;
-                              return (
-                                <span
-                                  className={`px-2 py-1 rounded-full text-xs font-bold border ${
-                                    pos
-                                      ? "bg-primary-green-100 text-primary-green-800 border-primary-green-200"
-                                      : "bg-orange-100 text-orange-800 border-orange-200"
-                                  }`}
-                                >
-                                  {pos ? "+" : ""}
-                                  {d}%
-                                </span>
-                              );
-                            })()}
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </div>
-                  </Card>
-                ) : (
-                  <Card className="p-6 bg-slate-50 border-slate-200">
-                    <div className="text-center">
-                      <Award className="size-12 text-slate-400 mx-auto mb-4" />
-                      <h4 className="text-lg font-semibold text-slate-600 mb-2">
-                        Strengths & Difficulties Assessments Not Completed
-                      </h4>
-                      <p className="text-sm text-slate-500">
-                        Complete both Strengths & Difficulties Assessment-1 and Strengths & Difficulties Assessment-2 to view
-                        your strengths & difficulties progress.
-                      </p>
-                    </div>
-                  </Card>
-                )}
-              </div>
-
-              {/* Before vs After Intervention (First 8 Questions) */}
-              <div>
-                <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
-                  <FileText className="size-5 text-slate-700" />
-                  Before vs After Intervention
-                </h3>
-
-                {preInterventionAnswers && postInterventionAnswers ? (
-                  <Card className="p-4 overflow-x-auto">
-                    <table className="min-w-full text-sm">
-                      <thead>
-                        <tr className="text-left text-slate-600 border-b">
-                          <th className="py-2 pr-4">Question</th>
-                          <th className="py-2 pr-4">Before</th>
-                          <th className="py-2">After</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {Object.entries(preInterventionAnswers)
-                          .slice(0, 8)
-                          .map(([key, beforeVal]) => {
-                            const question = getPreQuestionLabelFromKey(key);
-                            const postKey =
-                              getCorrespondingPostKeyFromPreKey(key) || key;
-                            const afterVal = postInterventionAnswers?.[postKey];
+                  {/* Overall moved below subscales */}
+                  <div className="mt-4 pt-4 border-t border-pink-200">
+                    <Card className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                      <CardContent className="flex p-4">
+                        <div className="min-w-0 flex-[6] pr-4">
+                          <h4 className="text-sm font-semibold text-slate-800">
+                            Overall Wellbeing Score
+                          </h4>
+                        </div>
+                        <div
+                          className="w-px shrink-0 self-stretch bg-slate-200"
+                          aria-hidden
+                        />
+                        <div className="flex min-w-0 flex-[4] flex-wrap items-center justify-end gap-2 pl-4">
+                          <span className="px-2 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+                            Before:{" "}
+                            {wellbeingPre
+                              ? Math.round(
+                                  Number.parseFloat(wellbeingPre.score),
+                                )
+                              : "—"}
+                            %
+                          </span>
+                          <span className="px-2 py-1 rounded-full text-xs font-semibold bg-primary-blue-50 text-primary-blue-800 border border-primary-blue-200">
+                            After:{" "}
+                            {wellbeingPost
+                              ? Math.round(
+                                  Number.parseFloat(wellbeingPost.score),
+                                )
+                              : "—"}
+                            %
+                          </span>
+                          {(() => {
+                            const b = wellbeingPre
+                              ? Number.parseFloat(wellbeingPre.score)
+                              : 0;
+                            const a = wellbeingPost
+                              ? Number.parseFloat(wellbeingPost.score)
+                              : 0;
+                            const d = Number.parseFloat((a - b).toFixed(2));
+                            const pos = d >= 0;
                             return (
-                              <tr key={key} className="border-b last:border-0">
-                                <td className="py-2 pr-4 text-slate-800">
-                                  {question}
-                                </td>
-                                <td className="py-2 pr-4 font-medium">
-                                  {beforeVal}
-                                </td>
-                                <td className="py-2 font-medium">
-                                  {typeof afterVal === "number" ||
-                                  typeof afterVal === "string"
-                                    ? afterVal
-                                    : "—"}
-                                </td>
-                              </tr>
+                              <span
+                                className={`px-2 py-1 rounded-full text-xs font-bold border ${
+                                  pos
+                                    ? "bg-primary-green-100 text-primary-green-800 border-primary-green-200"
+                                    : "bg-orange-100 text-orange-800 border-orange-200"
+                                }`}
+                              >
+                                {pos ? "+" : ""}
+                                {d}%
+                              </span>
                             );
-                          })}
-                      </tbody>
-                    </table>
-                  </Card>
-                ) : (
-                  <Card className="p-6 bg-slate-50 border-slate-200">
-                    <div className="text-center">
-                      <FileText className="size-12 text-slate-400 mx-auto mb-4" />
-                      <h4 className="text-lg font-semibold text-slate-600 mb-2">
-                        Intervention Comparison Not Available
-                      </h4>
-                      <p className="text-sm text-slate-500">
-                        Complete both Base-line Assessment and Finish-line Assessment to view
-                        your intervention progress.
-                      </p>
-                    </div>
-                  </Card>
-                )}
-              </div>
+                          })()}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </Card>
+              ) : (
+                <Card className="p-6 bg-slate-50 border-slate-200">
+                  <div className="text-center">
+                    <Heart className="size-12 text-slate-400 mx-auto mb-4" />
+                    <h4 className="text-lg font-semibold text-slate-600 mb-2">
+                      Psychological Wellbeing Assessments Not Completed
+                    </h4>
+                    <p className="text-sm text-slate-500">
+                      Complete both Psychological Wellbeing Assessment-1 and
+                      Psychological Wellbeing Assessment-2 to view your
+                      psychological wellbeing progress.
+                    </p>
+                  </div>
+                </Card>
+              )}
+            </div>
 
-              {/* Download Actions */}
-              {/* <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-slate-200">
+            {/* Strengths & Difficulties Questionnaire (SDQ): Before vs After */}
+            <div>
+              <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                <Award className="size-5 text-amber-600" />
+                Strengths & Difficulties Progress
+              </h3>
+
+              {sdqPre && sdqPost ? (
+                <Card className="p-6 bg-gradient-to-r from-amber-50 to-yellow-50 border-amber-200">
+                  <div className="space-y-2">
+                    {Array.from(
+                      new Set([
+                        ...Object.keys(sdqPre?.subscaleScores || {}),
+                        ...Object.keys(sdqPost?.subscaleScores || {}),
+                      ]),
+                    ).map((dim) => {
+                      const before = sdqPre?.subscaleScores?.[dim] ?? 0;
+                      const after = sdqPost?.subscaleScores?.[dim] ?? 0;
+                      const maxRaw = 10;
+                      const beforePct = Math.round(
+                        Math.max(0, Math.min(100, (before / maxRaw) * 100)),
+                      );
+                      const afterPct = Math.round(
+                        Math.max(0, Math.min(100, (after / maxRaw) * 100)),
+                      );
+                      const delta = Number.parseFloat(
+                        (afterPct - beforePct).toFixed(2),
+                      );
+                      const deltaPositive = delta >= 0;
+                      const scaleInfo = SDQ_SUBSCALES[dim] ?? {
+                        name: toTitleCaseLabel(dim),
+                        description: "",
+                      };
+
+                      return (
+                        <Card
+                          key={dim}
+                          className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm"
+                        >
+                          <CardContent className="flex p-4">
+                            <div className="min-w-0 flex-[6] pr-4">
+                              <h4 className="text-sm font-semibold text-slate-800">
+                                {scaleInfo.name}
+                              </h4>
+                              {scaleInfo.description ? (
+                                <p className="mt-0.5 text-[11px] font-normal leading-snug text-slate-500">
+                                  {scaleInfo.description}
+                                </p>
+                              ) : null}
+                            </div>
+                            <div
+                              className="w-px shrink-0 self-stretch bg-slate-200"
+                              aria-hidden
+                            />
+                            <div className="flex min-w-0 flex-[4] flex-wrap items-center justify-end gap-2 pl-4">
+                              <span className="px-2 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+                                Before: {beforePct}%
+                              </span>
+                              <span className="px-2 py-1 rounded-full text-xs font-semibold bg-primary-blue-50 text-primary-blue-800 border border-primary-blue-200">
+                                After: {afterPct}%
+                              </span>
+                              <span
+                                className={`px-2 py-1 rounded-full text-xs font-bold border ${
+                                  deltaPositive
+                                    ? "bg-primary-green-100 text-primary-green-800 border-primary-green-200"
+                                    : "bg-orange-100 text-orange-800 border-orange-200"
+                                }`}
+                              >
+                                {deltaPositive ? "+" : ""}
+                                {delta}%
+                              </span>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
+                  </div>
+
+                  {/* Overall moved below subscales */}
+                  <div className="mt-4 pt-4 border-t border-amber-200">
+                    <Card className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                      <CardContent className="flex p-4">
+                        <div className="min-w-0 flex-[6] pr-4">
+                          <h4 className="text-sm font-semibold text-slate-800">
+                            Overall SDQ Score
+                          </h4>
+                        </div>
+                        <div
+                          className="w-px shrink-0 self-stretch bg-slate-200"
+                          aria-hidden
+                        />
+                        <div className="flex min-w-0 flex-[4] flex-wrap items-center justify-end gap-2 pl-4">
+                          <span className="px-2 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+                            Before:{" "}
+                            {sdqPre
+                              ? Math.round(
+                                  Math.min((sdqPre.score / 40) * 100, 100),
+                                )
+                              : "—"}
+                            %
+                          </span>
+                          <span className="px-2 py-1 rounded-full text-xs font-semibold bg-primary-blue-50 text-primary-blue-800 border border-primary-blue-200">
+                            After:{" "}
+                            {sdqPost
+                              ? Math.round(
+                                  Math.min((sdqPost.score / 40) * 100, 100),
+                                )
+                              : "—"}
+                            %
+                          </span>
+                          {(() => {
+                            const b = sdqPre
+                              ? Math.min((sdqPre.score / 40) * 100, 100)
+                              : 0;
+                            const a = sdqPost
+                              ? Math.min((sdqPost.score / 40) * 100, 100)
+                              : 0;
+                            const d = Number.parseFloat((a - b).toFixed(2));
+                            const pos = d >= 0;
+                            return (
+                              <span
+                                className={`px-2 py-1 rounded-full text-xs font-bold border ${
+                                  pos
+                                    ? "bg-primary-green-100 text-primary-green-800 border-primary-green-200"
+                                    : "bg-orange-100 text-orange-800 border-orange-200"
+                                }`}
+                              >
+                                {pos ? "+" : ""}
+                                {d}%
+                              </span>
+                            );
+                          })()}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </Card>
+              ) : (
+                <Card className="p-6 bg-slate-50 border-slate-200">
+                  <div className="text-center">
+                    <Award className="size-12 text-slate-400 mx-auto mb-4" />
+                    <h4 className="text-lg font-semibold text-slate-600 mb-2">
+                      Strengths & Difficulties Assessments Not Completed
+                    </h4>
+                    <p className="text-sm text-slate-500">
+                      Complete both Strengths & Difficulties Assessment-1 and
+                      Strengths & Difficulties Assessment-2 to view your
+                      strengths & difficulties progress.
+                    </p>
+                  </div>
+                </Card>
+              )}
+            </div>
+
+            {/* Before vs After Intervention (First 8 Questions) */}
+            <div>
+              <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                <FileText className="size-5 text-violet-600" />
+                Before vs After Intervention
+              </h3>
+
+              {preInterventionAnswers && postInterventionAnswers ? (
+                <Card className="p-6 bg-gradient-to-r from-violet-50 to-violet-60 border-violet-200">
+                  <div className="space-y-2">
+                    {Object.entries(preInterventionAnswers)
+                      .slice(0, 8)
+                      .map(([key, beforeVal], index) => {
+                        const question = getPreQuestionLabelFromKey(key);
+                        const postKey =
+                          getCorrespondingPostKeyFromPreKey(key) || key;
+                        const afterVal = postInterventionAnswers?.[postKey];
+
+                        const questionMeta = PRE_ASSESSMENT_QUESTIONS[key];
+                        const maxScale = 10;
+                        const isReverse = questionMeta?.reverseScored ?? false;
+                        const toPercent = (val: number) =>
+                          isReverse
+                            ? Math.round(((maxScale - val) / maxScale) * 100)
+                            : Math.round((val / maxScale) * 100);
+
+                        const beforeNum =
+                          typeof beforeVal === "number"
+                            ? beforeVal
+                            : Number(beforeVal);
+                        const afterNum =
+                          typeof afterVal === "number"
+                            ? afterVal
+                            : typeof afterVal === "string"
+                              ? Number(afterVal)
+                              : null;
+
+                        const beforePct = Number.isFinite(beforeNum)
+                          ? toPercent(beforeNum)
+                          : null;
+                        const afterPct =
+                          afterNum !== null && Number.isFinite(afterNum)
+                            ? toPercent(afterNum)
+                            : null;
+                        const delta =
+                          beforePct !== null && afterPct !== null
+                            ? Number.parseFloat(
+                                (afterPct - beforePct).toFixed(2),
+                              )
+                            : null;
+                        const deltaPositive = delta !== null && delta >= 0;
+
+                        return (
+                          <Card
+                            key={key}
+                            className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm"
+                          >
+                            <CardContent className="flex p-4">
+                              <div className="min-w-0 flex-[6] pr-4">
+                                <h4 className="text-sm font-semibold text-slate-800">
+                                  {questionMeta?.topic}
+                                  {isReverse && (
+                                    <span className="ml-1 text-xs font-normal italic text-slate-400">
+                                      (reverse scored)
+                                    </span>
+                                  )}
+                                </h4>
+                                <p className="mt-0.5 text-[11px] font-normal leading-snug text-slate-500">
+                                  {question}
+                                </p>
+                              </div>
+                              <div
+                                className="w-px shrink-0 self-stretch bg-slate-200"
+                                aria-hidden
+                              />
+                              <div className="flex min-w-0 flex-[4] flex-wrap items-center justify-end gap-2 pl-4">
+                                <span className="px-2 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+                                  Before:{" "}
+                                  {beforePct !== null ? `${beforePct}%` : "—"}
+                                </span>
+                                <span className="px-2 py-1 rounded-full text-xs font-semibold bg-primary-blue-50 text-primary-blue-800 border border-primary-blue-200">
+                                  After:{" "}
+                                  {afterPct !== null ? `${afterPct}%` : "—"}
+                                </span>
+                                {delta !== null ? (
+                                  <span
+                                    className={`px-2 py-1 rounded-full text-xs font-bold border ${
+                                      isReverse
+                                        ? deltaPositive
+                                          ? "bg-orange-100 text-orange-800 border-orange-200"
+                                          : "bg-primary-green-100 text-primary-green-800 border-primary-green-200"
+                                        : deltaPositive
+                                          ? "bg-primary-green-100 text-primary-green-800 border-primary-green-200"
+                                          : "bg-orange-100 text-orange-800 border-orange-200"
+                                    }`}
+                                  >
+                                    {deltaPositive ? "+" : ""}
+                                    {delta}%
+                                  </span>
+                                ) : (
+                                  <span className="px-2 py-1 rounded-full text-xs font-bold border bg-slate-100 text-slate-500 border-slate-200">
+                                    —
+                                  </span>
+                                )}
+                              </div>
+                            </CardContent>
+                          </Card>
+                        );
+                      })}
+                  </div>
+                </Card>
+              ) : (
+                <Card className="p-6 bg-slate-50 border-slate-200">
+                  <div className="text-center">
+                    <FileText className="size-12 text-slate-400 mx-auto mb-4" />
+                    <h4 className="text-lg font-semibold text-slate-600 mb-2">
+                      Intervention Comparison Not Available
+                    </h4>
+                    <p className="text-sm text-slate-500">
+                      Complete both Base-line Assessment and Finish-line
+                      Assessment to view your intervention progress.
+                    </p>
+                  </div>
+                </Card>
+              )}
+            </div>
+
+            {/* Download Actions */}
+            {/* <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-slate-200">
                 <Button className="flex-1 bg-primary-green-600 hover:bg-primary-green-700 text-white">
                   <Download className="size-4 mr-2" />
                   Download PDF Report
@@ -1144,14 +1243,14 @@ export function ReportDialog({ isOpen, onClose, contentOnly }: ReportDialogProps
                   Export as Word
                 </Button>
               </div> */}
-            </>
-          ) : (
-            <div className="py-8 text-center text-slate-500">
-              <p>Report not available yet. Please visit after sometime.</p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+          </>
+        ) : (
+          <div className="py-8 text-center text-slate-500">
+            <p>Report not available yet. Please visit after sometime.</p>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 
   if (contentOnly) {

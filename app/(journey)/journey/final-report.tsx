@@ -454,16 +454,44 @@ const SDQ_SUBSCALES: Record<string, { name: string; description: string }> = {
   },
 };
 
-const PRE_ASSESSMENT_QUESTIONS: string[] = [
-  "How clear are your current career goals?",
-  "How confident are you that you will achieve your career goals?",
-  "How confident are you in your ability to overcome obstacles in your career?",
-  "How would you rate your current level of stress related to work or personal life?",
-  "How well do you understand your own thought patterns and behaviors?",
-  "How satisfied are you with your current work-life balance?",
-  "How satisfied are you with your current job and overall well-being?",
-  "How ready are you to make changes in your professional or personal life?",
-];
+const PRE_ASSESSMENT_QUESTIONS: Record<
+  string,
+  { text: string; topic: string; reverseScored?: boolean }
+> = {
+  q1: {
+    text: "How clear are your current career goals?",
+    topic: "Career Goal Clarity",
+  },
+  q2: {
+    text: "How confident are you that you will achieve your career goals?",
+    topic: "Goal Achievement Confidence",
+  },
+  q3: {
+    text: "How confident are you in your ability to overcome obstacles in your career?",
+    topic: "Career Resilience",
+  },
+  q4: {
+    text: "How would you rate your current level of stress related to work or personal life?",
+    topic: "Work-Life Stress",
+    reverseScored: true,
+  },
+  q5: {
+    text: "How well do you understand your own thought patterns and behaviors?",
+    topic: "Self-Awareness",
+  },
+  q6: {
+    text: "How satisfied are you with your current work-life balance?",
+    topic: "Work-Life Balance",
+  },
+  q7: {
+    text: "How satisfied are you with your current job and overall well-being?",
+    topic: "Job Satisfaction & Wellbeing",
+  },
+  q8: {
+    text: "How ready are you to make changes in your professional or personal life?",
+    topic: "Readiness for Change",
+  },
+};
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -479,19 +507,15 @@ function toTitleCaseLabel(key: string): string {
 }
 
 function getPreQuestionLabel(key: string): string {
-  if (key.startsWith("q")) {
-    const idx = Number.parseInt(key.slice(1), 10) - 1;
-    if (!Number.isNaN(idx) && PRE_ASSESSMENT_QUESTIONS[idx]) {
-      return PRE_ASSESSMENT_QUESTIONS[idx];
-    }
-  }
-  return key;
+  return PRE_ASSESSMENT_QUESTIONS[key]?.text ?? key;
 }
 
 function getPostKey(key: string): string {
   if (key.startsWith("q")) return key;
-  const idx = PRE_ASSESSMENT_QUESTIONS.findIndex((t) => t === key);
-  return idx >= 0 ? `q${idx + 1}` : key;
+  const entry = Object.entries(PRE_ASSESSMENT_QUESTIONS).find(
+    ([, value]) => value.text === key,
+  );
+  return entry ? entry[0] : key;
 }
 
 // ── Journey Insights interfaces ───────────────────────────────────────────────
@@ -1764,119 +1788,166 @@ export const FinalReport: React.FC<FinalReportProps> = ({
           {preInterventionAnswers && postInterventionAnswers ? (
             <div
               style={{
-                border: "1px solid #e2e8f0",
+                background: "#f5f3ff",
+                border: "1px solid #ddd6fe",
                 borderRadius: "8px",
-                overflow: "hidden",
+                padding: "16px",
               }}
             >
-              <table
-                style={{
-                  width: "100%",
-                  borderCollapse: "collapse",
-                  fontSize: "12px",
-                }}
-              >
-                <thead>
-                  <tr style={{ background: "#f8fafc" }}>
-                    <th
-                      style={{
-                        textAlign: "left",
-                        padding: "10px 14px",
-                        color: "#4a5568",
-                        fontWeight: "600",
-                        borderBottom: "2px solid #e2e8f0",
-                        fontSize: "11px",
-                        textTransform: "uppercase",
-                        letterSpacing: "0.5px",
-                      }}
-                    >
-                      Question
-                    </th>
-                    <th
-                      style={{
-                        textAlign: "center",
-                        padding: "10px 14px",
-                        color: "#4a5568",
-                        fontWeight: "600",
-                        borderBottom: "2px solid #e2e8f0",
-                        fontSize: "11px",
-                        textTransform: "uppercase",
-                        letterSpacing: "0.5px",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      Before
-                    </th>
-                    <th
-                      style={{
-                        textAlign: "center",
-                        padding: "10px 14px",
-                        color: "#4a5568",
-                        fontWeight: "600",
-                        borderBottom: "2px solid #e2e8f0",
-                        fontSize: "11px",
-                        textTransform: "uppercase",
-                        letterSpacing: "0.5px",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      After
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {Object.entries(preInterventionAnswers)
-                    .slice(0, 8)
-                    .map(([key, beforeVal], i) => {
-                      const question = getPreQuestionLabel(key);
-                      const postKey = getPostKey(key);
-                      const afterVal = postInterventionAnswers?.[postKey];
-                      return (
-                        <tr
-                          key={key}
-                          style={{
-                            background: i % 2 === 0 ? "#ffffff" : "#f8fafc",
-                          }}
-                        >
-                          <td
+              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                {Object.entries(preInterventionAnswers)
+                  .slice(0, 8)
+                  .map(([key, beforeVal]) => {
+                    const question = getPreQuestionLabel(key);
+                    const postKey = getPostKey(key);
+                    const afterVal = postInterventionAnswers?.[postKey];
+                    const questionMeta = PRE_ASSESSMENT_QUESTIONS[key];
+                    const maxScale = 10;
+                    const isReverse = questionMeta?.reverseScored ?? false;
+                    const toPercent = (val: number) =>
+                      isReverse
+                        ? Math.round(((maxScale - val) / maxScale) * 100)
+                        : Math.round((val / maxScale) * 100);
+
+                    const beforeNum =
+                      typeof beforeVal === "number" ? beforeVal : Number(beforeVal);
+                    const afterNum =
+                      typeof afterVal === "number"
+                        ? afterVal
+                        : typeof afterVal === "string"
+                          ? Number(afterVal)
+                          : null;
+
+                    const beforePct = Number.isFinite(beforeNum)
+                      ? toPercent(beforeNum)
+                      : null;
+                    const afterPct =
+                      afterNum !== null && Number.isFinite(afterNum)
+                        ? toPercent(afterNum)
+                        : null;
+                    const delta =
+                      beforePct !== null && afterPct !== null
+                        ? Number.parseFloat((afterPct - beforePct).toFixed(2))
+                        : null;
+                    const deltaPositive = delta !== null && delta >= 0;
+
+                    const deltaBg =
+                      delta === null
+                        ? "#f1f5f9"
+                        : isReverse
+                          ? deltaPositive
+                            ? "#fff7ed"
+                            : "#f0fdf4"
+                          : deltaPositive
+                            ? "#f0fdf4"
+                            : "#fff7ed";
+                    const deltaText =
+                      delta === null
+                        ? "#64748b"
+                        : isReverse
+                          ? deltaPositive
+                            ? "#c2410c"
+                            : "#15803d"
+                          : deltaPositive
+                            ? "#15803d"
+                            : "#c2410c";
+                    const deltaBorder =
+                      delta === null
+                        ? "#cbd5e1"
+                        : isReverse
+                          ? deltaPositive
+                            ? "#fed7aa"
+                            : "#bbf7d0"
+                          : deltaPositive
+                            ? "#bbf7d0"
+                            : "#fed7aa";
+
+                    return (
+                      <div
+                        key={key}
+                        style={{
+                          background: "#ffffff",
+                          border: "1px solid #e2e8f0",
+                          borderRadius: "6px",
+                          padding: "10px 14px",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "12px",
+                        }}
+                      >
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div
                             style={{
-                              padding: "10px 14px",
+                              fontWeight: "600",
                               color: "#1a202c",
-                              borderBottom: "1px solid #e2e8f0",
+                              fontSize: "13px",
+                            }}
+                          >
+                            {questionMeta?.topic ?? key}
+                            {isReverse && (
+                              <span
+                                style={{
+                                  marginLeft: "6px",
+                                  fontSize: "11px",
+                                  color: "#94a3b8",
+                                  fontStyle: "italic",
+                                  fontWeight: "400",
+                                }}
+                              >
+                                (reverse scored)
+                              </span>
+                            )}
+                          </div>
+                          <div
+                            style={{
+                              fontSize: "11px",
+                              color: "#718096",
+                              marginTop: "2px",
+                              lineHeight: "1.4",
                             }}
                           >
                             {question}
-                          </td>
-                          <td
-                            style={{
-                              padding: "10px 14px",
-                              textAlign: "center",
-                              fontWeight: "600",
-                              color: "#2d3748",
-                              borderBottom: "1px solid #e2e8f0",
-                            }}
+                          </div>
+                        </div>
+                        <div
+                          style={{
+                            width: "1px",
+                            alignSelf: "stretch",
+                            background: "#e2e8f0",
+                            flexShrink: 0,
+                          }}
+                        />
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "6px",
+                            flexShrink: 0,
+                            paddingLeft: "12px",
+                            flexWrap: "wrap",
+                            justifyContent: "flex-end",
+                          }}
+                        >
+                          <Badge bg="#f1f5f9" text="#374151" border="#cbd5e1">
+                            Before: {beforePct !== null ? `${beforePct}%` : "—"}
+                          </Badge>
+                          <Badge bg="#eff6ff" text="#1e40af" border="#bfdbfe">
+                            After: {afterPct !== null ? `${afterPct}%` : "—"}
+                          </Badge>
+                          <Badge
+                            bg={deltaBg}
+                            text={deltaText}
+                            border={deltaBorder}
                           >
-                            {beforeVal}
-                          </td>
-                          <td
-                            style={{
-                              padding: "10px 14px",
-                              textAlign: "center",
-                              fontWeight: "600",
-                              color: "#2d3748",
-                              borderBottom: "1px solid #e2e8f0",
-                            }}
-                          >
-                            {typeof afterVal === "number" ||
-                            typeof afterVal === "string"
-                              ? afterVal
+                            {delta !== null
+                              ? `${deltaPositive ? "+" : ""}${delta}%`
                               : "—"}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                </tbody>
-              </table>
+                          </Badge>
+                        </div>
+                      </div>
+                    );
+                  })}
+              </div>
             </div>
           ) : (
             <NotCompleted
