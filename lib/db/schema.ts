@@ -372,7 +372,7 @@ export const journey_progress = pgTable("journey_progress", {
   user_id: uuid("user_id").notNull(),
   current_session: integer("current_session").notNull(),
   completed_sessions: json("completed_sessions").notNull(), // array of numbers
-  total_score: integer("total_score").notNull(),
+  payment_done: boolean("payment_done").default(false).notNull(),
   last_active_date: varchar("last_active_date", { length: 32 }).notNull(), // or timestamp
   enable_by_coach: jsonb("enable_by_coach").default({}), // JSONB for coach-enabled features
   created_at: timestamp("created_at").defaultNow().notNull(),
