@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
       userId: session.user.id,
       currentSession: 0,
       completedSessions: [],
-      totalScore: 0,
+      paymentDone: false,
       lastActiveDate: new Date().toISOString(),
     });
   }

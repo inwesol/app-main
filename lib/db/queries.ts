@@ -897,7 +897,7 @@ export async function getUserJourneyProgress(userId: string) {
     userId: progress.user_id,
     currentSession: progress.current_session,
     completedSessions: progress.completed_sessions, // JSON array
-    totalScore: progress.total_score,
+    paymentDone: progress.payment_done,
     lastActiveDate: progress.last_active_date,
     enableByCoach: progress.enable_by_coach, // JSONB for coach-enabled features
   };
@@ -908,13 +908,13 @@ export async function createUserJourneyProgress({
   userId,
   currentSession,
   completedSessions,
-  totalScore,
+  paymentDone = false,
   lastActiveDate,
 }: {
   userId: string;
   currentSession: number;
   completedSessions: number[];
-  totalScore: number;
+  paymentDone?: boolean;
   lastActiveDate: string;
 }) {
   const [created] = await db
@@ -923,7 +923,7 @@ export async function createUserJourneyProgress({
       user_id: userId,
       current_session: currentSession,
       completed_sessions: completedSessions,
-      total_score: totalScore,
+      payment_done: paymentDone,
       last_active_date: lastActiveDate,
       created_at: new Date(),
       updated_at: new Date(),
@@ -934,7 +934,7 @@ export async function createUserJourneyProgress({
     userId: created.user_id,
     currentSession: created.current_session,
     completedSessions: created.completed_sessions,
-    totalScore: created.total_score,
+    paymentDone: created.payment_done,
     lastActiveDate: created.last_active_date,
     enableByCoach: created.enable_by_coach,
   };
@@ -1095,10 +1095,6 @@ export async function updateJourneyProgressAfterForm(
     if (!completedSessions.includes(sessionId)) {
       completedSessions.push(sessionId);
     }
-    // Calculate the new total score
-    // Each completed session is worth 100 points
-    const newTotalScore = (jp.total_score ?? 0) + 100;
-
     // Set current_session to the next one, up to your last session number
     const nextSession = Math.max(...completedSessions) + 1;
 
@@ -1109,7 +1105,6 @@ export async function updateJourneyProgressAfterForm(
         last_active_date: new Date().toISOString(),
         updated_at: new Date(),
         current_session: nextSession,
-        total_score: newTotalScore,
       })
       .where(eq(journey_progress.user_id, userId));
   }
