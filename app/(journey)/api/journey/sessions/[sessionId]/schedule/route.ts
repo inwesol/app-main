@@ -16,6 +16,7 @@ export async function POST(
     }
 
     const { sessionId } = await params;
+    const currentSessionId = Number.parseInt(sessionId, 10);
     const body = await request.json();
     const { session_datetime } = body;
 
@@ -51,26 +52,55 @@ export async function POST(
       .where(
         and(
           eq(user_session_form_progress.user_id, session.user.id),
-          eq(
-            user_session_form_progress.session_id,
-            Number.parseInt(sessionId, 10)
-          ),
+          eq(user_session_form_progress.session_id, currentSessionId),
           eq(user_session_form_progress.form_id, "schedule-call")
         )
       )
       .limit(1);
 
+    const inheritedCoachDetails: {
+      assignedCoachId?: string;
+      meeting_link?: string;
+    } = {};
+
+    if (currentSessionId > 0) {
+      const previousSessionProgress = await db
+        .select({ insights: user_session_form_progress.insights })
+        .from(user_session_form_progress)
+        .where(
+          and(
+            eq(user_session_form_progress.user_id, session.user.id),
+            eq(user_session_form_progress.session_id, currentSessionId - 1),
+            eq(user_session_form_progress.form_id, "schedule-call")
+          )
+        )
+        .limit(1);
+
+      const previousInsights =
+        (previousSessionProgress[0]?.insights as Record<string, unknown>) || {};
+
+      if (typeof previousInsights.assignedCoachId === "string") {
+        inheritedCoachDetails.assignedCoachId = previousInsights.assignedCoachId;
+      }
+
+      if (typeof previousInsights.meeting_link === "string") {
+        inheritedCoachDetails.meeting_link = previousInsights.meeting_link;
+      }
+    }
+
     const insights = {
       session_datetime: session_datetime,
       scheduled_at: new Date().toISOString(),
+      ...inheritedCoachDetails,
     };
+    const scheduleStatus = insights.assignedCoachId ? "assigned" : "pending";
 
     if (existingProgress.length > 0) {
       // Update existing record
       await db
         .update(user_session_form_progress)
         .set({
-          status: "pending",
+          status: scheduleStatus,
           insights,
           updated_at: new Date(),
         })
@@ -79,7 +109,7 @@ export async function POST(
             eq(user_session_form_progress.user_id, session.user.id),
             eq(
               user_session_form_progress.session_id,
-              Number.parseInt(sessionId, 10)
+              currentSessionId
             ),
             eq(user_session_form_progress.form_id, "schedule-call")
           )
@@ -88,9 +118,9 @@ export async function POST(
       // Create new record
       await db.insert(user_session_form_progress).values({
         user_id: session.user.id,
-        session_id: Number.parseInt(sessionId, 10),
+        session_id: currentSessionId,
         form_id: "schedule-call",
-        status: "pending",
+        status: scheduleStatus,
         insights,
       });
     }
@@ -98,6 +128,7 @@ export async function POST(
     return NextResponse.json({
       success: true,
       message: "Schedule request submitted successfully",
+      status: scheduleStatus,
       insights,
     });
   } catch (error) {
