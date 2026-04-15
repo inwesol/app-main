@@ -40,6 +40,7 @@ interface UserProgress {
   completedSessions: number[];
   totalScore: number;
   lastActiveDate: string;
+  paymentDone: boolean;
 }
 
 interface JourneyPageProps {
@@ -71,6 +72,14 @@ export const JourneyPage: React.FC<JourneyPageProps> = ({ fullName }) => {
 
       // Build sessions with updated status
       const updatedSessions = SESSION_TEMPLATES.map((session) => {
+        if (!data.paymentDone) {
+          return {
+            ...session,
+            status:
+              session.id === 0 ? ("current" as const) : ("locked" as const),
+          };
+        }
+
         if (data.completedSessions.includes(session.id)) {
           return { ...session, status: "completed" as const };
         } else if (session.id === data.currentSession) {
@@ -112,6 +121,7 @@ export const JourneyPage: React.FC<JourneyPageProps> = ({ fullName }) => {
 
   const allSessionsCompleted =
     userProgress.completedSessions.length === sessions.length;
+  const isPaymentDone = userProgress.paymentDone;
 
   const generatePdfReport = async () => {
     console.log("Generating PDF report");
@@ -181,18 +191,20 @@ export const JourneyPage: React.FC<JourneyPageProps> = ({ fullName }) => {
               <div className="flex items-center justify-between text-xs text-primary-green-700 mb-1">
                 <span>Status</span>
                 <span className="font-bold">
-                  {Math.round(getProgressPercentage())}%
+                  {isPaymentDone ? `${Math.round(getProgressPercentage())}%` : "Locked"}
                 </span>
               </div>
               <Progress
-                value={getProgressPercentage()}
+                value={isPaymentDone ? getProgressPercentage() : 0}
                 className="h-2 bg-primary-green-100"
               />
               <div className="flex items-center justify-between text-xs text-primary-green-700 mt-1 pt-1">
                 <span className="">
-                  {userProgress.currentSession > 8
-                    ? "All sessions are completed"
-                    : `Active Session #${userProgress.currentSession + 1}`}
+                  {isPaymentDone
+                    ? userProgress.currentSession > 8
+                      ? "All sessions are completed"
+                      : `Active Session #${userProgress.currentSession + 1}`
+                    : "Complete payment to unlock full journey"}
                 </span>
                 <span className="">
                   Latest activity on{" "}
@@ -221,21 +233,26 @@ export const JourneyPage: React.FC<JourneyPageProps> = ({ fullName }) => {
               <Dialog
                 open={isDownloadDialogOpen}
                 onOpenChange={(open) => {
-                  if (!allSessionsCompleted) return;
+                  if (!isPaymentDone || !allSessionsCompleted) return;
                   setIsDownloadDialogOpen(open);
                 }}
               >
-                <DialogTrigger asChild disabled={!allSessionsCompleted}>
+                <DialogTrigger
+                  asChild
+                  disabled={!isPaymentDone || !allSessionsCompleted}
+                >
                   <div
                     className={`flex items-center justify-between p-3 rounded-lg border transition-colors duration-200 ${
-                      allSessionsCompleted
+                      isPaymentDone && allSessionsCompleted
                         ? "bg-teal-50/50 border-teal-200/30 cursor-pointer hover:bg-teal-100/50"
                         : "bg-slate-100/50 border-slate-200/30 cursor-not-allowed opacity-80"
                     }`}
                     title={
-                      allSessionsCompleted
+                      isPaymentDone && allSessionsCompleted
                         ? undefined
-                        : "Complete all sessions to unlock the Final Report"
+                        : !isPaymentDone
+                          ? "Complete payment to unlock Coaching Insights"
+                          : "Complete all sessions to unlock the Final Report"
                     }
                   >
                     <div className="flex items-center gap-2">
@@ -248,7 +265,7 @@ export const JourneyPage: React.FC<JourneyPageProps> = ({ fullName }) => {
                         Final Report
                       </span>
                     </div>
-                    {allSessionsCompleted ? (
+                    {isPaymentDone && allSessionsCompleted ? (
                       <ArrowRight className="size-4 text-teal-600" />
                     ) : (
                       <LucideIcons.Lock className="size-4 text-slate-600" />
@@ -312,17 +329,39 @@ export const JourneyPage: React.FC<JourneyPageProps> = ({ fullName }) => {
               {/* View Section */}
               <Dialog
                 open={isViewDialogOpen}
-                onOpenChange={setIsViewDialogOpen}
+                onOpenChange={(open) => {
+                  if (!isPaymentDone) return;
+                  setIsViewDialogOpen(open);
+                }}
               >
-                <DialogTrigger asChild>
-                  <div className="flex items-center justify-between p-3 bg-primary-blue-50/50 rounded-lg border border-primary-blue-200/30 cursor-pointer hover:bg-primary-blue-100/50 transition-colors duration-200">
+                <DialogTrigger asChild disabled={!isPaymentDone}>
+                  <div
+                    className={`flex items-center justify-between p-3 rounded-lg border transition-colors duration-200 ${
+                      isPaymentDone
+                        ? "bg-primary-blue-50/50 border-primary-blue-200/30 cursor-pointer hover:bg-primary-blue-100/50"
+                        : "bg-slate-100/50 border-slate-200/30 cursor-not-allowed opacity-80"
+                    }`}
+                    title={
+                      isPaymentDone
+                        ? undefined
+                        : "Complete payment to unlock Coaching Insights"
+                    }
+                  >
                     <div className="flex items-center gap-2">
-                      <Eye className="size-4 text-primary-blue-600" />
-                      <span className="text-sm font-medium text-primary-blue-800">
+                      <Eye
+                        className={`size-4 ${isPaymentDone ? "text-primary-blue-600" : "text-slate-600"}`}
+                      />
+                      <span
+                        className={`text-sm font-medium ${isPaymentDone ? "text-primary-blue-800" : "text-slate-600"}`}
+                      >
                         Highlights
                       </span>
                     </div>
-                    <ArrowRight className="size-4 text-primary-blue-600" />
+                    {isPaymentDone ? (
+                      <ArrowRight className="size-4 text-primary-blue-600" />
+                    ) : (
+                      <LucideIcons.Lock className="size-4 text-slate-600" />
+                    )}
                   </div>
                 </DialogTrigger>
                 <DialogContent
@@ -345,17 +384,39 @@ export const JourneyPage: React.FC<JourneyPageProps> = ({ fullName }) => {
               {/* Report Section */}
               <Dialog
                 open={isReportDialogOpen}
-                onOpenChange={setIsReportDialogOpen}
+                onOpenChange={(open) => {
+                  if (!isPaymentDone) return;
+                  setIsReportDialogOpen(open);
+                }}
               >
-                <DialogTrigger asChild>
-                  <div className="flex items-center justify-between p-3 bg-purple-50/50 rounded-lg border border-purple-200/30 cursor-pointer hover:bg-purple-100/50 transition-colors duration-200">
+                <DialogTrigger asChild disabled={!isPaymentDone}>
+                  <div
+                    className={`flex items-center justify-between p-3 rounded-lg border transition-colors duration-200 ${
+                      isPaymentDone
+                        ? "bg-purple-50/50 border-purple-200/30 cursor-pointer hover:bg-purple-100/50"
+                        : "bg-slate-100/50 border-slate-200/30 cursor-not-allowed opacity-80"
+                    }`}
+                    title={
+                      isPaymentDone
+                        ? undefined
+                        : "Complete payment to unlock Coaching Insights"
+                    }
+                  >
                     <div className="flex items-center gap-2">
-                      <BarChart3 className="size-4 text-purple-600" />
-                      <span className="text-sm font-medium text-purple-800">
+                      <BarChart3
+                        className={`size-4 ${isPaymentDone ? "text-purple-600" : "text-slate-600"}`}
+                      />
+                      <span
+                        className={`text-sm font-medium ${isPaymentDone ? "text-purple-800" : "text-slate-600"}`}
+                      >
                         Report
                       </span>
                     </div>
-                    <ArrowRight className="size-4 text-purple-600" />
+                    {isPaymentDone ? (
+                      <ArrowRight className="size-4 text-purple-600" />
+                    ) : (
+                      <LucideIcons.Lock className="size-4 text-slate-600" />
+                    )}
                   </div>
                 </DialogTrigger>
                 <DialogContent
