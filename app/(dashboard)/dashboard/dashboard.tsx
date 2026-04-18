@@ -361,6 +361,7 @@ export default function Dashboard() {
           title="CoCo"
           description="CoCo is AI mindset coach. CoCo helps you pause, reflect, and think clearly in a fast-paced world."
           internalUrl="/chat"
+          imageUrl="/images/coco.png"
           gradientColors={{
             from: "from-blue-500",
             via: "via-indigo-500",
@@ -466,6 +467,7 @@ export default function Dashboard() {
           icon={<RouteIcon className="size-5 sm:size-8" />}
           title="1:1 Coaching"
           description="Connect with experienced coaches who provide personalized, one-on-one guidance tailored to your goals."
+          imageUrl="/images/1-1-coaching.png"
           internalUrl="/journey"
           gradientColors={{
             from: "from-green-500",
@@ -575,6 +577,7 @@ export default function Dashboard() {
           icon={<BookOpen className="size-5 sm:size-8" />}
           title="Be Future-Ready"
           description="Discover how ready you are for life after school. Understand yourself better through our assessments and guides."
+          imageUrl="/images/be-future-ready.png"
           externalUrl="https://inwesol.com/be-future-ready"
         />
       </div>
@@ -584,6 +587,7 @@ export default function Dashboard() {
           icon={<MapIcon className="size-5 sm:size-8" />}
           title="Explorer"
           description="Discover how ready you are for life after school. Understand yourself better through our assessments and guides."
+          imageUrl="/images/explorer.png"
           externalUrl="https://inwesol.com/explorer"
           gradientColors={{
             from: "from-cyan-500",
@@ -596,6 +600,7 @@ export default function Dashboard() {
           icon={<Lightbulb className="size-5 sm:size-8" />}
           title="Behavioural Tools"
           description="Discover how ready you are for life after school. Understand yourself better through our assessments and guides."
+          imageUrl="/images/behavioural-tools.png"
           internalUrl="/tools"
           gradientColors={{
             from: "from-amber-500",
